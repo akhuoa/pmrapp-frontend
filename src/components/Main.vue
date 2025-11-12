@@ -15,7 +15,7 @@
         </p>
       </section>
 
-      <section class="bg-white mb-12 rounded-lg shadow-lg p-8 border border-gray-200 hover:shadow-xl transition-shadow max-w-4xl mx-auto">
+      <section class="bg-white mb-12 rounded-lg p-8 border border-gray-200 max-w-4xl mx-auto">
         <div class="flex items-center justify-between flex-wrap gap-6">
           <div class="flex-1 min-w-[250px]">
             <h2 class="text-2xl font-bold text-gray-900 mb-2">
@@ -46,9 +46,7 @@
                 target="_blank"
                 rel="noopener noreferrer"
                 class="text-[#830a28] hover:text-[#d11241] underline font-medium"
-              >
-                its project page on GitHub
-              </a>.
+              >its project page on GitHub</a>.
             </p>
           </div>
         </div>
