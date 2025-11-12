@@ -11,17 +11,29 @@
       <nav>
         <ul class="flex items-center gap-4">
           <li>
-            <RouterLink to="/workspace" class="hover:opacity-80 transition-opacity">
+            <RouterLink
+              to="/workspace"
+              class="hover:opacity-80 transition-opacity"
+              active-class="text-[#830a28]"
+            >
               Workspace
             </RouterLink>
           </li>
           <li>
-            <RouterLink to="/exposure" class="hover:opacity-80 transition-opacity">
+            <RouterLink
+              to="/exposure"
+              class="hover:opacity-80 transition-opacity"
+              active-class="text-[#830a28]"
+            >
               Exposure
             </RouterLink>
           </li>
           <li>
-            <RouterLink to="/login" class="hover:opacity-80 transition-opacity">
+            <RouterLink
+              to="/login"
+              class="hover:opacity-80 transition-opacity"
+              active-class="text-[#830a28]"
+            >
               Login
             </RouterLink>
           </li>
