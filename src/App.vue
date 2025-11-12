@@ -1,24 +1,13 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div class="app-container">
-    <img src="/logo.png" alt="PMR Logo" class="logo" />
-    <h1>You did it!</h1>
-    <p>
-      Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-      documentation
-    </p>
-  </div>
+  <header>
+    <img src="/logo.png" alt="Physiome Model Repository" width="200" height="200" />
+  </header>
+  <main>
+    <h1>Physiome Model Repository</h1>
+  </main>
+  <footer>
+    <p>Copyright 2024 IUPS Physiome Project</p>
+  </footer>
 </template>
-
-<style scoped>
-.app-container {
-  text-align: center;
-}
-
-.logo {
-  max-width: 200px;
-  height: auto;
-  margin: 2rem 0;
-}
-</style>
