@@ -1,13 +1,11 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import Header from './components/Header.vue'
+import Main from './components/Main.vue'
+import Footer from './components/Footer.vue'
+</script>
 
 <template>
-  <header>
-    <img src="/logo.png" alt="Physiome Model Repository" width="200" height="200" />
-  </header>
-  <main>
-    <h1>Physiome Model Repository</h1>
-  </main>
-  <footer>
-    <p>Copyright 2024 IUPS Physiome Project</p>
-  </footer>
+  <Header />
+  <Main />
+  <Footer />
 </template>
