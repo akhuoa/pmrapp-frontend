@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
+import Workspaces from '@/components/Workspaces.vue'
 </script>
 
 <template>
@@ -13,9 +14,15 @@ import Footer from '@/components/Footer.vue'
           Browse and explore all workspaces.
         </p>
 
-        <!-- Placeholder content -->
         <div class="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
-          <p class="text-gray-500">Workspace listing coming soon...</p>
+          <Suspense>
+            <template #default>
+              <Workspaces />
+            </template>
+            <template #fallback>
+              <p class="text-gray-600">Loading workspaces...</p>
+            </template>
+          </Suspense>
         </div>
       </div>
     </main>
