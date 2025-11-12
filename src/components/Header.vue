@@ -2,7 +2,9 @@
 <script setup lang="ts"></script>
 
 <template>
-  <header class="bg-white border-b border-gray-200">
+  <header
+    class="relative bg-white border-b border-gray-200 before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-[6px] before:bg-[#3a3a3a]"
+  >
     <div class="container mx-auto px-4 py-4 flex items-center justify-between">
       <RouterLink to="/" class="flex items-center hover:opacity-80 transition-opacity">
         <img src="/logo.png" alt="Physiome Model Repository" width="48" height="48" />
