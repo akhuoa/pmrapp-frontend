@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
+import Exposures from '@/components/Exposures.vue';
 </script>
 
 <template>
@@ -13,9 +14,15 @@ import Footer from '@/components/Footer.vue'
           View and manage model exposures.
         </p>
 
-        <!-- Placeholder content -->
         <div class="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
-          <p class="text-gray-500">Exposure listing coming soon...</p>
+          <Suspense>
+            <template #default>
+              <Exposures />
+            </template>
+            <template #fallback>
+              <p class="text-gray-600">Loading exposures...</p>
+            </template>
+          </Suspense>
         </div>
       </div>
     </main>
