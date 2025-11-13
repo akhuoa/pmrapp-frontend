@@ -14,16 +14,14 @@ import Workspaces from '@/components/Workspaces.vue'
           Browse and explore all workspaces.
         </p>
 
-        <div class="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
-          <Suspense>
-            <template #default>
-              <Workspaces />
-            </template>
-            <template #fallback>
-              <p class="text-gray-600">Loading workspaces...</p>
-            </template>
-          </Suspense>
-        </div>
+        <Suspense>
+          <template #default>
+            <Workspaces />
+          </template>
+          <template #fallback>
+            <p class="text-gray-600">Loading workspaces...</p>
+          </template>
+        </Suspense>
       </div>
     </main>
     <Footer />

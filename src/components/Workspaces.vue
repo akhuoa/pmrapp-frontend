@@ -2,10 +2,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type { Workspace } from '@/types/workspace'
+// TODO: Remove this import when API is available
+import { mockWorkspaces } from '@/mocks/workspaceMockData'
 import { workspaceService } from '@/services/workspaceService'
 
 const workspaces = ref<Workspace[]>([])
 const error = ref<string | null>(null)
+// TODO: Remove this state when API is available
+const isLoadingMock = ref(false)
 
 try {
   workspaces.value = await workspaceService.listAliasedWorkspaces()
@@ -18,17 +22,51 @@ try {
   error.value = err instanceof Error ? err.message : 'Failed to load workspaces'
   console.error('Error loading workspaces:', err)
 }
+
+// TODO: Remove this function when API is available
+const loadMockData = async () => {
+  isLoadingMock.value = true
+  error.value = null
+
+  try {
+    await new Promise((resolve) => setTimeout(resolve, 200)) // Simulate API delay
+    workspaces.value = mockWorkspaces.sort((a: Workspace, b: Workspace) => {
+      return a.entity.description.localeCompare(b.entity.description)
+    })
+  } catch (err) {
+    error.value = 'Failed to load mock data'
+    console.error('Error loading mock data:', err)
+  } finally {
+    isLoadingMock.value = false
+  }
+}
 </script>
 
 <template>
-  <div v-if="error" class="text-red-600 bg-red-50 border border-red-200 rounded-lg p-4">
+  <div v-if="error" class="text-red-600 bg-red-50 border border-red-200 rounded-lg p-4 max-w-4xl mx-auto">
     <h3 class="font-semibold mb-2">Error loading workspaces</h3>
     <p class="text-sm">{{ error }}</p>
+
+    <!-- TODO: Remove this section when API is available -->
+    <div class="mt-4 pt-4 border-t border-red-300">
+      <p class="text-sm text-gray-700 mb-3">
+        <strong>Temporary Solution:</strong> The API is currently unavailable. You can load sample data for testing purposes.
+        This is fixed sample data for testing. This feature will be removed once the API is ready.
+      </p>
+      <button
+        @click="loadMockData"
+        :disabled="isLoadingMock"
+        class="bg-[#830a28] hover:bg-[#d11241] disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold px-8 py-3 rounded-lg transition-colors shadow-md hover:shadow-lg"
+      >
+        {{ isLoadingMock ? 'Loading...' : 'Load Mock Data (Temporary)' }}
+      </button>
+    </div>
   </div>
-  <div v-else-if="workspaces.length === 0" class="text-gray-500 text-center py-4">
+
+  <div v-else-if="workspaces.length === 0" class="text-gray-500 text-center py-8 bg-white rounded-lg shadow-lg border border-gray-200">
     No workspaces found.
   </div>
-  <div v-else>
+  <div v-else class="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
     <div
       v-for="workspace in workspaces"
       :key="workspace.alias"
