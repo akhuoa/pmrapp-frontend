@@ -12,3 +12,32 @@ export interface Workspace {
   alias: string
   entity: WorkspaceEntity
 }
+
+export interface WorkspaceCommit {
+  commit_id: string
+  author: string
+  committer: string
+}
+
+export interface WorkspaceFileEntry {
+  filemode: string
+  kind: string
+  id: string
+  name: string
+}
+
+export interface WorkspaceTreeInfo {
+  filecount: number
+  entries: WorkspaceFileEntry[]
+}
+
+export interface WorkspaceTarget {
+  TreeInfo: WorkspaceTreeInfo
+}
+
+export interface WorkspaceInfo {
+  workspace: WorkspaceEntity
+  commit: WorkspaceCommit
+  path: string
+  target: WorkspaceTarget
+}

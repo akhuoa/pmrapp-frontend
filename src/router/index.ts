@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import WorkspaceView from '@/views/WorkspaceView.vue'
+import WorkspaceDetailView from '@/views/WorkspaceDetailView.vue'
 import ExposureView from '@/views/ExposureView.vue'
 import LoginView from '@/views/LoginView.vue'
 
@@ -16,6 +17,11 @@ const router = createRouter({
       path: '/workspace',
       name: 'workspace',
       component: WorkspaceView,
+    },
+    {
+      path: '/workspace/:alias',
+      name: 'workspace-detail',
+      component: WorkspaceDetailView,
     },
     {
       path: '/exposure',
