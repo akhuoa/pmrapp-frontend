@@ -81,7 +81,7 @@ const handleSubmit = async () => {
         <button
           type="submit"
           :disabled="isLoading"
-          class="w-full bg-[#830a28] hover:bg-[#6a0820] disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-colors shadow-md hover:shadow-lg"
+          class="w-full bg-[#830a28] hover:bg-[#d11241] disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold px-8 py-3 rounded-lg transition-colors shadow-md hover:shadow-lg"
         >
           {{ isLoading ? 'Logging in...' : 'Login' }}
         </button>
