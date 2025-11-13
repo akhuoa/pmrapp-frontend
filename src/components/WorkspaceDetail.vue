@@ -66,24 +66,21 @@ const loadMockData = async () => {
     <h1 class="text-4xl font-bold mb-6">
       {{ workspaceInfo.workspace.description || alias }}
     </h1>
+    <p class="text-gray-600 mb-4">Git Repository URI: {{ workspaceInfo.workspace.url }}</p>
 
     <div class="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
-      <p class="text-gray-600 mb-4">Git Repository URI: {{ workspaceInfo.workspace.url }}</p>
-
-      <div class="mt-6">
-        <h2 class="text-xl font-semibold mb-4">Files</h2>
-        <ul class="space-y-2">
-          <li v-for="entry in workspaceInfo.target.TreeInfo.entries" :key="entry.id">
-            <RouterLink
-              :to="`/workspace/${alias}/file/${workspaceInfo.commit.commit_id}/${entry.name}`"
-              class="text-[#830a28] hover:text-[#d11241] transition-colors flex items-center gap-2"
-            >
-              <FileIcon class="text-gray-500" />
-              {{ entry.name }}
-            </RouterLink>
-          </li>
-        </ul>
-      </div>
+      <h2 class="text-xl font-semibold mb-4">Files</h2>
+      <ul class="space-y-2">
+        <li v-for="entry in workspaceInfo.target.TreeInfo.entries" :key="entry.id">
+          <RouterLink
+            :to="`/workspace/${alias}/file/${workspaceInfo.commit.commit_id}/${entry.name}`"
+            class="text-[#830a28] hover:text-[#d11241] transition-colors flex items-center gap-2"
+          >
+            <FileIcon class="text-gray-500" />
+            {{ entry.name }}
+          </RouterLink>
+        </li>
+      </ul>
     </div>
   </div>
 </template>
