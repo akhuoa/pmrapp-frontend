@@ -34,7 +34,11 @@ try {
       :key="workspace.alias"
       class="mb-4 pb-4 border-b border-gray-200 last:mb-0 last:pb-0 last:border-b-0"
     >
-      <h3 class="text-lg font-semibold mb-2">{{ workspace.entity.description }}</h3>
+      <RouterLink :to="`/workspace/${workspace.alias}`">
+        <h3 class="inline-block text-lg font-semibold mb-2 text-[#830a28] hover:text-[#d11241] transition-colors">
+          {{ workspace.entity.description }}
+        </h3>
+      </RouterLink>
       <p class="text-gray-600 text-sm">{{ workspace.entity.url }}</p>
     </div>
   </div>
