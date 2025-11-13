@@ -16,7 +16,7 @@
       </section>
 
       <section class="bg-white mb-12 rounded-lg p-8 border border-gray-200 max-w-4xl mx-auto">
-        <div class="flex items-center justify-between flex-wrap gap-6">
+        <div class="flex items-center justify-between flex-wrap gap-6 text-center md:text-left">
           <div class="flex-1 min-w-[250px]">
             <h2 class="text-2xl font-bold text-gray-900 mb-2">
               Workspace Listing
@@ -25,7 +25,7 @@
               Browse and explore all workspaces in the repository.
             </p>
           </div>
-          <div>
+          <div class="w-full md:w-auto">
             <RouterLink
               to="/workspace"
               class="inline-block bg-[#830a28] hover:bg-[#d11241] text-white font-semibold px-8 py-3 rounded-lg transition-colors shadow-md hover:shadow-lg"
