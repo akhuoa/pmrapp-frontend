@@ -1,6 +1,6 @@
 # PMR App - Frontend
 
-The frontend web application for serving Physiome Model Repository.
+The frontend web application for serving Physiome Model Repository, built with Vue.
 
 ## Recommended IDE Setup
 
