@@ -56,7 +56,7 @@ const handleSubmit = async () => {
             type="text"
             autocomplete="username"
             required
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#830a28] focus:border-transparent outline-none transition-all"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#cc0000] focus:border-transparent outline-none transition-all"
             placeholder="Enter your username"
           />
         </div>
@@ -72,7 +72,7 @@ const handleSubmit = async () => {
             type="password"
             autocomplete="current-password"
             required
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#830a28] focus:border-transparent outline-none transition-all"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#cc0000] focus:border-transparent outline-none transition-all"
             placeholder="Enter your password"
           />
         </div>
@@ -81,7 +81,7 @@ const handleSubmit = async () => {
         <button
           type="submit"
           :disabled="isLoading"
-          class="w-full bg-[#830a28] hover:bg-[#d11241] disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold px-8 py-3 rounded-lg transition-colors shadow-md hover:shadow-lg"
+          class="w-full bg-[#cc0000] hover:bg-[#830a28] disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold px-8 py-3 rounded-lg transition-colors shadow-md hover:shadow-lg"
         >
           {{ isLoading ? 'Logging in...' : 'Login' }}
         </button>

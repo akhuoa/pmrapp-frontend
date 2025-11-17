@@ -56,7 +56,7 @@ const loadMockData = async () => {
       <button
         @click="loadMockData"
         :disabled="isLoadingMock"
-        class="bg-[#830a28] hover:bg-[#d11241] disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold px-8 py-3 rounded-lg transition-colors shadow-md hover:shadow-lg"
+        class="bg-[#cc0000] hover:bg-[#830a28] disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold px-8 py-3 rounded-lg transition-colors shadow-md hover:shadow-lg"
       >
         {{ isLoadingMock ? 'Loading...' : 'Load Mock Data (Temporary)' }}
       </button>
@@ -73,7 +73,7 @@ const loadMockData = async () => {
       class="mb-4 pb-4 border-b border-gray-200 last:mb-0 last:pb-0 last:border-b-0"
     >
       <RouterLink :to="`/workspace/${workspace.alias}`">
-        <h3 class="inline-block text-lg font-semibold mb-2 text-[#830a28] hover:text-[#d11241] transition-colors">
+        <h3 class="inline-block text-lg font-semibold mb-2 text-[#cc0000] hover:text-[#830a28] transition-colors">
           {{ workspace.entity.description }}
         </h3>
       </RouterLink>

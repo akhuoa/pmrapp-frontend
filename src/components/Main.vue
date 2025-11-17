@@ -28,7 +28,7 @@
           <div class="w-full md:w-auto">
             <RouterLink
               to="/workspace"
-              class="inline-block bg-[#830a28] hover:bg-[#d11241] text-white font-semibold px-8 py-3 rounded-lg transition-colors shadow-md hover:shadow-lg"
+              class="inline-block bg-[#cc0000] hover:bg-[#830a28] text-white font-semibold px-8 py-3 rounded-lg transition-colors shadow-md hover:shadow-lg"
             >
               View Workspaces
             </RouterLink>
@@ -45,7 +45,7 @@
                 href="https://github.com/Physiome/pmrplatform/"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="text-[#830a28] hover:text-[#d11241] transition-colors underline font-medium"
+                class="text-[#cc0000] hover:text-[#830a28] transition-colors underline font-medium"
               >its project page on GitHub</a>.
             </p>
           </div>

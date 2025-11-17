@@ -55,7 +55,7 @@ const loadMockData = async () => {
       <button
         @click="loadMockData"
         :disabled="isLoadingMock"
-        class="bg-[#830a28] hover:bg-[#d11241] disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold px-8 py-3 rounded-lg transition-colors shadow-md hover:shadow-lg"
+        class="bg-[#cc0000] hover:bg-[#830a28] disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold px-8 py-3 rounded-lg transition-colors shadow-md hover:shadow-lg"
       >
         {{ isLoadingMock ? 'Loading...' : 'Load Mock Data (Temporary)' }}
       </button>
@@ -74,7 +74,7 @@ const loadMockData = async () => {
         <li v-for="entry in workspaceInfo.target.TreeInfo.entries" :key="entry.id">
           <RouterLink
             :to="`/workspace/${alias}/file/${workspaceInfo.commit.commit_id}/${entry.name}`"
-            class="text-[#830a28] hover:text-[#d11241] transition-colors flex items-center gap-2"
+            class="text-[#cc0000] hover:text-[#830a28] transition-colors flex items-center gap-2"
           >
             <FileIcon class="text-gray-500" />
             {{ entry.name }}

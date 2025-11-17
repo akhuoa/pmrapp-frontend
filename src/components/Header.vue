@@ -14,7 +14,7 @@
             <RouterLink
               to="/workspace"
               class="hover:opacity-80 transition-opacity"
-              active-class="text-[#830a28]"
+              active-class="text-[#cc0000]"
             >
               Workspace
             </RouterLink>
@@ -23,7 +23,7 @@
             <RouterLink
               to="/exposure"
               class="hover:opacity-80 transition-opacity"
-              active-class="text-[#830a28]"
+              active-class="text-[#cc0000]"
             >
               Exposure
             </RouterLink>
@@ -32,7 +32,7 @@
             <RouterLink
               to="/login"
               class="hover:opacity-80 transition-opacity"
-              active-class="text-[#830a28]"
+              active-class="text-[#cc0000]"
             >
               Login
             </RouterLink>

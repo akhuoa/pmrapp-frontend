@@ -16,7 +16,7 @@ import Footer from '@/components/Footer.vue'
           </p>
           <RouterLink
             to="/"
-            class="inline-block bg-[#830a28] hover:bg-[#d11241] text-white font-semibold px-8 py-3 rounded-lg transition-colors shadow-md hover:shadow-lg"
+            class="inline-block bg-[#cc0000] hover:bg-[#830a28] text-white font-semibold px-8 py-3 rounded-lg transition-colors shadow-md hover:shadow-lg"
           >
             Go to Home
           </RouterLink>
