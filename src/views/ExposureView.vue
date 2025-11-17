@@ -14,16 +14,14 @@ import Exposures from '@/components/Exposures.vue';
           View and manage model exposures.
         </p>
 
-        <div class="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
-          <Suspense>
-            <template #default>
-              <Exposures />
-            </template>
-            <template #fallback>
-              <p class="text-gray-600">Loading exposures...</p>
-            </template>
-          </Suspense>
-        </div>
+        <Suspense>
+          <template #default>
+            <Exposures />
+          </template>
+          <template #fallback>
+            <p class="text-gray-600">Loading exposures...</p>
+          </template>
+        </Suspense>
       </div>
     </main>
     <Footer />

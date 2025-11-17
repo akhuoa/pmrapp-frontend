@@ -1,6 +1,6 @@
 export interface ExposureEntity {
   id: number
-  description: string
+  description: string | null
   workspace_id: number
   workspace_tag_id: number | null
   commit_id: string
