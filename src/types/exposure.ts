@@ -1,3 +1,5 @@
+import type { WorkspaceEntity } from './workspace'
+
 export interface ExposureEntity {
   id: number
   description: string | null
@@ -12,4 +14,14 @@ export interface ExposureEntity {
 export interface Exposure {
   alias: string
   entity: ExposureEntity
+}
+
+export type ExposureFile = [string, boolean]
+
+export interface ExposureInfo {
+  exposure: ExposureEntity
+  exposure_alias: string
+  files: ExposureFile[]
+  workspace: WorkspaceEntity
+  workspace_alias: string
 }
