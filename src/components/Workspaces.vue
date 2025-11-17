@@ -43,7 +43,7 @@ const loadMockData = async () => {
 </script>
 
 <template>
-  <div v-if="error" class="text-red-600 bg-red-50 border border-red-200 rounded-lg p-4 max-w-4xl mx-auto">
+  <div v-if="error" class="text-red-600 bg-red-50 border border-red-200 rounded-lg p-4">
     <h3 class="font-semibold mb-2">Error loading workspaces</h3>
     <p class="text-sm">{{ error }}</p>
 
