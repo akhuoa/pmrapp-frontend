@@ -56,7 +56,7 @@ const loadMockData = async () => {
       <button
         @click="loadMockData"
         :disabled="isLoadingMock"
-        class="bg-[#cc0000] hover:bg-[#830a28] disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold px-8 py-3 rounded-lg transition-colors shadow-md hover:shadow-lg"
+        class="button-primary"
       >
         {{ isLoadingMock ? 'Loading...' : 'Load Mock Data (Temporary)' }}
       </button>
@@ -81,3 +81,7 @@ const loadMockData = async () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+@import '@/assets/button.css';
+</style>

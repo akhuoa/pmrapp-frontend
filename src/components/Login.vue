@@ -81,7 +81,7 @@ const handleSubmit = async () => {
         <button
           type="submit"
           :disabled="isLoading"
-          class="w-full bg-[#cc0000] hover:bg-[#830a28] disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold px-8 py-3 rounded-lg transition-colors shadow-md hover:shadow-lg"
+          class="w-full button-primary"
         >
           {{ isLoading ? 'Logging in...' : 'Login' }}
         </button>
@@ -89,3 +89,7 @@ const handleSubmit = async () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+@import '@/assets/button.css';
+</style>

@@ -28,7 +28,7 @@
           <div class="w-full md:w-auto">
             <RouterLink
               to="/workspace"
-              class="inline-block bg-[#cc0000] hover:bg-[#830a28] text-white font-semibold px-8 py-3 rounded-lg transition-colors shadow-md hover:shadow-lg"
+              class="inline-block button-primary"
             >
               View Workspaces
             </RouterLink>
@@ -54,3 +54,7 @@
     </div>
   </main>
 </template>
+
+<style scoped>
+@import '@/assets/button.css';
+</style>
