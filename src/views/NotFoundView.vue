@@ -1,9 +1,16 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
 
 const router = useRouter()
+const hasHistory = ref(false)
+
+onMounted(() => {
+  // Check if there's a previous page in history
+  hasHistory.value = window.history.length > 2
+})
 
 const goBack = () => {
   router.back()
@@ -21,20 +28,21 @@ const goBack = () => {
           <p class="text-lg text-gray-600 mb-8">
             The page you are looking for doesn't exist or has been moved.
           </p>
-          <div class="flex gap-4 justify-center">
-            <button
-              @click="goBack"
-              class="inline-block button-primary"
-            >
-              Go Back
-            </button>
-            <RouterLink
-              to="/"
-              class="inline-block button-primary"
-            >
-              Go to Home
-            </RouterLink>
-          </div>
+
+          <button
+            v-if="hasHistory"
+            @click="goBack"
+            class="inline-block button-primary"
+          >
+            Go Back
+          </button>
+          <RouterLink
+            v-else
+            to="/"
+            class="inline-block button-primary"
+          >
+            Go to Home
+          </RouterLink>
         </div>
       </div>
     </main>
