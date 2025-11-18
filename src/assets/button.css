@@ -2,8 +2,8 @@
 
 .button-primary {
   @apply
-    bg-[#cc0000]
-    hover:bg-[#830a28]
+    bg-primary
+    hover:bg-primary-hover
     text-white
     font-semibold
     px-8

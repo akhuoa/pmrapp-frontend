@@ -45,7 +45,7 @@
                 href="https://github.com/Physiome/pmrplatform/"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="text-[#cc0000] hover:text-[#830a28] transition-colors underline font-medium"
+                class="text-primary hover:text-primary-hover transition-colors underline font-medium"
               >its project page on GitHub</a>.
             </p>
           </div>

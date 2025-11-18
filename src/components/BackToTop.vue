@@ -30,7 +30,7 @@ onUnmounted(() => {
     <button
       v-if="isVisible"
       @click="scrollToTop"
-      class="fixed bottom-8 right-8 bg-[#830a28] hover:bg-[#d11241] text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all z-40"
+      class="fixed bottom-8 right-8 bg-primary-hover hover:bg-primary-light text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all z-40"
       aria-label="Back to top"
     >
       <svg

@@ -56,7 +56,7 @@ const handleSubmit = async () => {
             type="text"
             autocomplete="username"
             required
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#cc0000] focus:border-transparent outline-none transition-all"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
             placeholder="Enter your username"
           />
         </div>
@@ -72,7 +72,7 @@ const handleSubmit = async () => {
             type="password"
             autocomplete="current-password"
             required
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#cc0000] focus:border-transparent outline-none transition-all"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
             placeholder="Enter your password"
           />
         </div>

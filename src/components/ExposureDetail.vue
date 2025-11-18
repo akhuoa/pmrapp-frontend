@@ -74,7 +74,7 @@ const loadMockData = async () => {
           <li v-for="entry in exposureInfo.files" :key="entry[0]">
             <RouterLink
               :to="`/exposure/${alias}/${entry[0]}`"
-              class="text-[#cc0000] hover:text-[#830a28] transition-colors inline-flex items-center gap-2"
+              class="text-primary hover:text-primary-hover transition-colors inline-flex items-center gap-2"
             >
               <FileIcon class="text-gray-500" />
               {{ entry[0]}}
@@ -90,14 +90,14 @@ const loadMockData = async () => {
           Derived from workspace
           <RouterLink
             :to="`/workspace/${exposureInfo.workspace_alias}`"
-            class="text-[#cc0000] hover:text-[#830a28] transition-colors"
+            class="text-primary hover:text-primary-hover transition-colors"
           >
             {{ exposureInfo.exposure.description }}
           </RouterLink>
           at changeset
           <RouterLink
             :to="`/workspace/${exposureInfo.workspace_alias}/file/${exposureInfo.exposure.commit_id}`"
-            class="text-[#cc0000] hover:text-[#830a28] transition-colors font-mono"
+            class="text-primary hover:text-primary-hover transition-colors font-mono"
           >
             {{ exposureInfo.exposure.commit_id.substring(0, 12) }}
           </RouterLink>.
@@ -114,7 +114,7 @@ const loadMockData = async () => {
             >
               <RouterLink
                 :to="`/exposure/${alias}/${entry[0]}`"
-                class="text-[#cc0000] hover:text-[#830a28] transition-colors inline-flex items-center gap-2"
+                class="text-primary hover:text-primary-hover transition-colors inline-flex items-center gap-2"
               >
                 <span class="text-gray-400">›</span>
                 {{ entry[0] }}
