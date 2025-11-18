@@ -2,7 +2,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <header class="header-border-top bg-white border-b border-gray-200">
+  <header class="header-border-top bg-white border-b border-gray-200 sticky top-0 z-100">
     <div class="container mx-auto px-4 py-4 flex items-center justify-between">
       <RouterLink to="/" class="flex items-center hover:opacity-80 transition-opacity">
         <img src="/logo.png" alt="Physiome Model Repository" width="48" height="48" />
@@ -47,6 +47,6 @@
 @reference 'tailwindcss';
 
 .header-border-top {
-  @apply relative before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-[6px] before:bg-[#3a3a3a];
+  @apply before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-[6px] before:bg-[#3a3a3a];
 }
 </style>
