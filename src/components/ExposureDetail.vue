@@ -62,24 +62,67 @@ const loadMockData = async () => {
     </div>
   </div>
 
-  <div v-else-if="exposureInfo">
-    <h1 class="text-4xl font-bold mb-6">
-      Exposure {{ exposureInfo.exposure.id }}
-    </h1>
-    <p class="text-gray-600 mb-4">{{ exposureInfo.exposure.description }}</p>
-    <div class="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
-      <h2 class="text-xl font-semibold mb-4">Files</h2>
-      <ul class="space-y-2">
-        <li v-for="entry in exposureInfo.files" :key="entry[0]">
+  <div v-else-if="exposureInfo" class="flex flex-col lg:flex-row gap-8">
+    <article class="flex-1">
+      <h1 class="text-4xl font-bold mb-6">
+        Exposure {{ exposureInfo.exposure.id }}
+      </h1>
+      <p class="text-gray-600 mb-4">{{ exposureInfo.exposure.description }}</p>
+      <div class="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
+        <h2 class="text-xl font-semibold mb-4">Files</h2>
+        <ul class="space-y-2">
+          <li v-for="entry in exposureInfo.files" :key="entry[0]">
+            <RouterLink
+              :to="`/exposure/${alias}/${entry[0]}`"
+              class="text-[#cc0000] hover:text-[#830a28] transition-colors flex items-center gap-2"
+            >
+              <FileIcon class="text-gray-500" />
+              {{ entry[0]}}
+            </RouterLink>
+          </li>
+        </ul>
+      </div>
+    </article>
+    <aside class="w-full lg:w-80">
+      <section class="pb-6">
+        <h4 class="text-lg font-semibold mb-3">Source</h4>
+        <div class="text-sm text-gray-700 leading-relaxed">
+          Derived from workspace
           <RouterLink
-            :to="`/exposure/${alias}/${entry[0]}`"
-            class="text-[#cc0000] hover:text-[#830a28] transition-colors flex items-center gap-2"
+            :to="`/workspace/${exposureInfo.workspace_alias}`"
+            class="text-[#cc0000] hover:text-[#830a28] transition-colors"
           >
-            <FileIcon class="text-gray-500" />
-            {{ entry[0]}}
+            {{ exposureInfo.exposure.description }}
           </RouterLink>
-        </li>
-      </ul>
-    </div>
+          at changeset
+          <RouterLink
+            :to="`/workspace/${exposureInfo.workspace_alias}/file/${exposureInfo.exposure.commit_id}`"
+            class="text-[#cc0000] hover:text-[#830a28] transition-colors font-mono"
+          >
+            {{ exposureInfo.exposure.commit_id.substring(0, 12) }}
+          </RouterLink>.
+        </div>
+      </section>
+      <section class="pt-6 border-t border-gray-200">
+        <h4 class="text-lg font-semibold mb-3">Navigation</h4>
+        <nav>
+          <ul class="space-y-2">
+            <li
+              v-for="entry in exposureInfo.files.filter((e) => e[1] === true)"
+              :key="entry[0]"
+              class="text-sm"
+            >
+              <RouterLink
+                :to="`/exposure/${alias}/${entry[0]}`"
+                class="text-[#cc0000] hover:text-[#830a28] transition-colors flex items-center gap-2"
+              >
+                <span class="text-gray-400">›</span>
+                {{ entry[0] }}
+              </RouterLink>
+            </li>
+          </ul>
+        </nav>
+      </section>
+    </aside>
   </div>
 </template>
