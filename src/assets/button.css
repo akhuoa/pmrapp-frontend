@@ -1,5 +1,17 @@
 @reference 'tailwindcss';
 
 .button-primary {
-  @apply bg-[#cc0000] hover:bg-[#830a28] text-white font-semibold px-8 py-3 rounded-lg transition-colors shadow-md hover:shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed;
+  @apply
+    bg-[#cc0000]
+    hover:bg-[#830a28]
+    text-white
+    font-semibold
+    px-8
+    py-3
+    rounded-lg
+    transition-colors
+    shadow-md
+    hover:shadow-lg
+    disabled:bg-gray-400
+    disabled:cursor-not-allowed;
 }
