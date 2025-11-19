@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import Login from '@/components/Login.vue'
+import PageHeader from '@/components/molecules/PageHeader.vue';
 </script>
 
 <template>
   <DefaultLayout>
-    <h1 class="text-4xl font-bold mb-6 text-center">Login</h1>
+    <PageHeader
+      title="Login"
+      centered
+    />
     <Login />
   </DefaultLayout>
 </template>

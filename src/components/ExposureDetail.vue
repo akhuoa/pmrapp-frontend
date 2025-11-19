@@ -6,6 +6,7 @@ import type { ExposureInfo } from '@/types/exposure'
 import { mockExposureInfo } from '@/mocks/exposureMockData'
 import { exposureService } from '@/services/exposureService'
 import FileIcon from '@/components/icons/FileIcon.vue'
+import PageHeader from './molecules/PageHeader.vue'
 
 const props = defineProps<{
   alias: string
@@ -64,10 +65,11 @@ const loadMockData = async () => {
 
   <div v-else-if="exposureInfo" class="flex flex-col lg:flex-row gap-8">
     <article class="flex-1">
-      <h1 class="text-4xl font-bold mb-6">
-        Exposure {{ exposureInfo.exposure.id }}
-      </h1>
-      <p class="text-gray-600 mb-4">{{ exposureInfo.exposure.description }}</p>
+      <PageHeader
+        :title="`Exposure ${exposureInfo.exposure.id}`"
+        :description="exposureInfo.exposure.description || undefined"
+      />
+
       <div class="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
         <h2 class="text-xl font-semibold mb-4">Files</h2>
         <ul class="space-y-2">

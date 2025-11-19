@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import Workspaces from '@/components/Workspaces.vue'
+import PageHeader from '@/components/molecules/PageHeader.vue'
 </script>
 
 <template>
   <DefaultLayout>
-    <h1 class="text-4xl font-bold mb-6">Workspace Listing</h1>
-    <p class="text-lg text-gray-600 mb-8">
-      Browse and explore all workspaces.
-    </p>
+    <PageHeader
+      title="Workspace Listing"
+      description="Browse and explore all workspaces."
+    />
 
     <Suspense>
       <template #default>

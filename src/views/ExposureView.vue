@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import Exposures from '@/components/Exposures.vue'
+import PageHeader from '@/components/molecules/PageHeader.vue';
 </script>
 
 <template>
   <DefaultLayout>
-    <h1 class="text-4xl font-bold mb-6">Exposure Listing</h1>
-    <p class="text-lg text-gray-600 mb-8">
-      View and manage model exposures.
-    </p>
+    <PageHeader
+      title="Exposure Listing"
+      description="View and manage model exposures."
+    />
 
     <Suspense>
       <template #default>

@@ -6,6 +6,7 @@ import type { WorkspaceInfo } from '@/types/workspace'
 import { mockWorkspaceInfo } from '@/mocks/workspaceMockData'
 import { workspaceService } from '@/services/workspaceService'
 import FileIcon from '@/components/icons/FileIcon.vue'
+import PageHeader from './molecules/PageHeader.vue'
 
 const props = defineProps<{
   alias: string
@@ -63,10 +64,10 @@ const loadMockData = async () => {
   </div>
 
   <div v-else-if="workspaceInfo">
-    <h1 class="text-4xl font-bold mb-6">
-      {{ workspaceInfo.workspace.description || alias }}
-    </h1>
-    <p class="text-gray-600 mb-4">Git Repository URI: {{ workspaceInfo.workspace.url }}</p>
+    <PageHeader
+      :title="workspaceInfo.workspace.description || alias"
+      :description="`Git Repository URI: ${workspaceInfo.workspace.url}`"
+    />
 
     <div class="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
       <h2 class="text-xl font-semibold mb-4">Files</h2>
