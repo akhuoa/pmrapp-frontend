@@ -5,7 +5,7 @@ import type { Workspace } from '@/types/workspace'
 // TODO: Remove this import when API is available
 import { mockWorkspaces } from '@/mocks/workspaceMockData'
 import { workspaceService } from '@/services/workspaceService'
-import MockDataLoader from './molecules/MockDataLoader.vue'
+import ErrorBlock from './organisms/ErrorBlock.vue'
 
 const workspaces = ref<Workspace[]>([])
 const error = ref<string | null>(null)
@@ -44,16 +44,14 @@ const loadMockData = async () => {
 </script>
 
 <template>
-  <div v-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
-    <h3 class="font-semibold mb-2 text-danger">Error loading workspaces</h3>
-    <p class="text-sm text-danger">{{ error }}</p>
-
-    <MockDataLoader
-      message="This is fixed sample data for testing."
-      :is-loading="isLoadingMock"
-      @load="loadMockData"
-    />
-  </div>
+  <ErrorBlock
+    v-if="error"
+    title="Error loading workspaces"
+    :error="error"
+    mock-message="This is fixed sample data for testing."
+    :is-loading-mock="isLoadingMock"
+    @load-mock="loadMockData"
+  />
 
   <div v-else-if="workspaces.length === 0" class="text-center py-8 bg-white rounded-lg shadow-lg border border-gray-200">
     No workspaces found.

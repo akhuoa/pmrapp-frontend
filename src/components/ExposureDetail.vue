@@ -7,7 +7,7 @@ import { mockExposureInfo } from '@/mocks/exposureMockData'
 import { exposureService } from '@/services/exposureService'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import PageHeader from './molecules/PageHeader.vue'
-import MockDataLoader from './molecules/MockDataLoader.vue'
+import ErrorBlock from './organisms/ErrorBlock.vue'
 
 const props = defineProps<{
   alias: string
@@ -43,16 +43,14 @@ const loadMockData = async () => {
 </script>
 
 <template>
-  <div v-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
-    <h3 class="font-semibold mb-2 text-danger">Error loading exposure</h3>
-    <p class="text-sm text-danger">{{ error }}</p>
-
-    <MockDataLoader
-      message="This is fixed sample data for a specific exposure alias. Regardless of which exposure URL you visit, the same mock data will be loaded."
-      :is-loading="isLoadingMock"
-      @load="loadMockData"
-    />
-  </div>
+  <ErrorBlock
+    v-if="error"
+    title="Error loading exposure"
+    :error="error"
+    mock-message="This is fixed sample data for a specific exposure alias. Regardless of which exposure URL you visit, the same mock data will be loaded."
+    :is-loading-mock="isLoadingMock"
+    @load-mock="loadMockData"
+  />
 
   <div v-else-if="exposureInfo" class="flex flex-col lg:flex-row gap-8">
     <article class="flex-1">

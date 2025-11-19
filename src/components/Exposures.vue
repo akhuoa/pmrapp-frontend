@@ -5,7 +5,7 @@ import type { Exposure } from '@/types/exposure'
 import { exposureService } from '@/services/exposureService'
 // TODO: Remove this import when API is available
 import { mockExposures } from '@/mocks/exposureMockData'
-import MockDataLoader from './molecules/MockDataLoader.vue'
+import ErrorBlock from './organisms/ErrorBlock.vue'
 
 const exposures = ref<Exposure[]>([])
 const error = ref<string | null>(null)
@@ -37,16 +37,14 @@ const loadMockData = async () => {
 </script>
 
 <template>
-  <div v-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
-    <h3 class="font-semibold mb-2 text-danger">Error loading exposures</h3>
-    <p class="text-sm text-danger">{{ error }}</p>
-
-    <MockDataLoader
-      message="This is fixed sample data for testing."
-      :is-loading="isLoadingMock"
-      @load="loadMockData"
-    />
-  </div>
+  <ErrorBlock
+    v-if="error"
+    title="Error loading exposures"
+    :error="error"
+    mock-message="This is fixed sample data for testing."
+    :is-loading-mock="isLoadingMock"
+    @load-mock="loadMockData"
+  />
 
   <div v-else-if="exposures.length === 0" class="text-center py-4">
     No exposures found.
