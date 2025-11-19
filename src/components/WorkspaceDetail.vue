@@ -75,7 +75,7 @@ const loadMockData = async () => {
         <li v-for="entry in workspaceInfo.target.TreeInfo.entries" :key="entry.id">
           <RouterLink
             :to="`/workspace/${alias}/file/${workspaceInfo.commit.commit_id}/${entry.name}`"
-            class="text-primary hover:text-primary-hover transition-colors inline-flex items-center gap-2"
+            class="text-link inline-flex items-center gap-2"
           >
             <FileIcon class="text-gray-500" />
             {{ entry.name }}
@@ -88,4 +88,5 @@ const loadMockData = async () => {
 
 <style scoped>
 @import '@/assets/button.css';
+@import '@/assets/text-link.css';
 </style>
