@@ -30,7 +30,7 @@ onUnmounted(() => {
     <button
       v-if="isVisible"
       @click="scrollToTop"
-      class="fixed bottom-8 right-8 bg-primary-hover hover:bg-primary-light text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all z-40"
+      class="fixed bottom-8 right-8 button-rounded-full z-40"
       aria-label="Back to top"
     >
       <svg
@@ -50,6 +50,20 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+@import '@/assets/button.css';
+
+.button-rounded-full {
+  @apply
+    bg-primary
+    hover:bg-primary-hover
+    text-white
+    p-3
+    transition-colors
+    rounded-full
+    shadow-md
+    hover:shadow-lg;
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
