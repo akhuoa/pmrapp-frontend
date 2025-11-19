@@ -1,0 +1,8 @@
+@reference 'tailwindcss';
+@reference './main.css';
+
+.label-field {
+  @apply
+    font-medium
+    text-gray-700;
+}
