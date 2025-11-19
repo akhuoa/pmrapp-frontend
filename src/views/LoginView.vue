@@ -5,6 +5,7 @@ import Login from '@/components/Login.vue'
 
 <template>
   <DefaultLayout>
+    <h1 class="text-4xl font-bold mb-6 text-center">Login</h1>
     <Login />
   </DefaultLayout>
 </template>
