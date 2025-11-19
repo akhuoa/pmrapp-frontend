@@ -5,6 +5,7 @@ import type { Exposure } from '@/types/exposure'
 import { exposureService } from '@/services/exposureService'
 // TODO: Remove this import when API is available
 import { mockExposures } from '@/mocks/exposureMockData'
+import MockDataLoader from './molecules/MockDataLoader.vue'
 
 const exposures = ref<Exposure[]>([])
 const error = ref<string | null>(null)
@@ -40,20 +41,11 @@ const loadMockData = async () => {
     <h3 class="font-semibold mb-2 text-danger">Error loading exposures</h3>
     <p class="text-sm text-danger">{{ error }}</p>
 
-    <!-- TODO: Remove this section when API is available -->
-    <div class="mt-4 pt-4 border-t border-red-300">
-      <p class="text-sm mb-3">
-        <strong>Temporary Solution:</strong> The API is currently unavailable. You can load sample data for testing purposes.
-        This is fixed sample data for testing. This feature will be removed once the API is ready.
-      </p>
-      <button
-        @click="loadMockData"
-        :disabled="isLoadingMock"
-        class="button-primary"
-      >
-        {{ isLoadingMock ? 'Loading...' : 'Load Mock Data (Temporary)' }}
-      </button>
-    </div>
+    <MockDataLoader
+      message="This is fixed sample data for testing."
+      :is-loading="isLoadingMock"
+      @load="loadMockData"
+    />
   </div>
 
   <div v-else-if="exposures.length === 0" class="text-center py-4">

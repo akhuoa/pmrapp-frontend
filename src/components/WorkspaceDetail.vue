@@ -7,6 +7,7 @@ import { mockWorkspaceInfo } from '@/mocks/workspaceMockData'
 import { workspaceService } from '@/services/workspaceService'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import PageHeader from './molecules/PageHeader.vue'
+import MockDataLoader from './molecules/MockDataLoader.vue'
 
 const props = defineProps<{
   alias: string
@@ -47,20 +48,11 @@ const loadMockData = async () => {
     <p class="text-sm text-danger">{{ error }}</p>
 
     <!-- TODO: Remove this section when API is available -->
-    <div class="mt-4 pt-4 border-t border-red-300">
-      <p class="text-sm mb-3">
-        <strong>Temporary Solution:</strong> The API is currently unavailable. You can load sample data for testing purposes.
-        This is fixed sample data for a specific workspace alias. Regardless of which workspace URL you visit,
-        the same mock data will be loaded. This feature will be removed once the API is ready.
-      </p>
-      <button
-        @click="loadMockData"
-        :disabled="isLoadingMock"
-        class="button-primary"
-      >
-        {{ isLoadingMock ? 'Loading...' : 'Load Mock Data (Temporary)' }}
-      </button>
-    </div>
+    <MockDataLoader
+      message="This is fixed sample data for a specific workspace alias. Regardless of which workspace URL you visit, the same mock data will be loaded."
+      :is-loading="isLoadingMock"
+      @load="loadMockData"
+    />
   </div>
 
   <div v-else-if="workspaceInfo">
