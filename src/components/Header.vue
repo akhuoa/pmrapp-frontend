@@ -1,5 +1,13 @@
 <!-- eslint-disable vue/multi-word-component-names -->
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useRoute } from 'vue-router'
+import { computed } from 'vue'
+
+const route = useRoute()
+
+const isWorkspaceActive = computed(() => route.path.startsWith('/workspace'))
+const isExposureActive = computed(() => route.path.startsWith('/exposure'))
+</script>
 
 <template>
   <header class="header-border-top bg-white border-b border-gray-200 sticky top-0 z-100">
@@ -14,7 +22,7 @@
             <RouterLink
               to="/workspace"
               class="hover:opacity-80 transition-opacity"
-              active-class="text-primary"
+              :class="{ 'text-primary': isWorkspaceActive }"
             >
               Workspace
             </RouterLink>
@@ -23,7 +31,7 @@
             <RouterLink
               to="/exposure"
               class="hover:opacity-80 transition-opacity"
-              active-class="text-primary"
+              :class="{ 'text-primary': isExposureActive }"
             >
               Exposure
             </RouterLink>
