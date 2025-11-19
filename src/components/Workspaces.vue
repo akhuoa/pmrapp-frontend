@@ -43,13 +43,13 @@ const loadMockData = async () => {
 </script>
 
 <template>
-  <div v-if="error" class="text-red-600 bg-red-50 border border-red-200 rounded-lg p-4">
-    <h3 class="font-semibold mb-2">Error loading workspaces</h3>
-    <p class="text-sm">{{ error }}</p>
+  <div v-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
+    <h3 class="font-semibold mb-2 text-danger">Error loading workspaces</h3>
+    <p class="text-sm text-danger">{{ error }}</p>
 
     <!-- TODO: Remove this section when API is available -->
     <div class="mt-4 pt-4 border-t border-red-300">
-      <p class="text-sm text-gray-700 mb-3">
+      <p class="text-sm mb-3">
         <strong>Temporary Solution:</strong> The API is currently unavailable. You can load sample data for testing purposes.
         This is fixed sample data for testing. This feature will be removed once the API is ready.
       </p>
@@ -63,7 +63,7 @@ const loadMockData = async () => {
     </div>
   </div>
 
-  <div v-else-if="workspaces.length === 0" class="text-gray-500 text-center py-8 bg-white rounded-lg shadow-lg border border-gray-200">
+  <div v-else-if="workspaces.length === 0" class="text-center py-8 bg-white rounded-lg shadow-lg border border-gray-200">
     No workspaces found.
   </div>
   <div v-else class="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
@@ -77,7 +77,7 @@ const loadMockData = async () => {
           {{ workspace.entity.description }}
         </h3>
       </RouterLink>
-      <p class="text-gray-600 text-sm">{{ workspace.entity.url }}</p>
+      <p class="text-sm">{{ workspace.entity.url }}</p>
     </div>
   </div>
 </template>

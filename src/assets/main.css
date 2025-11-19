@@ -7,4 +7,25 @@
   --color-primary: #cc0100;
   --color-primary-hover: #830a28;
   --color-primary-light: #d11241;
+
+  /* Text colors */
+  --color-heading: var(--color-gray-900);
+  --color-body: var(--color-gray-600);
+  --color-muted: var(--color-gray-500);
+  --color-danger: var(--color-red-600);
+}
+
+@layer base {
+  body {
+    color: var(--color-body);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--color-heading);
+  }
 }

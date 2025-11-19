@@ -18,10 +18,10 @@
       <section class="bg-white mb-12 rounded-lg p-8 border border-gray-200 max-w-4xl mx-auto">
         <div class="flex items-center justify-between flex-wrap gap-6 text-center md:text-left">
           <div class="flex-1 min-w-[250px]">
-            <h2 class="text-2xl font-bold text-gray-900 mb-2">
+            <h2 class="text-2xl font-bold mb-2">
               Workspace Listing
             </h2>
-            <p class="text-gray-600">
+            <p class="">
               Browse and explore all workspaces in the repository.
             </p>
           </div>
@@ -45,7 +45,7 @@
                 href="https://github.com/Physiome/pmrplatform/"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="text-primary hover:text-primary-hover transition-colors underline font-medium"
+                class="text-link underline font-medium"
               >its project page on GitHub</a>.
             </p>
           </div>
@@ -57,4 +57,5 @@
 
 <style scoped>
 @import '@/assets/button.css';
+@import '@/assets/text-link.css';
 </style>

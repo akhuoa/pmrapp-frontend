@@ -38,7 +38,7 @@ const handleSubmit = async () => {
   <div class="max-w-md mx-auto bg-white rounded-lg shadow-lg p-8 border border-gray-200">
     <form @submit.prevent="handleSubmit" class="space-y-4">
       <!-- Error message -->
-      <div v-if="error" class="text-red-600 bg-red-50 border border-red-200 rounded-lg p-3 text-sm">
+      <div v-if="error" class="text-danger bg-red-50 border border-red-200 rounded-lg p-3 text-sm">
         {{ error }}
       </div>
 

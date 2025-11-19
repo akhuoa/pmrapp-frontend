@@ -36,13 +36,13 @@ const loadMockData = async () => {
 </script>
 
 <template>
-  <div v-if="error" class="text-red-600 bg-red-50 border border-red-200 rounded-lg p-4">
-    <h3 class="font-semibold mb-2">Error loading exposures</h3>
-    <p class="text-sm">{{ error }}</p>
+  <div v-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
+    <h3 class="font-semibold mb-2 text-danger">Error loading exposures</h3>
+    <p class="text-sm text-danger">{{ error }}</p>
 
     <!-- TODO: Remove this section when API is available -->
     <div class="mt-4 pt-4 border-t border-red-300">
-      <p class="text-sm text-gray-700 mb-3">
+      <p class="text-sm mb-3">
         <strong>Temporary Solution:</strong> The API is currently unavailable. You can load sample data for testing purposes.
         This is fixed sample data for testing. This feature will be removed once the API is ready.
       </p>
@@ -56,7 +56,7 @@ const loadMockData = async () => {
     </div>
   </div>
 
-  <div v-else-if="exposures.length === 0" class="text-gray-500 text-center py-4">
+  <div v-else-if="exposures.length === 0" class="text-center py-4">
     No exposures found.
   </div>
 
@@ -71,7 +71,7 @@ const loadMockData = async () => {
           Exposure {{ exposure.entity.id }}
         </h3>
       </RouterLink>
-      <p class="text-gray-600 text-sm">{{ exposure.entity.description }}</p>
+      <p class="text-sm">{{ exposure.entity.description }}</p>
     </div>
   </div>
 </template>

@@ -42,13 +42,13 @@ const loadMockData = async () => {
 </script>
 
 <template>
-  <div v-if="error" class="text-red-600 bg-red-50 border border-red-200 rounded-lg p-4">
-    <h3 class="font-semibold mb-2">Error loading workspace</h3>
-    <p class="text-sm">{{ error }}</p>
+  <div v-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
+    <h3 class="font-semibold mb-2 text-danger">Error loading workspace</h3>
+    <p class="text-sm text-danger">{{ error }}</p>
 
     <!-- TODO: Remove this section when API is available -->
     <div class="mt-4 pt-4 border-t border-red-300">
-      <p class="text-sm text-gray-700 mb-3">
+      <p class="text-sm mb-3">
         <strong>Temporary Solution:</strong> The API is currently unavailable. You can load sample data for testing purposes.
         This is fixed sample data for a specific workspace alias. Regardless of which workspace URL you visit,
         the same mock data will be loaded. This feature will be removed once the API is ready.
@@ -77,7 +77,7 @@ const loadMockData = async () => {
             :to="`/workspace/${alias}/file/${workspaceInfo.commit.commit_id}/${entry.name}`"
             class="text-link inline-flex items-center gap-2"
           >
-            <FileIcon class="text-gray-500" />
+            <FileIcon class="text-muted" />
             {{ entry.name }}
           </RouterLink>
         </li>

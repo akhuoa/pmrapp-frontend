@@ -16,7 +16,7 @@ import PageHeader from '@/components/molecules/PageHeader.vue'
         <Workspaces />
       </template>
       <template #fallback>
-        <p class="text-gray-600">Loading workspaces...</p>
+        <p class="">Loading workspaces...</p>
       </template>
     </Suspense>
   </DefaultLayout>

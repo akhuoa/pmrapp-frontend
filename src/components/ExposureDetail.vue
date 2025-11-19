@@ -42,13 +42,13 @@ const loadMockData = async () => {
 </script>
 
 <template>
-  <div v-if="error" class="text-red-600 bg-red-50 border border-red-200 rounded-lg p-4">
-    <h3 class="font-semibold mb-2">Error loading exposure</h3>
-    <p class="text-sm">{{ error }}</p>
+  <div v-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
+    <h3 class="font-semibold mb-2 text-danger">Error loading exposure</h3>
+    <p class="text-sm text-danger">{{ error }}</p>
 
     <!-- TODO: Remove this section when API is available -->
     <div class="mt-4 pt-4 border-t border-red-300">
-      <p class="text-sm text-gray-700 mb-3">
+      <p class="text-sm mb-3">
         <strong>Temporary Solution:</strong> The API is currently unavailable. You can load sample data for testing purposes.
         This is fixed sample data for a specific exposure alias. Regardless of which exposure URL you visit,
         the same mock data will be loaded. This feature will be removed once the API is ready.
@@ -78,7 +78,7 @@ const loadMockData = async () => {
               :to="`/exposure/${alias}/${entry[0]}`"
               class="text-link inline-flex items-center gap-2"
             >
-              <FileIcon class="text-gray-500" />
+              <FileIcon class="text-muted" />
               {{ entry[0]}}
             </RouterLink>
           </li>
@@ -88,7 +88,7 @@ const loadMockData = async () => {
     <aside class="w-full lg:w-80">
       <section class="pb-6">
         <h4 class="text-lg font-semibold mb-3">Source</h4>
-        <div class="text-sm text-gray-700 leading-relaxed">
+        <div class="text-sm leading-relaxed">
           Derived from workspace
           <RouterLink
             :to="`/workspace/${exposureInfo.workspace_alias}`"
@@ -118,7 +118,7 @@ const loadMockData = async () => {
                 :to="`/exposure/${alias}/${entry[0]}`"
                 class="text-link inline-flex items-center gap-2"
               >
-                <span class="text-gray-400">›</span>
+                <span class="text-muted">›</span>
                 {{ entry[0] }}
               </RouterLink>
             </li>
