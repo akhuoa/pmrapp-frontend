@@ -1,70 +1,130 @@
-# PMR App - Frontend
+# PMR - Frontend
 
-The frontend web application for serving Physiome Model Repository, built with Vue.
+The next-generation frontend web application for the [Physiome Model Repository](https://models.physiomeproject.org/), built with Vue 3, TypeScript, and Tailwind CSS v4.
 
-## Recommended IDE Setup
+## About
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+A modern, responsive web application for browsing and exploring computational models in the Physiome Model Repository. Built with Vue 3 and powered by [a Rust-based backend](https://github.com/Physiome/pmrplatform), this project represents the next generation of the platform.
 
-## Recommended Browser Setup
+**Features:**
+- 🎨 Light/Dark theme with system preference support
+- 📱 Responsive design with Tailwind CSS v4
+- ⚡ Built with Vue 3 Composition API and TypeScript
+- 🧩 Atomic design component structure
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+## Tech Stack
 
-## Type Support for `.vue` Imports in TS
+- **Framework:** Vue 3 with TypeScript
+- **Build Tool:** Vite
+- **Styling:** Tailwind CSS v4
+- **Routing:** Vue Router
+- **Testing:** Vitest (unit) + Cypress (e2e)
+- **Code Quality:** ESLint + TypeScript
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+## Project Structure
 
-## Customize configuration
+```
+src/
+├── assets/          # Global styles and CSS files
+├── components/      # Vue components (atomic design)
+│   ├── atoms/       # Basic building blocks
+│   ├── molecules/   # Simple component groups
+│   └── organisms/   # Complex components
+├── composables/     # Vue composables
+├── layouts/         # Layout components
+├── router/          # Vue Router configuration
+├── services/        # API service layer
+├── types/           # TypeScript type definitions
+└── views/           # Page-level components
+```
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+## Getting Started
 
-## Project Setup
+### Prerequisites
+
+- Node.js 20.19+ or 22.12+ (LTS recommended)
+
+### Installation
 
 ```sh
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+### Development
+
+Start the development server with hot-reload:
 
 ```sh
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+The app will be available at `http://localhost:5173/pmrapp-frontend/`
+
+### Build
+
+Type-check, compile and minify for production:
 
 ```sh
 npm run build
 ```
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
+Preview the production build:
+
+```sh
+npm run preview
+```
+
+## Testing
+
+### Unit Tests
+
+Run unit tests with Vitest:
 
 ```sh
 npm run test:unit
 ```
 
-### Run End-to-End Tests with [Cypress](https://www.cypress.io/)
+### End-to-End Tests
+
+Run e2e tests in development mode:
 
 ```sh
 npm run test:e2e:dev
 ```
 
-This runs the end-to-end tests against the Vite development server.
-It is much faster than the production build.
-
-But it's still recommended to test the production build with `test:e2e` before deploying (e.g. in CI environments):
+Run e2e tests against production build:
 
 ```sh
 npm run build
 npm run test:e2e
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+## Code Quality
+
+Lint and fix code:
 
 ```sh
 npm run lint
 ```
+
+## Development Tools
+
+### Recommended IDE Setup
+
+- [VS Code](https://code.visualstudio.com/)
+- [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) extension (disable Vetur if installed)
+
+### Browser DevTools
+
+**Chrome/Edge/Brave:**
+- [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
+- Enable Custom Object Formatters in DevTools settings
+
+**Firefox:**
+- [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
+
+## Related Projects
+
+- **Backend:** [pmrplatform](https://github.com/Physiome/pmrplatform/) - Rust-powered backend platform
+- **Rust Demo:** [pmr3.demo.physiomeproject.org](https://pmr3.demo.physiomeproject.org/) - Alternative frontend built with Leptos (Rust)
+- **Current Production:** [models.physiomeproject.org](https://models.physiomeproject.org/) - Active Physiome Model Repository
