@@ -48,9 +48,17 @@ const isActive = (path: string) => computed(() => route.path.startsWith(path))
 
 <style scoped>
 @reference 'tailwindcss';
+@reference '@/assets/main.css';
 
 .header-border-top {
-  @apply before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-[6px] before:bg-[#3a3a3a];
+  @apply
+    before:content-['']
+    before:absolute
+    before:top-0
+    before:left-0
+    before:right-0
+    before:h-[6px]
+    before:bg-dark;
 }
 
 .nav-link {
