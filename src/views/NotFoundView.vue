@@ -19,9 +19,9 @@ const goBack = () => {
 <template>
   <DefaultLayout>
     <div class="max-w-2xl mx-auto text-center">
-      <h1 class="text-6xl font-bold mb-4 text-gray-800">404</h1>
-      <h2 class="text-3xl font-semibold mb-4 text-gray-700">Page Not Found</h2>
-      <p class="text-lg text-gray-600 mb-8">
+      <h1 class="text-6xl font-bold mb-4">404</h1>
+      <h2 class="text-3xl font-semibold mb-4">Page Not Found</h2>
+      <p class="text-lg mb-8">
         The page you are looking for doesn't exist or has been moved.
       </p>
 
