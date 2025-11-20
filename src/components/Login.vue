@@ -38,8 +38,8 @@ const handleSubmit = async () => {
   <div class="max-w-md mx-auto box">
     <form @submit.prevent="handleSubmit" class="space-y-4">
       <!-- Error message -->
-      <div v-if="error" class="text-danger bg-red-50 border border-red-200 rounded-lg p-3 text-sm">
-        {{ error }}
+      <div v-if="error" class="error-box">
+        <p class="text-sm">{{ error }}</p>
       </div>
 
       <!-- Username field -->
@@ -91,4 +91,5 @@ const handleSubmit = async () => {
 @import '@/assets/label.css';
 @import '@/assets/input.css';
 @import '@/assets/box.css';
+@import '@/assets/error-box.css';
 </style>

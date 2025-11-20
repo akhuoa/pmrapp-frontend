@@ -16,9 +16,9 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+  <div class="error-box">
     <h3 class="font-semibold mb-2 text-danger">{{ title }}</h3>
-    <p class="text-sm text-danger">{{ error }}</p>
+    <p class="text-sm">{{ error }}</p>
 
     <!-- TODO: Remove this section when API is available -->
     <MockDataLoader
@@ -28,3 +28,7 @@ const emit = defineEmits<{
     />
   </div>
 </template>
+
+<style scoped>
+@import '@/assets/error-box.css';
+</style>

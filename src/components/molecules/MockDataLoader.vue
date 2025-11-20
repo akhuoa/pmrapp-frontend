@@ -10,7 +10,7 @@ defineEmits<{
 </script>
 
 <template>
-  <div class="mt-4 pt-4 border-t border-red-300">
+  <div class="mt-4 pt-4 border-t border-red-300 text-body">
     <p class="text-sm mb-3">
       <strong>Temporary Solution:</strong> The API is currently unavailable. You can load sample data for testing purposes.
       {{ message }}
