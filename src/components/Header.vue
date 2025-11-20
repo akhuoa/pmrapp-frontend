@@ -31,6 +31,7 @@ const isActive = (path: string) => computed(() => route.path.startsWith(path))
               {{ link.label }}
             </RouterLink>
           </li>
+          <li class="h-6 border-l border-gray-300 dark:border-gray-600"></li>
           <li>
             <RouterLink
               to="/login"
