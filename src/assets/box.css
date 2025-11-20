@@ -10,3 +10,10 @@
     border
     border-gray-200;
 }
+
+@media (prefers-color-scheme: dark) {
+  .box {
+    @apply
+      bg-gray-800;
+  }
+}
