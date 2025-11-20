@@ -58,7 +58,7 @@ const loadMockData = async () => {
       :description="`Git Repository URI: ${workspaceInfo.workspace.url}`"
     />
 
-    <div class="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
+    <div class="box">
       <h2 class="text-xl font-semibold mb-4">Files</h2>
       <ul class="space-y-2">
         <li v-for="entry in workspaceInfo.target.TreeInfo.entries" :key="entry.id">
@@ -78,4 +78,5 @@ const loadMockData = async () => {
 <style scoped>
 @import '@/assets/button.css';
 @import '@/assets/text-link.css';
+@import '@/assets/box.css';
 </style>

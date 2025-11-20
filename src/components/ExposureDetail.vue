@@ -59,7 +59,7 @@ const loadMockData = async () => {
         :description="exposureInfo.exposure.description || undefined"
       />
 
-      <div class="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
+      <div class="box">
         <h2 class="text-xl font-semibold mb-4">Files</h2>
         <ul class="space-y-2">
           <li v-for="entry in exposureInfo.files" :key="entry[0]">
@@ -121,4 +121,5 @@ const loadMockData = async () => {
 <style scoped>
 @import '@/assets/button.css';
 @import '@/assets/text-link.css';
+@import '@/assets/box.css';
 </style>

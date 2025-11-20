@@ -15,7 +15,7 @@
         </p>
       </section>
 
-      <section class="bg-white mb-12 rounded-lg p-8 border border-gray-200 max-w-4xl mx-auto">
+      <section class="max-w-4xl mb-12 mx-auto box">
         <div class="flex items-center justify-between flex-wrap gap-6 text-center md:text-left">
           <div class="flex-1 min-w-[250px]">
             <h2 class="text-2xl font-bold mb-2">
@@ -36,7 +36,7 @@
         </div>
       </section>
 
-      <section class="rounded-lg p-8 text-center">
+      <section class="p-8 text-center">
         <div class="flex items-start gap-4">
           <div class="flex-1">
             <p>
@@ -58,4 +58,5 @@
 <style scoped>
 @import '@/assets/button.css';
 @import '@/assets/text-link.css';
+@import '@/assets/box.css';
 </style>
