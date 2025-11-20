@@ -10,3 +10,10 @@
     rounded-lg
     p-4;
 }
+
+@media (prefers-color-scheme: dark) {
+  .error-box {
+    @apply
+      bg-red-900/20;
+  }
+}
