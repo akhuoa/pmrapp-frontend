@@ -5,7 +5,8 @@ import type { Exposure } from '@/types/exposure'
 import { exposureService } from '@/services/exposureService'
 // TODO: Remove this import when API is available
 import { mockExposures } from '@/mocks/exposureMockData'
-import ErrorBlock from './organisms/ErrorBlock.vue'
+import ItemList from './organisms/ItemList.vue'
+import ExposureListItem from './molecules/ExposureListItem.vue'
 
 const exposures = ref<Exposure[]>([])
 const error = ref<string | null>(null)
@@ -37,37 +38,25 @@ const loadMockData = async () => {
 </script>
 
 <template>
-  <ErrorBlock
-    v-if="error"
-    title="Error loading exposures"
+  <ItemList
+    :items="exposures"
     :error="error"
+    error-title="Error loading exposures"
     mock-message="This is fixed sample data for testing."
     :is-loading-mock="isLoadingMock"
+    empty-message="No exposures found."
     @load-mock="loadMockData"
-  />
-
-  <div v-else-if="exposures.length === 0" class="text-center box">
-    No exposures found.
-  </div>
-
-  <div v-else class="box">
-    <div
-      v-for="exposure in exposures"
-      :key="exposure.alias"
-      class="mb-4 pb-4 border-b border-gray-200 last:mb-0 last:pb-0 last:border-b-0"
-    >
-      <RouterLink :to="`/exposure/${exposure.alias}`">
-        <h3 class="inline-block text-lg font-semibold mb-2 text-link">
-          Exposure {{ exposure.entity.id }}
-        </h3>
-      </RouterLink>
-      <p class="text-sm">{{ exposure.entity.description }}</p>
-    </div>
-  </div>
+  >
+    <template #item>
+      <ExposureListItem
+        v-for="exposure in exposures"
+        :key="exposure.alias"
+        :exposure="exposure"
+      />
+    </template>
+  </ItemList>
 </template>
 
 <style scoped>
 @import '@/assets/button.css';
-@import '@/assets/text-link.css';
-@import '@/assets/box.css';
 </style>

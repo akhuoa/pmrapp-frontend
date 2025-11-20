@@ -5,7 +5,8 @@ import type { Workspace } from '@/types/workspace'
 import { workspaceService } from '@/services/workspaceService'
 // TODO: Remove this import when API is available
 import { mockWorkspaces } from '@/mocks/workspaceMockData'
-import ErrorBlock from './organisms/ErrorBlock.vue'
+import ItemList from './organisms/ItemList.vue'
+import WorkspaceListItem from './molecules/WorkspaceListItem.vue'
 
 const workspaces = ref<Workspace[]>([])
 const error = ref<string | null>(null)
@@ -44,37 +45,25 @@ const loadMockData = async () => {
 </script>
 
 <template>
-  <ErrorBlock
-    v-if="error"
-    title="Error loading workspaces"
+  <ItemList
+    :items="workspaces"
     :error="error"
+    error-title="Error loading workspaces"
     mock-message="This is fixed sample data for testing."
     :is-loading-mock="isLoadingMock"
+    empty-message="No workspaces found."
     @load-mock="loadMockData"
-  />
-
-  <div v-else-if="workspaces.length === 0" class="text-center box">
-    No workspaces found.
-  </div>
-
-  <div v-else class="box">
-    <div
-      v-for="workspace in workspaces"
-      :key="workspace.alias"
-      class="mb-4 pb-4 border-b border-gray-200 last:mb-0 last:pb-0 last:border-b-0"
-    >
-      <RouterLink :to="`/workspace/${workspace.alias}`">
-        <h3 class="inline-block text-lg font-semibold mb-2 text-link">
-          {{ workspace.entity.description }}
-        </h3>
-      </RouterLink>
-      <p class="text-sm">{{ workspace.entity.url }}</p>
-    </div>
-  </div>
+  >
+    <template #item>
+      <WorkspaceListItem
+        v-for="workspace in workspaces"
+        :key="workspace.alias"
+        :workspace="workspace"
+      />
+    </template>
+  </ItemList>
 </template>
 
 <style scoped>
 @import '@/assets/button.css';
-@import '@/assets/text-link.css';
-@import '@/assets/box.css';
 </style>
