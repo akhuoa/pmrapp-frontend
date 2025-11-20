@@ -6,3 +6,10 @@
     font-medium
     text-gray-700;
 }
+
+@media (prefers-color-scheme: dark) {
+  .label-field {
+    @apply
+      text-gray-200;
+  }
+}
