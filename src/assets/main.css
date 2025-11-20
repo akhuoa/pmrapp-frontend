@@ -2,4 +2,54 @@
 
 @theme {
   --font-sans: 'Lucida Sans Unicode', 'Lucida Grande', sans-serif;
+
+  /* Primary brand colors */
+  --color-primary: #cc0100;
+  --color-primary-hover: #830a28;
+  --color-primary-light: #d11241;
+
+  /* Light theme colors */
+  --color-heading: var(--color-gray-900);
+  --color-body: var(--color-gray-600);
+  --color-muted: var(--color-gray-500);
+  --color-danger: var(--color-red-600);
+
+  /* Dark theme colors */
+  --color-dark: #1a1a1a;
+  --color-dark-light: #b0b0b0;
+  --color-dark-heading: var(--color-gray-200);
+  --color-dark-body: var(--color-gray-400);
+  --color-dark-muted: var(--color-gray-500);
+  --color-dark-danger: var(--color-red-500);
+}
+
+@layer base {
+  body {
+    color: var(--color-body);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--color-heading);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      color: var(--color-dark-body);
+      background-color: var(--color-dark);
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      color: var(--color-dark-heading);
+    }
+  }
 }

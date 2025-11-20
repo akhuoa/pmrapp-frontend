@@ -1,38 +1,42 @@
 <!-- eslint-disable vue/multi-word-component-names -->
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useRoute } from 'vue-router'
+import { computed } from 'vue'
+
+const route = useRoute()
+
+const navLinks = [
+  { path: '/workspace', label: 'Workspace' },
+  { path: '/exposure', label: 'Exposure' },
+]
+
+const isActive = (path: string) => computed(() => route.path.startsWith(path))
+</script>
 
 <template>
-  <header class="header-border-top bg-white border-b border-gray-200 sticky top-0 z-100">
+  <header class="header-border-top bg-white dark:bg-dark border-b border-gray-200 dark:border-gray-700 sticky top-0 z-100">
     <div class="container mx-auto px-4 py-4 flex items-center justify-between">
-      <RouterLink to="/" class="flex items-center hover:opacity-80 transition-opacity">
+      <RouterLink to="/" class="flex items-center nav-link">
         <img src="/logo.png" alt="Physiome Model Repository" width="48" height="48" />
       </RouterLink>
 
       <nav>
         <ul class="flex items-center gap-4">
-          <li>
+          <li v-for="link in navLinks" :key="link.path">
             <RouterLink
-              to="/workspace"
-              class="hover:opacity-80 transition-opacity"
-              active-class="text-[#cc0000]"
+              :to="link.path"
+              class="nav-link"
+              :class="{ 'text-primary': isActive(link.path).value }"
             >
-              Workspace
+              {{ link.label }}
             </RouterLink>
           </li>
-          <li>
-            <RouterLink
-              to="/exposure"
-              class="hover:opacity-80 transition-opacity"
-              active-class="text-[#cc0000]"
-            >
-              Exposure
-            </RouterLink>
-          </li>
+          <li class="h-6 border-l border-gray-300 dark:border-gray-600"></li>
           <li>
             <RouterLink
               to="/login"
-              class="hover:opacity-80 transition-opacity"
-              active-class="text-[#cc0000]"
+              class="nav-link"
+              active-class="text-primary"
             >
               Login
             </RouterLink>
@@ -45,8 +49,25 @@
 
 <style scoped>
 @reference 'tailwindcss';
+@reference '@/assets/main.css';
 
 .header-border-top {
-  @apply before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-[6px] before:bg-[#3a3a3a];
+  @apply
+    before:content-['']
+    before:absolute
+    before:top-0
+    before:left-0
+    before:right-0
+    before:h-[6px]
+    before:bg-dark;
+
+    @media (prefers-color-scheme: dark) {
+      @apply
+        before:bg-primary;
+    }
+}
+
+.nav-link {
+  @apply hover:opacity-80 transition-opacity;
 }
 </style>

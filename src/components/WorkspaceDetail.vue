@@ -6,6 +6,8 @@ import type { WorkspaceInfo } from '@/types/workspace'
 import { mockWorkspaceInfo } from '@/mocks/workspaceMockData'
 import { workspaceService } from '@/services/workspaceService'
 import FileIcon from '@/components/icons/FileIcon.vue'
+import PageHeader from './molecules/PageHeader.vue'
+import ErrorBlock from './organisms/ErrorBlock.vue'
 
 const props = defineProps<{
   alias: string
@@ -41,42 +43,30 @@ const loadMockData = async () => {
 </script>
 
 <template>
-  <div v-if="error" class="text-red-600 bg-red-50 border border-red-200 rounded-lg p-4">
-    <h3 class="font-semibold mb-2">Error loading workspace</h3>
-    <p class="text-sm">{{ error }}</p>
-
-    <!-- TODO: Remove this section when API is available -->
-    <div class="mt-4 pt-4 border-t border-red-300">
-      <p class="text-sm text-gray-700 mb-3">
-        <strong>Temporary Solution:</strong> The API is currently unavailable. You can load sample data for testing purposes.
-        This is fixed sample data for a specific workspace alias. Regardless of which workspace URL you visit,
-        the same mock data will be loaded. This feature will be removed once the API is ready.
-      </p>
-      <button
-        @click="loadMockData"
-        :disabled="isLoadingMock"
-        class="button-primary"
-      >
-        {{ isLoadingMock ? 'Loading...' : 'Load Mock Data (Temporary)' }}
-      </button>
-    </div>
-  </div>
+  <ErrorBlock
+    v-if="error"
+    title="Error loading workspace"
+    :error="error"
+    mock-message="This is fixed sample data for a specific workspace alias. Regardless of which workspace URL you visit, the same mock data will be loaded."
+    :is-loading-mock="isLoadingMock"
+    @load-mock="loadMockData"
+  />
 
   <div v-else-if="workspaceInfo">
-    <h1 class="text-4xl font-bold mb-6">
-      {{ workspaceInfo.workspace.description || alias }}
-    </h1>
-    <p class="text-gray-600 mb-4">Git Repository URI: {{ workspaceInfo.workspace.url }}</p>
+    <PageHeader
+      :title="workspaceInfo.workspace.description || alias"
+      :description="`Git Repository URI: ${workspaceInfo.workspace.url}`"
+    />
 
-    <div class="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
+    <div class="box">
       <h2 class="text-xl font-semibold mb-4">Files</h2>
       <ul class="space-y-2">
         <li v-for="entry in workspaceInfo.target.TreeInfo.entries" :key="entry.id">
           <RouterLink
             :to="`/workspace/${alias}/file/${workspaceInfo.commit.commit_id}/${entry.name}`"
-            class="text-[#cc0000] hover:text-[#830a28] transition-colors inline-flex items-center gap-2"
+            class="text-link inline-flex items-center gap-2"
           >
-            <FileIcon class="text-gray-500" />
+            <FileIcon class="text-muted" />
             {{ entry.name }}
           </RouterLink>
         </li>
@@ -87,4 +77,6 @@ const loadMockData = async () => {
 
 <style scoped>
 @import '@/assets/button.css';
+@import '@/assets/text-link.css';
+@import '@/assets/box.css';
 </style>

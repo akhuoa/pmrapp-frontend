@@ -2,8 +2,8 @@
 <script setup lang="ts"></script>
 
 <template>
-  <footer class="bg-[#3a3a3a] text-[#b0b0b0] py-4">
-    <div class="container mx-auto px-4">
+  <footer class="bg-dark dark:bg-gray-800 text-dark-light dark:text-gray-400 py-4">
+    <div class="container mx-auto px-4 text-center">
       <p class="text-sm font-light">Copyright 2025 IUPS Physiome Project</p>
     </div>
   </footer>

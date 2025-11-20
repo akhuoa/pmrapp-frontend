@@ -6,6 +6,8 @@ import type { ExposureInfo } from '@/types/exposure'
 import { mockExposureInfo } from '@/mocks/exposureMockData'
 import { exposureService } from '@/services/exposureService'
 import FileIcon from '@/components/icons/FileIcon.vue'
+import PageHeader from './molecules/PageHeader.vue'
+import ErrorBlock from './organisms/ErrorBlock.vue'
 
 const props = defineProps<{
   alias: string
@@ -41,42 +43,31 @@ const loadMockData = async () => {
 </script>
 
 <template>
-  <div v-if="error" class="text-red-600 bg-red-50 border border-red-200 rounded-lg p-4">
-    <h3 class="font-semibold mb-2">Error loading exposure</h3>
-    <p class="text-sm">{{ error }}</p>
-
-    <!-- TODO: Remove this section when API is available -->
-    <div class="mt-4 pt-4 border-t border-red-300">
-      <p class="text-sm text-gray-700 mb-3">
-        <strong>Temporary Solution:</strong> The API is currently unavailable. You can load sample data for testing purposes.
-        This is fixed sample data for a specific exposure alias. Regardless of which exposure URL you visit,
-        the same mock data will be loaded. This feature will be removed once the API is ready.
-      </p>
-      <button
-        @click="loadMockData"
-        :disabled="isLoadingMock"
-        class="button-primary"
-      >
-        {{ isLoadingMock ? 'Loading...' : 'Load Mock Data (Temporary)' }}
-      </button>
-    </div>
-  </div>
+  <ErrorBlock
+    v-if="error"
+    title="Error loading exposure"
+    :error="error"
+    mock-message="This is fixed sample data for a specific exposure alias. Regardless of which exposure URL you visit, the same mock data will be loaded."
+    :is-loading-mock="isLoadingMock"
+    @load-mock="loadMockData"
+  />
 
   <div v-else-if="exposureInfo" class="flex flex-col lg:flex-row gap-8">
     <article class="flex-1">
-      <h1 class="text-4xl font-bold mb-6">
-        Exposure {{ exposureInfo.exposure.id }}
-      </h1>
-      <p class="text-gray-600 mb-4">{{ exposureInfo.exposure.description }}</p>
-      <div class="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
+      <PageHeader
+        :title="`Exposure ${exposureInfo.exposure.id}`"
+        :description="exposureInfo.exposure.description || undefined"
+      />
+
+      <div class="box">
         <h2 class="text-xl font-semibold mb-4">Files</h2>
         <ul class="space-y-2">
           <li v-for="entry in exposureInfo.files" :key="entry[0]">
             <RouterLink
               :to="`/exposure/${alias}/${entry[0]}`"
-              class="text-[#cc0000] hover:text-[#830a28] transition-colors inline-flex items-center gap-2"
+              class="text-link inline-flex items-center gap-2"
             >
-              <FileIcon class="text-gray-500" />
+              <FileIcon class="text-muted" />
               {{ entry[0]}}
             </RouterLink>
           </li>
@@ -86,24 +77,24 @@ const loadMockData = async () => {
     <aside class="w-full lg:w-80">
       <section class="pb-6">
         <h4 class="text-lg font-semibold mb-3">Source</h4>
-        <div class="text-sm text-gray-700 leading-relaxed">
+        <div class="text-sm leading-relaxed">
           Derived from workspace
           <RouterLink
             :to="`/workspace/${exposureInfo.workspace_alias}`"
-            class="text-[#cc0000] hover:text-[#830a28] transition-colors"
+            class="text-link"
           >
             {{ exposureInfo.exposure.description }}
           </RouterLink>
           at changeset
           <RouterLink
             :to="`/workspace/${exposureInfo.workspace_alias}/file/${exposureInfo.exposure.commit_id}`"
-            class="text-[#cc0000] hover:text-[#830a28] transition-colors font-mono"
+            class="text-link font-mono"
           >
             {{ exposureInfo.exposure.commit_id.substring(0, 12) }}
           </RouterLink>.
         </div>
       </section>
-      <section class="pt-6 border-t border-gray-200">
+      <section class="pt-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Navigation</h4>
         <nav>
           <ul class="space-y-2">
@@ -114,9 +105,9 @@ const loadMockData = async () => {
             >
               <RouterLink
                 :to="`/exposure/${alias}/${entry[0]}`"
-                class="text-[#cc0000] hover:text-[#830a28] transition-colors inline-flex items-center gap-2"
+                class="text-link inline-flex items-center gap-2"
               >
-                <span class="text-gray-400">›</span>
+                <span class="text-muted">›</span>
                 {{ entry[0] }}
               </RouterLink>
             </li>
@@ -129,4 +120,6 @@ const loadMockData = async () => {
 
 <style scoped>
 @import '@/assets/button.css';
+@import '@/assets/text-link.css';
+@import '@/assets/box.css';
 </style>
