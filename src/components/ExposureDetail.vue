@@ -94,7 +94,7 @@ const loadMockData = async () => {
           </RouterLink>.
         </div>
       </section>
-      <section class="pt-6 border-t border-gray-200">
+      <section class="pt-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Navigation</h4>
         <nav>
           <ul class="space-y-2">
