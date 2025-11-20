@@ -2,9 +2,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type { Workspace } from '@/types/workspace'
+import { workspaceService } from '@/services/workspaceService'
 // TODO: Remove this import when API is available
 import { mockWorkspaces } from '@/mocks/workspaceMockData'
-import { workspaceService } from '@/services/workspaceService'
 import ErrorBlock from './organisms/ErrorBlock.vue'
 
 const workspaces = ref<Workspace[]>([])
@@ -53,10 +53,11 @@ const loadMockData = async () => {
     @load-mock="loadMockData"
   />
 
-  <div v-else-if="workspaces.length === 0" class="text-center py-8 bg-white rounded-lg shadow-lg border border-gray-200">
+  <div v-else-if="workspaces.length === 0" class="text-center box">
     No workspaces found.
   </div>
-  <div v-else class="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
+
+  <div v-else class="box">
     <div
       v-for="workspace in workspaces"
       :key="workspace.alias"
@@ -75,4 +76,5 @@ const loadMockData = async () => {
 <style scoped>
 @import '@/assets/button.css';
 @import '@/assets/text-link.css';
+@import '@/assets/box.css';
 </style>

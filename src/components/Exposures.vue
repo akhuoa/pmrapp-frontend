@@ -9,7 +9,7 @@ import ErrorBlock from './organisms/ErrorBlock.vue'
 
 const exposures = ref<Exposure[]>([])
 const error = ref<string | null>(null)
-  // TODO: Remove this state when API is available
+// TODO: Remove this state when API is available
 const isLoadingMock = ref(false)
 
 try {
@@ -46,11 +46,11 @@ const loadMockData = async () => {
     @load-mock="loadMockData"
   />
 
-  <div v-else-if="exposures.length === 0" class="text-center py-4">
+  <div v-else-if="exposures.length === 0" class="text-center box">
     No exposures found.
   </div>
 
-  <div v-else class="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
+  <div v-else class="box">
     <div
       v-for="exposure in exposures"
       :key="exposure.alias"
@@ -69,4 +69,5 @@ const loadMockData = async () => {
 <style scoped>
 @import '@/assets/button.css';
 @import '@/assets/text-link.css';
+@import '@/assets/box.css';
 </style>
