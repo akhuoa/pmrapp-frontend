@@ -2,9 +2,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type { WorkspaceInfo } from '@/types/workspace'
-// TODO: Remove this import when API is available
-import { mockWorkspaceInfo } from '@/mocks/workspaceMockData'
-import { workspaceService } from '@/services/workspaceService'
+import { getWorkspaceService } from '@/services'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import PageHeader from './molecules/PageHeader.vue'
 import ErrorBlock from './organisms/ErrorBlock.vue'
@@ -15,30 +13,12 @@ const props = defineProps<{
 
 const workspaceInfo = ref<WorkspaceInfo | null>(null)
 const error = ref<string | null>(null)
-// TODO: Remove this state when API is available
-const isLoadingMock = ref(false)
 
 try {
-  workspaceInfo.value = await workspaceService.getWorkspaceInfo(props.alias)
+  workspaceInfo.value = await getWorkspaceService().getWorkspaceInfo(props.alias)
 } catch (err) {
   error.value = err instanceof Error ? err.message : 'Failed to load workspace'
   console.error('Error loading workspace:', err)
-}
-
-// TODO: Remove this function when API is available
-const loadMockData = async () => {
-  isLoadingMock.value = true
-  error.value = null
-
-  try {
-    await new Promise((resolve) => setTimeout(resolve, 200)) // Simulate API delay
-    workspaceInfo.value = mockWorkspaceInfo
-  } catch (err) {
-    error.value = 'Failed to load mock data'
-    console.error('Error loading mock data:', err)
-  } finally {
-    isLoadingMock.value = false
-  }
 }
 </script>
 
@@ -47,9 +27,6 @@ const loadMockData = async () => {
     v-if="error"
     title="Error loading workspace"
     :error="error"
-    mock-message="This is fixed sample data for a specific workspace alias. Regardless of which workspace URL you visit, the same mock data will be loaded."
-    :is-loading-mock="isLoadingMock"
-    @load-mock="loadMockData"
   />
 
   <div v-else-if="workspaceInfo">

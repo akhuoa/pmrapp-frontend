@@ -5,27 +5,14 @@ interface Props {
   items: T[]
   error: string | null
   errorTitle: string
-  mockMessage: string
-  isLoadingMock: boolean
   emptyMessage: string
 }
 
 defineProps<Props>()
-
-const emit = defineEmits<{
-  loadMock: []
-}>()
 </script>
 
 <template>
-  <ErrorBlock
-    v-if="error"
-    :title="errorTitle"
-    :error="error"
-    :mock-message="mockMessage"
-    :is-loading-mock="isLoadingMock"
-    @load-mock="emit('loadMock')"
-  />
+  <ErrorBlock v-if="error" :title="errorTitle" :error="error" />
 
   <div v-else-if="items.length === 0" class="text-center box">
     {{ emptyMessage }}

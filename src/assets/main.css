@@ -3,8 +3,15 @@
 @theme {
   --font-sans: 'Lucida Sans Unicode', 'Lucida Grande', sans-serif;
 
+  /* Color palettes */
+  --coffee-bean: #0d0000;
+  --onyx: #0c0c0c;
+  --carbon-black: #1d1d1d;
+  --onyx-2: #151414;
+  --brick-ember: #cc0000;
+
   /* Primary brand colors */
-  --color-primary: #cc0100;
+  --color-primary: var(--brick-ember);
   --color-primary-hover: #830a28;
   --color-primary-light: #d11241;
 

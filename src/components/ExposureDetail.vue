@@ -2,9 +2,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type { ExposureInfo } from '@/types/exposure'
-// TODO: Remove this import when API is available
-import { mockExposureInfo } from '@/mocks/exposureMockData'
-import { exposureService } from '@/services/exposureService'
+import { getExposureService } from '@/services'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import PageHeader from './molecules/PageHeader.vue'
 import ErrorBlock from './organisms/ErrorBlock.vue'
@@ -15,30 +13,12 @@ const props = defineProps<{
 
 const exposureInfo = ref<ExposureInfo | null>(null)
 const error = ref<string | null>(null)
-// TODO: Remove this state when API is available
-const isLoadingMock = ref(false)
 
 try {
-  exposureInfo.value = await exposureService.getExposureInfo(props.alias)
+  exposureInfo.value = await getExposureService().getExposureInfo(props.alias)
 } catch (err) {
   error.value = err instanceof Error ? err.message : 'Failed to load exposure'
   console.error('Error loading exposure:', err)
-}
-
-// TODO: Remove this function when API is available
-const loadMockData = async () => {
-  isLoadingMock.value = true
-  error.value = null
-
-  try {
-    await new Promise((resolve) => setTimeout(resolve, 200)) // Simulate API delay
-    exposureInfo.value = mockExposureInfo
-  } catch (err) {
-    error.value = 'Failed to load mock data'
-    console.error('Error loading mock data:', err)
-  } finally {
-    isLoadingMock.value = false
-  }
 }
 </script>
 
@@ -47,9 +27,6 @@ const loadMockData = async () => {
     v-if="error"
     title="Error loading exposure"
     :error="error"
-    mock-message="This is fixed sample data for a specific exposure alias. Regardless of which exposure URL you visit, the same mock data will be loaded."
-    :is-loading-mock="isLoadingMock"
-    @load-mock="loadMockData"
   />
 
   <div v-else-if="exposureInfo" class="flex flex-col lg:flex-row gap-8">
