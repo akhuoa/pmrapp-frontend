@@ -14,7 +14,7 @@ const isActive = (path: string) => computed(() => route.path.startsWith(path))
 </script>
 
 <template>
-  <header class="header-border-top bg-white dark:bg-dark border-b border-gray-200 dark:border-gray-700 sticky top-0 z-100">
+  <header class="header-border-top bg-background border-b border-gray-200 dark:border-gray-700 sticky top-0 z-100">
     <div class="container mx-auto px-4 py-4 flex items-center justify-between">
       <RouterLink to="/" class="flex items-center nav-link">
         <img src="/logo.png" alt="Physiome Model Repository" width="48" height="48" />
@@ -59,12 +59,7 @@ const isActive = (path: string) => computed(() => route.path.startsWith(path))
     before:left-0
     before:right-0
     before:h-[6px]
-    before:bg-dark;
-
-    @media (prefers-color-scheme: dark) {
-      @apply
-        before:bg-primary;
-    }
+    before:bg-primary;
 }
 
 .nav-link {

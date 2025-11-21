@@ -14,7 +14,7 @@
 @media (prefers-color-scheme: dark) {
   .box {
     @apply
-      bg-dark
+      bg-background
       border-gray-700;
   }
 }

@@ -44,7 +44,7 @@ try {
               :to="`/exposure/${alias}/${entry[0]}`"
               class="text-link inline-flex items-center gap-2"
             >
-              <FileIcon class="text-muted" />
+              <FileIcon class="text-foreground" />
               {{ entry[0]}}
             </RouterLink>
           </li>
@@ -84,7 +84,7 @@ try {
                 :to="`/exposure/${alias}/${entry[0]}`"
                 class="text-link inline-flex items-center gap-2"
               >
-                <span class="text-muted">›</span>
+                <span class="text-foreground">›</span>
                 {{ entry[0] }}
               </RouterLink>
             </li>

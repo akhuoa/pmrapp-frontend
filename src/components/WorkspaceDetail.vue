@@ -43,7 +43,7 @@ try {
             :to="`/workspace/${alias}/file/${workspaceInfo.commit.commit_id}/${entry.name}`"
             class="text-link inline-flex items-center gap-2"
           >
-            <FileIcon class="text-muted" />
+            <FileIcon class="text-foreground" />
             {{ entry.name }}
           </RouterLink>
         </li>
