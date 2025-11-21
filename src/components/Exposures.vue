@@ -3,8 +3,6 @@
 import { ref } from 'vue'
 import type { Exposure } from '@/types/exposure'
 import { exposureService } from '@/services/exposureService'
-// TODO: Remove this import when API is available
-import { mockExposures } from '@/mocks/exposureMockData'
 import ItemList from './organisms/ItemList.vue'
 import ExposureListItem from './molecules/ExposureListItem.vue'
 
@@ -26,8 +24,9 @@ const loadMockData = async () => {
   error.value = null
 
   try {
-    await new Promise((resolve) => setTimeout(resolve, 200)) // Simulate API delay
-    exposures.value = mockExposures
+    const response = await fetch('/pmrapp-frontend/mocks/exposures.json')
+    if (!response.ok) throw new Error('Failed to fetch mock data')
+    exposures.value = await response.json()
   } catch (err) {
     error.value = 'Failed to load mock data'
     console.error('Error loading mock data:', err)

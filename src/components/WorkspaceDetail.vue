@@ -2,8 +2,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type { WorkspaceInfo } from '@/types/workspace'
-// TODO: Remove this import when API is available
-import { mockWorkspaceInfo } from '@/mocks/workspaceMockData'
 import { workspaceService } from '@/services/workspaceService'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import PageHeader from './molecules/PageHeader.vue'
@@ -31,8 +29,9 @@ const loadMockData = async () => {
   error.value = null
 
   try {
-    await new Promise((resolve) => setTimeout(resolve, 200)) // Simulate API delay
-    workspaceInfo.value = mockWorkspaceInfo
+    const response = await fetch('/pmrapp-frontend/mocks/workspace-info.json')
+    if (!response.ok) throw new Error('Failed to fetch mock data')
+    workspaceInfo.value = await response.json()
   } catch (err) {
     error.value = 'Failed to load mock data'
     console.error('Error loading mock data:', err)

@@ -3,8 +3,6 @@
 import { ref } from 'vue'
 import type { Workspace } from '@/types/workspace'
 import { workspaceService } from '@/services/workspaceService'
-// TODO: Remove this import when API is available
-import { mockWorkspaces } from '@/mocks/workspaceMockData'
 import ItemList from './organisms/ItemList.vue'
 import WorkspaceListItem from './molecules/WorkspaceListItem.vue'
 
@@ -31,7 +29,9 @@ const loadMockData = async () => {
   error.value = null
 
   try {
-    await new Promise((resolve) => setTimeout(resolve, 200)) // Simulate API delay
+    const response = await fetch('/pmrapp-frontend/mocks/workspaces.json')
+    if (!response.ok) throw new Error('Failed to fetch mock data')
+    const mockWorkspaces = await response.json()
     workspaces.value = mockWorkspaces.sort((a: Workspace, b: Workspace) => {
       return a.entity.description.localeCompare(b.entity.description)
     })
