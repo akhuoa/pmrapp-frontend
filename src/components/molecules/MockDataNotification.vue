@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { USE_MOCK_DATA } from '@/services'
+import CloseButton from '@/components/atoms/CloseButton.vue'
 
 const isVisible = ref(true)
 </script>
@@ -16,12 +17,10 @@ const isVisible = ref(true)
         The repository currently uses mock data while we are waiting for its API to become available.
       </span>
     </div>
-    <button
+    <CloseButton
+      class="absolute top-1/2 right-4 -translate-y-1/2"
       @click="isVisible = false"
-      class="w-6 h-6 hover:opacity-70 transition-opacity absolute top-1/2 right-4 -translate-y-1/2 cursor-pointer"
       aria-label="Close notification"
-    >
-      ✕
-    </button>
+    />
   </div>
 </template>
