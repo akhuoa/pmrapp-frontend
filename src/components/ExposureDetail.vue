@@ -4,6 +4,7 @@ import { ref } from 'vue'
 import type { ExposureInfo } from '@/types/exposure'
 import { getExposureService } from '@/services'
 import FileIcon from '@/components/icons/FileIcon.vue'
+import ActionButton from '@/components/atoms/ActionButton.vue'
 import PageHeader from './molecules/PageHeader.vue'
 import ErrorBlock from './organisms/ErrorBlock.vue'
 
@@ -38,26 +39,31 @@ try {
 
       <div class="box">
         <h2 class="text-xl font-semibold mb-4">Files</h2>
-        <ul class="space-y-2">
-          <li v-for="entry in exposureInfo.files" :key="entry[0]">
-            <div class="inline-flex items-center gap-2">
-              <FileIcon class="text-foreground" />
-              {{ entry[0]}}
+        <ul class="space-y-0">
+          <li v-for="entry in exposureInfo.files" :key="entry[0]"
+            class="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700 last:mb-0 last:pb-0 last:border-b-0 flex items-center justify-between">
+            <div class="flex items-center gap-2 flex-1 min-w-0">
+              <FileIcon class="text-foreground flex-shrink-0" />
+              <span class="truncate text-sm">{{ entry[0] }}</span>
             </div>
-            <template v-if="entry[1] === true">
-              <RouterLink
-                :to="`/exposure/${alias}/${entry[0]}`"
-                class="text-link"
+            <div class="flex items-center gap-2 ml-4 flex-shrink-0">
+              <template v-if="entry[1] === true">
+                <ActionButton
+                  variant="primary"
+                  size="sm"
+                  :to="`/exposure/${alias}/${entry[0]}`"
+                >
+                  View
+                </ActionButton>
+              </template>
+              <ActionButton
+                variant="secondary"
+                size="sm"
+                :to="`/workspace/${exposureInfo.workspace_alias}/rawfile/${exposureInfo.exposure.commit_id}/${entry[0]}`"
               >
-                View
-              </RouterLink>
-            </template>
-            <RouterLink
-              :to="`/workspace/${exposureInfo.workspace_alias}/rawfile/${exposureInfo.exposure.commit_id}/${entry[0]}`"
-              class="text-link"
-            >
-              Download
-            </RouterLink>
+                Download
+              </ActionButton>
+            </div>
           </li>
         </ul>
       </div>
