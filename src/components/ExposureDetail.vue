@@ -40,12 +40,23 @@ try {
         <h2 class="text-xl font-semibold mb-4">Files</h2>
         <ul class="space-y-2">
           <li v-for="entry in exposureInfo.files" :key="entry[0]">
-            <RouterLink
-              :to="`/exposure/${alias}/${entry[0]}`"
-              class="text-link inline-flex items-center gap-2"
-            >
+            <div class="inline-flex items-center gap-2">
               <FileIcon class="text-foreground" />
               {{ entry[0]}}
+            </div>
+            <template v-if="entry[1] === true">
+              <RouterLink
+                :to="`/exposure/${alias}/${entry[0]}`"
+                class="text-link"
+              >
+                View
+              </RouterLink>
+            </template>
+            <RouterLink
+              :to="`/workspace/${exposureInfo.workspace_alias}/rawfile/${exposureInfo.exposure.commit_id}/${entry[0]}`"
+              class="text-link"
+            >
+              Download
             </RouterLink>
           </li>
         </ul>
