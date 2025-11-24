@@ -4,7 +4,9 @@ import MockDataNotification from '@/components/molecules/MockDataNotification.vu
 </script>
 
 <template>
-  <MockDataNotification />
-  <RouterView />
-  <BackToTop />
+  <div class="min-h-screen flex flex-col">
+    <MockDataNotification />
+    <RouterView />
+    <BackToTop />
+  </div>
 </template>
