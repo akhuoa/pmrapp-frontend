@@ -90,7 +90,6 @@ const handleSubmit = async () => {
 </template>
 
 <style scoped>
-@import '@/assets/button.css';
 @import '@/assets/label.css';
 @import '@/assets/input.css';
 @import '@/assets/box.css';

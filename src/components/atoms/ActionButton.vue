@@ -32,7 +32,7 @@ const variantClasses = {
 const sizeClasses = {
   sm: 'text-sm rounded',
   md: 'text-base rounded-md',
-  lg: 'text-base px-4 py-2 rounded-lg',
+  lg: 'text-base px-8 py-2 rounded-lg',
 }
 </script>
 

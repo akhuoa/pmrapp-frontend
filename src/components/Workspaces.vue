@@ -38,7 +38,3 @@ try {
     </template>
   </ItemList>
 </template>
-
-<style scoped>
-@import '@/assets/button.css';
-</style>

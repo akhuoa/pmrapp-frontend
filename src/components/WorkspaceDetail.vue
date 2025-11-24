@@ -53,7 +53,6 @@ try {
 </template>
 
 <style scoped>
-@import '@/assets/button.css';
 @import '@/assets/text-link.css';
 @import '@/assets/box.css';
 </style>
