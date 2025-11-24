@@ -3,8 +3,6 @@
 import { ref } from 'vue'
 import type { ExposureFileInfo } from '@/types/exposure'
 import { getExposureService } from '@/services'
-import FileIcon from '@/components/icons/FileIcon.vue'
-import ActionButton from '@/components/atoms/ActionButton.vue'
 import PageHeader from './molecules/PageHeader.vue'
 import ErrorBlock from './organisms/ErrorBlock.vue'
 
@@ -56,47 +54,6 @@ try {
         </ul>
       </div>
     </article>
-    <!-- <aside class="w-full lg:w-80">
-      <section class="pb-6">
-        <h4 class="text-lg font-semibold mb-3">Source</h4>
-        <div class="text-sm leading-relaxed">
-          Derived from workspace
-          <RouterLink
-            :to="`/workspace/${ExposureFileInfo.workspace_alias}`"
-            class="text-link"
-          >
-            {{ ExposureFileInfo.exposure.description }}
-          </RouterLink>
-          at changeset
-          <RouterLink
-            :to="`/workspace/${ExposureFileInfo.workspace_alias}/file/${ExposureFileInfo.exposure.commit_id}`"
-            class="text-link font-mono"
-          >
-            {{ ExposureFileInfo.exposure.commit_id.substring(0, 12) }}
-          </RouterLink>.
-        </div>
-      </section>
-      <section class="pt-6 border-t border-gray-200 dark:border-gray-700">
-        <h4 class="text-lg font-semibold mb-3">Navigation</h4>
-        <nav>
-          <ul class="space-y-2">
-            <li
-              v-for="entry in ExposureFileInfo.files.filter((e) => e[1] === true)"
-              :key="entry[0]"
-              class="text-sm"
-            >
-              <RouterLink
-                :to="`/exposure/${alias}/${entry[0]}`"
-                class="text-link inline-flex items-center gap-2"
-              >
-                <span class="text-foreground">›</span>
-                {{ entry[0] }}
-              </RouterLink>
-            </li>
-          </ul>
-        </nav>
-      </section>
-    </aside> -->
   </div>
 </template>
 
