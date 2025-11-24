@@ -2,7 +2,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <footer class="bg-background dark:bg-gray-800 text-foreground dark:text-gray-400 py-4">
+  <footer class="bg-gray-800 text-gray-400 py-4">
     <div class="container mx-auto px-4 text-center">
       <p class="text-sm font-light">Copyright 2025 IUPS Physiome Project</p>
     </div>
