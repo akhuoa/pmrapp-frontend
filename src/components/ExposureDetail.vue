@@ -47,15 +47,14 @@ try {
               <span class="truncate text-sm">{{ entry[0] }}</span>
             </div>
             <div class="flex items-center gap-2 ml-4 flex-shrink-0">
-              <template v-if="entry[1] === true">
-                <ActionButton
-                  variant="primary"
-                  size="sm"
-                  :to="`/exposure/${alias}/${entry[0]}`"
-                >
-                  View
-                </ActionButton>
-              </template>
+              <ActionButton
+                v-if="entry[1] === true"
+                variant="primary"
+                size="sm"
+                :to="`/exposure/${alias}/${entry[0]}`"
+              >
+                View
+              </ActionButton>
               <ActionButton
                 variant="secondary"
                 size="sm"
