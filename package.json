@@ -20,7 +20,9 @@
     "lint:oxlint": "oxlint . --fix -D correctness --ignore-path .gitignore",
     "lint:eslint": "eslint . --fix --cache",
     "lint": "run-s lint:*",
-    "format": "prettier --write src/"
+    "lint:biome": "biome lint . --fix",
+    "format": "prettier --write src/",
+    "format:biome": "biome format . --write"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
