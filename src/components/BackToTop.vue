@@ -40,7 +40,8 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-@import '@/assets/button.css';
+@reference 'tailwindcss';
+@reference '@/assets/main.css';
 
 .button-rounded-full {
   @apply

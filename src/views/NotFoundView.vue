@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import ActionButton from '@/components/atoms/ActionButton.vue'
 
 const router = useRouter()
 const hasHistory = ref(false)
@@ -25,24 +26,24 @@ const goBack = () => {
         The page you are looking for doesn't exist or has been moved.
       </p>
 
-      <button
+      <ActionButton
         v-if="hasHistory"
         @click="goBack"
-        class="inline-block button-primary"
+        variant="primary"
+        size="lg"
+        class="inline-block"
       >
         Go Back
-      </button>
-      <RouterLink
+      </ActionButton>
+      <ActionButton
         v-else
-        to="/"
-        class="inline-block button-primary"
+        :to="'/'"
+        variant="primary"
+        size="lg"
+        class="inline-block"
       >
         Go to Home
-      </RouterLink>
+      </ActionButton>
     </div>
   </DefaultLayout>
 </template>
-
-<style scoped>
-@import '@/assets/button.css';
-</style>

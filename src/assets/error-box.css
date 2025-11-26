@@ -3,7 +3,7 @@
 
 .error-box {
   @apply
-    text-danger
+    text-error
     bg-red-50
     border
     border-red-200

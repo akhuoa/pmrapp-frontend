@@ -25,3 +25,25 @@ export interface ExposureInfo {
   workspace: WorkspaceEntity
   workspace_alias: string
 }
+
+
+export interface ExposureFileView {
+  id: number
+  exposure_file_id: number
+  view_task_template_id: number
+  exposure_file_view_task_id: number
+  view_key: string
+  updated_ts: number
+}
+
+export interface ExposureFileTarget {
+  id: number
+  exposure_id: number
+  workspace_file_path: string
+  default_view_id: number | null
+  views: ExposureFileView[]
+}
+
+export type ExposureFileInfo = {
+  Target: ExposureFileTarget[]
+}

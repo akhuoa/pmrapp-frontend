@@ -6,6 +6,7 @@ import ExposureView from '@/views/ExposureView.vue'
 import LoginView from '@/views/LoginView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import ExposureDetailView from '@/views/ExposureDetailView.vue'
+import ExposureFileDetailView from '@/views/ExposureFileDetailView.vue'
 
 const title = 'Physiome Model Repository'
 const router = createRouter({
@@ -40,6 +41,12 @@ const router = createRouter({
       name: 'exposure-detail',
       component: ExposureDetailView,
       meta: { title: `Exposure – ${title}` },
+    },
+    {
+      path: '/exposure/:alias/:file',
+      name: 'exposure-file-detail',
+      component: ExposureFileDetailView,
+      meta: { title: `Exposure File – ${title}` },
     },
     {
       path: '/login',

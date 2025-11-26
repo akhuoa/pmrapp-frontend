@@ -1,5 +1,8 @@
 <!-- eslint-disable vue/multi-word-component-names -->
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import ActionButton from './atoms/ActionButton.vue';
+
+</script>
 
 <template>
   <section class="text-center mb-16">
@@ -23,12 +26,14 @@
         </p>
       </div>
       <div class="w-full md:w-auto">
-        <RouterLink
-          to="/workspace"
-          class="inline-block button-primary"
+        <ActionButton
+          variant="primary"
+          size="lg"
+          :to="'/workspace'"
+          class="inline-block"
         >
           View Workspaces
-        </RouterLink>
+        </ActionButton>
       </div>
     </div>
   </section>
@@ -51,7 +56,6 @@
 </template>
 
 <style scoped>
-@import '@/assets/button.css';
 @import '@/assets/text-link.css';
 @import '@/assets/box.css';
 </style>

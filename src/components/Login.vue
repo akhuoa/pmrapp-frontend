@@ -1,6 +1,7 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { ref } from 'vue'
+import ActionButton from '@/components/atoms/ActionButton.vue'
 
 const username = ref('')
 const password = ref('')
@@ -75,19 +76,20 @@ const handleSubmit = async () => {
       </div>
 
       <!-- Submit button -->
-      <button
+      <ActionButton
         type="submit"
+        variant="primary"
+        size="lg"
         :disabled="isLoading"
-        class="w-full button-primary"
+        class="w-full"
       >
         {{ isLoading ? 'Logging in...' : 'Login' }}
-      </button>
+      </ActionButton>
     </form>
   </div>
 </template>
 
 <style scoped>
-@import '@/assets/button.css';
 @import '@/assets/label.css';
 @import '@/assets/input.css';
 @import '@/assets/box.css';

@@ -4,6 +4,7 @@ import { ref } from 'vue'
 import type { ExposureInfo } from '@/types/exposure'
 import { getExposureService } from '@/services'
 import FileIcon from '@/components/icons/FileIcon.vue'
+import ActionButton from '@/components/atoms/ActionButton.vue'
 import PageHeader from './molecules/PageHeader.vue'
 import ErrorBlock from './organisms/ErrorBlock.vue'
 
@@ -38,15 +39,30 @@ try {
 
       <div class="box">
         <h2 class="text-xl font-semibold mb-4">Files</h2>
-        <ul class="space-y-2">
-          <li v-for="entry in exposureInfo.files" :key="entry[0]">
-            <RouterLink
-              :to="`/exposure/${alias}/${entry[0]}`"
-              class="text-link inline-flex items-center gap-2"
-            >
-              <FileIcon class="text-muted" />
-              {{ entry[0]}}
-            </RouterLink>
+        <ul class="space-y-0">
+          <li v-for="entry in exposureInfo.files" :key="entry[0]"
+            class="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700 last:mb-0 last:pb-0 last:border-b-0 flex items-center justify-between">
+            <div class="flex items-center gap-2 flex-1 min-w-0">
+              <FileIcon class="text-foreground flex-shrink-0" />
+              <span class="truncate text-sm">{{ entry[0] }}</span>
+            </div>
+            <div class="flex items-center gap-2 ml-4 flex-shrink-0">
+              <ActionButton
+                v-if="entry[1] === true"
+                variant="primary"
+                size="sm"
+                :to="`/exposure/${alias}/${entry[0]}`"
+              >
+                View
+              </ActionButton>
+              <ActionButton
+                variant="secondary"
+                size="sm"
+                :to="`/workspace/${exposureInfo.workspace_alias}/rawfile/${exposureInfo.exposure.commit_id}/${entry[0]}`"
+              >
+                Download
+              </ActionButton>
+            </div>
           </li>
         </ul>
       </div>
@@ -84,7 +100,7 @@ try {
                 :to="`/exposure/${alias}/${entry[0]}`"
                 class="text-link inline-flex items-center gap-2"
               >
-                <span class="text-muted">›</span>
+                <span class="text-foreground">›</span>
                 {{ entry[0] }}
               </RouterLink>
             </li>
@@ -96,7 +112,6 @@ try {
 </template>
 
 <style scoped>
-@import '@/assets/button.css';
 @import '@/assets/text-link.css';
 @import '@/assets/box.css';
 </style>

@@ -3,60 +3,97 @@
 @theme {
   --font-sans: 'Lucida Sans Unicode', 'Lucida Grande', sans-serif;
 
-  /* Color palettes */
-  --coffee-bean: #0d0000;
-  --onyx: #0c0c0c;
-  --carbon-black: #1d1d1d;
-  --onyx-2: #151414;
-  --brick-ember: #cc0000;
+  --color-primary: var(--primary);
+  --color-primary-fg: var(--primary-fg);
 
-  /* Primary brand colors */
-  --color-primary: var(--brick-ember);
-  --color-primary-hover: #830a28;
-  --color-primary-light: #d11241;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-heading: var(--heading);
 
-  /* Light theme colors */
-  --color-heading: var(--color-gray-900);
-  --color-body: var(--color-gray-600);
-  --color-muted: var(--color-gray-500);
-  --color-danger: var(--color-red-600);
+  --color-surface: var(--surface);
+  --color-surface-fg: var(--surface-fg);
 
-  /* Dark theme colors */
-  --color-dark: #1a1a1a;
-  --color-dark-light: #b0b0b0;
-  --color-dark-heading: var(--color-gray-200);
-  --color-dark-body: var(--color-gray-400);
-  --color-dark-muted: var(--color-gray-500);
-  --color-dark-danger: var(--color-red-500);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+
+  --color-muted: var(--muted);
+  --color-muted-fg: var(--muted-fg);
+
+  --color-border: var(--border);
+  --color-error: var(--error);
+
+  --color-primary-hover: var(--primary-hover);
+  --color-link: var(--link);
+  --color-link-hover: var(--link-hover);
 }
 
 @layer base {
-  body {
-    color: var(--color-body);
-  }
-
   h1,
   h2,
   h3,
   h4,
   h5,
   h6 {
-    color: var(--color-heading);
+    color: var(--heading);
   }
 
-  @media (prefers-color-scheme: dark) {
-    body {
-      color: var(--color-dark-body);
-      background-color: var(--color-dark);
-    }
-
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-      color: var(--color-dark-heading);
-    }
+  body {
+    color: var(--foreground);
+    background-color: var(--background);
   }
 }
+
+:root {
+  /* Light theme colors */
+  --primary: #cc0000;
+  --primary-fg: #ffffff;
+  --primary-hover: #a30000;
+
+  --link: #cc0000;
+  --link-hover: #a30000;
+
+  --background: #ffffff;
+  --foreground: #1d1d1d;
+  --heading: #0d0000;
+
+  --surface: #ffffff;
+  --surface-fg: #151414;
+
+  --accent: #0d0000;
+  --accent-fg: #ffffff;
+
+  --muted: #f5f5f5;
+  --muted-fg: #1d1d1d;
+
+  --border: #e5e5e5;
+  --error: #cc0000;
+
+  /* Dark theme colors */
+  @media (prefers-color-scheme: dark) {
+    --primary: #FF5252;
+    --primary-fg: #ffffff;
+
+    --primary-hover: #FF7070;
+
+    --link: #FF5252;
+    --link-hover: #FF7070;
+
+    --background: #0c0c0c;
+    --foreground: #d4d4d4;
+    --heading: #ffffff;
+
+    --surface: #151414;
+    --surface-fg: #ffffff;
+
+    --accent: #0d0000;
+    --accent-fg: #ffffff;
+
+    --muted: #1d1d1d;
+    --muted-fg: #a3a3a3;
+
+    --border: #1d1d1d;
+    --error: #FF5252;
+  }
+}
+
+/* The colour codes are generated based on the colour in logo image */
