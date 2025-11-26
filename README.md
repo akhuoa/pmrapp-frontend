@@ -42,12 +42,13 @@ src/
 
 ### Prerequisites
 
-- Node.js 20.19+ or 22.12+ (LTS recommended)
+- Node.js 20.19+ or 22.12+ (LTS recommended, for compatibility)
+- [Bun](https://bun.sh/) 1.3.3 (latest recommended)
 
 ### Installation
 
 ```sh
-npm install
+bun install
 ```
 
 ### Environment Configuration
@@ -70,7 +71,7 @@ cp .env.example .env
 Start the development server with hot-reload:
 
 ```sh
-npm run dev
+bun run dev
 ```
 
 The app will be available at `http://localhost:5173/pmrapp-frontend/`
@@ -80,13 +81,13 @@ The app will be available at `http://localhost:5173/pmrapp-frontend/`
 Type-check, compile and minify for production:
 
 ```sh
-npm run build
+bun run build
 ```
 
 Preview the production build:
 
 ```sh
-npm run preview
+bun run preview
 ```
 
 ## Testing
@@ -96,7 +97,7 @@ npm run preview
 Run unit tests with Vitest:
 
 ```sh
-npm run test:unit
+bun run test:unit
 ```
 
 ### End-to-End Tests
@@ -104,14 +105,14 @@ npm run test:unit
 Run e2e tests in development mode:
 
 ```sh
-npm run test:e2e:dev
+bun run test:e2e:dev
 ```
 
 Run e2e tests against production build:
 
 ```sh
-npm run build
-npm run test:e2e
+bun run build
+bun run test:e2e
 ```
 
 ## Code Quality
@@ -119,7 +120,7 @@ npm run test:e2e
 Lint and fix code:
 
 ```sh
-npm run lint
+bun run lint
 ```
 
 ## Development Tools
