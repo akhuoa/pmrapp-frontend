@@ -2,8 +2,7 @@
 @reference './main.css';
 
 .input-field {
-  @apply
-    px-4
+  @apply px-4
     py-2
     border
     border-gray-200
@@ -17,8 +16,7 @@
 
 @media (prefers-color-scheme: dark) {
   .input-field {
-    @apply
-      bg-background
+    @apply bg-background
       text-gray-100
       border-gray-600;
   }

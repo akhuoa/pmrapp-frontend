@@ -13,7 +13,7 @@ const checkScroll = () => {
 const scrollToTop = () => {
   window.scrollTo({
     top: 0,
-    behavior: 'smooth'
+    behavior: 'smooth',
   })
 }
 
@@ -44,8 +44,7 @@ onUnmounted(() => {
 @reference '@/assets/main.css';
 
 .button-rounded-full {
-  @apply
-    bg-primary
+  @apply bg-primary
     hover:bg-primary-hover
     text-white
     p-3

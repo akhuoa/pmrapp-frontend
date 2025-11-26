@@ -14,7 +14,9 @@ const isActive = (path: string) => computed(() => route.path.startsWith(path))
 </script>
 
 <template>
-  <header class="header-border-top bg-background border-b border-gray-200 dark:border-gray-700 sticky top-0 z-100">
+  <header
+    class="header-border-top bg-background border-b border-gray-200 dark:border-gray-700 sticky top-0 z-100"
+  >
     <div class="container mx-auto px-4 py-4 flex items-center justify-between">
       <RouterLink to="/" class="flex items-center nav-link">
         <img src="/logo.png" alt="Physiome Model Repository" width="48" height="48" />
@@ -33,11 +35,7 @@ const isActive = (path: string) => computed(() => route.path.startsWith(path))
           </li>
           <li class="h-6 border-l border-gray-300 dark:border-gray-600"></li>
           <li>
-            <RouterLink
-              to="/login"
-              class="nav-link"
-              active-class="text-primary"
-            >
+            <RouterLink to="/login" class="nav-link" active-class="text-primary">
               Login
             </RouterLink>
           </li>
@@ -52,8 +50,7 @@ const isActive = (path: string) => computed(() => route.path.startsWith(path))
 @reference '@/assets/main.css';
 
 .header-border-top {
-  @apply
-    before:content-['']
+  @apply before:content-['']
     before:absolute
     before:top-0
     before:left-0

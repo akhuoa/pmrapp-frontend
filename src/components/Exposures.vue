@@ -25,11 +25,7 @@ try {
     empty-message="No exposures found."
   >
     <template #item>
-      <ExposureListItem
-        v-for="exposure in exposures"
-        :key="exposure.alias"
-        :exposure="exposure"
-      />
+      <ExposureListItem v-for="exposure in exposures" :key="exposure.alias" :exposure="exposure" />
     </template>
   </ItemList>
 </template>

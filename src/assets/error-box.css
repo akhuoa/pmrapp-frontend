@@ -2,8 +2,7 @@
 @reference './main.css';
 
 .error-box {
-  @apply
-    text-error
+  @apply text-error
     bg-red-50
     border
     border-red-200
@@ -13,8 +12,7 @@
 
 @media (prefers-color-scheme: dark) {
   .error-box {
-    @apply
-      bg-red-900/20
+    @apply bg-red-900/20
       border-red-900;
   }
 }

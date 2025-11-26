@@ -23,7 +23,7 @@ const handleSubmit = async () => {
     console.log('Login attempt:', { username: username.value, password: '***' })
 
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000))
 
     // Temporary placeholder
     error.value = 'Login functionality coming soon...'
@@ -45,9 +45,7 @@ const handleSubmit = async () => {
 
       <!-- Username field -->
       <div>
-        <label for="username" class="label-field block mb-2">
-          Username
-        </label>
+        <label for="username" class="label-field block mb-2"> Username </label>
         <input
           id="username"
           v-model="username"
@@ -61,9 +59,7 @@ const handleSubmit = async () => {
 
       <!-- Password field -->
       <div>
-        <label for="password" class="label-field block mb-2">
-          Password
-        </label>
+        <label for="password" class="label-field block mb-2"> Password </label>
         <input
           id="password"
           v-model="password"
@@ -76,13 +72,7 @@ const handleSubmit = async () => {
       </div>
 
       <!-- Submit button -->
-      <ActionButton
-        type="submit"
-        variant="primary"
-        size="lg"
-        :disabled="isLoading"
-        class="w-full"
-      >
+      <ActionButton type="submit" variant="primary" size="lg" :disabled="isLoading" class="w-full">
         {{ isLoading ? 'Logging in...' : 'Login' }}
       </ActionButton>
     </form>

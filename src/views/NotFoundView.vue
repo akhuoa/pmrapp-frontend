@@ -22,9 +22,7 @@ const goBack = () => {
     <div class="max-w-2xl mx-auto text-center">
       <h1 class="text-6xl font-bold mb-4">404</h1>
       <h2 class="text-3xl font-semibold mb-4">Page Not Found</h2>
-      <p class="text-lg mb-8">
-        The page you are looking for doesn't exist or has been moved.
-      </p>
+      <p class="text-lg mb-8">The page you are looking for doesn't exist or has been moved.</p>
 
       <ActionButton
         v-if="hasHistory"
@@ -35,13 +33,7 @@ const goBack = () => {
       >
         Go Back
       </ActionButton>
-      <ActionButton
-        v-else
-        :to="'/'"
-        variant="primary"
-        size="lg"
-        class="inline-block"
-      >
+      <ActionButton v-else :to="'/'" variant="primary" size="lg" class="inline-block">
         Go to Home
       </ActionButton>
     </div>

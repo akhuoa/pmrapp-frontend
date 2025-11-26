@@ -23,11 +23,7 @@ try {
 </script>
 
 <template>
-  <ErrorBlock
-    v-if="error"
-    title="Error loading exposure file"
-    :error="error"
-  />
+  <ErrorBlock v-if="error" title="Error loading exposure file" :error="error" />
 
   <div v-else-if="exposureFileInfo" class="flex flex-col lg:flex-row gap-8">
     <article class="flex-1">
@@ -39,8 +35,11 @@ try {
       <div class="box">
         <h2 class="text-xl font-semibold mb-4">Views</h2>
         <ul class="space-y-0">
-          <li v-for="entry in exposureFileInfo.Target[0]?.views" :key="entry.id"
-            class="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700 last:mb-0 last:pb-0 last:border-b-0 flex items-center justify-between">
+          <li
+            v-for="entry in exposureFileInfo.Target[0]?.views"
+            :key="entry.id"
+            class="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700 last:mb-0 last:pb-0 last:border-b-0 flex items-center justify-between"
+          >
             <div class="flex items-center gap-2 flex-1 min-w-0">
               &bull;
               <RouterLink

@@ -24,11 +24,7 @@ try {
 </script>
 
 <template>
-  <ErrorBlock
-    v-if="error"
-    title="Error loading exposure"
-    :error="error"
-  />
+  <ErrorBlock v-if="error" title="Error loading exposure" :error="error" />
 
   <div v-else-if="exposureInfo" class="flex flex-col lg:flex-row gap-8">
     <article class="flex-1">
@@ -40,8 +36,11 @@ try {
       <div class="box">
         <h2 class="text-xl font-semibold mb-4">Files</h2>
         <ul class="space-y-0">
-          <li v-for="entry in exposureInfo.files" :key="entry[0]"
-            class="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700 last:mb-0 last:pb-0 last:border-b-0 flex items-center justify-between">
+          <li
+            v-for="entry in exposureInfo.files"
+            :key="entry[0]"
+            class="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700 last:mb-0 last:pb-0 last:border-b-0 flex items-center justify-between"
+          >
             <div class="flex items-center gap-2 flex-1 min-w-0">
               <FileIcon class="text-foreground flex-shrink-0" />
               <span class="truncate text-sm">{{ entry[0] }}</span>
@@ -72,10 +71,7 @@ try {
         <h4 class="text-lg font-semibold mb-3">Source</h4>
         <div class="text-sm leading-relaxed">
           Derived from workspace
-          <RouterLink
-            :to="`/workspace/${exposureInfo.workspace_alias}`"
-            class="text-link"
-          >
+          <RouterLink :to="`/workspace/${exposureInfo.workspace_alias}`" class="text-link">
             {{ exposureInfo.exposure.description }}
           </RouterLink>
           at changeset
@@ -83,8 +79,8 @@ try {
             :to="`/workspace/${exposureInfo.workspace_alias}/file/${exposureInfo.exposure.commit_id}`"
             class="text-link font-mono"
           >
-            {{ exposureInfo.exposure.commit_id.substring(0, 12) }}
-          </RouterLink>.
+            {{ exposureInfo.exposure.commit_id.substring(0, 12) }} </RouterLink
+          >.
         </div>
       </section>
       <section class="pt-6 border-t border-gray-200 dark:border-gray-700">

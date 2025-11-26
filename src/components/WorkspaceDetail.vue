@@ -23,11 +23,7 @@ try {
 </script>
 
 <template>
-  <ErrorBlock
-    v-if="error"
-    title="Error loading workspace"
-    :error="error"
-  />
+  <ErrorBlock v-if="error" title="Error loading workspace" :error="error" />
 
   <div v-else-if="workspaceInfo">
     <PageHeader
