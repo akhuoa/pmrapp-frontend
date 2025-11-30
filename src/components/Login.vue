@@ -23,7 +23,7 @@ const handleSubmit = async () => {
     console.log('Login attempt:', { username: username.value, password: '***' })
 
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000))
 
     // Temporary placeholder
     error.value = 'Login functionality coming soon...'

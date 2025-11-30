@@ -10,9 +10,9 @@ describe('App', () => {
     const wrapper = mount(App, {
       global: {
         stubs: {
-          RouterView: { template: '<div class="router-view-stub"></div>' }
-        }
-      }
+          RouterView: { template: '<div class="router-view-stub"></div>' },
+        },
+      },
     })
     expect(wrapper.findComponent(MockDataNotification).exists()).toBe(true)
     expect(wrapper.find('.router-view-stub').exists()).toBe(true)

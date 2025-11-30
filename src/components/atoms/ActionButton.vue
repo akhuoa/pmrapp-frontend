@@ -25,8 +25,10 @@ const disabledClasses = {
 }
 
 const variantClasses = {
-  primary: 'px-3 py-1 rounded border border-primary bg-primary text-white hover:opacity-90 transition-opacity',
-  secondary: 'px-3 py-1 rounded border border-primary text-primary hover:bg-primary/10 transition-colors',
+  primary:
+    'px-3 py-1 rounded border border-primary bg-primary text-white hover:opacity-90 transition-opacity',
+  secondary:
+    'px-3 py-1 rounded border border-primary text-primary hover:bg-primary/10 transition-colors',
 }
 
 const sizeClasses = {

@@ -1,7 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import ActionButton from './atoms/ActionButton.vue';
-
+import ActionButton from './atoms/ActionButton.vue'
 </script>
 
 <template>
