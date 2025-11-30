@@ -26,7 +26,6 @@ export interface ExposureInfo {
   workspace_alias: string
 }
 
-
 export interface ExposureFileView {
   id: number
   exposure_file_id: number

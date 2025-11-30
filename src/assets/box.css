@@ -1,20 +1,12 @@
-@reference 'tailwindcss';
-@reference './main.css';
+@reference "tailwindcss";
+@reference "./main.css";
 
 .box {
-  @apply
-    bg-white
-    rounded-lg
-    shadow-lg
-    p-8
-    border
-    border-gray-200;
+  @apply bg-white rounded-lg shadow-lg p-8 border border-gray-200;
 }
 
 @media (prefers-color-scheme: dark) {
   .box {
-    @apply
-      bg-background
-      border-gray-700;
+    @apply bg-background border-gray-700;
   }
 }

@@ -1,7 +1,7 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @theme {
-  --font-sans: 'Lucida Sans Unicode', 'Lucida Grande', sans-serif;
+  --font-sans: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 
   --color-primary: var(--primary);
   --color-primary-fg: var(--primary-fg);
@@ -70,13 +70,13 @@
 
   /* Dark theme colors */
   @media (prefers-color-scheme: dark) {
-    --primary: #FF5252;
+    --primary: #ff5252;
     --primary-fg: #ffffff;
 
-    --primary-hover: #FF7070;
+    --primary-hover: #ff7070;
 
-    --link: #FF5252;
-    --link-hover: #FF7070;
+    --link: #ff5252;
+    --link-hover: #ff7070;
 
     --background: #0c0c0c;
     --foreground: #d4d4d4;
@@ -92,7 +92,7 @@
     --muted-fg: #a3a3a3;
 
     --border: #1d1d1d;
-    --error: #FF5252;
+    --error: #ff5252;
   }
 }
 
