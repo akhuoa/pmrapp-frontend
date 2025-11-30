@@ -1,6 +1,6 @@
 export const Cookie = {
   get: (name: string): string | null => {
-    const nameEQ = name + '='
+    const nameEQ = `${name}=`
     const cookies = document.cookie.split(';')
     for (let cookie of cookies) {
       cookie = cookie.trim()
@@ -13,7 +13,7 @@ export const Cookie = {
   set: (name: string, value: string, days: number) => {
     const date = new Date()
     date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000)
-    const expires = 'expires=' + date.toUTCString()
+    const expires = `expires=${date.toUTCString()}`
     document.cookie = `${name}=${value};${expires};path=/`
   },
 }
