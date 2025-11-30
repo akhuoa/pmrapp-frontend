@@ -9,13 +9,14 @@ const COOKIE_DAYS = 7
 
 const isVisible = ref(true)
 
-const handleClose = () => {
+const handleClose = async () => {
   isVisible.value = false
-  Cookie.set(COOKIE_NAME, 'true', COOKIE_DAYS)
+  await Cookie.set(COOKIE_NAME, 'true', COOKIE_DAYS)
 }
 
-onMounted(() => {
-  if (Cookie.get(COOKIE_NAME) === 'true') {
+onMounted(async () => {
+  const dismissed = await Cookie.get(COOKIE_NAME)
+  if (dismissed === 'true') {
     isVisible.value = false
   }
 })
