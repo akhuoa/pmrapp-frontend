@@ -2,8 +2,6 @@ import { globalIgnores } from 'eslint/config'
 import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
 import pluginVue from 'eslint-plugin-vue'
 import pluginVitest from '@vitest/eslint-plugin'
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import pluginCypress from 'eslint-plugin-cypress'
 import pluginOxlint from 'eslint-plugin-oxlint'
 import skipFormatting from '@vue/eslint-config-prettier/skip-formatting'
