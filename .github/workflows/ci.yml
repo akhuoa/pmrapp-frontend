@@ -19,6 +19,12 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Check formatting
+        run: bun run format
+
+      - name: Run linter
+        run: bun run lint
+
       - name: Run unit tests
         run: bun run test:unit
 
