@@ -12,7 +12,7 @@ const error = ref<string | null>(null)
 try {
   workspaces.value = await getWorkspaceService().listAliasedWorkspaces()
 
-  // sort by entity.description alphabetically
+  // Sort by entity.description alphabetically.
   workspaces.value.sort((a: Workspace, b: Workspace) => {
     return a.entity.description.localeCompare(b.entity.description)
   })

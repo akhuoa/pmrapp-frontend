@@ -8,7 +8,7 @@ const router = useRouter()
 const hasHistory = ref(false)
 
 onMounted(() => {
-  // Check if there's a previous page in history
+  // Check if there's a previous page in history.
   hasHistory.value = window.history.length > 2
 })
 

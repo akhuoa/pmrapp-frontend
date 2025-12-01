@@ -6,7 +6,7 @@ import ArrowUpIcon from './icons/ArrowUpIcon.vue'
 const isVisible = ref(false)
 
 const checkScroll = () => {
-  // Show button if user has scrolled down more than 300px
+  // Show button if user has scrolled down more than 300px.
   isVisible.value = window.scrollY > 300
 }
 

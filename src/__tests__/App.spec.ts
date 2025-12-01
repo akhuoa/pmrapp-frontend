@@ -7,9 +7,9 @@ import BackToTop from '../components/BackToTop.vue'
 
 describe('App', () => {
   beforeEach(() => {
-    // Reset all mocks before each test
+    // Reset all mocks before each test.
     vi.clearAllMocks()
-    // Reset cookieStore mock to default behavior
+    // Reset the cookieStore mock to its default behaviour.
     vi.mocked(globalThis.cookieStore.get).mockResolvedValue(null)
   })
 
