@@ -1,10 +1,10 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { Workspace } from '@/types/workspace'
 import { getWorkspaceService } from '@/services'
-import ItemList from './organisms/ItemList.vue'
+import type { Workspace } from '@/types/workspace'
 import WorkspaceListItem from './molecules/WorkspaceListItem.vue'
+import ItemList from './organisms/ItemList.vue'
 
 const workspaces = ref<Workspace[]>([])
 const error = ref<string | null>(null)

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import ActionButton from '@/components/atoms/ActionButton.vue'
+import DefaultLayout from '@/layouts/DefaultLayout.vue'
 
 const router = useRouter()
 const hasHistory = ref(false)

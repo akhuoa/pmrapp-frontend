@@ -1,9 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-
 import { mount } from '@vue/test-utils'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../App.vue'
-import MockDataNotification from '../components/molecules/MockDataNotification.vue'
 import BackToTop from '../components/BackToTop.vue'
+import MockDataNotification from '../components/molecules/MockDataNotification.vue'
 
 describe('App', () => {
   beforeEach(() => {
