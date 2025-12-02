@@ -21,10 +21,9 @@
       // the single page app to route accordingly.
       (((l) => {
         if (l.search[1] === '/' ) {
-          // biome-ignore lint: var declaration is fine here
-          var decoded = l.search.slice(1).split('&').map((s) => s.replace(/~and~/g, '&')).join('?');
+          const decoded = l.search.slice(1).split('&').map((s) => s.replace(/~and~/g, '&')).join('?');
           window.history.replaceState(null, null,
-              l.pathname.slice(0, -1) + decoded + l.hash
+            l.pathname.slice(0, -1) + decoded + l.hash
           );
         }
       })(window.location))
