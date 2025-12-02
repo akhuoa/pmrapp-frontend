@@ -21,12 +21,6 @@
     "lineWidth": 100,
     "useEditorconfig": true
   },
-  "html": {
-    "formatter": {
-      "indentScriptAndStyle": false,
-      "selfCloseVoidElements": "always"
-    }
-  },
   "javascript": {
     "formatter": {
       "arrowParentheses": "always",
