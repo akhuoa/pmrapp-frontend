@@ -18,7 +18,7 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
     "lint": "bunx --bun biome lint --fix --error-on-warnings --max-diagnostics=none",
-    "format": "biome format . --write"
+    "format": "bunx --bun biome format --fix --max-diagnostics=none"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
