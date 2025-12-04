@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import ExposureFileDetail from '@/components/ExposureFileDetail.vue'
+import DefaultLayout from '@/layouts/DefaultLayout.vue'
 
 const route = useRoute()
 const alias = route.params.alias as string

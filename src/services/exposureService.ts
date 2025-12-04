@@ -1,4 +1,4 @@
-import type { Exposure, ExposureInfo, ExposureFileInfo } from '@/types/exposure'
+import type { Exposure, ExposureFileInfo, ExposureInfo } from '@/types/exposure'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 const API_SUFFIX = import.meta.env.VITE_API_SUFFIX

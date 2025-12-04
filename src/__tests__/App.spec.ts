@@ -1,15 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-
 import { mount } from '@vue/test-utils'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../App.vue'
-import MockDataNotification from '../components/molecules/MockDataNotification.vue'
 import BackToTop from '../components/BackToTop.vue'
+import MockDataNotification from '../components/molecules/MockDataNotification.vue'
 
 describe('App', () => {
   beforeEach(() => {
-    // Reset all mocks before each test
+    // Reset all mocks before each test.
     vi.clearAllMocks()
-    // Reset cookieStore mock to default behavior
+    // Reset the cookieStore mock to its default behaviour.
     vi.mocked(globalThis.cookieStore.get).mockResolvedValue(null)
   })
 

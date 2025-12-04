@@ -1,7 +1,6 @@
-// vitest.setup.ts
-import { vi } from 'vitest';
+import { vi } from 'vitest'
 
-// Check if cookieStore exists (to avoid overwriting if a polyfill is added later)
+// Check if cookieStore exists (to avoid overwriting if a polyfill is added later).
 if (!globalThis.cookieStore) {
   Object.defineProperty(globalThis, 'cookieStore', {
     writable: true,
@@ -14,5 +13,5 @@ if (!globalThis.cookieStore) {
       removeEventListener: vi.fn(),
       dispatchEvent: vi.fn(),
     },
-  });
+  })
 }
