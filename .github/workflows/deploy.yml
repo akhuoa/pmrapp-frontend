@@ -41,6 +41,7 @@ jobs:
         run: bun run build
         env:
           VITE_USE_MOCK_DATA: 'true'
+          VITE_GA_MEASUREMENT_ID: ${{ secrets.VITE_GA_MEASUREMENT_ID }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
