@@ -1,10 +1,10 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { ExposureInfo } from '@/types/exposure'
-import { getExposureService } from '@/services'
-import FileIcon from '@/components/icons/FileIcon.vue'
 import ActionButton from '@/components/atoms/ActionButton.vue'
+import FileIcon from '@/components/icons/FileIcon.vue'
+import { getExposureService } from '@/services'
+import type { ExposureInfo } from '@/types/exposure'
 import PageHeader from './molecules/PageHeader.vue'
 import ErrorBlock from './organisms/ErrorBlock.vue'
 

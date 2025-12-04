@@ -1,19 +1,19 @@
+// CookieStore get and set methods are supported in modern browsers.
+// https://developer.mozilla.org/en-US/docs/Web/API/CookieStore#browser_compatibility
 export const Cookie = {
-  get: (name: string): string | null => {
-    const nameEQ = name + '='
-    const cookies = document.cookie.split(';')
-    for (let cookie of cookies) {
-      cookie = cookie.trim()
-      if (cookie.indexOf(nameEQ) === 0) {
-        return cookie.substring(nameEQ.length)
-      }
-    }
-    return null
+  get: async (name: string): Promise<string | null> => {
+    const cookie = await cookieStore.get(name)
+    return cookie?.value ?? null
   },
-  set: (name: string, value: string, days: number) => {
-    const date = new Date()
-    date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000)
-    const expires = 'expires=' + date.toUTCString()
-    document.cookie = `${name}=${value};${expires};path=/`
-  }
+  set: async (name: string, value: string, days: number) => {
+    const expires = new Date()
+    expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000)
+
+    await cookieStore.set({
+      name,
+      value,
+      expires: expires.getTime(),
+      path: '/',
+    })
+  },
 }

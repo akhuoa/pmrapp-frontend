@@ -1,21 +1,22 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
+import CloseButton from '@/components/atoms/CloseButton.vue'
 import { USE_MOCK_DATA } from '@/services'
 import { Cookie } from '@/utils/cookie'
-import CloseButton from '@/components/atoms/CloseButton.vue'
 
 const COOKIE_NAME = 'pmr_mock_notification_dismissed'
 const COOKIE_DAYS = 7
 
 const isVisible = ref(true)
 
-const handleClose = () => {
+const handleClose = async () => {
   isVisible.value = false
-  Cookie.set(COOKIE_NAME, 'true', COOKIE_DAYS)
+  await Cookie.set(COOKIE_NAME, 'true', COOKIE_DAYS)
 }
 
-onMounted(() => {
-  if (Cookie.get(COOKIE_NAME) === 'true') {
+onMounted(async () => {
+  const dismissed = await Cookie.get(COOKIE_NAME)
+  if (dismissed === 'true') {
     isVisible.value = false
   }
 })

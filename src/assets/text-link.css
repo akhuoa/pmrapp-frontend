@@ -1,9 +1,6 @@
-@reference 'tailwindcss';
-@reference './main.css';
+@reference "tailwindcss";
+@reference "./main.css";
 
 .text-link {
-  @apply
-    text-primary
-    hover:text-primary-hover
-    transition-colors
+  @apply text-primary hover:text-primary-hover transition-colors;
 }

@@ -5,7 +5,8 @@ on:
     branches: ['main']
 
 jobs:
-  test:
+  ci:
+    name: CI
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -16,6 +17,12 @@ jobs:
 
       - name: Install dependencies
         run: bun install
+
+      - name: Check formatting
+        run: bun run format
+
+      - name: Run linter
+        run: bun run lint
 
       - name: Run unit tests
         run: bun run test:unit

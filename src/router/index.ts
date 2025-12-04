@@ -1,12 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '@/views/HomeView.vue'
-import WorkspaceView from '@/views/WorkspaceView.vue'
-import WorkspaceDetailView from '@/views/WorkspaceDetailView.vue'
-import ExposureView from '@/views/ExposureView.vue'
-import LoginView from '@/views/LoginView.vue'
-import NotFoundView from '@/views/NotFoundView.vue'
 import ExposureDetailView from '@/views/ExposureDetailView.vue'
 import ExposureFileDetailView from '@/views/ExposureFileDetailView.vue'
+import ExposureView from '@/views/ExposureView.vue'
+import HomeView from '@/views/HomeView.vue'
+import LoginView from '@/views/LoginView.vue'
+import NotFoundView from '@/views/NotFoundView.vue'
+import WorkspaceDetailView from '@/views/WorkspaceDetailView.vue'
+import WorkspaceView from '@/views/WorkspaceView.vue'
 
 const title = 'Physiome Model Repository'
 const router = createRouter({

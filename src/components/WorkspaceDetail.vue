@@ -1,9 +1,9 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { WorkspaceInfo } from '@/types/workspace'
-import { getWorkspaceService } from '@/services'
 import FileIcon from '@/components/icons/FileIcon.vue'
+import { getWorkspaceService } from '@/services'
+import type { WorkspaceInfo } from '@/types/workspace'
 import PageHeader from './molecules/PageHeader.vue'
 import ErrorBlock from './organisms/ErrorBlock.vue'
 

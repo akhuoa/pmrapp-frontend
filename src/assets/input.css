@@ -1,25 +1,12 @@
-@reference 'tailwindcss';
-@reference './main.css';
+@reference "tailwindcss";
+@reference "./main.css";
 
 .input-field {
-  @apply
-    px-4
-    py-2
-    border
-    border-gray-200
-    rounded-lg
-    focus:ring-2
-    focus:ring-primary
-    focus:border-transparent
-    outline-none
-    transition-all;
+  @apply px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all;
 }
 
 @media (prefers-color-scheme: dark) {
   .input-field {
-    @apply
-      bg-background
-      text-gray-100
-      border-gray-600;
+    @apply bg-background text-gray-100 border-gray-600;
   }
 }

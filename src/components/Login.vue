@@ -19,13 +19,13 @@ const handleSubmit = async () => {
   isLoading.value = true
 
   try {
-    // TODO: Implement actual login logic
+    // TODO: Implement actual login logic.
     console.log('Login attempt:', { username: username.value, password: '***' })
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Simulate API call.
+    await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    // Temporary placeholder
+    // This is a temporary placeholder.
     error.value = 'Login functionality coming soon...'
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Login failed'

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import DefaultLayout from '@/layouts/DefaultLayout.vue'
-import Workspaces from '@/components/Workspaces.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
+import Workspaces from '@/components/Workspaces.vue'
+import DefaultLayout from '@/layouts/DefaultLayout.vue'
 </script>
 
 <template>

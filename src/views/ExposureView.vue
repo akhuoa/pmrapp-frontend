@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import Exposures from '@/components/Exposures.vue'
-import PageHeader from '@/components/molecules/PageHeader.vue';
+import PageHeader from '@/components/molecules/PageHeader.vue'
+import DefaultLayout from '@/layouts/DefaultLayout.vue'
 </script>
 
 <template>

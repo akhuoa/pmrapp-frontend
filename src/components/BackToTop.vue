@@ -1,19 +1,19 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import ArrowUpIcon from './icons/ArrowUpIcon.vue'
 
 const isVisible = ref(false)
 
 const checkScroll = () => {
-  // Show button if user has scrolled down more than 300px
+  // Show button if user has scrolled down more than 300px.
   isVisible.value = window.scrollY > 300
 }
 
 const scrollToTop = () => {
   window.scrollTo({
     top: 0,
-    behavior: 'smooth'
+    behavior: 'smooth',
   })
 }
 
