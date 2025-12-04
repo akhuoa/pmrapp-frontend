@@ -1,10 +1,10 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { Exposure } from '@/types/exposure'
 import { getExposureService } from '@/services'
-import ItemList from './organisms/ItemList.vue'
+import type { Exposure } from '@/types/exposure'
 import ExposureListItem from './molecules/ExposureListItem.vue'
+import ItemList from './organisms/ItemList.vue'
 
 const exposures = ref<Exposure[]>([])
 const error = ref<string | null>(null)

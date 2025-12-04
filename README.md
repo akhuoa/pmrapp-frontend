@@ -19,7 +19,7 @@ A modern, responsive web application for browsing and exploring computational mo
 - **Styling:** Tailwind CSS v4
 - **Routing:** Vue Router
 - **Testing:** Vitest (unit) + Cypress (e2e)
-- **Code Quality:** Biome (linting & formatting) + TypeScript
+- **Code Quality:** Biome (formatting and linting) + TypeScript
 
 ## Project Structure
 

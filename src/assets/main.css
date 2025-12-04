@@ -44,7 +44,7 @@
 }
 
 :root {
-  /* Light theme colors */
+  /* Light theme colours */
   --primary: #cc0000;
   --primary-fg: #ffffff;
   --primary-hover: #a30000;
@@ -68,7 +68,7 @@
   --border: #e5e5e5;
   --error: #cc0000;
 
-  /* Dark theme colors */
+  /* Dark theme colours */
   @media (prefers-color-scheme: dark) {
     --primary: #ff5252;
     --primary-fg: #ffffff;
@@ -96,4 +96,4 @@
   }
 }
 
-/* The colour codes are generated based on the colour in logo image */
+/* The colour codes are generated based on the colour in logo image. */

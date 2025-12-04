@@ -17,8 +17,8 @@
     "test:e2e:dev": "start-server-and-test 'vite dev --port 4173' http://localhost:4173 'cypress open --e2e'",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
-    "lint": "biome lint . --fix",
-    "format": "biome format . --write"
+    "lint": "bunx --bun biome lint --fix --error-on-warnings --max-diagnostics=none",
+    "format": "bunx --bun biome format --fix --max-diagnostics=none"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
