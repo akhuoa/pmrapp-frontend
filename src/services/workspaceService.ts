@@ -1,16 +1,14 @@
 import type { Workspace, WorkspaceInfo } from '@/types/workspace'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
-const API_SUFFIX = import.meta.env.VITE_API_SUFFIX
 
 export const workspaceService = {
   async listAliasedWorkspaces(): Promise<Workspace[]> {
-    const response = await fetch(`${API_BASE_URL}/api/list_aliased_workspaces${API_SUFFIX}`, {
+    const response = await fetch(`${API_BASE_URL}/api/list_aliased_workspaces`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({}),
     })
 
     if (!response.ok) {
@@ -25,7 +23,7 @@ export const workspaceService = {
     const formData = new URLSearchParams()
     formData.append('id[Aliased]', alias)
 
-    const response = await fetch(`${API_BASE_URL}/api/get_workspace_info${API_SUFFIX}`, {
+    const response = await fetch(`${API_BASE_URL}/api/get_workspace_info`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
