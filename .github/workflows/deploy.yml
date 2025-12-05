@@ -40,7 +40,7 @@ jobs:
       - name: Build
         run: bun run build
         env:
-          VITE_USE_MOCK_DATA: 'true'
+          VITE_USE_MOCK_DATA: ${{ secrets.VITE_USE_MOCK_DATA }}
           VITE_GA_MEASUREMENT_ID: ${{ secrets.VITE_GA_MEASUREMENT_ID }}
 
       - name: Setup Pages
