@@ -32,6 +32,7 @@ const goBack = () => {
         variant="primary"
         size="lg"
         class="inline-block"
+        contentSection="not_found_view"
       >
         Go Back
       </ActionButton>
@@ -41,6 +42,7 @@ const goBack = () => {
         variant="primary"
         size="lg"
         class="inline-block"
+        contentSection="not_found_view"
       >
         Go to Home
       </ActionButton>
