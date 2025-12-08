@@ -1,20 +1,22 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import { getAuthService } from '@/services'
+import { useAuthStore } from '@/stores/auth'
 
+const router = useRouter()
+const authStore = useAuthStore()
 const username = ref('')
 const password = ref('')
 const error = ref<string | null>(null)
-const success = ref<string | null>(null)
 const isLoading = ref(false)
 
 const authService = getAuthService()
 
 const handleSubmit = async () => {
   error.value = null
-  success.value = null
 
   if (!username.value || !password.value) {
     error.value = 'Please enter both username and password'
@@ -29,11 +31,11 @@ const handleSubmit = async () => {
       password: password.value,
     })
 
-    // TODO: Store token and redirect user.
-    // For now, just show a success message.
-    success.value = 'Login successful!'
+    // Store auth state.
+    authStore.setAuth(token, username.value)
 
-    error.value = null
+    // Redirect to home page.
+    router.push('/')
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Login failed'
   } finally {
@@ -48,11 +50,6 @@ const handleSubmit = async () => {
       <!-- Error message -->
       <div v-if="error" class="error-box">
         <p class="text-sm">{{ error }}</p>
-      </div>
-
-      <!-- Success message -->
-      <div v-if="success" class="success-box">
-        <p class="text-sm">{{ success }}</p>
       </div>
 
       <!-- Username field -->
@@ -107,5 +104,4 @@ const handleSubmit = async () => {
 @import '@/assets/input.css';
 @import '@/assets/box.css';
 @import '@/assets/error-box.css';
-@import '@/assets/success-box.css';
 </style>
