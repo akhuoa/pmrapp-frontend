@@ -30,6 +30,12 @@ try {
   />
 
   <div v-else-if="workspaceInfo">
+    <div class="mb-4">
+      <RouterLink to="/workspace" class="text-link">
+        &larr; Back
+      </RouterLink>
+    </div>
+
     <PageHeader
       :title="workspaceInfo.workspace.description || alias"
       :description="`Git Repository URI: ${workspaceInfo.workspace.url}`"
