@@ -21,6 +21,7 @@
 
   --color-border: var(--border);
   --color-error: var(--error);
+  --color-success: var(--success);
 
   --color-primary-hover: var(--primary-hover);
   --color-link: var(--link);
@@ -67,6 +68,7 @@
 
   --border: #e5e5e5;
   --error: #cc0000;
+  --success: var(--color-green-500);
 
   /* Dark theme colours */
   @media (prefers-color-scheme: dark) {
@@ -93,6 +95,7 @@
 
     --border: #1d1d1d;
     --error: #ff5252;
+    --success: var(--color-green-900);
   }
 }
 
