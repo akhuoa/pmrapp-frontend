@@ -14,7 +14,9 @@ try {
 
   // Sort by entity.description alphabetically.
   workspaces.value.sort((a: Workspace, b: Workspace) => {
-    return a.entity.description?.localeCompare(b.entity.description)
+    const descA = a.entity.description ?? ''
+    const descB = b.entity.description ?? ''
+    return descA.localeCompare(descB)
   })
 } catch (err) {
   error.value = err instanceof Error ? err.message : 'Failed to load workspaces'
