@@ -2,14 +2,19 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import ActionButton from '@/components/atoms/ActionButton.vue'
+import { getAuthService } from '@/services'
 
 const username = ref('')
 const password = ref('')
 const error = ref<string | null>(null)
+const success = ref<string | null>(null)
 const isLoading = ref(false)
+
+const authService = getAuthService()
 
 const handleSubmit = async () => {
   error.value = null
+  success.value = null
 
   if (!username.value || !password.value) {
     error.value = 'Please enter both username and password'
@@ -19,14 +24,16 @@ const handleSubmit = async () => {
   isLoading.value = true
 
   try {
-    // TODO: Implement actual login logic.
-    console.log('Login attempt:', { username: username.value, password: '***' })
+    const token = await authService.login({
+      login: username.value,
+      password: password.value,
+    })
 
-    // Simulate API call.
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    // TODO: Store token and redirect user.
+    // For now, just show a success message.
+    success.value = 'Login successful!'
 
-    // This is a temporary placeholder.
-    error.value = 'Login functionality coming soon...'
+    error.value = null
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Login failed'
   } finally {
@@ -41,6 +48,11 @@ const handleSubmit = async () => {
       <!-- Error message -->
       <div v-if="error" class="error-box">
         <p class="text-sm">{{ error }}</p>
+      </div>
+
+      <!-- Success message -->
+      <div v-if="success" class="success-box">
+        <p class="text-sm">{{ success }}</p>
       </div>
 
       <!-- Username field -->
@@ -94,4 +106,5 @@ const handleSubmit = async () => {
 @import '@/assets/input.css';
 @import '@/assets/box.css';
 @import '@/assets/error-box.css';
+@import '@/assets/success-box.css';
 </style>
