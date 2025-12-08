@@ -4,12 +4,11 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export const exposureService = {
   async listAliased(): Promise<Exposure[]> {
-    const response = await fetch(`${API_BASE_URL}/api/list_aliased`, {
+    const response = await fetch(`${API_BASE_URL}/api/list_aliased_exposures`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({}),
     })
 
     if (!response.ok) {
@@ -21,15 +20,14 @@ export const exposureService = {
   },
 
   async getExposureInfo(alias: string): Promise<ExposureInfo> {
-    const formData = new URLSearchParams()
-    formData.append('id[Aliased]', alias)
-
     const response = await fetch(`${API_BASE_URL}/api/get_exposure_info`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: formData,
+      body: JSON.stringify({
+        id: { Aliased: alias },
+      }),
     })
 
     if (!response.ok) {
