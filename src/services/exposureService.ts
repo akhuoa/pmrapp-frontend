@@ -23,7 +23,7 @@ export const exposureService = {
     const response = await fetch(`${API_BASE_URL}/api/get_exposure_info`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         id: { Aliased: alias },
@@ -39,16 +39,15 @@ export const exposureService = {
   },
 
   async getExposureFileInfo(id: string, path: string): Promise<ExposureFileInfo> {
-    const formData = new URLSearchParams()
-    formData.append('id', id)
-    formData.append('path', path)
-
     const response = await fetch(`${API_BASE_URL}/api/resolve_exposure_path`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
-      body: formData,
+      body: JSON.stringify({
+        id,
+        path,
+      }),
     })
 
     if (!response.ok) {
