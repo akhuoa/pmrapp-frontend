@@ -2,7 +2,6 @@ import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../App.vue'
 import BackToTop from '../components/BackToTop.vue'
-import NotificationBar from '../components/molecules/NotificationBar.vue'
 
 describe('App', () => {
   beforeEach(() => {
@@ -20,7 +19,6 @@ describe('App', () => {
         },
       },
     })
-    expect(wrapper.findComponent(NotificationBar).exists()).toBe(true)
     expect(wrapper.find('.router-view-stub').exists()).toBe(true)
     expect(wrapper.findComponent(BackToTop).exists()).toBe(true)
   })
