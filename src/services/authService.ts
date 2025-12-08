@@ -19,4 +19,17 @@ export const authService = {
     const token = await response.text()
     return token
   },
+
+  async logout(): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/api/sign_out`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`Logout failed: ${response.status}`)
+    }
+  },
 }
