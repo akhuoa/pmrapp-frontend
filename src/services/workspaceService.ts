@@ -20,15 +20,14 @@ export const workspaceService = {
   },
 
   async getWorkspaceInfo(alias: string): Promise<WorkspaceInfo> {
-    const formData = new URLSearchParams()
-    formData.append('id[Aliased]', alias)
-
     const response = await fetch(`${API_BASE_URL}/api/get_workspace_info`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
-      body: formData,
+      body: JSON.stringify({
+        id: { Aliased: alias },
+      }),
     })
 
     if (!response.ok) {
