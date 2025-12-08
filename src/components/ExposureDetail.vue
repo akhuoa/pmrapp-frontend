@@ -32,6 +32,12 @@ try {
 
   <div v-else-if="exposureInfo" class="flex flex-col lg:flex-row gap-8">
     <article class="flex-1">
+      <div class="mb-4">
+        <RouterLink to="/exposure" class="text-link">
+          &larr; Back
+        </RouterLink>
+      </div>
+
       <PageHeader
         :title="`Exposure ${exposureInfo.exposure.id}`"
         :description="exposureInfo.exposure.description || undefined"
