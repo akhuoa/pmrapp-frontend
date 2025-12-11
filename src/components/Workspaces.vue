@@ -1,10 +1,10 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useWorkspaceStore } from '@/stores/workspace'
+import ListToolbar from './molecules/ListToolbar.vue'
 import WorkspaceListItem from './molecules/WorkspaceListItem.vue'
 import ItemList from './organisms/ItemList.vue'
-import ListToolbar from './molecules/ListToolbar.vue'
 
 const workspaceStore = useWorkspaceStore()
 const searchQuery = ref('')
