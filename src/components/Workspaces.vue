@@ -1,39 +1,44 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { ref } from 'vue'
-import { getWorkspaceService } from '@/services'
-import type { Workspace } from '@/types/workspace'
+import { onMounted } from 'vue'
+import { useWorkspaceStore } from '@/stores/workspace'
 import WorkspaceListItem from './molecules/WorkspaceListItem.vue'
 import ItemList from './organisms/ItemList.vue'
+import ActionButton from './atoms/ActionButton.vue'
 
-const workspaces = ref<Workspace[]>([])
-const error = ref<string | null>(null)
+const workspaceStore = useWorkspaceStore()
 
-try {
-  workspaces.value = await getWorkspaceService().listAliasedWorkspaces()
+onMounted(async () => {
+  await workspaceStore.fetchWorkspaces()
+})
 
-  // Sort by entity.description alphabetically.
-  workspaces.value.sort((a: Workspace, b: Workspace) => {
-    const descA = a.entity.description ?? ''
-    const descB = b.entity.description ?? ''
-    return descA.localeCompare(descB)
-  })
-} catch (err) {
-  error.value = err instanceof Error ? err.message : 'Failed to load workspaces'
-  console.error('Error loading workspaces:', err)
+const handleRefresh = async () => {
+  await workspaceStore.fetchWorkspaces(true)
 }
 </script>
 
 <template>
+  <div class="mb-4 flex justify-end">
+    <ActionButton
+      variant="secondary"
+      size="sm"
+      :disabled="workspaceStore.isLoading"
+      @click="handleRefresh"
+      content-section="Workspace Listing"
+    >
+      {{ workspaceStore.isLoading ? 'Refreshing...' : 'Refresh' }}
+    </ActionButton>
+  </div>
+
   <ItemList
-    :items="workspaces"
-    :error="error"
+    :items="workspaceStore.workspaces"
+    :error="workspaceStore.error"
     error-title="Error loading workspaces"
     empty-message="No workspaces found."
   >
     <template #item>
       <WorkspaceListItem
-        v-for="workspace in workspaces"
+        v-for="workspace in workspaceStore.workspaces"
         :key="workspace.alias"
         :workspace="workspace"
       />
