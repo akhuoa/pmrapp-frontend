@@ -14,6 +14,7 @@ const props = defineProps<{
 const workspaceStore = useWorkspaceStore()
 const workspaceInfo = ref<WorkspaceInfo | null>(null)
 const error = ref<string | null>(null)
+const isLoading = ref(true)
 
 onMounted(async () => {
   try {
@@ -21,24 +22,30 @@ onMounted(async () => {
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to load workspace'
     console.error('Error loading workspace:', err)
+  } finally {
+    isLoading.value = false
   }
 })
 </script>
 
 <template>
+  <div class="mb-4">
+    <RouterLink to="/workspace" class="text-link">
+      &larr; Back to Workspaces
+    </RouterLink>
+  </div>
+
   <ErrorBlock
     v-if="error"
     title="Error loading workspace"
     :error="error"
   />
 
-  <div v-else-if="workspaceInfo">
-    <div class="mb-4">
-      <RouterLink to="/workspace" class="text-link">
-        &larr; Back
-      </RouterLink>
-    </div>
+  <div v-else-if="isLoading" class="text-center box">
+    Loading workspace...
+  </div>
 
+  <div v-else-if="workspaceInfo">
     <PageHeader
       :title="workspaceInfo.workspace.description || alias"
       :description="`Git Repository URI: ${workspaceInfo.workspace.url}`"

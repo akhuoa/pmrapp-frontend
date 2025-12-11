@@ -15,6 +15,7 @@ const props = defineProps<{
 const exposureStore = useExposureStore()
 const exposureInfo = ref<ExposureInfo | null>(null)
 const error = ref<string | null>(null)
+const isLoading = ref(true)
 
 onMounted(async () => {
   try {
@@ -22,25 +23,31 @@ onMounted(async () => {
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to load exposure'
     console.error('Error loading exposure:', err)
+  } finally {
+    isLoading.value = false
   }
 })
 </script>
 
 <template>
+  <div class="mb-4">
+    <RouterLink to="/exposure" class="text-link">
+      &larr; Back to Exposures
+    </RouterLink>
+  </div>
+
   <ErrorBlock
     v-if="error"
     title="Error loading exposure"
     :error="error"
   />
 
+  <div v-else-if="isLoading" class="text-center box">
+    Loading exposure...
+  </div>
+
   <div v-else-if="exposureInfo" class="flex flex-col lg:flex-row gap-8">
     <article class="flex-1">
-      <div class="mb-4">
-        <RouterLink to="/exposure" class="text-link">
-          &larr; Back
-        </RouterLink>
-      </div>
-
       <PageHeader
         :title="`Exposure ${exposureInfo.exposure.id}`"
         :description="exposureInfo.exposure.description || undefined"
