@@ -17,7 +17,10 @@ const error = ref<string | null>(null)
 
 onMounted(async () => {
   try {
-    exposureFileInfo.value = await exposureStore.getExposureFileInfo(props.alias, props.file)
+    const { alias, file } = props
+    const fileView = `${file}/view`
+    // const fileDownload = file // This will return redirect path to download.
+    exposureFileInfo.value = await exposureStore.getExposureFileInfo(alias, fileView)
     console.log('exposuree file info', exposureFileInfo.value)
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to load exposure file'
