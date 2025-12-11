@@ -9,13 +9,6 @@ const alias = route.params.alias as string
 
 <template>
   <DefaultLayout>
-    <Suspense>
-      <template #default>
-        <ExposureDetail :alias="alias" />
-      </template>
-      <template #fallback>
-        <p class="text-gray-600">Loading exposure...</p>
-      </template>
-    </Suspense>
+    <ExposureDetail :alias="alias" />
   </DefaultLayout>
 </template>

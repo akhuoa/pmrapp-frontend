@@ -11,13 +11,6 @@ import DefaultLayout from '@/layouts/DefaultLayout.vue'
       description="Browse and explore all workspaces."
     />
 
-    <Suspense>
-      <template #default>
-        <Workspaces />
-      </template>
-      <template #fallback>
-        <p class="">Loading workspaces...</p>
-      </template>
-    </Suspense>
+    <Workspaces />
   </DefaultLayout>
 </template>

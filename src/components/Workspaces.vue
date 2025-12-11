@@ -33,6 +33,7 @@ const handleRefresh = async () => {
   <ItemList
     :items="workspaceStore.workspaces"
     :error="workspaceStore.error"
+    :is-loading="workspaceStore.isLoading"
     error-title="Error loading workspaces"
     empty-message="No workspaces found."
   >
