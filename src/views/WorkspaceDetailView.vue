@@ -9,13 +9,6 @@ const alias = route.params.alias as string
 
 <template>
   <DefaultLayout>
-    <Suspense>
-      <template #default>
-        <WorkspaceDetail :alias="alias" />
-      </template>
-      <template #fallback>
-        <p class="text-gray-600">Loading workspace...</p>
-      </template>
-    </Suspense>
+    <WorkspaceDetail :alias="alias" />
   </DefaultLayout>
 </template>

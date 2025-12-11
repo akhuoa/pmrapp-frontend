@@ -10,13 +10,6 @@ const file = route.params.file as string
 
 <template>
   <DefaultLayout>
-    <Suspense>
-      <template #default>
-        <ExposureFileDetail :alias="alias" :file="file" />
-      </template>
-      <template #fallback>
-        <p class="text-gray-600">Loading exposure file {{ file }}...</p>
-      </template>
-    </Suspense>
+    <ExposureFileDetail :alias="alias" :file="file" />
   </DefaultLayout>
 </template>

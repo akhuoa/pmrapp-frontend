@@ -33,6 +33,7 @@ const handleRefresh = async () => {
   <ItemList
     :items="exposureStore.exposures"
     :error="exposureStore.error"
+    :is-loading="exposureStore.isLoading"
     error-title="Error loading exposures"
     empty-message="No exposures found."
   >
