@@ -36,19 +36,21 @@ const sizeClasses = {
   md: 'text-base rounded-md',
   lg: 'text-base px-8 py-2 rounded-lg',
 }
+
+const buttonClasses = 'inline-flex items-center gap-2'
 </script>
 
 <template>
   <RouterLink
     v-if="to"
     :to="to"
-    :class="[variantClasses[variant], sizeClasses[size]]"
+    :class="[variantClasses[variant], sizeClasses[size], buttonClasses]"
   >
     <slot />
   </RouterLink>
   <button
     v-else
-    :class="[variantClasses[variant], sizeClasses[size], disabledClasses[variant]]"
+    :class="[variantClasses[variant], sizeClasses[size], disabledClasses[variant], buttonClasses]"
     :type="type"
     :disabled="disabled"
   >
