@@ -1,9 +1,9 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
-import { getExposureService } from '@/services'
+import { useExposureStore } from '@/stores/exposure'
 import type { ExposureInfo } from '@/types/exposure'
 import PageHeader from './molecules/PageHeader.vue'
 import ErrorBlock from './organisms/ErrorBlock.vue'
@@ -12,15 +12,18 @@ const props = defineProps<{
   alias: string
 }>()
 
+const exposureStore = useExposureStore()
 const exposureInfo = ref<ExposureInfo | null>(null)
 const error = ref<string | null>(null)
 
-try {
-  exposureInfo.value = await getExposureService().getExposureInfo(props.alias)
-} catch (err) {
-  error.value = err instanceof Error ? err.message : 'Failed to load exposure'
-  console.error('Error loading exposure:', err)
-}
+onMounted(async () => {
+  try {
+    exposureInfo.value = await exposureStore.getExposureInfo(props.alias)
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Failed to load exposure'
+    console.error('Error loading exposure:', err)
+  }
+})
 </script>
 
 <template>
