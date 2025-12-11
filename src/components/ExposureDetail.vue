@@ -1,6 +1,7 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import { useExposureStore } from '@/stores/exposure'
@@ -12,6 +13,7 @@ const props = defineProps<{
   alias: string
 }>()
 
+const router = useRouter()
 const exposureStore = useExposureStore()
 const exposureInfo = ref<ExposureInfo | null>(null)
 const error = ref<string | null>(null)
@@ -27,13 +29,23 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
+
+const goBack = () => {
+  // If thre's history with search query, go back to it.
+  // Otherwise, go to exposure listing.
+  if (window.history.state.back?.includes('/exposure') && !window.history.state.back?.includes('/exposure/')) {
+    router.back()
+  } else {
+    router.push('/exposure')
+  }
+}
 </script>
 
 <template>
   <div class="mb-4">
-    <RouterLink to="/exposure" class="text-link">
+    <button @click="goBack" class="text-link">
       &larr; Back to Exposures
-    </RouterLink>
+    </button>
   </div>
 
   <ErrorBlock

@@ -1,6 +1,7 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { WorkspaceInfo } from '@/types/workspace'
@@ -11,6 +12,7 @@ const props = defineProps<{
   alias: string
 }>()
 
+const router = useRouter()
 const workspaceStore = useWorkspaceStore()
 const workspaceInfo = ref<WorkspaceInfo | null>(null)
 const error = ref<string | null>(null)
@@ -26,13 +28,23 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
+
+const goBack = () => {
+  // If thre's history with search query, go back to it.
+  // Otherwise, go to workspace listing.
+  if (window.history.state.back?.includes('/workspace') && !window.history.state.back?.includes('/workspace/')) {
+    router.back()
+  } else {
+    router.push('/workspace')
+  }
+}
 </script>
 
 <template>
   <div class="mb-4">
-    <RouterLink to="/workspace" class="text-link">
+    <button @click="goBack" class="text-link">
       &larr; Back to Workspaces
-    </RouterLink>
+    </button>
   </div>
 
   <ErrorBlock
