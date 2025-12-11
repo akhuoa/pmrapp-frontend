@@ -31,9 +31,15 @@ export const useWorkspaceStore = defineStore('workspace', () => {
       const data = await getWorkspaceService().listAliasedWorkspaces()
 
       // Sort by entity.description alphabetically.
+      // If the description is null, move the item to the end of the sorted array.
       data.sort((a: Workspace, b: Workspace) => {
-        const descA = a.entity.description ?? ''
-        const descB = b.entity.description ?? ''
+        const descA = a.entity.description
+        const descB = b.entity.description
+
+        if (descA === null && descB === null) return 0
+        if (descA === null) return 1
+        if (descB === null) return -1
+
         return descA.localeCompare(descB)
       })
 

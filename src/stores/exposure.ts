@@ -31,6 +31,19 @@ export const useExposureStore = defineStore('exposure', () => {
     try {
       const data = await getExposureService().listAliasedExposures()
 
+      // Sort by entity.description alphabetically.
+      // If the description is null, move the item to the end of the sorted array.
+      data.sort((a: Exposure, b: Exposure) => {
+        const descA = a.entity.description
+        const descB = b.entity.description
+
+        if (descA === null && descB === null) return 0
+        if (descA === null) return 1
+        if (descB === null) return -1
+
+        return descA.localeCompare(descB)
+      })
+
       exposures.value = data
       lastFetchTime.value = Date.now()
     } catch (err) {
