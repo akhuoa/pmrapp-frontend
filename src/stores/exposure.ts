@@ -1,13 +1,14 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { getExposureService } from '@/services'
-import type { Exposure, ExposureInfo } from '@/types/exposure'
+import type { Exposure, ExposureInfo, ExposureFileInfo } from '@/types/exposure'
 
 const CACHE_TTL = 30 * 60 * 1000 // 30 minutes in milliseconds
 
 export const useExposureStore = defineStore('exposure', () => {
   const exposures = ref<Exposure[]>([])
   const exposureInfoCache = ref<Map<string, ExposureInfo>>(new Map())
+  const exposureFileInfoCache = ref<Map<string, ExposureFileInfo>>(new Map())
   const lastFetchTime = ref<number | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
@@ -57,9 +58,28 @@ export const useExposureStore = defineStore('exposure', () => {
     }
   }
 
+  const getExposureFileInfo = async (alias: string, file: string): Promise<ExposureFileInfo> => {
+    const cacheKey = `${alias}:${file}`
+
+    // Check cache first.
+    if (exposureFileInfoCache.value.has(cacheKey)) {
+      return exposureFileInfoCache.value.get(cacheKey)!
+    }
+
+    try {
+      const info = await getExposureService().getExposureFileInfo(alias, file)
+      exposureFileInfoCache.value.set(cacheKey, info)
+      return info
+    } catch (err) {
+      console.error(`Error loading exposure file info for ${alias}/${file}:`, err)
+      throw err
+    }
+  }
+
   const clearCache = (): void => {
     exposures.value = []
     exposureInfoCache.value.clear()
+    exposureFileInfoCache.value.clear()
     lastFetchTime.value = null
     error.value = null
   }
@@ -71,6 +91,7 @@ export const useExposureStore = defineStore('exposure', () => {
     lastFetchTime,
     fetchExposures,
     getExposureInfo,
+    getExposureFileInfo,
     clearCache,
   }
 })
