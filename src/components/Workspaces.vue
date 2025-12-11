@@ -1,12 +1,13 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useWorkspaceStore } from '@/stores/workspace'
 import ActionButton from './atoms/ActionButton.vue'
 import WorkspaceListItem from './molecules/WorkspaceListItem.vue'
 import ItemList from './organisms/ItemList.vue'
 
 const workspaceStore = useWorkspaceStore()
+const searchQuery = ref('')
 
 onMounted(async () => {
   await workspaceStore.fetchWorkspaces()
@@ -15,10 +16,30 @@ onMounted(async () => {
 const handleRefresh = async () => {
   await workspaceStore.fetchWorkspaces(true)
 }
+
+const filteredWorkspaces = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return workspaceStore.workspaces
+  }
+
+  const query = searchQuery.value.toLowerCase()
+  return workspaceStore.workspaces.filter((workspace) => {
+    const description = workspace.entity.description?.toLowerCase() || ''
+    return description.includes(query)
+  })
+})
 </script>
 
 <template>
-  <div class="mb-4 flex justify-end">
+  <div class="mb-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+    <div class="flex-1 w-full sm:w-auto">
+      <input
+        v-model="searchQuery"
+        type="text"
+        placeholder="Search by description..."
+        class="input-field w-full"
+      />
+    </div>
     <ActionButton
       variant="secondary"
       size="sm"
@@ -31,7 +52,7 @@ const handleRefresh = async () => {
   </div>
 
   <ItemList
-    :items="workspaceStore.workspaces"
+    :items="filteredWorkspaces"
     :error="workspaceStore.error"
     :is-loading="workspaceStore.isLoading"
     error-title="Error loading workspaces"
@@ -39,10 +60,14 @@ const handleRefresh = async () => {
   >
     <template #item>
       <WorkspaceListItem
-        v-for="workspace in workspaceStore.workspaces"
+        v-for="workspace in filteredWorkspaces"
         :key="workspace.alias"
         :workspace="workspace"
       />
     </template>
   </ItemList>
 </template>
+
+<style scoped>
+@import '@/assets/input.css';
+</style>
