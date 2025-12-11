@@ -1,8 +1,8 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
-import { getWorkspaceService } from '@/services'
+import { useWorkspaceStore } from '@/stores/workspace'
 import type { WorkspaceInfo } from '@/types/workspace'
 import PageHeader from './molecules/PageHeader.vue'
 import ErrorBlock from './organisms/ErrorBlock.vue'
@@ -11,15 +11,18 @@ const props = defineProps<{
   alias: string
 }>()
 
+const workspaceStore = useWorkspaceStore()
 const workspaceInfo = ref<WorkspaceInfo | null>(null)
 const error = ref<string | null>(null)
 
-try {
-  workspaceInfo.value = await getWorkspaceService().getWorkspaceInfo(props.alias)
-} catch (err) {
-  error.value = err instanceof Error ? err.message : 'Failed to load workspace'
-  console.error('Error loading workspace:', err)
-}
+onMounted(async () => {
+  try {
+    workspaceInfo.value = await workspaceStore.getWorkspaceInfo(props.alias)
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Failed to load workspace'
+    console.error('Error loading workspace:', err)
+  }
+})
 </script>
 
 <template>
