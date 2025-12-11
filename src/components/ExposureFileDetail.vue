@@ -14,6 +14,7 @@ const props = defineProps<{
 const exposureStore = useExposureStore()
 const exposureFileInfo = ref<ExposureFileInfo | null>(null)
 const error = ref<string | null>(null)
+const isLoading = ref(true)
 
 onMounted(async () => {
   try {
@@ -25,16 +26,28 @@ onMounted(async () => {
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to load exposure file'
     console.error('Error loading exposure file:', err)
+  } finally {
+    isLoading.value = false
   }
 })
 </script>
 
 <template>
+  <div class="mb-4">
+    <RouterLink :to="`/exposure/${props.alias}`" class="text-link">
+      &larr; Back
+    </RouterLink>
+  </div>
+
   <ErrorBlock
     v-if="error"
     title="Error loading exposure file"
     :error="error"
   />
+
+  <div v-else-if="isLoading" class="text-center box">
+    Loading exposure file...
+  </div>
 
   <div v-else-if="exposureFileInfo" class="flex flex-col lg:flex-row gap-8">
     <div v-if="exposureFileInfo.Redirect">
