@@ -2,10 +2,9 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
 import { useExposureStore } from '@/stores/exposure'
-import ActionButton from './atoms/ActionButton.vue'
 import ExposureListItem from './molecules/ExposureListItem.vue'
 import ItemList from './organisms/ItemList.vue'
-import RefreshIcon from './icons/RefreshIcon.vue'
+import ListToolbar from './molecules/ListToolbar.vue'
 
 const exposureStore = useExposureStore()
 const searchQuery = ref('')
@@ -32,26 +31,12 @@ const filteredExposures = computed(() => {
 </script>
 
 <template>
-  <div class="mb-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-    <div class="flex-1 w-full sm:w-auto">
-      <input
-        v-model="searchQuery"
-        type="text"
-        placeholder="Search by description..."
-        class="input-field w-full"
-      />
-    </div>
-    <ActionButton
-      variant="secondary"
-      size="lg"
-      :disabled="exposureStore.isLoading"
-      @click="handleRefresh"
-      content-section="Exposure Listing"
-    >
-      <RefreshIcon />
-      <span>{{ exposureStore.isLoading ? 'Refreshing...' : 'Refresh' }}</span>
-    </ActionButton>
-  </div>
+  <ListToolbar
+    v-model:search-query="searchQuery"
+    :is-loading="exposureStore.isLoading"
+    content-section="Exposure Listing"
+    @refresh="handleRefresh"
+  />
 
   <ItemList
     :items="filteredExposures"
@@ -69,7 +54,3 @@ const filteredExposures = computed(() => {
     </template>
   </ItemList>
 </template>
-
-<style scoped>
-@import '@/assets/input.css';
-</style>

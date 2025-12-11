@@ -2,10 +2,9 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
 import { useWorkspaceStore } from '@/stores/workspace'
-import ActionButton from './atoms/ActionButton.vue'
 import WorkspaceListItem from './molecules/WorkspaceListItem.vue'
 import ItemList from './organisms/ItemList.vue'
-import RefreshIcon from './icons/RefreshIcon.vue'
+import ListToolbar from './molecules/ListToolbar.vue'
 
 const workspaceStore = useWorkspaceStore()
 const searchQuery = ref('')
@@ -32,26 +31,12 @@ const filteredWorkspaces = computed(() => {
 </script>
 
 <template>
-  <div class="mb-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-    <div class="flex-1 w-full sm:w-auto">
-      <input
-        v-model="searchQuery"
-        type="text"
-        placeholder="Search by description..."
-        class="input-field w-full"
-      />
-    </div>
-    <ActionButton
-      variant="secondary"
-      size="lg"
-      :disabled="workspaceStore.isLoading"
-      @click="handleRefresh"
-      content-section="Workspace Listing"
-    >
-      <RefreshIcon />
-      <span>{{ workspaceStore.isLoading ? 'Refreshing...' : 'Refresh' }}</span>
-    </ActionButton>
-  </div>
+  <ListToolbar
+    v-model:search-query="searchQuery"
+    :is-loading="workspaceStore.isLoading"
+    content-section="Workspace Listing"
+    @refresh="handleRefresh"
+  />
 
   <ItemList
     :items="filteredWorkspaces"
@@ -69,7 +54,3 @@ const filteredWorkspaces = computed(() => {
     </template>
   </ItemList>
 </template>
-
-<style scoped>
-@import '@/assets/input.css';
-</style>
