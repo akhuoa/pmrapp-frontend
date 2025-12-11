@@ -7,8 +7,6 @@ describe('App', () => {
   beforeEach(() => {
     // Reset all mocks before each test.
     vi.clearAllMocks()
-    // Reset the cookieStore mock to its default behaviour.
-    vi.mocked(globalThis.cookieStore.get).mockResolvedValue(null)
   })
 
   it('mounts and renders the main layout components', () => {
