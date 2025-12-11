@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { ref } from 'vue'
-import { getExposureService } from '@/services'
+import { ref, onMounted } from 'vue'
+import { useExposureStore } from '@/stores/exposure'
 import type { ExposureFileInfo } from '@/types/exposure'
 import PageHeader from './molecules/PageHeader.vue'
 import ErrorBlock from './organisms/ErrorBlock.vue'
@@ -11,15 +11,19 @@ const props = defineProps<{
   file: string
 }>()
 
+const exposureStore = useExposureStore()
 const exposureFileInfo = ref<ExposureFileInfo | null>(null)
 const error = ref<string | null>(null)
 
-try {
-  exposureFileInfo.value = await getExposureService().getExposureFileInfo(props.alias, props.file)
-} catch (err) {
-  error.value = err instanceof Error ? err.message : 'Failed to load exposure file'
-  console.error('Error loading exposure file:', err)
-}
+onMounted(async () => {
+  try {
+    exposureFileInfo.value = await exposureStore.getExposureFileInfo(props.alias, props.file)
+    console.log('exposuree file info', exposureFileInfo.value)
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Failed to load exposure file'
+    console.error('Error loading exposure file:', err)
+  }
+})
 </script>
 
 <template>
@@ -30,7 +34,11 @@ try {
   />
 
   <div v-else-if="exposureFileInfo" class="flex flex-col lg:flex-row gap-8">
-    <article class="flex-1">
+    <div v-if="exposureFileInfo.Redirect">
+      Redirect: {{ exposureFileInfo.Redirect }}
+    </div>
+
+    <article class="flex-1" v-else>
       <PageHeader
         :title="`Exposure ${exposureFileInfo.Target[0]?.exposure_id}`"
         :description="exposureFileInfo.Target[0]?.workspace_file_path || undefined"
