@@ -44,6 +44,6 @@ export interface ExposureFileTarget {
 }
 
 export type ExposureFileInfo = {
-  Target: ExposureFileTarget[],
-  Redirect?: string,
+  Target: ExposureFileTarget[]
+  Redirect?: string
 }

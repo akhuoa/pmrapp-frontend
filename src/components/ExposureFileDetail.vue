@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useExposureStore } from '@/stores/exposure'
 import type { ExposureFileInfo } from '@/types/exposure'
 import PageHeader from './molecules/PageHeader.vue'

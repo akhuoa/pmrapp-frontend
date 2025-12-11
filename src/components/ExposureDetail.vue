@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import { useExposureStore } from '@/stores/exposure'
