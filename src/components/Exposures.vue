@@ -1,32 +1,44 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { ref } from 'vue'
-import { getExposureService } from '@/services'
-import type { Exposure } from '@/types/exposure'
+import { onMounted } from 'vue'
+import { useExposureStore } from '@/stores/exposure'
 import ExposureListItem from './molecules/ExposureListItem.vue'
 import ItemList from './organisms/ItemList.vue'
+import ActionButton from './atoms/ActionButton.vue'
 
-const exposures = ref<Exposure[]>([])
-const error = ref<string | null>(null)
+const exposureStore = useExposureStore()
 
-try {
-  exposures.value = await getExposureService().listAliased()
-} catch (err) {
-  error.value = err instanceof Error ? err.message : 'Failed to load exposures'
-  console.error('Error loading exposures:', err)
+onMounted(async () => {
+  await exposureStore.fetchExposures()
+})
+
+const handleRefresh = async () => {
+  await exposureStore.fetchExposures(true)
 }
 </script>
 
 <template>
+  <div class="mb-4 flex justify-end">
+    <ActionButton
+      variant="secondary"
+      size="sm"
+      :disabled="exposureStore.isLoading"
+      @click="handleRefresh"
+      content-section="Exposure Listing"
+    >
+      {{ exposureStore.isLoading ? 'Refreshing...' : 'Refresh' }}
+    </ActionButton>
+  </div>
+
   <ItemList
-    :items="exposures"
-    :error="error"
+    :items="exposureStore.exposures"
+    :error="exposureStore.error"
     error-title="Error loading exposures"
     empty-message="No exposures found."
   >
     <template #item>
       <ExposureListItem
-        v-for="exposure in exposures"
+        v-for="exposure in exposureStore.exposures"
         :key="exposure.alias"
         :exposure="exposure"
       />
