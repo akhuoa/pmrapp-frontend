@@ -1,16 +1,25 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useWorkspaceStore } from '@/stores/workspace'
 import ListToolbar from './molecules/ListToolbar.vue'
 import WorkspaceListItem from './molecules/WorkspaceListItem.vue'
 import ItemList from './organisms/ItemList.vue'
 
 const workspaceStore = useWorkspaceStore()
-const searchQuery = ref('')
+const route = useRoute()
+const router = useRouter()
+const searchQuery = ref((route.query.search as string) || '')
 
 onMounted(async () => {
   await workspaceStore.fetchWorkspaces()
+})
+
+// Sync search query with URL query parameter.
+watch(searchQuery, (newValue) => {
+  const query = newValue.trim() ? { search: newValue } : {}
+  router.replace({ query })
 })
 
 const handleRefresh = async () => {

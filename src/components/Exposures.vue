@@ -1,16 +1,25 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useExposureStore } from '@/stores/exposure'
 import ExposureListItem from './molecules/ExposureListItem.vue'
 import ListToolbar from './molecules/ListToolbar.vue'
 import ItemList from './organisms/ItemList.vue'
 
 const exposureStore = useExposureStore()
-const searchQuery = ref('')
+const route = useRoute()
+const router = useRouter()
+const searchQuery = ref((route.query.search as string) || '')
 
 onMounted(async () => {
   await exposureStore.fetchExposures()
+})
+
+// Sync search query with URL query parameter.
+watch(searchQuery, (newValue) => {
+  const query = newValue.trim() ? { search: newValue } : {}
+  router.replace({ query })
 })
 
 const handleRefresh = async () => {
