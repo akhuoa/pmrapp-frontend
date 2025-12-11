@@ -5,6 +5,7 @@ import { useWorkspaceStore } from '@/stores/workspace'
 import ActionButton from './atoms/ActionButton.vue'
 import WorkspaceListItem from './molecules/WorkspaceListItem.vue'
 import ItemList from './organisms/ItemList.vue'
+import RefreshIcon from './icons/RefreshIcon.vue'
 
 const workspaceStore = useWorkspaceStore()
 const searchQuery = ref('')
@@ -42,12 +43,13 @@ const filteredWorkspaces = computed(() => {
     </div>
     <ActionButton
       variant="secondary"
-      size="sm"
+      size="lg"
       :disabled="workspaceStore.isLoading"
       @click="handleRefresh"
       content-section="Workspace Listing"
     >
-      {{ workspaceStore.isLoading ? 'Refreshing...' : 'Refresh' }}
+      <RefreshIcon />
+      <span>{{ workspaceStore.isLoading ? 'Refreshing...' : 'Refresh' }}</span>
     </ActionButton>
   </div>
 
