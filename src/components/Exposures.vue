@@ -1,12 +1,14 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useExposureStore } from '@/stores/exposure'
 import ActionButton from './atoms/ActionButton.vue'
 import ExposureListItem from './molecules/ExposureListItem.vue'
 import ItemList from './organisms/ItemList.vue'
+import RefreshIcon from './icons/RefreshIcon.vue'
 
 const exposureStore = useExposureStore()
+const searchQuery = ref('')
 
 onMounted(async () => {
   await exposureStore.fetchExposures()
@@ -15,23 +17,44 @@ onMounted(async () => {
 const handleRefresh = async () => {
   await exposureStore.fetchExposures(true)
 }
+
+const filteredExposures = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return exposureStore.exposures
+  }
+
+  const query = searchQuery.value.toLowerCase()
+  return exposureStore.exposures.filter((exposure) => {
+    const description = exposure.entity.description?.toLowerCase() || ''
+    return description.includes(query)
+  })
+})
 </script>
 
 <template>
-  <div class="mb-4 flex justify-end">
+  <div class="mb-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+    <div class="flex-1 w-full sm:w-auto">
+      <input
+        v-model="searchQuery"
+        type="text"
+        placeholder="Search by description..."
+        class="input-field w-full"
+      />
+    </div>
     <ActionButton
       variant="secondary"
-      size="sm"
+      size="lg"
       :disabled="exposureStore.isLoading"
       @click="handleRefresh"
       content-section="Exposure Listing"
     >
-      {{ exposureStore.isLoading ? 'Refreshing...' : 'Refresh' }}
+      <RefreshIcon />
+      <span>{{ exposureStore.isLoading ? 'Refreshing...' : 'Refresh' }}</span>
     </ActionButton>
   </div>
 
   <ItemList
-    :items="exposureStore.exposures"
+    :items="filteredExposures"
     :error="exposureStore.error"
     :is-loading="exposureStore.isLoading"
     error-title="Error loading exposures"
@@ -39,10 +62,14 @@ const handleRefresh = async () => {
   >
     <template #item>
       <ExposureListItem
-        v-for="exposure in exposureStore.exposures"
+        v-for="exposure in filteredExposures"
         :key="exposure.alias"
         :exposure="exposure"
       />
     </template>
   </ItemList>
 </template>
+
+<style scoped>
+@import '@/assets/input.css';
+</style>
