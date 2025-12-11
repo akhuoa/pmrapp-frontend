@@ -56,8 +56,9 @@ export const useWorkspaceStore = defineStore('workspace', () => {
 
   const getWorkspaceInfo = async (alias: string): Promise<WorkspaceInfo> => {
     // Check cache first.
-    if (workspaceInfoCache.value.has(alias)) {
-      return workspaceInfoCache.value.get(alias)!
+    const cached = workspaceInfoCache.value.get(alias)
+    if (cached) {
+      return cached
     }
 
     try {
