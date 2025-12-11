@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { getExposureService } from '@/services'
-import type { Exposure, ExposureInfo, ExposureFileInfo } from '@/types/exposure'
+import type { Exposure, ExposureFileInfo, ExposureInfo } from '@/types/exposure'
 
 const CACHE_TTL = 30 * 60 * 1000 // 30 minutes in milliseconds
 
