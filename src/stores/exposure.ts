@@ -57,8 +57,9 @@ export const useExposureStore = defineStore('exposure', () => {
 
   const getExposureInfo = async (alias: string): Promise<ExposureInfo> => {
     // Check cache first.
-    if (exposureInfoCache.value.has(alias)) {
-      return exposureInfoCache.value.get(alias)!
+    const cached = exposureInfoCache.value.get(alias)
+    if (cached) {
+      return cached
     }
 
     try {
@@ -75,8 +76,9 @@ export const useExposureStore = defineStore('exposure', () => {
     const cacheKey = `${alias}:${file}`
 
     // Check cache first.
-    if (exposureFileInfoCache.value.has(cacheKey)) {
-      return exposureFileInfoCache.value.get(cacheKey)!
+    const cached = exposureFileInfoCache.value.get(cacheKey)
+    if (cached) {
+      return cached
     }
 
     try {
