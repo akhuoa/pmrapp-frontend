@@ -173,24 +173,26 @@ const goBack = () => {
 @import '@/assets/box.css';
 
 .html-view {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
+  @apply text-sm;
 
   :global(a) {
     @apply text-link;
   }
 
-  :global(h3) {
-    @apply text-xl font-semibold mt-8 mb-2;
+  :global(h2),
+  :global(h3),
+  :global(h4) {
+    @apply text-xl font-semibold mt-8 mb-4;
   }
 
-  :global(h3:first-child) {
+  :global(> div > h2),
+  :global(> div > h3),
+  :global(> div > h4) {
     @apply mt-0;
   }
 
   :global(p) {
-    @apply mb-4;
+    @apply text-sm mb-4;
   }
 
   :global(img) {
