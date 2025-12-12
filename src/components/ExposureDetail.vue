@@ -91,7 +91,7 @@ const goBack = () => {
       />
 
       <div v-if="detailHTML" class="box mb-8">
-        <div v-html="detailHTML"></div>
+        <div v-html="detailHTML" class="html-view"></div>
       </div>
 
       <div class="box">
@@ -171,4 +171,46 @@ const goBack = () => {
 <style scoped>
 @import '@/assets/text-link.css';
 @import '@/assets/box.css';
+
+.html-view {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+
+  :global(a) {
+    @apply text-link;
+  }
+
+  :global(h3) {
+    @apply text-xl font-semibold mt-8 mb-2;
+  }
+
+  :global(h3:first-child) {
+    @apply mt-0;
+  }
+
+  :global(p) {
+    @apply mb-4;
+  }
+
+  :global(img) {
+    @apply max-w-full h-auto;
+  }
+
+  :global(table) {
+    @apply w-full border border-collapse border-gray-300 dark:border-gray-600 mb-4 table-fixed;
+  }
+
+  :global(table caption) {
+    @apply text-sm font-medium mb-2;
+  }
+
+  :global(table td), :global(table th) {
+    @apply border border-gray-300 dark:border-gray-600 p-2;
+  }
+
+  :global(table td) {
+    @apply align-top text-sm;
+  }
+}
 </style>
