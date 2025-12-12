@@ -1,7 +1,9 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { ref } from 'vue'
-import { getExposureService } from '@/services'
+import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import ActionButton from '@/components/atoms/ActionButton.vue'
+import { useExposureStore } from '@/stores/exposure'
 import type { ExposureFileInfo } from '@/types/exposure'
 import PageHeader from './molecules/PageHeader.vue'
 import ErrorBlock from './organisms/ErrorBlock.vue'
@@ -11,26 +13,67 @@ const props = defineProps<{
   file: string
 }>()
 
+const router = useRouter()
+const exposureStore = useExposureStore()
 const exposureFileInfo = ref<ExposureFileInfo | null>(null)
 const error = ref<string | null>(null)
+const isLoading = ref(true)
 
-try {
-  exposureFileInfo.value = await getExposureService().getExposureFileInfo(props.alias, props.file)
-} catch (err) {
-  error.value = err instanceof Error ? err.message : 'Failed to load exposure file'
-  console.error('Error loading exposure file:', err)
+onMounted(async () => {
+  try {
+    const { alias, file } = props
+    const fileView = `${file}/view`
+    // const fileDownload = file // This will return redirect path to download.
+    exposureFileInfo.value = await exposureStore.getExposureFileInfo(alias, fileView)
+    console.log('exposuree file info', exposureFileInfo.value)
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Failed to load exposure file'
+    console.error('Error loading exposure file:', err)
+  } finally {
+    isLoading.value = false
+  }
+})
+
+const goBack = () => {
+  // Keep history if there's search query, else go to exposure detail.
+  if (
+    window.history.state.back?.includes(`/exposure/${props.alias}`) &&
+    !window.history.state.back?.includes(`/exposure/${props.alias}/`)
+  ) {
+    router.back()
+  } else {
+    router.push(`/exposure/${props.alias}`)
+  }
 }
 </script>
 
 <template>
+  <div class="mb-4">
+    <ActionButton
+      variant="link"
+      @click="goBack"
+      content-section="Exposure File Detail"
+    >
+      &larr; Back
+    </ActionButton>
+  </div>
+
   <ErrorBlock
     v-if="error"
     title="Error loading exposure file"
     :error="error"
   />
 
+  <div v-else-if="isLoading" class="text-center box">
+    Loading exposure file...
+  </div>
+
   <div v-else-if="exposureFileInfo" class="flex flex-col lg:flex-row gap-8">
-    <article class="flex-1">
+    <div v-if="exposureFileInfo.Redirect">
+      Redirect: {{ exposureFileInfo.Redirect }}
+    </div>
+
+    <article class="flex-1" v-else>
       <PageHeader
         :title="`Exposure ${exposureFileInfo.Target[0]?.exposure_id}`"
         :description="exposureFileInfo.Target[0]?.workspace_file_path || undefined"

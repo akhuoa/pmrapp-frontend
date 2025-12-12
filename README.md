@@ -62,7 +62,6 @@ cp .env.example .env
 **Environment Variables:**
 
 - `VITE_API_BASE_URL` - Base URL for the PMR API server (default: `http://127.0.0.1:9380` for local Rust backend)
-- `VITE_API_SUFFIX` - API request suffix appended to endpoint URLs (required for API requests)
 
 > **Note:** To run the backend locally, see the [pmrplatform](https://github.com/Physiome/pmrplatform/) repository for setup instructions.
 

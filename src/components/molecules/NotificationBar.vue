@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import CloseButton from '@/components/atoms/CloseButton.vue'
-import { USE_MOCK_DATA } from '@/services'
 import { Cookie } from '@/utils/cookie'
 
-const COOKIE_NAME = 'pmr_mock_notification_dismissed'
+const COOKIE_NAME = 'pmr_notification_dismissed'
 const COOKIE_DAYS = 7
 
 const isVisible = ref(true)
@@ -24,13 +23,13 @@ onMounted(async () => {
 
 <template>
   <div
-    v-if="USE_MOCK_DATA && isVisible"
+    v-if="isVisible"
     class="bg-amber-100 dark:bg-amber-900/20 border-b border-amber-300 dark:border-amber-700 relative"
   >
     <div class="container mx-auto px-4 pr-10 lg:pr-4 py-2 flex items-center justify-center gap-2 text-sm text-amber-900 dark:text-amber-100">
       <span>⚠️</span>
       <span>
-        The repository currently uses mock data while we are waiting for its API to become available.
+        This is a general notification message.
       </span>
     </div>
     <CloseButton

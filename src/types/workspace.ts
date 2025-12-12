@@ -2,7 +2,7 @@ export interface WorkspaceEntity {
   id: number
   url: string
   superceded_by_id: number | null
-  description: string
+  description: string | null
   long_description: string | null
   created_ts: number
   exposures: unknown | null
