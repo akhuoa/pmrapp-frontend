@@ -33,7 +33,10 @@ onMounted(async () => {
 const goBack = () => {
   // If thre's history with search query, go back to it.
   // Otherwise, go to exposure listing.
-  if (window.history.state.back?.includes('/exposure') && !window.history.state.back?.includes('/exposure/')) {
+  if (
+    window.history.state.back?.includes('/exposure') &&
+    !window.history.state.back?.includes('/exposure/')
+  ) {
     router.back()
   } else {
     router.push('/exposure')
