@@ -18,10 +18,32 @@ const exposureStore = useExposureStore()
 const exposureInfo = ref<ExposureInfo | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
+const detailHTML = ref<string>('')
 
 onMounted(async () => {
   try {
     exposureInfo.value = await exposureStore.getExposureInfo(props.alias)
+
+    const fileWithViews = exposureInfo.value.exposure?.files?.find(
+      (file) => file.views && file.views.length > 0
+    )
+
+    if (fileWithViews) {
+      const viewEntry = fileWithViews.views.find((v) => v.view_key === 'view')
+      // This route path is used to fix relative paths in the HTML content.
+      // It is not a part of the API request parameters.
+      const routePath = router.currentRoute.value.path
+
+      if (viewEntry) {
+        detailHTML.value = await exposureStore.getExposureSafeHTML(
+          fileWithViews.exposure_id,
+          viewEntry.exposure_file_id,
+          'view',
+          'index.html',
+          routePath
+        )
+      }
+    }
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to load exposure'
     console.error('Error loading exposure:', err)
@@ -71,6 +93,10 @@ const goBack = () => {
         :title="`Exposure ${exposureInfo.exposure.id}`"
         :description="exposureInfo.exposure.description || undefined"
       />
+
+      <div v-if="detailHTML" class="box mb-8">
+        <div v-html="detailHTML" class="html-view"></div>
+      </div>
 
       <div class="box">
         <h2 class="text-xl font-semibold mb-4">Files</h2>
@@ -151,4 +177,48 @@ const goBack = () => {
 <style scoped>
 @import '@/assets/text-link.css';
 @import '@/assets/box.css';
+
+.html-view {
+  @apply text-sm;
+
+  :global(a) {
+    @apply text-link;
+  }
+
+  :global(h2),
+  :global(h3),
+  :global(h4) {
+    @apply text-xl font-semibold mt-8 mb-4;
+  }
+
+  :global(> div > h2),
+  :global(> div > h3),
+  :global(> div > h4) {
+    @apply mt-0;
+  }
+
+  :global(p) {
+    @apply text-sm mb-4;
+  }
+
+  :global(img) {
+    @apply max-w-full h-auto;
+  }
+
+  :global(table) {
+    @apply w-full border border-collapse border-gray-300 dark:border-gray-600 mb-4 table-fixed;
+  }
+
+  :global(table caption) {
+    @apply text-sm font-medium mb-2;
+  }
+
+  :global(table td), :global(table th) {
+    @apply border border-gray-300 dark:border-gray-600 p-2;
+  }
+
+  :global(table td) {
+    @apply align-top text-sm;
+  }
+}
 </style>
