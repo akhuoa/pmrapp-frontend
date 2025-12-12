@@ -9,6 +9,7 @@ export const useExposureStore = defineStore('exposure', () => {
   const exposures = ref<Exposure[]>([])
   const exposureInfoCache = ref<Map<string, ExposureInfo>>(new Map())
   const exposureFileInfoCache = ref<Map<string, ExposureFileInfo>>(new Map())
+  const exposureHTMLCache = ref<Map<string, string>>(new Map())
   const lastFetchTime = ref<number | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
@@ -91,10 +92,40 @@ export const useExposureStore = defineStore('exposure', () => {
     }
   }
 
+  const getExposureSafeHTML = async (
+    exposureId: number,
+    exposureFileId: number,
+    viewKey: string,
+    path: string
+  ): Promise<string> => {
+    const cacheKey = `${exposureId}:${exposureFileId}:${viewKey}:${path}`
+
+    // Check cache first.
+    const cached = exposureHTMLCache.value.get(cacheKey)
+    if (cached) {
+      return cached
+    }
+
+    try {
+      const html = await getExposureService().getExposureSafeHTML(
+        exposureId,
+        exposureFileId,
+        viewKey,
+        path
+      )
+      exposureHTMLCache.value.set(cacheKey, html)
+      return html
+    } catch (err) {
+      console.error(`Error loading safe HTML for exposure ${exposureId}:`, err)
+      throw err
+    }
+  }
+
   const clearCache = (): void => {
     exposures.value = []
     exposureInfoCache.value.clear()
     exposureFileInfoCache.value.clear()
+    exposureHTMLCache.value.clear()
     lastFetchTime.value = null
     error.value = null
   }
@@ -107,6 +138,7 @@ export const useExposureStore = defineStore('exposure', () => {
     fetchExposures,
     getExposureInfo,
     getExposureFileInfo,
+    getExposureSafeHTML,
     clearCache,
   }
 })
