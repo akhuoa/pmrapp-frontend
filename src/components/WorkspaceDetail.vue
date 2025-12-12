@@ -32,7 +32,10 @@ onMounted(async () => {
 const goBack = () => {
   // If thre's history with search query, go back to it.
   // Otherwise, go to workspace listing.
-  if (window.history.state.back?.includes('/workspace') && !window.history.state.back?.includes('/workspace/')) {
+  if (
+    window.history.state.back?.includes('/workspace') &&
+    !window.history.state.back?.includes('/workspace/')
+  ) {
     router.back()
   } else {
     router.push('/workspace')
