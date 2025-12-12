@@ -65,6 +65,7 @@ export const exposureService = {
     exposureFileId: number,
     viewKey: string,
     path: string,
+    routePath: string
   ): Promise<string> {
     const response = await fetch(
       `${API_BASE_URL}/api/exposure/safe_html/${exposureId}/${exposureFileId}/${viewKey}/${path}`,
@@ -74,6 +75,9 @@ export const exposureService = {
       throw new Error(`Failed to fetch HTML: ${response.status}`)
     }
 
-    return response.text()
+    const responseText = await response.text()
+    const updatedResponseText = responseText.replace(/src="\.\.\//g, `src="${API_BASE_URL}${routePath}/`)
+
+    return updatedResponseText
   },
 }
