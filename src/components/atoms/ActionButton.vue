@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { RouteLocationRaw } from 'vue-router'
 
-type ButtonVariant = 'primary' | 'secondary'
+type ButtonVariant = 'primary' | 'secondary' | 'link'
 type ButtonSize = 'sm' | 'md' | 'lg'
 
 interface Props {
@@ -22,6 +22,7 @@ withDefaults(defineProps<Props>(), {
 const disabledClasses = {
   primary: 'disabled:opacity-60 disabled:cursor-not-allowed',
   secondary: 'disabled:opacity-60 disabled:cursor-not-allowed hover:bg-transparent',
+  link: 'disabled:opacity-60 disabled:cursor-not-allowed',
 }
 
 const variantClasses = {
@@ -29,6 +30,8 @@ const variantClasses = {
     'px-3 py-1 rounded border border-primary bg-primary text-white hover:opacity-90 transition-opacity',
   secondary:
     'px-3 py-1 rounded border border-primary text-primary hover:bg-primary/10 transition-colors',
+  link:
+    'text-primary hover:text-primary-hover transition-colors',
 }
 
 const sizeClasses = {

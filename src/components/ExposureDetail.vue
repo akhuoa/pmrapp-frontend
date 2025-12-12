@@ -43,9 +43,13 @@ const goBack = () => {
 
 <template>
   <div class="mb-4">
-    <button @click="goBack" class="text-link">
+    <ActionButton
+      variant="link"
+      @click="goBack"
+      content-section="Exposure Detail"
+    >
       &larr; Back to Exposures
-    </button>
+    </ActionButton>
   </div>
 
   <ErrorBlock
