@@ -33,7 +33,7 @@ const handleRefresh = () => {
     <div class="flex-1 w-full sm:w-auto">
       <input
         :value="searchQuery"
-        type="text"
+        type="search"
         :placeholder="searchPlaceholder"
         class="input-field w-full"
         @input="handleSearchInput"
