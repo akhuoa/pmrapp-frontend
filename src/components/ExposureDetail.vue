@@ -18,10 +18,28 @@ const exposureStore = useExposureStore()
 const exposureInfo = ref<ExposureInfo | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
+const detailHTML = ref<string>('')
 
 onMounted(async () => {
   try {
     exposureInfo.value = await exposureStore.getExposureInfo(props.alias)
+
+    const fileWithViews = exposureInfo.value.exposure?.files?.find(
+      (file) => file.views && file.views.length > 0
+    )
+
+    if (fileWithViews) {
+      const viewEntry = fileWithViews.views.find((v) => v.view_key === 'view')
+
+      if (viewEntry) {
+        detailHTML.value = await exposureStore.getExposureSafeHTML(
+          fileWithViews.exposure_id,
+          viewEntry.exposure_file_id,
+          'view',
+          'index.html'
+        )
+      }
+    }
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to load exposure'
     console.error('Error loading exposure:', err)
@@ -71,6 +89,10 @@ const goBack = () => {
         :title="`Exposure ${exposureInfo.exposure.id}`"
         :description="exposureInfo.exposure.description || undefined"
       />
+
+      <div v-if="detailHTML" class="box mb-8">
+        <div v-html="detailHTML"></div>
+      </div>
 
       <div class="box">
         <h2 class="text-xl font-semibold mb-4">Files</h2>

@@ -59,4 +59,21 @@ export const exposureService = {
     const payload = await response.json()
     return payload.inner
   },
+
+  async getExposureSafeHTML(
+    exposureId: number,
+    exposureFileId: number,
+    viewKey: string,
+    path: string
+  ): Promise<string> {
+    const response = await fetch(
+      `${API_BASE_URL}/api/exposure/safe_html/${exposureId}/${exposureFileId}/${viewKey}/${path}`
+    )
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch HTML: ${response.status}`)
+    }
+
+    return response.text()
+  },
 }
