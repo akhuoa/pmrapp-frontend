@@ -96,9 +96,10 @@ export const useExposureStore = defineStore('exposure', () => {
     exposureId: number,
     exposureFileId: number,
     viewKey: string,
-    path: string
+    path: string,
+    routePath: string
   ): Promise<string> => {
-    const cacheKey = `${exposureId}:${exposureFileId}:${viewKey}:${path}`
+    const cacheKey = `${exposureId}:${exposureFileId}:${viewKey}:${path}:${routePath}`
 
     // Check cache first.
     const cached = exposureHTMLCache.value.get(cacheKey)
@@ -111,7 +112,8 @@ export const useExposureStore = defineStore('exposure', () => {
         exposureId,
         exposureFileId,
         viewKey,
-        path
+        path,
+        routePath
       )
       exposureHTMLCache.value.set(cacheKey, html)
       return html

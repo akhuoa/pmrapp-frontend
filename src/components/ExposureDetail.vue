@@ -30,13 +30,17 @@ onMounted(async () => {
 
     if (fileWithViews) {
       const viewEntry = fileWithViews.views.find((v) => v.view_key === 'view')
+      // This route path is used to fix relative paths in the HTML content.
+      // It is not a part of the API request parameters.
+      const routePath = router.currentRoute.value.path
 
       if (viewEntry) {
         detailHTML.value = await exposureStore.getExposureSafeHTML(
           fileWithViews.exposure_id,
           viewEntry.exposure_file_id,
           'view',
-          'index.html'
+          'index.html',
+          routePath
         )
       }
     }
