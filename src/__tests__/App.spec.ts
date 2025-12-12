@@ -14,9 +14,12 @@ describe('App', () => {
       global: {
         stubs: {
           RouterView: { template: '<div class="router-view-stub"></div>' },
+          DefaultLayout: { template: '<div class="default-layout-stub"><slot /></div>' },
         },
       },
     })
+    expect(wrapper.find('.min-h-screen').exists()).toBe(true)
+    expect(wrapper.find('.default-layout-stub').exists()).toBe(true)
     expect(wrapper.find('.router-view-stub').exists()).toBe(true)
     expect(wrapper.findComponent(BackToTop).exists()).toBe(true)
   })
