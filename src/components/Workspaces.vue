@@ -1,39 +1,62 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { ref } from 'vue'
-import { getWorkspaceService } from '@/services'
-import type { Workspace } from '@/types/workspace'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useWorkspaceStore } from '@/stores/workspace'
+import ListToolbar from './molecules/ListToolbar.vue'
 import WorkspaceListItem from './molecules/WorkspaceListItem.vue'
 import ItemList from './organisms/ItemList.vue'
 
-const workspaces = ref<Workspace[]>([])
-const error = ref<string | null>(null)
+const workspaceStore = useWorkspaceStore()
+const route = useRoute()
+const router = useRouter()
+const searchQuery = ref((route.query.search as string) || '')
 
-try {
-  workspaces.value = await getWorkspaceService().listAliasedWorkspaces()
+onMounted(async () => {
+  await workspaceStore.fetchWorkspaces()
+})
 
-  // Sort by entity.description alphabetically.
-  workspaces.value.sort((a: Workspace, b: Workspace) => {
-    const descA = a.entity.description ?? ''
-    const descB = b.entity.description ?? ''
-    return descA.localeCompare(descB)
-  })
-} catch (err) {
-  error.value = err instanceof Error ? err.message : 'Failed to load workspaces'
-  console.error('Error loading workspaces:', err)
+// Sync search query with URL query parameter.
+watch(searchQuery, (newValue) => {
+  const query = newValue.trim() ? { search: newValue } : {}
+  router.replace({ query })
+})
+
+const handleRefresh = async () => {
+  await workspaceStore.fetchWorkspaces(true)
 }
+
+const filteredWorkspaces = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return workspaceStore.workspaces
+  }
+
+  const query = searchQuery.value.toLowerCase()
+  return workspaceStore.workspaces.filter((workspace) => {
+    const description = workspace.entity.description?.toLowerCase() || ''
+    return description.includes(query)
+  })
+})
 </script>
 
 <template>
+  <ListToolbar
+    v-model:search-query="searchQuery"
+    :is-loading="workspaceStore.isLoading"
+    content-section="Workspace Listing"
+    @refresh="handleRefresh"
+  />
+
   <ItemList
-    :items="workspaces"
-    :error="error"
+    :items="filteredWorkspaces"
+    :error="workspaceStore.error"
+    :is-loading="workspaceStore.isLoading"
     error-title="Error loading workspaces"
     empty-message="No workspaces found."
   >
     <template #item>
       <WorkspaceListItem
-        v-for="workspace in workspaces"
+        v-for="workspace in filteredWorkspaces"
         :key="workspace.alias"
         :workspace="workspace"
       />

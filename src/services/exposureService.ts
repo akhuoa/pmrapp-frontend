@@ -3,7 +3,7 @@ import type { Exposure, ExposureFileInfo, ExposureInfo } from '@/types/exposure'
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export const exposureService = {
-  async listAliased(): Promise<Exposure[]> {
+  async listAliasedExposures(): Promise<Exposure[]> {
     const response = await fetch(`${API_BASE_URL}/api/list_aliased_exposures`, {
       method: 'POST',
       headers: {
@@ -45,7 +45,9 @@ export const exposureService = {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        id,
+        id: {
+          Aliased: id,
+        },
         path,
       }),
     })

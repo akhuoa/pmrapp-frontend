@@ -7,6 +7,6 @@
 
 @media (prefers-color-scheme: dark) {
   .input-field {
-    @apply bg-background text-gray-100 border-gray-600;
+    @apply bg-background text-gray-100 border-gray-700;
   }
 }

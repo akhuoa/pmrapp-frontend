@@ -1,9 +1,10 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
-import { getExposureService } from '@/services'
+import { useExposureStore } from '@/stores/exposure'
 import type { ExposureInfo } from '@/types/exposure'
 import PageHeader from './molecules/PageHeader.vue'
 import ErrorBlock from './organisms/ErrorBlock.vue'
@@ -12,32 +13,60 @@ const props = defineProps<{
   alias: string
 }>()
 
+const router = useRouter()
+const exposureStore = useExposureStore()
 const exposureInfo = ref<ExposureInfo | null>(null)
 const error = ref<string | null>(null)
+const isLoading = ref(true)
 
-try {
-  exposureInfo.value = await getExposureService().getExposureInfo(props.alias)
-} catch (err) {
-  error.value = err instanceof Error ? err.message : 'Failed to load exposure'
-  console.error('Error loading exposure:', err)
+onMounted(async () => {
+  try {
+    exposureInfo.value = await exposureStore.getExposureInfo(props.alias)
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Failed to load exposure'
+    console.error('Error loading exposure:', err)
+  } finally {
+    isLoading.value = false
+  }
+})
+
+const goBack = () => {
+  // If thre's history with search query, go back to it.
+  // Otherwise, go to exposure listing.
+  if (
+    window.history.state.back?.includes('/exposure') &&
+    !window.history.state.back?.includes('/exposure/')
+  ) {
+    router.back()
+  } else {
+    router.push('/exposure')
+  }
 }
 </script>
 
 <template>
+  <div class="mb-4">
+    <ActionButton
+      variant="link"
+      @click="goBack"
+      content-section="Exposure Detail"
+    >
+      &larr; Back to Exposures
+    </ActionButton>
+  </div>
+
   <ErrorBlock
     v-if="error"
     title="Error loading exposure"
     :error="error"
   />
 
+  <div v-else-if="isLoading" class="text-center box">
+    Loading exposure...
+  </div>
+
   <div v-else-if="exposureInfo" class="flex flex-col lg:flex-row gap-8">
     <article class="flex-1">
-      <div class="mb-4">
-        <RouterLink to="/exposure" class="text-link">
-          &larr; Back
-        </RouterLink>
-      </div>
-
       <PageHeader
         :title="`Exposure ${exposureInfo.exposure.id}`"
         :description="exposureInfo.exposure.description || undefined"
