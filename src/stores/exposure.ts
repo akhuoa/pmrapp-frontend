@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { getExposureService } from '@/services'
 import type { Exposure, ExposureFileInfo, ExposureInfo } from '@/types/exposure'
 
-const CACHE_TTL = 30 * 60 * 1000 // 30 minutes in milliseconds
+const CACHE_TTL = 24 * 60 * 60 * 1000 // 1 day in milliseconds
 
 export const useExposureStore = defineStore('exposure', () => {
   const exposures = ref<Exposure[]>([])
