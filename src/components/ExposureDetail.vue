@@ -42,7 +42,7 @@ onMounted(async () => {
           viewEntry.exposure_file_id,
           'view',
           'index.html',
-          routePath
+          routePath,
         )
       }
     }
