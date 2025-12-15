@@ -66,7 +66,7 @@ export const exposureService = {
     exposureFileId: number,
     viewKey: string,
     path: string,
-    routePath: string
+    routePath: string,
   ): Promise<string> {
     const response = await fetch(
       `${API_BASE_URL}/api/exposure/safe_html/${exposureId}/${exposureFileId}/${viewKey}/${path}`,
