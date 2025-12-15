@@ -6,6 +6,7 @@ import ActionButton from '@/components/atoms/ActionButton.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import { useExposureStore } from '@/stores/exposure'
 import type { ExposureInfo } from '@/types/exposure'
+import { useBackNavigation } from '@/composables/useBackNavigation'
 import PageHeader from './molecules/PageHeader.vue'
 import ErrorBlock from './organisms/ErrorBlock.vue'
 
@@ -19,6 +20,7 @@ const exposureInfo = ref<ExposureInfo | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 const detailHTML = ref<string>('')
+const { goBack } = useBackNavigation('/exposure')
 
 onMounted(async () => {
   try {
@@ -51,19 +53,6 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
-
-const goBack = () => {
-  // If there's history with search query, go back to it.
-  // Otherwise, go to exposure listing.
-  if (
-    window.history.state.back?.includes('/exposure') &&
-    !window.history.state.back?.includes('/exposure/')
-  ) {
-    router.back()
-  } else {
-    router.push('/exposure')
-  }
-}
 </script>
 
 <template>

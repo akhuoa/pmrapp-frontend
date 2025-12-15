@@ -5,8 +5,10 @@ import { useRouter } from 'vue-router'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { WorkspaceInfo } from '@/types/workspace'
+import { useBackNavigation } from '@/composables/useBackNavigation'
 import PageHeader from './molecules/PageHeader.vue'
 import ErrorBlock from './organisms/ErrorBlock.vue'
+import ActionButton from '@/components/atoms/ActionButton.vue'
 
 const props = defineProps<{
   alias: string
@@ -17,6 +19,7 @@ const workspaceStore = useWorkspaceStore()
 const workspaceInfo = ref<WorkspaceInfo | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
+const { goBack } = useBackNavigation('/workspace')
 
 onMounted(async () => {
   try {
@@ -28,19 +31,6 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
-
-const goBack = () => {
-  // If there's history with search query, go back to it.
-  // Otherwise, go to workspace listing.
-  if (
-    window.history.state.back?.includes('/workspace') &&
-    !window.history.state.back?.includes('/workspace/')
-  ) {
-    router.back()
-  } else {
-    router.push('/workspace')
-  }
-}
 </script>
 
 <template>
