@@ -39,7 +39,7 @@ const sizeClasses = {
   lg: 'text-base px-8 py-2 rounded-lg',
 }
 
-const buttonClasses = 'inline-flex items-center justify-center gap-2'
+const buttonClasses = 'inline-flex items-center justify-center gap-2 cursor-pointer'
 </script>
 
 <template>
