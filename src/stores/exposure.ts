@@ -50,7 +50,6 @@ export const useExposureStore = defineStore('exposure', () => {
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to load exposures'
       console.error('Error loading exposures:', err)
-      throw err
     } finally {
       isLoading.value = false
     }

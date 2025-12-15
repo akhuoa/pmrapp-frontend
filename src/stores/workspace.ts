@@ -48,7 +48,6 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to load workspaces'
       console.error('Error loading workspaces:', err)
-      throw err
     } finally {
       isLoading.value = false
     }
