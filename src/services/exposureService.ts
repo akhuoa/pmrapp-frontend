@@ -1,4 +1,5 @@
 import type { Exposure, ExposureFileInfo, ExposureInfo } from '@/types/exposure'
+import { resolveHtmlPaths } from '@/utils/path'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
@@ -76,8 +77,6 @@ export const exposureService = {
     }
 
     const responseText = await response.text()
-    const updatedResponseText = responseText.replace(/src="\.\.\//g, `src="${API_BASE_URL}${routePath}/`)
-
-    return updatedResponseText
+    return resolveHtmlPaths(responseText, API_BASE_URL, routePath)
   },
 }
