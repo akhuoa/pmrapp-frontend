@@ -21,10 +21,13 @@ export const authService = {
   },
 
   async logout(): Promise<void> {
+    const token = sessionStorage.getItem('auth_token')
+
     const response = await fetch(`${API_BASE_URL}/api/sign_out`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
       },
     })
 
