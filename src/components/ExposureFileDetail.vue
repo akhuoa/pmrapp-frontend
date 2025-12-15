@@ -25,7 +25,6 @@ onMounted(async () => {
     const fileView = `${file}/view`
     // const fileDownload = file // This will return redirect path to download.
     exposureFileInfo.value = await exposureStore.getExposureFileInfo(alias, fileView)
-    console.log('exposuree file info', exposureFileInfo.value)
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to load exposure file'
     console.error('Error loading exposure file:', err)
