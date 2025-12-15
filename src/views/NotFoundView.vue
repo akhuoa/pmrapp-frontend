@@ -23,7 +23,7 @@ const goBack = () => {
     <p class="text-lg mb-8">
       The page you are looking for doesn't exist or has been moved.
     </p>
-    
+
     <ActionButton
       v-if="hasHistory"
       @click="goBack"
@@ -44,5 +44,5 @@ const goBack = () => {
     >
       Go to Home
     </ActionButton>
-  </div>      
+  </div>
 </template>

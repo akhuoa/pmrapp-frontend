@@ -10,7 +10,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  searchPlaceholder: 'Search by description...',
+  searchPlaceholder: 'Filter by description...',
 })
 
 const emit = defineEmits<{

@@ -22,7 +22,7 @@ app.use(pinia)
 app.use(router)
 app.use(gtag)
 
-// Initialise authentication state from local storage.
+// Initialise authentication state from session storage.
 const authStore = useAuthStore()
 authStore.initAuth()
 

@@ -13,7 +13,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     // TEMPORARY: Using sessionStorage for token persistence.
     // This is not the most secure approach as it's still vulnerable to XSS attacks.
-    // It can be HttpOnly cookies or other secure storage mechanisms in the future.
+    // This can be HttpOnly cookies or other secure storage mechanisms in the future.
     sessionStorage.setItem('auth_token', authToken)
     sessionStorage.setItem('username', user)
   }

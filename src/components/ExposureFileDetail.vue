@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import { useExposureStore } from '@/stores/exposure'
 import type { ExposureFileInfo } from '@/types/exposure'
+import { useBackNavigation } from '@/composables/useBackNavigation'
 import PageHeader from './molecules/PageHeader.vue'
 import ErrorBlock from './organisms/ErrorBlock.vue'
 
@@ -18,6 +19,7 @@ const exposureStore = useExposureStore()
 const exposureFileInfo = ref<ExposureFileInfo | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
+const { goBack } = useBackNavigation(`/exposure/${props.alias}`)
 
 onMounted(async () => {
   try {
@@ -25,7 +27,6 @@ onMounted(async () => {
     const fileView = `${file}/view`
     // const fileDownload = file // This will return redirect path to download.
     exposureFileInfo.value = await exposureStore.getExposureFileInfo(alias, fileView)
-    console.log('exposuree file info', exposureFileInfo.value)
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to load exposure file'
     console.error('Error loading exposure file:', err)
@@ -33,18 +34,6 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
-
-const goBack = () => {
-  // Keep history if there's search query, else go to exposure detail.
-  if (
-    window.history.state.back?.includes(`/exposure/${props.alias}`) &&
-    !window.history.state.back?.includes(`/exposure/${props.alias}/`)
-  ) {
-    router.back()
-  } else {
-    router.push(`/exposure/${props.alias}`)
-  }
-}
 </script>
 
 <template>
