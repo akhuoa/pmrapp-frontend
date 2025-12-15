@@ -53,7 +53,7 @@ onMounted(async () => {
 })
 
 const goBack = () => {
-  // If thre's history with search query, go back to it.
+  // If there's history with search query, go back to it.
   // Otherwise, go to exposure listing.
   if (
     window.history.state.back?.includes('/exposure') &&
