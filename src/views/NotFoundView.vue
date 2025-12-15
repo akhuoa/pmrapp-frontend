@@ -41,7 +41,7 @@ const goBack = () => {
       size="lg"
       class="inline-block"
     >
-    Go to Home
+      Go to Home
     </ActionButton>
   </div>
 </template>
