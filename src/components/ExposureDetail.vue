@@ -170,43 +170,43 @@ onMounted(async () => {
 .html-view {
   @apply text-sm;
 
-  :global(a) {
+  & :deep(a) {
     @apply text-link;
   }
 
-  :global(h2),
-  :global(h3),
-  :global(h4) {
+  & :deep(h2),
+  & :deep(h3),
+  & :deep(h4) {
     @apply text-xl font-semibold mt-8 mb-4;
   }
 
-  :global(> div > h2),
-  :global(> div > h3),
-  :global(> div > h4) {
+  & :deep(> div > h2),
+  & :deep(> div > h3),
+  & :deep(> div > h4) {
     @apply mt-0;
   }
 
-  :global(p) {
+  & :deep(p) {
     @apply text-sm mb-4;
   }
 
-  :global(img) {
+  & :deep(img) {
     @apply max-w-full h-auto;
   }
 
-  :global(table) {
+  & :deep(table) {
     @apply w-full border border-collapse border-gray-300 dark:border-gray-600 mb-4 table-fixed;
   }
 
-  :global(table caption) {
+  & :deep(table caption) {
     @apply text-sm font-medium mb-2;
   }
 
-  :global(table td), :global(table th) {
+  & :deep(table td), & :deep(table th) {
     @apply border border-gray-300 dark:border-gray-600 p-2;
   }
 
-  :global(table td) {
+  & :deep(table td) {
     @apply align-top text-sm;
   }
 }
