@@ -64,10 +64,10 @@ export const exposureService = {
     exposureId: number,
     exposureFileId: number,
     viewKey: string,
-    path: string
+    path: string,
   ): Promise<string> {
     const response = await fetch(
-      `${API_BASE_URL}/api/exposure/safe_html/${exposureId}/${exposureFileId}/${viewKey}/${path}`
+      `${API_BASE_URL}/api/exposure/safe_html/${exposureId}/${exposureFileId}/${viewKey}/${path}`,
     )
 
     if (!response.ok) {

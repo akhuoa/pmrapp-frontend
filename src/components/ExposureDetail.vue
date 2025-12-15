@@ -25,7 +25,7 @@ onMounted(async () => {
     exposureInfo.value = await exposureStore.getExposureInfo(props.alias)
 
     const fileWithViews = exposureInfo.value.exposure?.files?.find(
-      (file) => file.views && file.views.length > 0
+      (file) => file.views && file.views.length > 0,
     )
 
     if (fileWithViews) {
@@ -36,7 +36,7 @@ onMounted(async () => {
           fileWithViews.exposure_id,
           viewEntry.exposure_file_id,
           'view',
-          'index.html'
+          'index.html',
         )
       }
     }
