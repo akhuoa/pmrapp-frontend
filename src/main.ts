@@ -12,7 +12,7 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 
-// Initialise authentication state from local storage.
+// Initialise authentication state from session storage.
 const authStore = useAuthStore()
 authStore.initAuth()
 
