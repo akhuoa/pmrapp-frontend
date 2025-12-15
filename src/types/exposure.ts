@@ -8,7 +8,7 @@ export interface ExposureEntity {
   commit_id: string
   created_ts: number
   default_file_id: number | null
-  files: unknown | null
+  files: ExposureFile[] | null
 }
 
 export interface Exposure {
