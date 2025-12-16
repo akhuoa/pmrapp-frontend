@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import Workspaces from '@/components/Workspaces.vue'
 import { useWorkspaceStore } from '@/stores/workspace'
+import { formatNumber } from '@/utils/format'
 
 const workspaceStore = useWorkspaceStore()
 const filteredCount = ref(0)
@@ -31,11 +32,11 @@ const description = computed(() => {
   if (hasFilter.value) {
     if (filteredCount.value === 0) return 'No workspaces found. Try a different keyword.'
     if (filteredCount.value !== totalCount.value)
-      return `Showing ${filteredCount.value} of ${totalCount.value} workspace${totalCount.value !== 1 ? 's' : ''}.`
+      return `Showing ${formatNumber(filteredCount.value)} of ${formatNumber(totalCount.value)} workspace${totalCount.value !== 1 ? 's' : ''}.`
   }
 
   const count = totalCount.value
-  return `Browse and explore ${count > 1 ? 'all ' : ''}${count} workspace${count > 1 ? 's' : ''}.`
+  return `Browse and explore ${count > 1 ? 'all ' : ''}${formatNumber(count)} workspace${count > 1 ? 's' : ''}.`
 })
 </script>
 
