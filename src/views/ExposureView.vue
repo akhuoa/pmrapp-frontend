@@ -1,10 +1,19 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import Exposures from '@/components/Exposures.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useExposureStore } from '@/stores/exposure'
 
 const exposureStore = useExposureStore()
+const filteredCount = ref(0)
+const totalCount = ref(0)
+const hasFilter = ref(false)
+
+const handleFilteredCountUpdate = (filtered: number, total: number, isFiltering: boolean) => {
+  filteredCount.value = filtered
+  totalCount.value = total
+  hasFilter.value = isFiltering
+}
 
 const description = computed(() => {
   if (exposureStore.isLoading) {
@@ -15,11 +24,15 @@ const description = computed(() => {
     return 'Unable to load exposures. Please try refreshing.'
   }
 
-  const count = exposureStore.exposures.length
-  if (count === 0) {
+  if (totalCount.value === 0) {
     return 'No exposures found. Please try refreshing.'
   }
 
+  if (hasFilter.value && filteredCount.value !== totalCount.value) {
+    return `Browse and explore ${filteredCount.value} out of ${totalCount.value} exposure${totalCount.value !== 1 ? 's' : ''}.`
+  }
+
+  const count = totalCount.value
   return `Browse and explore ${count > 1 ? 'all ' : ''}${count} exposure${count > 1 ? 's' : ''}.`
 })
 </script>
@@ -30,5 +43,5 @@ const description = computed(() => {
     :description="description"
   />
 
-  <Exposures />
+  <Exposures @update-filtered-count="handleFilteredCountUpdate" />
 </template>

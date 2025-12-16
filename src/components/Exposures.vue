@@ -7,6 +7,10 @@ import ExposureListItem from './molecules/ExposureListItem.vue'
 import ListToolbar from './molecules/ListToolbar.vue'
 import ItemList from './organisms/ItemList.vue'
 
+const emit = defineEmits<{
+  updateFilteredCount: [filteredCount: number, totalCount: number, hasFilter: boolean]
+}>()
+
 const exposureStore = useExposureStore()
 const route = useRoute()
 const router = useRouter()
@@ -37,6 +41,19 @@ const filteredExposures = computed(() => {
     return description.includes(query)
   })
 })
+
+watch(
+  [filteredExposures, () => exposureStore.exposures.length],
+  () => {
+    emit(
+      'updateFilteredCount',
+      filteredExposures.value.length,
+      exposureStore.exposures.length,
+      !!filterQuery.value.trim()
+    )
+  },
+  { immediate: true }
+)
 </script>
 
 <template>

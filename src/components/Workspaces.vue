@@ -7,6 +7,10 @@ import ListToolbar from './molecules/ListToolbar.vue'
 import WorkspaceListItem from './molecules/WorkspaceListItem.vue'
 import ItemList from './organisms/ItemList.vue'
 
+const emit = defineEmits<{
+  updateFilteredCount: [filteredCount: number, totalCount: number, hasFilter: boolean]
+}>()
+
 const workspaceStore = useWorkspaceStore()
 const route = useRoute()
 const router = useRouter()
@@ -37,6 +41,19 @@ const filteredWorkspaces = computed(() => {
     return description.includes(query)
   })
 })
+
+watch(
+  [filteredWorkspaces, () => workspaceStore.workspaces.length],
+  () => {
+    emit(
+      'updateFilteredCount',
+      filteredWorkspaces.value.length,
+      workspaceStore.workspaces.length,
+      !!filterQuery.value.trim()
+    )
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
