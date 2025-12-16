@@ -29,8 +29,7 @@ const description = computed(() => {
   }
 
   if (hasFilter.value) {
-    if (filteredCount.value === 0)
-      return 'No exposures found. Try a different keyword.'
+    if (filteredCount.value === 0) return 'No exposures found. Try a different keyword.'
     if (filteredCount.value !== totalCount.value)
       return `Showing ${filteredCount.value} of ${totalCount.value} exposure${totalCount.value !== 1 ? 's' : ''}.`
   }

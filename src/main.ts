@@ -12,7 +12,7 @@ const gtag = createGtag({
   tagId: GA_MEASUREMENT_ID,
   pageTracker: {
     router,
-  }
+  },
 })
 
 const app = createApp(App)

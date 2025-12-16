@@ -28,9 +28,8 @@ const description = computed(() => {
     return 'No workspaces found. Please try refreshing.'
   }
 
-  if (hasFilter.value ) {
-    if (filteredCount.value === 0)
-      return 'No workspaces found. Try a different keyword.'
+  if (hasFilter.value) {
+    if (filteredCount.value === 0) return 'No workspaces found. Try a different keyword.'
     if (filteredCount.value !== totalCount.value)
       return `Showing ${filteredCount.value} of ${totalCount.value} workspace${totalCount.value !== 1 ? 's' : ''}.`
   }

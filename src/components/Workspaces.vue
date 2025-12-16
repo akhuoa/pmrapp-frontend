@@ -49,10 +49,10 @@ watch(
       'updateFilteredCount',
       filteredWorkspaces.value.length,
       workspaceStore.workspaces.length,
-      !!filterQuery.value.trim()
+      !!filterQuery.value.trim(),
     )
   },
-  { immediate: true }
+  { immediate: true },
 )
 </script>
 
