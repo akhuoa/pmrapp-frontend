@@ -3,24 +3,24 @@ import ActionButton from '../atoms/ActionButton.vue'
 import RefreshIcon from '../icons/RefreshIcon.vue'
 
 interface Props {
-  searchQuery: string
+  filterQuery: string
   isLoading: boolean
-  searchPlaceholder?: string
+  filterPlaceholder?: string
   contentSection: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  searchPlaceholder: 'Filter by description...',
+  filterPlaceholder: 'Filter by description...',
 })
 
 const emit = defineEmits<{
-  'update:searchQuery': [value: string]
+  'update:filterQuery': [value: string]
   refresh: []
 }>()
 
-const handleSearchInput = (event: Event) => {
+const handleFilterInput = (event: Event) => {
   const target = event.target as HTMLInputElement
-  emit('update:searchQuery', target.value)
+  emit('update:filterQuery', target.value)
 }
 
 const handleRefresh = () => {
@@ -32,11 +32,11 @@ const handleRefresh = () => {
   <div class="mb-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
     <div class="flex-1 w-full sm:w-auto">
       <input
-        :value="searchQuery"
+        :value="filterQuery"
         type="search"
-        :placeholder="searchPlaceholder"
+        :placeholder="filterPlaceholder"
         class="input-field w-full"
-        @input="handleSearchInput"
+        @input="handleFilterInput"
       />
     </div>
     <ActionButton

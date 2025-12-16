@@ -7,18 +7,22 @@ import ExposureListItem from './molecules/ExposureListItem.vue'
 import ListToolbar from './molecules/ListToolbar.vue'
 import ItemList from './organisms/ItemList.vue'
 
+const emit = defineEmits<{
+  updateFilteredCount: [filteredCount: number, totalCount: number, hasFilter: boolean]
+}>()
+
 const exposureStore = useExposureStore()
 const route = useRoute()
 const router = useRouter()
-const searchQuery = ref((route.query.search as string) || '')
+const filterQuery = ref((route.query.filter as string) || '')
 
 onMounted(async () => {
   await exposureStore.fetchExposures()
 })
 
-// Sync search query with URL query parameter.
-watch(searchQuery, (newValue) => {
-  const query = newValue.trim() ? { search: newValue } : {}
+// Sync filter query with URL query parameter.
+watch(filterQuery, (newValue) => {
+  const query = newValue.trim() ? { filter: newValue } : {}
   router.replace({ query })
 })
 
@@ -27,21 +31,34 @@ const handleRefresh = async () => {
 }
 
 const filteredExposures = computed(() => {
-  if (!searchQuery.value.trim()) {
+  if (!filterQuery.value.trim()) {
     return exposureStore.exposures
   }
 
-  const query = searchQuery.value.toLowerCase()
+  const query = filterQuery.value.toLowerCase()
   return exposureStore.exposures.filter((exposure) => {
     const description = exposure.entity.description?.toLowerCase() || ''
     return description.includes(query)
   })
 })
+
+watch(
+  [filteredExposures, () => exposureStore.exposures.length],
+  () => {
+    emit(
+      'updateFilteredCount',
+      filteredExposures.value.length,
+      exposureStore.exposures.length,
+      !!filterQuery.value.trim()
+    )
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
   <ListToolbar
-    v-model:search-query="searchQuery"
+    v-model:filter-query="filterQuery"
     :is-loading="exposureStore.isLoading"
     content-section="Exposure Listing"
     @refresh="handleRefresh"

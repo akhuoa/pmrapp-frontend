@@ -7,18 +7,22 @@ import ListToolbar from './molecules/ListToolbar.vue'
 import WorkspaceListItem from './molecules/WorkspaceListItem.vue'
 import ItemList from './organisms/ItemList.vue'
 
+const emit = defineEmits<{
+  updateFilteredCount: [filteredCount: number, totalCount: number, hasFilter: boolean]
+}>()
+
 const workspaceStore = useWorkspaceStore()
 const route = useRoute()
 const router = useRouter()
-const searchQuery = ref((route.query.search as string) || '')
+const filterQuery = ref((route.query.filter as string) || '')
 
 onMounted(async () => {
   await workspaceStore.fetchWorkspaces()
 })
 
-// Sync search query with URL query parameter.
-watch(searchQuery, (newValue) => {
-  const query = newValue.trim() ? { search: newValue } : {}
+// Sync filter query with URL query parameter.
+watch(filterQuery, (newValue) => {
+  const query = newValue.trim() ? { filter: newValue } : {}
   router.replace({ query })
 })
 
@@ -27,21 +31,34 @@ const handleRefresh = async () => {
 }
 
 const filteredWorkspaces = computed(() => {
-  if (!searchQuery.value.trim()) {
+  if (!filterQuery.value.trim()) {
     return workspaceStore.workspaces
   }
 
-  const query = searchQuery.value.toLowerCase()
+  const query = filterQuery.value.toLowerCase()
   return workspaceStore.workspaces.filter((workspace) => {
     const description = workspace.entity.description?.toLowerCase() || ''
     return description.includes(query)
   })
 })
+
+watch(
+  [filteredWorkspaces, () => workspaceStore.workspaces.length],
+  () => {
+    emit(
+      'updateFilteredCount',
+      filteredWorkspaces.value.length,
+      workspaceStore.workspaces.length,
+      !!filterQuery.value.trim()
+    )
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
   <ListToolbar
-    v-model:search-query="searchQuery"
+    v-model:filter-query="filterQuery"
     :is-loading="workspaceStore.isLoading"
     content-section="Workspace Listing"
     @refresh="handleRefresh"

@@ -13,10 +13,4 @@ export function trackButtonClick(payload: ButtonClickPayload): void {
     content_section,
     link_category: link_category
   });
-
-  console.log('button_click', {
-    button_name,
-    content_section,
-    link_category: link_category
-  })
 }
