@@ -7,8 +7,8 @@ import UserDropdown from '@/components/molecules/UserDropdown.vue'
 const route = useRoute()
 
 const navLinks = [
-  { path: '/workspace', label: 'Workspace' },
-  { path: '/exposure', label: 'Exposure' },
+  { path: '/workspace', label: 'Workspaces' },
+  { path: '/exposure', label: 'Exposures' },
 ]
 
 const isActive = (path: string) => computed(() => route.path.startsWith(path))
