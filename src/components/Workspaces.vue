@@ -14,7 +14,7 @@ const emit = defineEmits<{
 const workspaceStore = useWorkspaceStore()
 const route = useRoute()
 const router = useRouter()
-const filterQuery = ref((route.query.search as string) || '')
+const filterQuery = ref((route.query.filter as string) || '')
 
 onMounted(async () => {
   await workspaceStore.fetchWorkspaces()
@@ -22,7 +22,7 @@ onMounted(async () => {
 
 // Sync filter query with URL query parameter.
 watch(filterQuery, (newValue) => {
-  const query = newValue.trim() ? { search: newValue } : {}
+  const query = newValue.trim() ? { filter: newValue } : {}
   router.replace({ query })
 })
 
