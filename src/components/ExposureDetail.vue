@@ -102,6 +102,7 @@ onMounted(async () => {
                 variant="primary"
                 size="sm"
                 :to="`/exposure/${alias}/${entry[0]}`"
+                contentSection="exposure_file_list"
               >
                 View
               </ActionButton>
@@ -109,6 +110,7 @@ onMounted(async () => {
                 variant="secondary"
                 size="sm"
                 :to="`/workspace/${exposureInfo.workspace_alias}/rawfile/${exposureInfo.exposure.commit_id}/${entry[0]}`"
+                contentSection="exposure_file_list"
               >
                 Download
               </ActionButton>
