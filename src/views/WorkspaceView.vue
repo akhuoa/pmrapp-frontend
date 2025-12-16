@@ -7,6 +7,10 @@ import { useWorkspaceStore } from '@/stores/workspace'
 const workspaceStore = useWorkspaceStore()
 
 const description = computed(() => {
+  if (workspaceStore.isLoading) {
+    return 'Loading workspaces...'
+  }
+
   if (workspaceStore.error) {
     return 'Unable to load workspaces. Please try refreshing.'
   }

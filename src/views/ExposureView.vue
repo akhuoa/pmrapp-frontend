@@ -7,6 +7,10 @@ import { useExposureStore } from '@/stores/exposure'
 const exposureStore = useExposureStore()
 
 const description = computed(() => {
+  if (exposureStore.isLoading) {
+    return 'Loading exposures...'
+  }
+
   if (exposureStore.error) {
     return 'Unable to load exposures. Please try refreshing.'
   }
