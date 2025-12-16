@@ -47,7 +47,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="dropdownRef" class="relative">
+  <div v-if="authStore.isAuthenticated" ref="dropdownRef" class="relative">
     <button
       @click="toggleDropdown"
       class="nav-link p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -60,28 +60,22 @@ onUnmounted(() => {
       v-if="isOpen"
       class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50"
     >
-      <template v-if="authStore.isAuthenticated">
-        <div class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
-          {{ authStore.username }}
-        </div>
-        <button
-          @click="handleLogout"
-          class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-        >
-          Logout
-        </button>
-      </template>
-      <template v-else>
-        <RouterLink
-          to="/login"
-          @click="closeDropdown"
-          class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-        >
-          Login
-        </RouterLink>
-      </template>
+      <button
+        @click="handleLogout"
+        class="w-full cursor-pointer text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+      >
+        Log out
+      </button>
     </div>
   </div>
+
+  <RouterLink
+    v-else
+    to="/login"
+    class="nav-link"
+  >
+    Log in
+  </RouterLink>
 </template>
 
 <style scoped>
