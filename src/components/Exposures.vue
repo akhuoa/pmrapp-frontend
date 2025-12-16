@@ -49,10 +49,10 @@ watch(
       'updateFilteredCount',
       filteredExposures.value.length,
       exposureStore.exposures.length,
-      !!filterQuery.value.trim()
+      !!filterQuery.value.trim(),
     )
   },
-  { immediate: true }
+  { immediate: true },
 )
 </script>
 
