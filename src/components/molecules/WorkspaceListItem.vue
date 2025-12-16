@@ -13,7 +13,7 @@ defineProps<{
         {{ workspace.entity.description || workspace.alias }}
       </h3>
     </RouterLink>
-    <p class="text-sm">{{ workspace.entity.url }}</p>
+    <p class="text-sm">{{ workspace.entity.long_description || workspace.entity.url }}</p>
   </div>
 </template>
 
