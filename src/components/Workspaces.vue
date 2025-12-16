@@ -10,14 +10,14 @@ import ItemList from './organisms/ItemList.vue'
 const workspaceStore = useWorkspaceStore()
 const route = useRoute()
 const router = useRouter()
-const searchQuery = ref((route.query.search as string) || '')
+const filterQuery = ref((route.query.search as string) || '')
 
 onMounted(async () => {
   await workspaceStore.fetchWorkspaces()
 })
 
-// Sync search query with URL query parameter.
-watch(searchQuery, (newValue) => {
+// Sync filter query with URL query parameter.
+watch(filterQuery, (newValue) => {
   const query = newValue.trim() ? { search: newValue } : {}
   router.replace({ query })
 })
@@ -27,11 +27,11 @@ const handleRefresh = async () => {
 }
 
 const filteredWorkspaces = computed(() => {
-  if (!searchQuery.value.trim()) {
+  if (!filterQuery.value.trim()) {
     return workspaceStore.workspaces
   }
 
-  const query = searchQuery.value.toLowerCase()
+  const query = filterQuery.value.toLowerCase()
   return workspaceStore.workspaces.filter((workspace) => {
     const description = workspace.entity.description?.toLowerCase() || ''
     return description.includes(query)
@@ -41,7 +41,7 @@ const filteredWorkspaces = computed(() => {
 
 <template>
   <ListToolbar
-    v-model:search-query="searchQuery"
+    v-model:filter-query="filterQuery"
     :is-loading="workspaceStore.isLoading"
     content-section="Workspace Listing"
     @refresh="handleRefresh"

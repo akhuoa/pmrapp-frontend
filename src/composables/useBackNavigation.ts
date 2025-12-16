@@ -1,7 +1,7 @@
 import { useRouter } from 'vue-router'
 
 /**
- * Composable for back navigation that preserves search state.
+ * Composable for back navigation that preserves filter state.
  *
  * @param basePath - The base path to check in history and navigate to (e.g., '/exposure', '/workspace').
  * @returns A function that navigates back or to the base path.
