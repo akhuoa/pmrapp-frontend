@@ -1,7 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import { useExposureStore } from '@/stores/exposure'
 import type { ExposureFileInfo } from '@/types/exposure'
@@ -14,7 +13,6 @@ const props = defineProps<{
   file: string
 }>()
 
-const router = useRouter()
 const exposureStore = useExposureStore()
 const exposureFileInfo = ref<ExposureFileInfo | null>(null)
 const error = ref<string | null>(null)
@@ -25,7 +23,6 @@ onMounted(async () => {
   try {
     const { alias, file } = props
     const fileView = `${file}/view`
-    // const fileDownload = file // This will return redirect path to download.
     exposureFileInfo.value = await exposureStore.getExposureFileInfo(alias, fileView)
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to load exposure file'
