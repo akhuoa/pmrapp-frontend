@@ -17,7 +17,7 @@ const exposureStore = useExposureStore()
 const exposureFileInfo = ref<ExposureFileInfo | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
-const { goBack } = useBackNavigation(`/exposure/${props.alias}`)
+const { goBack } = useBackNavigation(`/exposures/${props.alias}`)
 
 onMounted(async () => {
   try {
@@ -73,7 +73,7 @@ onMounted(async () => {
             <div class="flex items-center gap-2 flex-1 min-w-0">
               &bull;
               <RouterLink
-                :to="`/exposure/${props.alias}/${props.file}/${entry.view_key}`"
+                :to="`/exposures/${props.alias}/${props.file}/${entry.view_key}`"
                 class="text-link truncate"
               >
                 <span>{{ entry.view_key }}</span>

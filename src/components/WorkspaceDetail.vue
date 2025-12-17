@@ -19,7 +19,7 @@ const workspaceStore = useWorkspaceStore()
 const workspaceInfo = ref<WorkspaceInfo | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
-const { goBack } = useBackNavigation('/workspace')
+const { goBack } = useBackNavigation('/workspaces')
 
 onMounted(async () => {
   try {
@@ -65,7 +65,7 @@ onMounted(async () => {
       <ul class="space-y-2">
         <li v-for="entry in workspaceInfo.target.TreeInfo.entries" :key="entry.id">
           <RouterLink
-            :to="`/workspace/${alias}/file/${workspaceInfo.commit.commit_id}/${entry.name}`"
+            :to="`/workspaces/${alias}/file/${workspaceInfo.commit.commit_id}/${entry.name}`"
             class="text-link inline-flex items-center gap-2"
           >
             <FileIcon class="text-foreground" />
