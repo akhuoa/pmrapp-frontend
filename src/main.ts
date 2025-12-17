@@ -1,6 +1,6 @@
 import { createPinia } from 'pinia'
-import { createGtag } from 'vue-gtag'
 import { createApp } from 'vue'
+import { createGtag } from 'vue-gtag'
 import './assets/main.css'
 
 import App from './App.vue'

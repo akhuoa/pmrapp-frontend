@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import Exposures from '@/components/Exposures.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useExposureStore } from '@/stores/exposure'
+import { formatNumber } from '@/utils/format'
 
 const exposureStore = useExposureStore()
 const filteredCount = ref(0)
@@ -31,11 +32,11 @@ const description = computed(() => {
   if (hasFilter.value) {
     if (filteredCount.value === 0) return 'No exposures found. Try a different keyword.'
     if (filteredCount.value !== totalCount.value)
-      return `Showing ${filteredCount.value} of ${totalCount.value} exposure${totalCount.value !== 1 ? 's' : ''}.`
+      return `Showing ${formatNumber(filteredCount.value)} of ${formatNumber(totalCount.value)} exposure${totalCount.value !== 1 ? 's' : ''}.`
   }
 
   const count = totalCount.value
-  return `Browse and explore ${count > 1 ? 'all ' : ''}${count} exposure${count > 1 ? 's' : ''}.`
+  return `Browse and explore ${count > 1 ? 'all ' : ''}${formatNumber(count)} exposure${count > 1 ? 's' : ''}.`
 })
 </script>
 

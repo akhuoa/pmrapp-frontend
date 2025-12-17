@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useRoute, type RouteLocationRaw } from 'vue-router'
+import { type RouteLocationRaw, useRoute } from 'vue-router'
 import { trackButtonClick } from '@/utils/analytics'
 
 type ButtonVariant = 'primary' | 'secondary' | 'link'
