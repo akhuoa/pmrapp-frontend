@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import ArrowRightIcon from '@/components/icons/ArrowRightIcon.vue'
+import NavigationCard from '@/components/molecules/NavigationCard.vue'
 </script>
 
 <template>
@@ -15,43 +15,17 @@ import ArrowRightIcon from '@/components/icons/ArrowRightIcon.vue'
   </section>
 
   <section class="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto mb-12">
-    <RouterLink
+    <NavigationCard
       to="/workspace"
-      class="box p-8 flex items-center gap-6 hover:shadow-lg transition-shadow group"
-    >
-      <div class="flex-1">
-        <h2 class="text-2xl font-bold mb-3 group-hover:text-primary transition-colors">
-          Workspaces
-        </h2>
-        <p class="text-gray-600 dark:text-gray-400 text-base">
-          Access project files and Git-based version history for all models.
-        </p>
-      </div>
-      <div class="flex-shrink-0">
-        <ArrowRightIcon
-          class="text-primary transform group-hover:translate-x-1 transition-transform"
-        />
-      </div>
-    </RouterLink>
+      title="Workspaces"
+      description="Access project files and Git-based version history for all models."
+    />
 
-    <RouterLink
+    <NavigationCard
       to="/exposure"
-      class="box p-8 flex items-center gap-6 hover:shadow-lg transition-shadow group"
-    >
-      <div class="flex-1">
-        <h2 class="text-2xl font-bold mb-3 group-hover:text-primary transition-colors">
-          Exposures
-        </h2>
-        <p class="text-gray-600 dark:text-gray-400 text-base">
-          Explore published models and simulation results for citation and public use.
-        </p>
-      </div>
-      <div class="flex-shrink-0">
-        <ArrowRightIcon
-          class="text-primary transform group-hover:translate-x-1 transition-transform"
-        />
-      </div>
-    </RouterLink>
+      title="Exposures"
+      description="Explore published models and simulation results for citation and public use."
+    />
   </section>
 
   <section class="p-8 text-center">
