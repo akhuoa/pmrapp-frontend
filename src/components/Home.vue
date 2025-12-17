@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import ActionButton from './atoms/ActionButton.vue'
+import ArrowRightIcon from '@/components/icons/ArrowRightIcon.vue'
 </script>
 
 <template>
@@ -14,28 +14,44 @@ import ActionButton from './atoms/ActionButton.vue'
     </p>
   </section>
 
-  <section class="max-w-4xl mb-12 mx-auto box">
-    <div class="flex items-center justify-between flex-wrap gap-6 text-center md:text-left">
-      <div class="flex-1 min-w-[250px]">
-        <h2 class="text-2xl font-bold mb-2">
-          Workspace Listing
+  <section class="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto mb-12">
+    <RouterLink
+      to="/workspace"
+      class="box p-8 flex items-center gap-6 hover:shadow-lg transition-shadow group"
+    >
+      <div class="flex-1">
+        <h2 class="text-2xl font-bold mb-3 group-hover:text-primary transition-colors">
+          Workspaces
         </h2>
-        <p class="">
-          Browse and explore all workspaces in the repository.
+        <p class="text-gray-600 dark:text-gray-400 text-base">
+          Access project files and Git-based version history for all models.
         </p>
       </div>
-      <div class="w-full md:w-auto">
-        <ActionButton
-          variant="primary"
-          size="lg"
-          :to="'/workspace'"
-          class="inline-block"
-          contentSection="home_page"
-        >
-          View Workspaces
-        </ActionButton>
+      <div class="flex-shrink-0">
+        <ArrowRightIcon
+          class="text-primary transform group-hover:translate-x-1 transition-transform"
+        />
       </div>
-    </div>
+    </RouterLink>
+
+    <RouterLink
+      to="/exposure"
+      class="box p-8 flex items-center gap-6 hover:shadow-lg transition-shadow group"
+    >
+      <div class="flex-1">
+        <h2 class="text-2xl font-bold mb-3 group-hover:text-primary transition-colors">
+          Exposures
+        </h2>
+        <p class="text-gray-600 dark:text-gray-400 text-base">
+          Explore published models and simulation results for citation and public use.
+        </p>
+      </div>
+      <div class="flex-shrink-0">
+        <ArrowRightIcon
+          class="text-primary transform group-hover:translate-x-1 transition-transform"
+        />
+      </div>
+    </RouterLink>
   </section>
 
   <section class="p-8 text-center">
