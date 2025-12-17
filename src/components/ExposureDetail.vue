@@ -20,7 +20,7 @@ const exposureInfo = ref<ExposureInfo | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 const detailHTML = ref<string>('')
-const { goBack } = useBackNavigation('/exposure')
+const { goBack } = useBackNavigation('/exposures')
 
 onMounted(async () => {
   try {
@@ -34,7 +34,8 @@ onMounted(async () => {
       const viewEntry = fileWithViews.views.find((v) => v.view_key === 'view')
       // This route path is used to fix relative paths in the HTML content.
       // It is not a part of the API request parameters.
-      const routePath = router.currentRoute.value.path
+      // Note: Keep as "exposure" (singular) to match server file paths, not the router path.
+      const routePath = `/exposure/${props.alias}`
 
       if (viewEntry) {
         detailHTML.value = await exposureStore.getExposureSafeHTML(
@@ -101,7 +102,7 @@ onMounted(async () => {
                 v-if="entry[1] === true"
                 variant="primary"
                 size="sm"
-                :to="`/exposure/${alias}/${entry[0]}`"
+                :to="`/exposures/${alias}/${entry[0]}`"
                 contentSection="exposure_file_list"
               >
                 View
@@ -109,7 +110,7 @@ onMounted(async () => {
               <ActionButton
                 variant="secondary"
                 size="sm"
-                :to="`/workspace/${exposureInfo.workspace_alias}/rawfile/${exposureInfo.exposure.commit_id}/${entry[0]}`"
+                :to="`/workspaces/${exposureInfo.workspace_alias}/rawfile/${exposureInfo.exposure.commit_id}/${entry[0]}`"
                 contentSection="exposure_file_list"
               >
                 Download
@@ -125,14 +126,14 @@ onMounted(async () => {
         <div class="text-sm leading-relaxed">
           Derived from workspace
           <RouterLink
-            :to="`/workspace/${exposureInfo.workspace_alias}`"
+            :to="`/workspaces/${exposureInfo.workspace_alias}`"
             class="text-link"
           >
             {{ exposureInfo.exposure.description }}
           </RouterLink>
           at changeset
           <RouterLink
-            :to="`/workspace/${exposureInfo.workspace_alias}/file/${exposureInfo.exposure.commit_id}`"
+            :to="`/workspaces/${exposureInfo.workspace_alias}/file/${exposureInfo.exposure.commit_id}`"
             class="text-link font-mono"
           >
             {{ exposureInfo.exposure.commit_id.substring(0, 12) }}
@@ -149,7 +150,7 @@ onMounted(async () => {
               class="text-sm"
             >
               <RouterLink
-                :to="`/exposure/${alias}/${entry[0]}`"
+                :to="`/exposures/${alias}/${entry[0]}`"
                 class="text-link inline-flex items-center gap-2"
               >
                 <span class="text-foreground">›</span>
