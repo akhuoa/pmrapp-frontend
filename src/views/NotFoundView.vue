@@ -34,6 +34,7 @@ const goBack = () => {
     >
       Go Back
     </ActionButton>
+
     <ActionButton
       v-else
       :to="'/'"
