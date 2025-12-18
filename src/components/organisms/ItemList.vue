@@ -6,6 +6,7 @@ interface Props {
   error: string | null
   errorTitle: string
   emptyMessage: string
+  isLoading?: boolean
 }
 
 defineProps<Props>()
@@ -13,6 +14,10 @@ defineProps<Props>()
 
 <template>
   <ErrorBlock v-if="error" :title="errorTitle" :error="error" />
+
+  <div v-else-if="isLoading" class="text-center box">
+    Loading...
+  </div>
 
   <div v-else-if="items.length === 0" class="text-center box">
     {{ emptyMessage }}
