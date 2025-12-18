@@ -1,7 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { nextTick, onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
@@ -14,7 +13,6 @@ const props = defineProps<{
   alias: string
 }>()
 
-const router = useRouter()
 const exposureStore = useExposureStore()
 const exposureInfo = ref<ExposureInfo | null>(null)
 const error = ref<string | null>(null)
