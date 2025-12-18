@@ -1,12 +1,19 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
+import { getAuthService } from '@/services'
+import { useAuthStore } from '@/stores/auth'
 
+const router = useRouter()
+const authStore = useAuthStore()
 const username = ref('')
 const password = ref('')
 const error = ref<string | null>(null)
 const isLoading = ref(false)
+
+const authService = getAuthService()
 
 const handleSubmit = async () => {
   error.value = null
@@ -19,14 +26,16 @@ const handleSubmit = async () => {
   isLoading.value = true
 
   try {
-    // TODO: Implement actual login logic.
-    console.log('Login attempt:', { username: username.value, password: '***' })
+    const token = await authService.login({
+      login: username.value,
+      password: password.value,
+    })
 
-    // Simulate API call.
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    // Store auth state.
+    authStore.setAuth(token, username.value)
 
-    // This is a temporary placeholder.
-    error.value = 'Login functionality coming soon...'
+    // Redirect to home page.
+    router.push('/')
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Login failed'
   } finally {

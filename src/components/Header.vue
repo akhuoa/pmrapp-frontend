@@ -2,12 +2,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import UserDropdown from '@/components/molecules/UserDropdown.vue'
 
 const route = useRoute()
 
 const navLinks = [
-  { path: '/workspace', label: 'Workspace' },
-  { path: '/exposure', label: 'Exposure' },
+  { path: '/workspaces', label: 'Workspaces' },
+  { path: '/exposures', label: 'Exposures' },
 ]
 
 const isActive = (path: string) => computed(() => route.path.startsWith(path))
@@ -33,13 +34,7 @@ const isActive = (path: string) => computed(() => route.path.startsWith(path))
           </li>
           <li class="h-6 border-l border-gray-300 dark:border-gray-600"></li>
           <li>
-            <RouterLink
-              to="/login"
-              class="nav-link"
-              active-class="text-primary"
-            >
-              Login
-            </RouterLink>
+            <UserDropdown />
           </li>
         </ul>
       </nav>

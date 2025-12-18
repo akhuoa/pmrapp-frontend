@@ -1,7 +1,9 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { ref } from 'vue'
-import { getExposureService } from '@/services'
+import { onMounted, ref } from 'vue'
+import ActionButton from '@/components/atoms/ActionButton.vue'
+import { useBackNavigation } from '@/composables/useBackNavigation'
+import { useExposureStore } from '@/stores/exposure'
 import type { ExposureFileInfo } from '@/types/exposure'
 import PageHeader from './molecules/PageHeader.vue'
 import ErrorBlock from './organisms/ErrorBlock.vue'
@@ -11,26 +13,53 @@ const props = defineProps<{
   file: string
 }>()
 
+const exposureStore = useExposureStore()
 const exposureFileInfo = ref<ExposureFileInfo | null>(null)
 const error = ref<string | null>(null)
+const isLoading = ref(true)
+const { goBack } = useBackNavigation(`/exposures/${props.alias}`)
 
-try {
-  exposureFileInfo.value = await getExposureService().getExposureFileInfo(props.alias, props.file)
-} catch (err) {
-  error.value = err instanceof Error ? err.message : 'Failed to load exposure file'
-  console.error('Error loading exposure file:', err)
-}
+onMounted(async () => {
+  try {
+    const { alias, file } = props
+    const fileView = `${file}/view`
+    exposureFileInfo.value = await exposureStore.getExposureFileInfo(alias, fileView)
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Failed to load exposure file'
+    console.error('Error loading exposure file:', err)
+  } finally {
+    isLoading.value = false
+  }
+})
 </script>
 
 <template>
+  <div class="mb-4">
+    <ActionButton
+      variant="link"
+      @click="goBack"
+      content-section="Exposure File Detail"
+    >
+      &larr; Back
+    </ActionButton>
+  </div>
+
   <ErrorBlock
     v-if="error"
     title="Error loading exposure file"
     :error="error"
   />
 
+  <div v-else-if="isLoading" class="text-center box">
+    Loading exposure file...
+  </div>
+
   <div v-else-if="exposureFileInfo" class="flex flex-col lg:flex-row gap-8">
-    <article class="flex-1">
+    <div v-if="exposureFileInfo.Redirect">
+      Redirect: {{ exposureFileInfo.Redirect }}
+    </div>
+
+    <article class="flex-1" v-else>
       <PageHeader
         :title="`Exposure ${exposureFileInfo.Target[0]?.exposure_id}`"
         :description="exposureFileInfo.Target[0]?.workspace_file_path || undefined"
@@ -44,7 +73,7 @@ try {
             <div class="flex items-center gap-2 flex-1 min-w-0">
               &bull;
               <RouterLink
-                :to="`/exposure/${props.alias}/${props.file}/${entry.view_key}`"
+                :to="`/exposures/${props.alias}/${props.file}/${entry.view_key}`"
                 class="text-link truncate"
               >
                 <span>{{ entry.view_key }}</span>

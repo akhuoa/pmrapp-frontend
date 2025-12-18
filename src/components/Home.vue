@@ -1,61 +1,34 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import ActionButton from './atoms/ActionButton.vue'
+import NavigationCard from '@/components/molecules/NavigationCard.vue'
 </script>
 
 <template>
-  <section class="text-center mb-16">
-    <h1 class="text-5xl font-bold mb-4">
+  <section class="text-center mt-8 mb-16">
+    <h1 class="text-5xl font-bold mb-8">
       Physiome Model Repository
     </h1>
     <p class="text-xl max-w-3xl mx-auto leading-relaxed">
-      Welcome to the demo of the platform that will power the next generation of the
-      Physiome Model Repository, written in Rust.
+      The Physiome Model Repository serves as a public resource for storing,
+      searching, and reusing CellML models and their metadata.
     </p>
   </section>
 
-  <section class="max-w-4xl mb-12 mx-auto box">
-    <div class="flex items-center justify-between flex-wrap gap-6 text-center md:text-left">
-      <div class="flex-1 min-w-[250px]">
-        <h2 class="text-2xl font-bold mb-2">
-          Workspace Listing
-        </h2>
-        <p class="">
-          Browse and explore all workspaces in the repository.
-        </p>
-      </div>
-      <div class="w-full md:w-auto">
-        <ActionButton
-          variant="primary"
-          size="lg"
-          :to="'/workspace'"
-          class="inline-block"
-          contentSection="home_page"
-        >
-          View Workspaces
-        </ActionButton>
-      </div>
-    </div>
-  </section>
+  <section class="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto mb-12">
+    <NavigationCard
+      to="/workspaces"
+      title="Workspaces"
+      description="Access project files and Git-based version history for all models."
+    />
 
-  <section class="p-8 text-center">
-    <div class="flex items-start gap-4">
-      <div class="flex-1">
-        <p>
-          The code for this project may be found on
-          <a
-            href="https://github.com/Physiome/pmrplatform/"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="text-link underline font-medium"
-          >its project page on GitHub</a>.
-        </p>
-      </div>
-    </div>
+    <NavigationCard
+      to="/exposures"
+      title="Exposures"
+      description="Explore published models and simulation results for citation and public use."
+    />
   </section>
 </template>
 
 <style scoped>
-@import '@/assets/text-link.css';
 @import '@/assets/box.css';
 </style>
