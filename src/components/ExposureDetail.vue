@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
@@ -20,7 +20,29 @@ const exposureInfo = ref<ExposureInfo | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 const detailHTML = ref<string>('')
+const htmlViewRef = ref<HTMLElement | null>(null)
 const { goBack } = useBackNavigation('/exposures')
+
+const convertFirstTextNodeToTitle = () => {
+  if (!htmlViewRef.value) return
+
+  const firstChild = htmlViewRef.value.firstChild
+  if (firstChild && firstChild.nodeType === 3) {
+    const textContent = firstChild.textContent?.trim()
+    if (textContent) {
+      const h2 = document.createElement('h2')
+      h2.textContent = textContent
+      htmlViewRef.value.replaceChild(h2, firstChild)
+    }
+  }
+}
+
+watch(detailHTML, async () => {
+  if (detailHTML.value) {
+    await nextTick()
+    convertFirstTextNodeToTitle()
+  }
+})
 
 onMounted(async () => {
   try {
@@ -85,7 +107,7 @@ onMounted(async () => {
       />
 
       <div v-if="detailHTML" class="box mb-8">
-        <div v-html="detailHTML" class="html-view"></div>
+        <div ref="htmlViewRef" v-html="detailHTML" class="html-view"></div>
       </div>
 
       <div class="box">
@@ -175,7 +197,10 @@ onMounted(async () => {
     @apply text-link;
   }
 
-  & :deep(h2),
+  & :deep(h2) {
+    @apply text-2xl font-semibold mt-0 mb-8;
+  }
+
   & :deep(h3),
   & :deep(h4) {
     @apply text-xl font-semibold mt-8 mb-4;
