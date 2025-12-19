@@ -8,6 +8,7 @@ import { useExposureStore } from '@/stores/exposure'
 import type { ExposureInfo } from '@/types/exposure'
 import PageHeader from './molecules/PageHeader.vue'
 import ErrorBlock from './organisms/ErrorBlock.vue'
+import { trackButtonClick } from '@/utils/analytics'
 
 const props = defineProps<{
   alias: string
@@ -20,6 +21,11 @@ const isLoading = ref(true)
 const detailHTML = ref<string>('')
 const htmlViewRef = ref<HTMLElement | null>(null)
 const { goBack } = useBackNavigation('/exposures')
+
+const pageTitle = computed(() => {
+  if (!exposureInfo.value) return 'Exposure Detail'
+  return exposureInfo.value.exposure.description || `Exposure ${exposureInfo.value.exposure.id}`
+})
 
 const openCORFiles = computed(() => {
   if (!exposureInfo.value) return []
@@ -67,6 +73,18 @@ const convertFirstTextNodeToTitle = () => {
       htmlViewRef.value.replaceChild(h2, firstChild)
     }
   }
+}
+
+const handleClick = (event: Event) => {
+  const buttonText = (event.currentTarget as HTMLElement)?.textContent?.trim() || ''
+  const contentSection = `Exposure Detail - ${pageTitle.value}`
+  const link = (event.currentTarget as HTMLElement)?.getAttribute('href') || ''
+
+  trackButtonClick({
+    button_name: buttonText,
+    content_section: contentSection,
+    link_category: link,
+  })
 }
 
 watch(detailHTML, async () => {
@@ -134,7 +152,7 @@ onMounted(async () => {
   <div v-else-if="exposureInfo" class="flex flex-col lg:flex-row gap-8">
     <article class="flex-1">
       <PageHeader
-        :title="exposureInfo.exposure.description || `Exposure ${exposureInfo.exposure.id}`"
+        :title="pageTitle"
       />
 
       <div v-if="detailHTML" class="box mb-8">
@@ -203,6 +221,7 @@ onMounted(async () => {
                 class="text-link inline-flex items-center gap-2"
                 target="_blank"
                 rel="noopener noreferrer"
+                @click="handleClick"
               >
                 <span class="text-foreground">›</span>
                 Launch with OpenCOR's Web App
