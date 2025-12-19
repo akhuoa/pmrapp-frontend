@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
@@ -20,6 +20,36 @@ const isLoading = ref(true)
 const detailHTML = ref<string>('')
 const htmlViewRef = ref<HTMLElement | null>(null)
 const { goBack } = useBackNavigation('/exposures')
+
+const openCORFiles = computed(() => {
+  if (!exposureInfo.value) return []
+
+  return exposureInfo.value.files.filter((entry) => {
+    const filename = entry[0]
+    return filename.endsWith('.omex') || filename.endsWith('.cellml') || filename.endsWith('.sedml')
+  })
+})
+
+const buildOpenCORURL = () => {
+  if (!exposureInfo.value || openCORFiles.value.length === 0) return ''
+
+  const baseURL = `${exposureInfo.value.workspace.url}rawfile/${exposureInfo.value.exposure.commit_id}`
+
+  const sortedFiles = [...openCORFiles.value].sort((a, b) => {
+    const getOrder = (filename: string) => {
+      if (filename.endsWith('.omex')) return 1
+      if (filename.endsWith('.sedml')) return 2
+      if (filename.endsWith('.cellml')) return 3
+      return 4
+    }
+    return getOrder(a[0]) - getOrder(b[0])
+  })
+
+  const fileURLs = sortedFiles.map(entry => `${baseURL}/${entry[0]}`).join('%7C')
+  const command = sortedFiles.length > 1 ? 'openFiles' : 'openFile'
+
+  return `//opencor.ws/app/?opencor://${command}/${fileURLs}`
+}
 
 const convertFirstTextNodeToTitle = () => {
   if (!htmlViewRef.value) return
@@ -159,6 +189,24 @@ onMounted(async () => {
             {{ exposureInfo.exposure.commit_id.substring(0, 12) }}
           </RouterLink>.
         </div>
+      </section>
+      <section v-if="openCORFiles.length > 0" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+        <h4 class="text-lg font-semibold mb-3">Views Available</h4>
+        <nav>
+          <ul class="space-y-2">
+            <li class="text-sm">
+              <a
+                :href="buildOpenCORURL()"
+                class="text-link inline-flex items-center gap-2"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span class="text-foreground">›</span>
+                Launch with OpenCOR's Web App
+              </a>
+            </li>
+          </ul>
+        </nav>
       </section>
       <section class="pt-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Navigation</h4>
