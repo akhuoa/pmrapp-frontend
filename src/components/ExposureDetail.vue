@@ -30,7 +30,7 @@ const openCORFiles = computed(() => {
   })
 })
 
-const buildOpenCORURL = () => {
+const buildOpenCORURL = (option: string) => {
   if (!exposureInfo.value || openCORFiles.value.length === 0) return ''
 
   const baseURL = `${exposureInfo.value.workspace.url}rawfile/${exposureInfo.value.exposure.commit_id}`
@@ -48,7 +48,11 @@ const buildOpenCORURL = () => {
   const fileURLs = sortedFiles.map(entry => `${baseURL}/${entry[0]}`).join('%7C')
   const command = sortedFiles.length > 1 ? 'openFiles' : 'openFile'
 
-  return `//opencor.ws/app/?opencor://${command}/${fileURLs}`
+  const opencorLink = `opencor://${command}/${fileURLs}`
+  if (option === 'webapp') {
+    return `//opencor.ws/app/?${opencorLink}`
+  }
+  return opencorLink
 }
 
 const convertFirstTextNodeToTitle = () => {
@@ -196,13 +200,24 @@ onMounted(async () => {
           <ul class="space-y-2">
             <li class="text-sm">
               <a
-                :href="buildOpenCORURL()"
+                :href="buildOpenCORURL('webapp')"
                 class="text-link inline-flex items-center gap-2"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <span class="text-foreground">›</span>
                 Launch with OpenCOR's Web App
+              </a>
+            </li>
+            <li class="text-sm">
+              <a
+                :href="buildOpenCORURL('desktop')"
+                class="text-link inline-flex items-center gap-2"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span class="text-foreground">›</span>
+                Launch with OpenCOR
               </a>
             </li>
           </ul>
