@@ -134,8 +134,7 @@ onMounted(async () => {
   <div v-else-if="exposureInfo" class="flex flex-col lg:flex-row gap-8">
     <article class="flex-1">
       <PageHeader
-        :title="`Exposure ${exposureInfo.exposure.id}`"
-        :description="exposureInfo.exposure.description || undefined"
+        :title="exposureInfo.exposure.description || `Exposure ${exposureInfo.exposure.id}`"
       />
 
       <div v-if="detailHTML" class="box mb-8">
