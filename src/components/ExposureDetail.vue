@@ -78,7 +78,7 @@ onMounted(async () => {
   </div>
 
   <div v-else-if="exposureInfo" class="flex flex-col lg:flex-row gap-8">
-    <article class="flex-1">
+    <article class="w-full lg:flex-1 lg:min-w-0">
       <PageHeader
         :title="`Exposure ${exposureInfo.exposure.id}`"
         :description="exposureInfo.exposure.description || undefined"
@@ -120,7 +120,7 @@ onMounted(async () => {
         </ul>
       </div>
     </article>
-    <aside class="w-full lg:w-80">
+    <aside class="w-full lg:w-70 xl:w-80 lg:flex-shrink-0">
       <section class="pb-6">
         <h4 class="text-lg font-semibold mb-3">Source</h4>
         <div class="text-sm leading-relaxed">
