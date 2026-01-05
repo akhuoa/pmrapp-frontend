@@ -51,7 +51,7 @@ const buildOpenCORURL = (option?: string) => {
     return getOrder(a[0]) - getOrder(b[0])
   })
 
-  const fileURLs = sortedFiles.map(entry => `${baseURL}/${entry[0]}`).join('%7C')
+  const fileURLs = sortedFiles.map((entry) => `${baseURL}/${entry[0]}`).join('%7C')
   const command = sortedFiles.length > 1 ? 'openFiles' : 'openFile'
 
   const opencorLink = `opencor://${command}/${fileURLs}`
