@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import Exposures from '@/components/Exposures.vue'
+import Exposures from '@/components/organisms/Exposures.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useExposureStore } from '@/stores/exposure'
 import { formatNumber } from '@/utils/format'

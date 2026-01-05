@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Login from '@/components/Login.vue'
+import Login from '@/components/organisms/Login.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 </script>
 

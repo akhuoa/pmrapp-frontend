@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import ExposureFileDetail from '@/components/ExposureFileDetail.vue'
+import ExposureFileDetail from '@/components/organisms/ExposureFileDetail.vue'
 
 const route = useRoute()
 const alias = route.params.alias as string

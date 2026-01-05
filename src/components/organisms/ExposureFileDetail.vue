@@ -5,8 +5,8 @@ import ActionButton from '@/components/atoms/ActionButton.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { useExposureStore } from '@/stores/exposure'
 import type { ExposureFileInfo } from '@/types/exposure'
-import PageHeader from './molecules/PageHeader.vue'
-import ErrorBlock from './organisms/ErrorBlock.vue'
+import PageHeader from '@/components/molecules/PageHeader.vue'
+import ErrorBlock from '@/components/organisms/ErrorBlock.vue'
 
 const props = defineProps<{
   alias: string

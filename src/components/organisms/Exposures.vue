@@ -3,9 +3,9 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useExposureStore } from '@/stores/exposure'
-import ExposureListItem from './molecules/ExposureListItem.vue'
-import ListToolbar from './molecules/ListToolbar.vue'
-import ItemList from './organisms/ItemList.vue'
+import ExposureListItem from '@/components/molecules/ExposureListItem.vue'
+import ListToolbar from '@/components/molecules/ListToolbar.vue'
+import ItemList from '@/components/organisms/ItemList.vue'
 
 const emit = defineEmits<{
   updateFilteredCount: [filteredCount: number, totalCount: number, hasFilter: boolean]

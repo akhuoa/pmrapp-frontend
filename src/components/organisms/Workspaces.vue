@@ -3,9 +3,9 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useWorkspaceStore } from '@/stores/workspace'
-import ListToolbar from './molecules/ListToolbar.vue'
-import WorkspaceListItem from './molecules/WorkspaceListItem.vue'
-import ItemList from './organisms/ItemList.vue'
+import ListToolbar from '@/components/molecules/ListToolbar.vue'
+import WorkspaceListItem from '@/components/molecules/WorkspaceListItem.vue'
+import ItemList from '@/components/organisms/ItemList.vue'
 
 const emit = defineEmits<{
   updateFilteredCount: [filteredCount: number, totalCount: number, hasFilter: boolean]
