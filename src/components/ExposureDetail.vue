@@ -36,6 +36,12 @@ const openCORFiles = computed(() => {
   })
 })
 
+const navigationFiles = computed(() => {
+  if (!exposureInfo.value) return []
+
+  return exposureInfo.value.files.filter((entry) => entry[1] === true)
+})
+
 const buildOpenCORURL = (option?: string) => {
   if (!exposureInfo.value || openCORFiles.value.length === 0) return ''
 
@@ -230,12 +236,12 @@ onMounted(async () => {
           </ul>
         </nav>
       </section>
-      <section class="pt-6 border-t border-gray-200 dark:border-gray-700">
+      <section v-if="navigationFiles.length > 0" class="pt-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Navigation</h4>
         <nav>
           <ul class="space-y-2">
             <li
-              v-for="entry in exposureInfo.files.filter((e) => e[1] === true)"
+              v-for="entry in navigationFiles"
               :key="entry[0]"
               class="text-sm"
             >
