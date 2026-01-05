@@ -3,6 +3,8 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
+import BackButton from '@/components/atoms/BackButton.vue'
+import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { useExposureStore } from '@/stores/exposure'
@@ -57,15 +59,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="mb-4">
-    <ActionButton
-      variant="link"
-      @click="goBack"
-      content-section="Exposure Detail"
-    >
-      &larr; Back to Exposures
-    </ActionButton>
-  </div>
+  <BackButton
+    label="Back to Exposures"
+    content-section="Exposure Detail"
+    :on-click="goBack"
+  />
 
   <ErrorBlock
     v-if="error"
@@ -73,9 +71,7 @@ onMounted(async () => {
     :error="error"
   />
 
-  <div v-else-if="isLoading" class="text-center box">
-    Loading exposure...
-  </div>
+  <LoadingBox v-else-if="isLoading" message="Loading exposure..." />
 
   <div v-else-if="exposureInfo" class="flex flex-col lg:flex-row gap-8">
     <article class="flex-1">

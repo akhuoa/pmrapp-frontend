@@ -2,7 +2,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import ActionButton from '@/components/atoms/ActionButton.vue'
+import BackButton from '@/components/atoms/BackButton.vue'
+import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { useWorkspaceStore } from '@/stores/workspace'
@@ -34,15 +35,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="mb-4">
-    <ActionButton
-      variant="link"
-      @click="goBack"
-      content-section="Workspace Detail"
-    >
-      &larr; Back to Workspaces
-    </ActionButton>
-  </div>
+  <BackButton
+    label="Back to Workspaces"
+    content-section="Workspace Detail"
+    :on-click="goBack"
+  />
 
   <ErrorBlock
     v-if="error"
@@ -50,9 +47,7 @@ onMounted(async () => {
     :error="error"
   />
 
-  <div v-else-if="isLoading" class="text-center box">
-    Loading workspace...
-  </div>
+  <LoadingBox v-else-if="isLoading" message="Loading workspace..." />
 
   <div v-else-if="workspaceInfo">
     <PageHeader

@@ -1,7 +1,8 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import ActionButton from '@/components/atoms/ActionButton.vue'
+import BackButton from '@/components/atoms/BackButton.vue'
+import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { useExposureStore } from '@/stores/exposure'
 import type { ExposureFileInfo } from '@/types/exposure'
@@ -34,15 +35,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="mb-4">
-    <ActionButton
-      variant="link"
-      @click="goBack"
-      content-section="Exposure File Detail"
-    >
-      &larr; Back
-    </ActionButton>
-  </div>
+  <BackButton
+    label="Back"
+    content-section="Exposure File Detail"
+    :on-click="goBack"
+  />
 
   <ErrorBlock
     v-if="error"
@@ -50,9 +47,7 @@ onMounted(async () => {
     :error="error"
   />
 
-  <div v-else-if="isLoading" class="text-center box">
-    Loading exposure file...
-  </div>
+  <LoadingBox v-else-if="isLoading" message="Loading exposure file..." />
 
   <div v-else-if="exposureFileInfo" class="flex flex-col lg:flex-row gap-8">
     <div v-if="exposureFileInfo.Redirect">
