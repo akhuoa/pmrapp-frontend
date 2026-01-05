@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import App from '../App.vue'
-import BackToTop from '../components/atoms/BackToTop.vue'
+import App from './App.vue'
+import BackToTop from './components/atoms/BackToTop.vue'
 
 describe('App', () => {
   beforeEach(() => {
