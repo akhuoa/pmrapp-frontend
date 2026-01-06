@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Exposure } from '@/types/exposure'
+import { formatDate } from '@/utils/format'
 
 defineProps<{
   exposure: Exposure
@@ -13,6 +14,12 @@ defineProps<{
         {{ exposure.entity.description || `Exposure ${exposure.entity.id}` }}
       </h3>
     </RouterLink>
+    <p>
+      <small>
+      #{{ exposure.entity.id }} ·
+      Created on {{ formatDate(exposure.entity.created_ts) }}
+      </small>
+    </p>
   </div>
 </template>
 
