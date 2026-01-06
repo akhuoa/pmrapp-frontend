@@ -23,7 +23,7 @@ const htmlViewRef = ref<HTMLElement | null>(null)
 const { goBack } = useBackNavigation('/exposures')
 
 const pageTitle = computed(() => {
-  if (!exposureInfo.value) return 'Exposure Detail'
+  if (!exposureInfo.value) return 'No information.'
   return exposureInfo.value.exposure.description || `Exposure ${exposureInfo.value.exposure.id}`
 })
 
@@ -49,9 +49,9 @@ const buildOpenCORURL = (option?: string) => {
 
   const sortedFiles = [...openCORFiles.value].sort((a, b) => {
     const getOrder = (filename: string) => {
-      if (filename.endsWith('.omex')) return 1
+      if (filename.endsWith('.cellml')) return 1
       if (filename.endsWith('.sedml')) return 2
-      if (filename.endsWith('.cellml')) return 3
+      if (filename.endsWith('.omex')) return 3
       return 4
     }
     return getOrder(a[0]) - getOrder(b[0])
@@ -230,7 +230,7 @@ onMounted(async () => {
                 @click="handleClick"
               >
                 <span class="text-foreground">›</span>
-                Launch with OpenCOR's Web App
+                Open in OpenCOR's Web app
               </a>
             </li>
           </ul>

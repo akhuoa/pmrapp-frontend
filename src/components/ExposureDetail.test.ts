@@ -126,7 +126,7 @@ describe('ExposureDetail', () => {
     vi.clearAllMocks()
   })
 
-  it('renders "Launch with OpenCOR\'s Web App" link that opens in new tab', async () => {
+  it('renders "Open in OpenCOR\'s Web app" link that opens in new tab', async () => {
     vi.spyOn(exposureStore, 'getExposureInfo').mockResolvedValue(mockExposureInfo)
     vi.spyOn(exposureStore, 'getExposureSafeHTML').mockResolvedValue('<div>Test HTML</div>')
 
@@ -154,17 +154,17 @@ describe('ExposureDetail', () => {
     await flushPromises()
     await nextTick()
 
-    // Find the "Launch with OpenCOR's Web App" link.
+    // Find the "Open in OpenCOR's Web app" link.
     const openCORLink = wrapper.find('a[target="_blank"][rel="noopener noreferrer"]')
 
     expect(openCORLink.exists()).toBe(true)
-    expect(openCORLink.text()).toContain("Launch with OpenCOR's Web App")
+    expect(openCORLink.text()).toContain("Open in OpenCOR's Web app")
     expect(openCORLink.attributes('target')).toBe('_blank')
     expect(openCORLink.attributes('rel')).toBe('noopener noreferrer')
     expect(openCORLink.attributes('href')).toContain('opencor.ws/app')
   })
 
-  it('calls trackButtonClick when "Launch with OpenCOR\'s Web App" is clicked', async () => {
+  it('calls trackButtonClick when "Open in OpenCOR\'s Web app" is clicked', async () => {
     const { trackButtonClick } = await import('@/utils/analytics')
 
     vi.spyOn(exposureStore, 'getExposureInfo').mockResolvedValue(mockExposureInfo)
@@ -194,12 +194,12 @@ describe('ExposureDetail', () => {
     await flushPromises()
     await nextTick()
 
-    // Find and click the "Launch with OpenCOR's Web App" link.
+    // Find and click the "Open in OpenCOR's Web app" link.
     const openCORLink = wrapper.find('a[target="_blank"][rel="noopener noreferrer"]')
     await openCORLink.trigger('click')
 
     expect(trackButtonClick).toHaveBeenCalledWith({
-      button_name: expect.stringContaining("Launch with OpenCOR's Web App"),
+      button_name: expect.stringContaining("Open in OpenCOR's Web app"),
       content_section: 'Exposure Detail - NCE protein knowledge page',
       link_category: expect.stringContaining('opencor'),
     })
