@@ -23,7 +23,7 @@ const htmlViewRef = ref<HTMLElement | null>(null)
 const { goBack } = useBackNavigation('/exposures')
 
 const pageTitle = computed(() => {
-  if (!exposureInfo.value) return 'Exposure Detail'
+  if (!exposureInfo.value) return 'No information.'
   return exposureInfo.value.exposure.description || `Exposure ${exposureInfo.value.exposure.id}`
 })
 
