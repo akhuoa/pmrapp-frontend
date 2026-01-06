@@ -8,6 +8,7 @@ import { useExposureStore } from '@/stores/exposure'
 import type { ExposureInfo } from '@/types/exposure'
 import PageHeader from './molecules/PageHeader.vue'
 import ErrorBlock from './organisms/ErrorBlock.vue'
+import { trackButtonClick } from '@/utils/analytics'
 
 const props = defineProps<{
   alias: string
@@ -21,6 +22,11 @@ const detailHTML = ref<string>('')
 const htmlViewRef = ref<HTMLElement | null>(null)
 const { goBack } = useBackNavigation('/exposures')
 
+const pageTitle = computed(() => {
+  if (!exposureInfo.value) return 'Exposure Detail'
+  return exposureInfo.value.exposure.description || `Exposure ${exposureInfo.value.exposure.id}`
+})
+
 const openCORFiles = computed(() => {
   if (!exposureInfo.value) return []
 
@@ -28,6 +34,12 @@ const openCORFiles = computed(() => {
     const filename = entry[0]
     return filename.endsWith('.omex') || filename.endsWith('.cellml') || filename.endsWith('.sedml')
   })
+})
+
+const navigationFiles = computed(() => {
+  if (!exposureInfo.value) return []
+
+  return exposureInfo.value.files.filter((entry) => entry[1] === true)
 })
 
 const buildOpenCORURL = (option?: string) => {
@@ -45,7 +57,7 @@ const buildOpenCORURL = (option?: string) => {
     return getOrder(a[0]) - getOrder(b[0])
   })
 
-  const fileURLs = sortedFiles.map(entry => `${baseURL}/${entry[0]}`).join('%7C')
+  const fileURLs = sortedFiles.map((entry) => `${baseURL}/${entry[0]}`).join('%7C')
   const command = sortedFiles.length > 1 ? 'openFiles' : 'openFile'
 
   const opencorLink = `opencor://${command}/${fileURLs}`
@@ -67,6 +79,18 @@ const convertFirstTextNodeToTitle = () => {
       htmlViewRef.value.replaceChild(h2, firstChild)
     }
   }
+}
+
+const handleClick = (event: Event) => {
+  const buttonText = (event.currentTarget as HTMLElement)?.textContent?.trim() || ''
+  const contentSection = `Exposure Detail - ${pageTitle.value}`
+  const link = (event.currentTarget as HTMLElement)?.getAttribute('href') || ''
+
+  trackButtonClick({
+    button_name: buttonText,
+    content_section: contentSection,
+    link_category: link,
+  })
 }
 
 watch(detailHTML, async () => {
@@ -134,7 +158,7 @@ onMounted(async () => {
   <div v-else-if="exposureInfo" class="flex flex-col lg:flex-row gap-8">
     <article class="flex-1">
       <PageHeader
-        :title="exposureInfo.exposure.description || `Exposure ${exposureInfo.exposure.id}`"
+        :title="pageTitle"
       />
 
       <div v-if="detailHTML" class="box mb-8">
@@ -203,6 +227,7 @@ onMounted(async () => {
                 class="text-link inline-flex items-center gap-2"
                 target="_blank"
                 rel="noopener noreferrer"
+                @click="handleClick"
               >
                 <span class="text-foreground">›</span>
                 Launch with OpenCOR's Web App
@@ -211,12 +236,12 @@ onMounted(async () => {
           </ul>
         </nav>
       </section>
-      <section class="pt-6 border-t border-gray-200 dark:border-gray-700">
+      <section v-if="navigationFiles.length > 0" class="pt-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Navigation</h4>
         <nav>
           <ul class="space-y-2">
             <li
-              v-for="entry in exposureInfo.files.filter((e) => e[1] === true)"
+              v-for="entry in navigationFiles"
               :key="entry[0]"
               class="text-sm"
             >
