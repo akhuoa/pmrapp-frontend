@@ -156,7 +156,7 @@ onMounted(async () => {
   </div>
 
   <div v-else-if="exposureInfo" class="flex flex-col lg:flex-row gap-8">
-    <article class="flex-1">
+    <article class="w-full lg:flex-1 lg:min-w-0">
       <PageHeader
         :title="pageTitle"
       />
@@ -172,7 +172,7 @@ onMounted(async () => {
             class="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700 last:mb-0 last:pb-0 last:border-b-0 flex items-center justify-between">
             <div class="flex items-center gap-2 flex-1 min-w-0">
               <FileIcon class="text-foreground flex-shrink-0" />
-              <span class="truncate text-sm">{{ entry[0] }}</span>
+              <span class="text-sm break-all">{{ entry[0] }}</span>
             </div>
             <div class="flex items-center gap-2 ml-4 flex-shrink-0">
               <ActionButton
@@ -197,7 +197,7 @@ onMounted(async () => {
         </ul>
       </div>
     </article>
-    <aside class="w-full lg:w-80">
+    <aside class="w-full lg:w-70 xl:w-80 lg:flex-shrink-0">
       <section class="pb-6">
         <h4 class="text-lg font-semibold mb-3">Source</h4>
         <div class="text-sm leading-relaxed">
