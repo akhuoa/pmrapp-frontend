@@ -230,7 +230,7 @@ onMounted(async () => {
                 @click="handleClick"
               >
                 <span class="text-foreground">›</span>
-                Open in OpenCOR's Web App
+                Open in OpenCOR's Web app
               </a>
             </li>
           </ul>
