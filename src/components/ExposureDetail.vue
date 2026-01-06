@@ -247,7 +247,7 @@ onMounted(async () => {
             >
               <RouterLink
                 :to="`/exposures/${alias}/${entry[0]}`"
-                class="text-link inline-flex items-center gap-2"
+                class="text-link inline-flex items-center gap-2 break-all"
               >
                 <span class="text-foreground">›</span>
                 {{ entry[0] }}
