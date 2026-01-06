@@ -49,9 +49,9 @@ const buildOpenCORURL = (option?: string) => {
 
   const sortedFiles = [...openCORFiles.value].sort((a, b) => {
     const getOrder = (filename: string) => {
-      if (filename.endsWith('.omex')) return 1
+      if (filename.endsWith('.cellml')) return 1
       if (filename.endsWith('.sedml')) return 2
-      if (filename.endsWith('.cellml')) return 3
+      if (filename.endsWith('.omex')) return 3
       return 4
     }
     return getOrder(a[0]) - getOrder(b[0])
