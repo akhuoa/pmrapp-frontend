@@ -17,7 +17,7 @@ defineProps<{
     <p>
       <small>
       #{{ exposure.entity.id }} ·
-      created on {{ formatDate(exposure.entity.created_ts) }}
+      Created on {{ formatDate(exposure.entity.created_ts) }}
       </small>
     </p>
   </div>

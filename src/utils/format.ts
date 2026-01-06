@@ -11,13 +11,13 @@ export function formatNumber(num: number): string {
 /**
  * Format a Unix timestamp to a readable date string.
  * @param timestamp - Unix timestamp in seconds.
- * @returns Formatted date string (e.g., "Jan 5, 2026").
- * @example formatDate(1704499200) // "Jan 5, 2024".
+ * @returns Formatted date string (e.g., "5 January 2026").
+ * @example formatDate(1704499200) // "5 January 2024".
  */
 export function formatDate(timestamp: number): string {
-  return new Date(timestamp * 1000).toLocaleDateString('en-US', {
+  return new Date(timestamp * 1000).toLocaleDateString('en-NZ', {
     year: 'numeric',
-    month: 'short',
+    month: 'long',
     day: 'numeric',
   })
 }
