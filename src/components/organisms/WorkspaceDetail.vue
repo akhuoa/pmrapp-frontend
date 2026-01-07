@@ -8,7 +8,7 @@ import { useBackNavigation } from '@/composables/useBackNavigation'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { WorkspaceInfo } from '@/types/workspace'
 import PageHeader from '@/components/molecules/PageHeader.vue'
-import ErrorBlock from '@/components/organisms/ErrorBlock.vue'
+import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 
 const props = defineProps<{
   alias: string

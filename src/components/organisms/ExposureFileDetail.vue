@@ -7,7 +7,7 @@ import { useBackNavigation } from '@/composables/useBackNavigation'
 import { useExposureStore } from '@/stores/exposure'
 import type { ExposureFileInfo } from '@/types/exposure'
 import PageHeader from '@/components/molecules/PageHeader.vue'
-import ErrorBlock from '@/components/organisms/ErrorBlock.vue'
+import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 
 const props = defineProps<{
   alias: string
