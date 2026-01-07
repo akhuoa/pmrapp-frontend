@@ -3,7 +3,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ListItem from '@/components/molecules/ListItem.vue'
-import ItemList from '@/components/molecules/ItemList.vue'
+import ListContainer from '@/components/molecules/ListContainer.vue'
 import ListToolbar from '@/components/molecules/ListToolbar.vue'
 import { useExposureStore } from '@/stores/exposure'
 import { formatDate } from '@/utils/format'
@@ -65,7 +65,7 @@ watch(
     @refresh="handleRefresh"
   />
 
-  <ItemList
+  <ListContainer
     :items="filteredExposures"
     :error="exposureStore.error"
     :is-loading="exposureStore.isLoading"
@@ -87,5 +87,5 @@ watch(
         </p>
       </ListItem>
     </template>
-  </ItemList>
+  </ListContainer>
 </template>

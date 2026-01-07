@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import ItemList from '@/components/molecules/ItemList.vue'
+import ListContainer from '@/components/molecules/ListContainer.vue'
 import ListToolbar from '@/components/molecules/ListToolbar.vue'
 import ListItem from '@/components/molecules/ListItem.vue'
 import { useWorkspaceStore } from '@/stores/workspace'
@@ -64,7 +64,7 @@ watch(
     @refresh="handleRefresh"
   />
 
-  <ItemList
+  <ListContainer
     :items="filteredWorkspaces"
     :error="workspaceStore.error"
     :is-loading="workspaceStore.isLoading"
@@ -80,5 +80,5 @@ watch(
         :link="`/workspaces/${workspace.alias}`"
       />
     </template>
-  </ItemList>
+  </ListContainer>
 </template>
