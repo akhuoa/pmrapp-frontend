@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
-import Workspaces from '@/components/Workspaces.vue'
+import Workspaces from '@/components/organisms/Workspaces.vue'
 import { useWorkspaceStore } from '@/stores/workspace'
 import { formatNumber } from '@/utils/format'
 

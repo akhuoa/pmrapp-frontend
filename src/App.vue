@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import BackToTop from '@/components/BackToTop.vue'
+import BackToTop from '@/components/atoms/BackToTop.vue'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 </script>
 
