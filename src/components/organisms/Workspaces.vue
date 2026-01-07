@@ -4,7 +4,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ItemList from '@/components/molecules/ItemList.vue'
 import ListToolbar from '@/components/molecules/ListToolbar.vue'
-import WorkspaceListItem from '@/components/molecules/WorkspaceListItem.vue'
+import ListItem from '@/components/molecules/ListItem.vue'
 import { useWorkspaceStore } from '@/stores/workspace'
 
 const emit = defineEmits<{
@@ -72,10 +72,12 @@ watch(
     empty-message="No workspaces found."
   >
     <template #item>
-      <WorkspaceListItem
+      <ListItem
         v-for="workspace in filteredWorkspaces"
         :key="workspace.alias"
-        :workspace="workspace"
+        :title="workspace.entity.description || workspace.alias"
+        :subtitle="workspace.entity.long_description || workspace.entity.url"
+        :link="`/workspaces/${workspace.alias}`"
       />
     </template>
   </ItemList>

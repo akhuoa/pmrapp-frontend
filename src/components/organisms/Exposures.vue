@@ -2,10 +2,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import ExposureListItem from '@/components/molecules/ExposureListItem.vue'
+import ListItem from '@/components/molecules/ListItem.vue'
 import ItemList from '@/components/molecules/ItemList.vue'
 import ListToolbar from '@/components/molecules/ListToolbar.vue'
 import { useExposureStore } from '@/stores/exposure'
+import { formatDate } from '@/utils/format'
 
 const emit = defineEmits<{
   updateFilteredCount: [filteredCount: number, totalCount: number, hasFilter: boolean]
@@ -72,11 +73,19 @@ watch(
     empty-message="No exposures found."
   >
     <template #item>
-      <ExposureListItem
+      <ListItem
         v-for="exposure in filteredExposures"
         :key="exposure.alias"
-        :exposure="exposure"
-      />
+        :title="exposure.entity.description || `Exposure ${exposure.entity.id}`"
+        :link="`/exposures/${exposure.alias}`"
+      >
+        <p>
+          <small>
+          #{{ exposure.entity.id }} ·
+          Created on {{ formatDate(exposure.entity.created_ts) }}
+          </small>
+        </p>
+      </ListItem>
     </template>
   </ItemList>
 </template>
