@@ -4,11 +4,11 @@ import { onMounted, ref } from 'vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
+import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
+import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { WorkspaceInfo } from '@/types/workspace'
-import PageHeader from '@/components/molecules/PageHeader.vue'
-import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 
 const props = defineProps<{
   alias: string

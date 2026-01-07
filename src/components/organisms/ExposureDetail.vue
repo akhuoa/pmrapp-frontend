@@ -5,11 +5,11 @@ import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
+import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
+import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { useExposureStore } from '@/stores/exposure'
 import type { ExposureInfo } from '@/types/exposure'
-import PageHeader from '@/components/molecules/PageHeader.vue'
-import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import { trackButtonClick } from '@/utils/analytics'
 
 const props = defineProps<{

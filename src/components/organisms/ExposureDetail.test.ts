@@ -1,9 +1,9 @@
 import { flushPromises, mount } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import ExposureDetail from '@/components/organisms/ExposureDetail.vue'
 import { useExposureStore } from '@/stores/exposure'
-import { createPinia, setActivePinia } from 'pinia'
 import type { ExposureInfo } from '@/types/exposure'
 
 // Mock Vue Router.
