@@ -5,7 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useWorkspaceStore } from '@/stores/workspace'
 import ListToolbar from '@/components/molecules/ListToolbar.vue'
 import WorkspaceListItem from '@/components/molecules/WorkspaceListItem.vue'
-import ItemList from '@/components/organisms/ItemList.vue'
+import ItemList from '@/components/molecules/ItemList.vue'
 
 const emit = defineEmits<{
   updateFilteredCount: [filteredCount: number, totalCount: number, hasFilter: boolean]
