@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ActionButton from './ActionButton.vue'
+import ActionButton from '@/components/atoms/ActionButton.vue'
 
 interface Props {
   label?: string

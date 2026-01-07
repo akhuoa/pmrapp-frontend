@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import ActionButton from '../atoms/ActionButton.vue'
-import RefreshIcon from '../icons/RefreshIcon.vue'
+import ActionButton from '@/components/atoms/ActionButton.vue'
+import RefreshIcon from '@/components/icons/RefreshIcon.vue'
 
 interface Props {
   filterQuery: string
