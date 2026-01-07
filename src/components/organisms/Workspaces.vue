@@ -2,10 +2,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import ListContainer from '@/components/molecules/ListContainer.vue'
+import ListItem from '@/components/molecules/ListItem.vue'
+import ListToolbar from '@/components/molecules/ListToolbar.vue'
 import { useWorkspaceStore } from '@/stores/workspace'
-import ListToolbar from './molecules/ListToolbar.vue'
-import WorkspaceListItem from './molecules/WorkspaceListItem.vue'
-import ItemList from './organisms/ItemList.vue'
 
 const emit = defineEmits<{
   updateFilteredCount: [filteredCount: number, totalCount: number, hasFilter: boolean]
@@ -64,7 +64,7 @@ watch(
     @refresh="handleRefresh"
   />
 
-  <ItemList
+  <ListContainer
     :items="filteredWorkspaces"
     :error="workspaceStore.error"
     :is-loading="workspaceStore.isLoading"
@@ -72,11 +72,13 @@ watch(
     empty-message="No workspaces found."
   >
     <template #item>
-      <WorkspaceListItem
+      <ListItem
         v-for="workspace in filteredWorkspaces"
         :key="workspace.alias"
-        :workspace="workspace"
+        :title="workspace.entity.description || workspace.alias"
+        :subtitle="workspace.entity.long_description || workspace.entity.url"
+        :link="`/workspaces/${workspace.alias}`"
       />
     </template>
-  </ItemList>
+  </ListContainer>
 </template>

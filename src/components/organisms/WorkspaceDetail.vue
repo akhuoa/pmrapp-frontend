@@ -1,20 +1,19 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import ActionButton from '@/components/atoms/ActionButton.vue'
+import BackButton from '@/components/atoms/BackButton.vue'
+import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
+import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
+import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { WorkspaceInfo } from '@/types/workspace'
-import PageHeader from './molecules/PageHeader.vue'
-import ErrorBlock from './organisms/ErrorBlock.vue'
 
 const props = defineProps<{
   alias: string
 }>()
 
-const router = useRouter()
 const workspaceStore = useWorkspaceStore()
 const workspaceInfo = ref<WorkspaceInfo | null>(null)
 const error = ref<string | null>(null)
@@ -34,15 +33,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="mb-4">
-    <ActionButton
-      variant="link"
-      @click="goBack"
-      content-section="Workspace Detail"
-    >
-      &larr; Back to Workspaces
-    </ActionButton>
-  </div>
+  <BackButton
+    label="Back to Workspaces"
+    content-section="Workspace Detail"
+    :on-click="goBack"
+  />
 
   <ErrorBlock
     v-if="error"
@@ -50,9 +45,7 @@ onMounted(async () => {
     :error="error"
   />
 
-  <div v-else-if="isLoading" class="text-center box">
-    Loading workspace...
-  </div>
+  <LoadingBox v-else-if="isLoading" message="Loading workspace..." />
 
   <div v-else-if="workspaceInfo">
     <PageHeader

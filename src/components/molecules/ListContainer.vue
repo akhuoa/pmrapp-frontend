@@ -1,5 +1,5 @@
 <script setup lang="ts" generic="T">
-import ErrorBlock from './ErrorBlock.vue'
+import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 
 interface Props {
   items: T[]

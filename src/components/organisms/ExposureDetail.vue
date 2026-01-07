@@ -2,12 +2,14 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import ActionButton from '@/components/atoms/ActionButton.vue'
+import BackButton from '@/components/atoms/BackButton.vue'
+import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
+import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
+import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { useExposureStore } from '@/stores/exposure'
 import type { ExposureInfo } from '@/types/exposure'
-import PageHeader from './molecules/PageHeader.vue'
-import ErrorBlock from './organisms/ErrorBlock.vue'
 import { trackButtonClick } from '@/utils/analytics'
 
 const props = defineProps<{
@@ -135,15 +137,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="mb-4">
-    <ActionButton
-      variant="link"
-      @click="goBack"
-      content-section="Exposure Detail"
-    >
-      &larr; Back to Exposures
-    </ActionButton>
-  </div>
+  <BackButton
+    label="Back to Exposures"
+    content-section="Exposure Detail"
+    :on-click="goBack"
+  />
 
   <ErrorBlock
     v-if="error"
@@ -151,9 +149,7 @@ onMounted(async () => {
     :error="error"
   />
 
-  <div v-else-if="isLoading" class="text-center box">
-    Loading exposure...
-  </div>
+  <LoadingBox v-else-if="isLoading" message="Loading exposure..." />
 
   <div v-else-if="exposureInfo" class="flex flex-col lg:flex-row gap-8">
     <article class="w-full lg:flex-1 lg:min-w-0">
