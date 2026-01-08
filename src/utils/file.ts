@@ -69,7 +69,6 @@ export const isCodeFile = (filename: string): boolean => {
     'omex',
     'csv',
     'xls',
-    'ai',
     'r',
     'matlab',
     'm',
@@ -111,6 +110,7 @@ export const isBinaryFile = (filename: string): boolean => {
     'xlsx',
     'ppt',
     'pptx',
+    'ai',
   ]
   return binaryExtensions.includes(extension)
 }
