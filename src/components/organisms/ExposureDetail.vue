@@ -5,6 +5,7 @@ import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
+import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
@@ -42,6 +43,15 @@ const navigationFiles = computed(() => {
   if (!exposureInfo.value) return []
 
   return exposureInfo.value.files.filter((entry) => entry[1] === true)
+})
+
+const archiveDownloadUrls = computed(() => {
+  if (!exposureInfo.value) return { zip: '', tgz: '' }
+  const base = `https://models.physiomeproject.org/workspace/${exposureInfo.value.workspace_alias}/@@archive/${exposureInfo.value.exposure.commit_id}`
+  return {
+    zip: `${base}/zip`,
+    tgz: `${base}/tgz`
+  }
 })
 
 const buildOpenCORURL = (option?: string) => {
@@ -248,6 +258,50 @@ onMounted(async () => {
                 <span class="text-foreground">›</span>
                 {{ entry[0] }}
               </RouterLink>
+            </li>
+          </ul>
+        </nav>
+      </section>
+      <section class="pt-6 border-t border-gray-200 dark:border-gray-700">
+        <h4 class="text-lg font-semibold mb-3">Downloads</h4>
+        <nav>
+          <ul class="space-y-2">
+            <li class="text-sm">
+              <ActionButton
+                variant="secondary"
+                size="sm"
+                :href="archiveDownloadUrls.zip"
+                :download="true"
+                content-section="Exposure Detail"
+              >
+                <DownloadIcon class="w-1 h-1" />
+                Complete Archive as .zip
+              </ActionButton>
+            </li>
+            <li class="text-sm">
+              <ActionButton
+                variant="secondary"
+                size="sm"
+                :href="archiveDownloadUrls.tgz"
+                :download="true"
+                content-section="Exposure Detail"
+              >
+                <DownloadIcon class="w-1 h-1" />
+                Complete Archive as .tgz
+              </ActionButton>
+            </li>
+            <li class="text-sm">
+              <ActionButton
+                variant="secondary"
+                size="sm"
+                :href="`'https://models.physiomeproject.org/e/${exposureInfo.workspace_alias}/download_generated_omex'`"
+                :download="true"
+                content-section="Exposure Detail"
+              >
+
+                <DownloadIcon class="w-1 h-1" />
+                COMBINE Archive (exposure)
+              </ActionButton>
             </li>
           </ul>
         </nav>
