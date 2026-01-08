@@ -13,6 +13,7 @@ import { getWorkspaceService } from '@/services'
 import { downloadFileFromContent } from '@/utils/download'
 import { isCodeFile, isImageFile, isMarkdownFile, isSvgFile } from '@/utils/file'
 import { renderMarkdown } from '@/utils/markdown'
+import ActionButton from '../atoms/ActionButton.vue'
 
 const props = defineProps<{
   alias: string
@@ -170,13 +171,16 @@ onMounted(async () => {
       <!-- Binary/Unknown File Type -->
       <div v-else class="text-center py-8 text-gray-500 dark:text-gray-400">
         <p class="mb-4">This file type cannot be displayed.</p>
-        <button
+        <ActionButton
+          variant="primary"
+          size="lg"
           @click="downloadFile"
-          class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded transition-colors"
+          :download="true"
+          content-section="Workspace File Detail"
         >
           <DownloadIcon class="w-4 h-4" />
           Download File
-        </button>
+        </ActionButton>
       </div>
     </div>
   </div>
