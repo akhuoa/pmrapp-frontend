@@ -37,4 +37,19 @@ export const workspaceService = {
     const payload = await response.json()
     return payload.inner
   },
+
+  async getRawFile(alias: string, commitId: string, filename: string): Promise<string> {
+    const response = await fetch(
+      `${API_BASE_URL}/api/workspace/${alias}/rawfile/${commitId}/${filename}`,
+      {
+        method: 'GET',
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(`Request failed: ${response.status}`)
+    }
+
+    return await response.text()
+  },
 }
