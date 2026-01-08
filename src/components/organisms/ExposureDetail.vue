@@ -12,6 +12,7 @@ import { useBackNavigation } from '@/composables/useBackNavigation'
 import { useExposureStore } from '@/stores/exposure'
 import type { ExposureInfo } from '@/types/exposure'
 import { trackButtonClick } from '@/utils/analytics'
+import { downloadWorkspaceFile } from '@/utils/download'
 
 const props = defineProps<{
   alias: string
@@ -105,6 +106,15 @@ const handleClick = (event: Event) => {
   })
 }
 
+const downloadFile = async (filename: string) => {
+  if (!exposureInfo.value) return
+
+  const alias = exposureInfo.value.workspace_alias
+  const commitId = exposureInfo.value.exposure.commit_id
+  if (!commitId) return
+  await downloadWorkspaceFile(alias, commitId, filename)
+}
+
 watch(detailHTML, async () => {
   if (detailHTML.value) {
     await nextTick()
@@ -171,33 +181,41 @@ onMounted(async () => {
         <div ref="htmlViewRef" v-html="detailHTML" class="html-view"></div>
       </div>
 
-      <div class="box">
-        <h2 class="text-xl font-semibold mb-4">Files</h2>
-        <ul class="space-y-0">
-          <li v-for="entry in exposureInfo.files" :key="entry[0]"
-            class="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700 last:mb-0 last:pb-0 last:border-b-0 flex items-center justify-between">
-            <div class="flex items-center gap-2 flex-1 min-w-0">
-              <FileIcon class="text-foreground flex-shrink-0" />
-              <span class="text-sm break-all">{{ entry[0] }}</span>
-            </div>
-            <div class="flex items-center gap-2 ml-4 flex-shrink-0">
-              <ActionButton
-                v-if="entry[1] === true"
-                variant="primary"
-                size="sm"
-                :to="`/exposures/${alias}/${entry[0]}`"
-                contentSection="exposure_file_list"
-              >
-                View
-              </ActionButton>
-              <ActionButton
-                variant="secondary"
-                size="sm"
-                :to="`/workspaces/${exposureInfo.workspace_alias}/rawfile/${exposureInfo.exposure.commit_id}/${entry[0]}`"
-                contentSection="exposure_file_list"
-              >
-                Download
-              </ActionButton>
+      <div class="box p-0! overflow-hidden">
+        <div class="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+          <span class="text-gray-600 dark:text-gray-400">
+            Files
+          </span>
+        </div>
+        <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+          <li
+            v-for="entry in exposureInfo.files"
+            :key="entry[0]"
+            class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          >
+            <div class="px-4 py-3 flex items-center justify-between">
+              <div class="flex items-center gap-3 flex-1 min-w-0">
+                <FileIcon class="text-gray-500 dark:text-gray-400 flex-shrink-0 w-4 h-4" />
+                <span class="text-sm break-all">{{ entry[0] }}</span>
+              </div>
+              <div class="flex items-center gap-2 ml-4 flex-shrink-0">
+                <ActionButton
+                  v-if="entry[1] === true"
+                  variant="primary"
+                  size="sm"
+                  :to="`/exposures/${alias}/${entry[0]}`"
+                  contentSection="exposure_file_list"
+                >
+                  View
+                </ActionButton>
+                <button
+                  @click.prevent="downloadFile(entry[0])"
+                  class="ml-4 p-2 text-gray-500 cursor-pointer hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                  :title="`Download ${entry[0]}`"
+                >
+                  <DownloadIcon class="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </li>
         </ul>
