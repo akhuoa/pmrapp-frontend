@@ -28,6 +28,14 @@ export const isSvgFile = (filename: string): boolean => {
 }
 
 /**
+ * Check if file is a markdown file.
+ */
+export const isMarkdownFile = (filename: string): boolean => {
+  const extension = getFileExtension(filename)
+  return ['md', 'markdown'].includes(extension)
+}
+
+/**
  * Check if file is a code/text file.
  */
 export const isCodeFile = (filename: string): boolean => {

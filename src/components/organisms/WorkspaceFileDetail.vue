@@ -10,7 +10,8 @@ import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { getWorkspaceService } from '@/services'
 import { downloadFileFromContent } from '@/utils/download'
-import { isImageFile, isSvgFile, isCodeFile } from '@/utils/file'
+import { isImageFile, isSvgFile, isCodeFile, isMarkdownFile } from '@/utils/file'
+import { renderMarkdown } from '@/utils/markdown'
 
 const props = defineProps<{
   alias: string
@@ -27,10 +28,20 @@ const { goBack } = useBackNavigation(`/workspaces/${props.alias}`)
 
 const isImage = computed(() => isImageFile(props.filename))
 const isSvg = computed(() => isSvgFile(props.filename))
+const isMarkdown = computed(() => isMarkdownFile(props.filename))
 const isCode = computed(() => isCodeFile(props.filename))
 
 const shouldShowAsText = computed(() => {
-  return isCode.value || isSvg.value || showCode.value
+  return isCode.value || (isSvg.value && showCode.value) || (isMarkdown.value && showCode.value)
+})
+
+const shouldShowPreview = computed(() => {
+  return (isSvg.value || isMarkdown.value) && !showCode.value
+})
+
+const renderedMarkdown = computed(() => {
+  if (!isMarkdown.value || !fileContent.value) return ''
+  return renderMarkdown(fileContent.value)
 })
 
 const imageDataUrl = computed(() => {
@@ -100,10 +111,10 @@ onMounted(async () => {
       <div class="flex items-center justify-end px-4 py-3 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center gap-2">
           <button
-            v-if="isSvg"
+            v-if="isSvg || isMarkdown"
             @click="toggleCodeView"
             class="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-            :title="showCode ? 'Show rendered' : 'Show code'"
+            :title="showCode ? 'Show preview' : 'Show code'"
           >
             <CodeIcon class="w-4 h-4" />
             {{ showCode ? 'Preview' : 'Code' }}
@@ -120,8 +131,13 @@ onMounted(async () => {
       </div>
 
       <!-- SVG Rendered View -->
-      <div v-if="isSvg && !showCode" class="flex justify-center p-8 bg-gray-50 dark:bg-gray-900 rounded">
+      <div v-if="isSvg && shouldShowPreview" class="flex justify-center p-8 bg-gray-50 dark:bg-gray-900 rounded">
         <img :src="fileBlobUrl" :alt="filename" class="max-w-full h-auto" />
+      </div>
+
+      <!-- Markdown Preview -->
+      <div v-else-if="isMarkdown && shouldShowPreview" class="p-8">
+        <div class="max-w-none" v-html="renderedMarkdown"></div>
       </div>
 
       <!-- Image View -->
