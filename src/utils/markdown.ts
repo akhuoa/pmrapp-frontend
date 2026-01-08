@@ -13,7 +13,7 @@ export const renderMarkdown = (markdown: string): string => {
     .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
     // Links.
     .replace(
-      /\[([^\]]+)\]\(([^\)]+)\)/g,
+      /\[([^\]]+)\]\(([^)]+)\)/g,
       '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300">$1</a>',
     )
     // Line breaks.

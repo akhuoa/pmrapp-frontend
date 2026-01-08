@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import WorkspaceDetail from '@/components/organisms/WorkspaceDetail.vue'
 import WorkspaceFileDetail from '@/components/organisms/WorkspaceFileDetail.vue'
-import { computed, onMounted, ref, watch } from 'vue'
-import type { WorkspaceInfo } from '@/types/workspace'
 import { useWorkspaceStore } from '@/stores/workspace'
+import type { WorkspaceInfo } from '@/types/workspace'
 
 const route = useRoute()
 const workspaceStore = useWorkspaceStore()
