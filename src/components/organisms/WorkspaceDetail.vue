@@ -69,7 +69,7 @@ onMounted(async () => {
 
     <div class="mb-6 space-y-2">
       <div>
-        <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Git Repository URL:</span>
+        <span class="font-medium text-gray-600 dark:text-gray-400">Git Repository URL:</span>
         <a
           :href="workspaceInfo.workspace.url"
           target="_blank"
@@ -80,14 +80,14 @@ onMounted(async () => {
         </a>
       </div>
       <div v-if="workspaceInfo.commit.author">
-        <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Author:</span>
+        <span class="font-medium text-gray-600 dark:text-gray-400">Author:</span>
         <span class="ml-2">{{ workspaceInfo.commit.author }}</span>
       </div>
     </div>
 
     <div class="box p-0! overflow-hidden">
-      <div class="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-        <span class="text-sm text-gray-600 dark:text-gray-400">
+      <div class="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+        <span class="text-gray-600 dark:text-gray-400">
           {{ fileCountText }}
         </span>
       </div>
