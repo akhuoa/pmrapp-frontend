@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
@@ -21,6 +21,12 @@ const workspaceInfo = ref<WorkspaceInfo | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 const { goBack } = useBackNavigation('/workspaces')
+
+const fileCountText = computed(() => {
+  if (!workspaceInfo.value) return ''
+  const count = workspaceInfo.value.target.TreeInfo.filecount
+  return `${count} ${count === 1 ? 'file' : 'files'}`
+})
 
 const downloadFile = async (fileName: string) => {
   const alias = props.alias
@@ -82,7 +88,7 @@ onMounted(async () => {
     <div class="box p-0! overflow-hidden">
       <div class="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
         <span class="text-sm text-gray-600 dark:text-gray-400">
-          {{ workspaceInfo.target.TreeInfo.filecount }} {{ workspaceInfo.target.TreeInfo.filecount === 1 ? 'file' : 'files' }}
+          {{ fileCountText }}
         </span>
       </div>
       <ul class="divide-y divide-gray-200 dark:divide-gray-700">
