@@ -48,3 +48,18 @@ export const isCodeFile = (filename: string): boolean => {
   ]
   return codeExtensions.includes(extension)
 }
+
+/**
+ * Check if a file is likely a binary file based on extension.
+ */
+export const isBinaryFile = (filename: string): boolean => {
+  const extension = getFileExtension(filename)
+  const binaryExtensions = [
+    'pdf', 'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'svg',
+    'zip', 'tar', 'gz', 'rar', '7z',
+    'exe', 'dll', 'so', 'dylib',
+    'mp3', 'mp4', 'avi', 'mov', 'wav',
+    'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'
+  ]
+  return binaryExtensions.includes(extension)
+}
