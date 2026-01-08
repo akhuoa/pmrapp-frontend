@@ -36,7 +36,7 @@ export const downloadFileFromBlob = (blob: Blob, filename: string): void => {
 export const downloadWorkspaceFile = async (
   alias: string,
   commitId: string,
-  filename: string
+  filename: string,
 ): Promise<void> => {
   try {
     if (isBinaryFile(filename)) {

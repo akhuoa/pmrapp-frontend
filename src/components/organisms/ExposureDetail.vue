@@ -51,7 +51,7 @@ const archiveDownloadUrls = computed(() => {
   const base = `https://models.physiomeproject.org/workspace/${exposureInfo.value.workspace_alias}/@@archive/${exposureInfo.value.exposure.commit_id}`
   return {
     zip: `${base}/zip`,
-    tgz: `${base}/tgz`
+    tgz: `${base}/tgz`,
   }
 })
 

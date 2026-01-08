@@ -24,7 +24,11 @@ const loadWorkspaceInfo = async () => {
     const aliasValue = alias.value
     const commitIdValue = commitId.value || ''
     const pathValue = path.value || ''
-    workspaceInfo.value = await workspaceStore.getWorkspaceInfo(aliasValue, commitIdValue, pathValue)
+    workspaceInfo.value = await workspaceStore.getWorkspaceInfo(
+      aliasValue,
+      commitIdValue,
+      pathValue,
+    )
 
     if (workspaceInfo.value?.target?.TreeInfo) {
       isWorkspaceFile.value = false

@@ -77,7 +77,7 @@ onMounted(async () => {
       const blob = await getWorkspaceService().getRawFileBlob(
         props.alias,
         props.commitId,
-        props.path
+        props.path,
       )
       fileBlobUrl.value = URL.createObjectURL(blob)
 
@@ -90,7 +90,7 @@ onMounted(async () => {
       fileContent.value = await getWorkspaceService().getRawFile(
         props.alias,
         props.commitId,
-        props.path
+        props.path,
       )
     }
   } catch (err) {

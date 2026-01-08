@@ -15,9 +15,9 @@ import type { WorkspaceInfo } from '@/types/workspace'
 import { downloadWorkspaceFile } from '@/utils/download'
 
 const props = defineProps<{
-  alias: string,
-  commitId?: string,
-  path?: string,
+  alias: string
+  commitId?: string
+  path?: string
 }>()
 
 const router = useRouter()
@@ -100,7 +100,7 @@ const archiveDownloadUrls = computed(() => {
   const base = `https://models.physiomeproject.org/workspace/${props.alias}/@@archive/${workspaceInfo.value.commit.commit_id}`
   return {
     zip: `${base}/zip`,
-    tgz: `${base}/tgz`
+    tgz: `${base}/tgz`,
   }
 })
 
