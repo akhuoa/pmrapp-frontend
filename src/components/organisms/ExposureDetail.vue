@@ -4,8 +4,8 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
-import FileIcon from '@/components/icons/FileIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
+import FileIcon from '@/components/icons/FileIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
@@ -51,7 +51,7 @@ const archiveDownloadUrls = computed(() => {
   const base = `https://models.physiomeproject.org/workspace/${exposureInfo.value.workspace_alias}/@@archive/${exposureInfo.value.exposure.commit_id}`
   return {
     zip: `${base}/zip`,
-    tgz: `${base}/tgz`
+    tgz: `${base}/tgz`,
   }
 })
 

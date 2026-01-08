@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import WorkspaceDetail from '@/components/organisms/WorkspaceDetail.vue'
 import WorkspaceFileDetail from '@/components/organisms/WorkspaceFileDetail.vue'
-import { computed, onMounted, ref, watch } from 'vue'
-import type { WorkspaceInfo } from '@/types/workspace'
 import { useWorkspaceStore } from '@/stores/workspace'
+import type { WorkspaceInfo } from '@/types/workspace'
 
 const route = useRoute()
 const workspaceStore = useWorkspaceStore()
@@ -24,7 +24,11 @@ const loadWorkspaceInfo = async () => {
     const aliasValue = alias.value
     const commitIdValue = commitId.value || ''
     const pathValue = path.value || ''
-    workspaceInfo.value = await workspaceStore.getWorkspaceInfo(aliasValue, commitIdValue, pathValue)
+    workspaceInfo.value = await workspaceStore.getWorkspaceInfo(
+      aliasValue,
+      commitIdValue,
+      pathValue,
+    )
 
     if (workspaceInfo.value?.target?.TreeInfo) {
       isWorkspaceFile.value = false

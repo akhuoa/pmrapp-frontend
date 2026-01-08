@@ -53,7 +53,11 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     }
   }
 
-  const getWorkspaceInfo = async (alias: string, commitId: string, path: string): Promise<WorkspaceInfo> => {
+  const getWorkspaceInfo = async (
+    alias: string,
+    commitId: string,
+    path: string,
+  ): Promise<WorkspaceInfo> => {
     // Check cache first.
     const cacheId = `${alias}:${commitId}:${path}`
     const cached = workspaceInfoCache.value.get(cacheId)

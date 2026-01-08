@@ -55,7 +55,7 @@ export const workspaceService = {
       `${API_BASE_URL}/api/workspace/${alias}/rawfile/${commitId}/${filename}`,
       {
         method: 'GET',
-      }
+      },
     )
 
     if (!response.ok) {

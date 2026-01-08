@@ -2,16 +2,16 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import BackButton from '@/components/atoms/BackButton.vue'
-import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
-import DownloadIcon from '@/components/icons/DownloadIcon.vue'
+import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import CodeIcon from '@/components/icons/CodeIcon.vue'
+import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { getWorkspaceService } from '@/services'
 import { downloadFileFromContent } from '@/utils/download'
-import { isImageFile, isSvgFile, isCodeFile, isMarkdownFile } from '@/utils/file'
+import { isCodeFile, isImageFile, isMarkdownFile, isSvgFile } from '@/utils/file'
 import { renderMarkdown } from '@/utils/markdown'
 
 const props = defineProps<{
@@ -77,7 +77,7 @@ onMounted(async () => {
       const blob = await getWorkspaceService().getRawFileBlob(
         props.alias,
         props.commitId,
-        props.path
+        props.path,
       )
       fileBlobUrl.value = URL.createObjectURL(blob)
 
@@ -90,7 +90,7 @@ onMounted(async () => {
       fileContent.value = await getWorkspaceService().getRawFile(
         props.alias,
         props.commitId,
-        props.path
+        props.path,
       )
     }
   } catch (err) {
