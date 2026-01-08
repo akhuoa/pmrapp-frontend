@@ -34,7 +34,7 @@ const backPath = computed(() => {
   }
   // Go to parent folder.
   const parentPath = props.path.substring(0, lastSlash)
-  return `/workspaces/${props.alias}/folder/${props.commitId}/${parentPath}`
+  return `/workspaces/${props.alias}/file/${props.commitId}/${parentPath}`
 })
 
 const { goBack } = useBackNavigation(backPath.value)

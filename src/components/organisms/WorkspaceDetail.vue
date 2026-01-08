@@ -39,7 +39,7 @@ const backPath = computed(() => {
   }
   // Go to parent folder.
   const parentPath = props.path.substring(0, lastSlash)
-  return `/workspaces/${props.alias}/folder/${props.commitId}/${parentPath}`
+  return `/workspaces/${props.alias}/file/${props.commitId}/${parentPath}`
 })
 
 const goBack = () => {
@@ -206,14 +206,6 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
               <FileIcon v-else class="text-gray-500 dark:text-gray-400 flex-shrink-0 w-4 h-4" />
 
               <RouterLink
-                v-if="entry.kind === 'tree'"
-                :to="`/workspaces/${props.alias}/folder/${workspaceInfo.commit.commit_id}/${(props.path ? props.path + '/' : '') + entry.name}`"
-                class="text-link font-medium truncate"
-              >
-                {{ entry.name }}
-              </RouterLink>
-              <RouterLink
-                v-else
                 :to="`/workspaces/${props.alias}/file/${workspaceInfo.commit.commit_id}/${(props.path ? props.path + '/' : '') + entry.name}`"
                 class="text-link font-medium truncate"
               >

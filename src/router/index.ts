@@ -6,7 +6,6 @@ import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import WorkspaceDetailView from '@/views/WorkspaceDetailView.vue'
-import WorkspaceFileDetailView from '@/views/WorkspaceFileDetailView.vue'
 import WorkspaceView from '@/views/WorkspaceView.vue'
 
 const title = 'Physiome Model Repository'
@@ -32,15 +31,9 @@ const router = createRouter({
       meta: { title: `Workspace Detail – ${title}` },
     },
     {
-      path: '/workspaces/:alias/folder/:commitId/:path(.*)',
-      name: 'workspace-folder-detail',
-      component: WorkspaceDetailView,
-      meta: { title: `Workspace Folder – ${title}` },
-    },
-    {
       path: '/workspaces/:alias/file/:commitId/:path(.*)',
       name: 'workspace-file-detail',
-      component: WorkspaceFileDetailView,
+      component: WorkspaceDetailView,
       meta: { title: `Workspace File – ${title}` },
     },
     {
