@@ -25,7 +25,19 @@ const fileBlobUrl = ref<string>('')
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 const showCode = ref(false)
-const { goBack } = useBackNavigation(`/workspaces/${props.alias}`)
+
+const backPath = computed(() => {
+  const lastSlash = props.path.lastIndexOf('/')
+  if (lastSlash === -1) {
+    // File in root - go to root workspace.
+    return `/workspaces/${props.alias}`
+  }
+  // Go to parent folder.
+  const parentPath = props.path.substring(0, lastSlash)
+  return `/workspaces/${props.alias}/folder/${props.commitId}/${parentPath}`
+})
+
+const { goBack } = useBackNavigation(backPath.value)
 
 const isImage = computed(() => isImageFile(props.path))
 const isSvg = computed(() => isSvgFile(props.path))
@@ -92,7 +104,7 @@ onMounted(async () => {
 
 <template>
   <BackButton
-    :label="`Back to Workspace`"
+    label="Back"
     content-section="Workspace File Detail"
     :on-click="goBack"
   />

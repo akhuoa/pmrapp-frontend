@@ -1,6 +1,7 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import BackButton from '@/components/atoms/BackButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
@@ -8,7 +9,6 @@ import FolderIcon from '@/components/icons/FolderIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
-import { useBackNavigation } from '@/composables/useBackNavigation'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { WorkspaceInfo } from '@/types/workspace'
 import { downloadWorkspaceFile } from '@/utils/download'
@@ -19,11 +19,43 @@ const props = defineProps<{
   path?: string,
 }>()
 
+const router = useRouter()
 const workspaceStore = useWorkspaceStore()
 const workspaceInfo = ref<WorkspaceInfo | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
-const { goBack } = useBackNavigation(props.path ? `/workspaces/${props.alias}` : '/workspaces')
+
+const backPath = computed(() => {
+  if (!props.path) {
+    // Root workspace - go to workspaces listing.
+    return '/workspaces'
+  }
+  // Extract parent folder path.
+  const lastSlash = props.path.lastIndexOf('/')
+  if (lastSlash === -1) {
+    // File/folder in root - go to root workspace
+    return `/workspaces/${props.alias}`
+  }
+  // Go to parent folder.
+  const parentPath = props.path.substring(0, lastSlash)
+  return `/workspaces/${props.alias}/folder/${props.commitId}/${parentPath}`
+})
+
+const goBack = () => {
+  const basePath = !props.path ? '/workspaces' : `/workspaces/${props.alias}`
+
+  // Check browser history to preserve query state (search filters).
+  if (
+    window.history.state.back?.includes(basePath) &&
+    !window.history.state.back?.includes(`${basePath}/`)
+  ) {
+    // Go back in browser history to preserve filters.
+    router.back()
+  } else {
+    // Navigate to computed back path.
+    router.push(backPath.value)
+  }
+}
 
 const fileCountText = computed(() => {
   if (!workspaceInfo.value) return ''
