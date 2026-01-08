@@ -19,15 +19,27 @@ export const workspaceService = {
     return payload.inner
   },
 
-  async getWorkspaceInfo(alias: string): Promise<WorkspaceInfo> {
+  async getWorkspaceInfo(alias: string, commitId: string, path: string): Promise<WorkspaceInfo> {
+    const payloadObj = {}
+
+    if (alias) {
+      Object.assign(payloadObj, { id: { Aliased: alias } })
+    }
+
+    if (commitId) {
+      Object.assign(payloadObj, { commit: commitId })
+    }
+
+    if (path) {
+      Object.assign(payloadObj, { path: path })
+    }
+
     const response = await fetch(`${API_BASE_URL}/api/get_workspace_info`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        id: { Aliased: alias },
-      }),
+      body: JSON.stringify(payloadObj),
     })
 
     if (!response.ok) {
@@ -36,5 +48,25 @@ export const workspaceService = {
 
     const payload = await response.json()
     return payload.inner
+  },
+
+  async getRawFileBlob(alias: string, commitId: string, filename: string): Promise<Blob> {
+    const response = await fetch(
+      `${API_BASE_URL}/api/workspace/${alias}/rawfile/${commitId}/${filename}`,
+      {
+        method: 'GET',
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(`Request failed: ${response.status}`)
+    }
+
+    return await response.blob()
+  },
+
+  async getRawFile(alias: string, commitId: string, filename: string): Promise<string> {
+    const blob = await this.getRawFileBlob(alias, commitId, filename)
+    return await blob.text()
   },
 }
