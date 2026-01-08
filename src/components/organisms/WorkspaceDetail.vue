@@ -31,6 +31,29 @@ const fileCountText = computed(() => {
   return `${count} ${count === 1 ? 'file' : 'files'}`
 })
 
+const sortedEntries = computed(() => {
+  if (!workspaceInfo.value) return []
+
+  const entries = [...workspaceInfo.value.target.TreeInfo.entries]
+
+  return entries.sort((a, b) => {
+    // Folders first.
+    if (a.kind === 'tree' && b.kind !== 'tree') return -1
+    if (a.kind !== 'tree' && b.kind === 'tree') return 1
+
+    // Both folders or both files - sort by name.
+    // Dotfiles (starting with ".") come before other files.
+    const aIsDotfile = a.name.startsWith('.')
+    const bIsDotfile = b.name.startsWith('.')
+
+    if (aIsDotfile && !bIsDotfile) return -1
+    if (!aIsDotfile && bIsDotfile) return 1
+
+    // Alphabetically (case-insensitive, but capitals before lowercase for same letter).
+    return a.name.localeCompare(b.name, 'en', { numeric: true })
+  })
+})
+
 const downloadFile = async (entry: any) => {
   const alias = props.alias
   const commitId = workspaceInfo.value?.commit.commit_id
@@ -108,7 +131,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
       </div>
       <ul class="divide-y divide-gray-200 dark:divide-gray-700">
         <li
-          v-for="entry in workspaceInfo.target.TreeInfo.entries"
+          v-for="entry in sortedEntries"
           :key="entry.id"
           class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
         >
