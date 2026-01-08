@@ -38,7 +38,7 @@ export const workspaceService = {
     return payload.inner
   },
 
-  async getRawFile(alias: string, commitId: string, filename: string): Promise<string> {
+  async getRawFileBlob(alias: string, commitId: string, filename: string): Promise<Blob> {
     const response = await fetch(
       `${API_BASE_URL}/api/workspace/${alias}/rawfile/${commitId}/${filename}`,
       {
@@ -50,6 +50,11 @@ export const workspaceService = {
       throw new Error(`Request failed: ${response.status}`)
     }
 
-    return await response.text()
+    return await response.blob()
+  },
+
+  async getRawFile(alias: string, commitId: string, filename: string): Promise<string> {
+    const blob = await this.getRawFileBlob(alias, commitId, filename)
+    return await blob.text()
   },
 }
