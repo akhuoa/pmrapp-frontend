@@ -53,19 +53,21 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     }
   }
 
-  const getWorkspaceInfo = async (alias: string): Promise<WorkspaceInfo> => {
+  const getWorkspaceInfo = async (alias: string, commitId: string, path: string): Promise<WorkspaceInfo> => {
     // Check cache first.
-    const cached = workspaceInfoCache.value.get(alias)
+    const cacheId = `${alias}:${commitId}:${path}`
+    const cached = workspaceInfoCache.value.get(cacheId)
+
     if (cached) {
       return cached
     }
 
     try {
-      const info = await getWorkspaceService().getWorkspaceInfo(alias)
-      workspaceInfoCache.value.set(alias, info)
+      const info = await getWorkspaceService().getWorkspaceInfo(alias, commitId, path)
+      workspaceInfoCache.value.set(cacheId, info)
       return info
     } catch (err) {
-      console.error(`Error loading workspace info for ${alias}:`, err)
+      console.error(`Error loading workspace info for ${cacheId}:`, err)
       throw err
     }
   }

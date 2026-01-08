@@ -19,15 +19,27 @@ export const workspaceService = {
     return payload.inner
   },
 
-  async getWorkspaceInfo(alias: string): Promise<WorkspaceInfo> {
+  async getWorkspaceInfo(alias: string, commitId: string, path: string): Promise<WorkspaceInfo> {
+    const payloadObj = {}
+
+    if (alias) {
+      Object.assign(payloadObj, { id: { Aliased: alias } })
+    }
+
+    if (commitId) {
+      Object.assign(payloadObj, { commit: commitId })
+    }
+
+    if (path) {
+      Object.assign(payloadObj, { path: path })
+    }
+
     const response = await fetch(`${API_BASE_URL}/api/get_workspace_info`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        id: { Aliased: alias },
-      }),
+      body: JSON.stringify(payloadObj),
     })
 
     if (!response.ok) {
