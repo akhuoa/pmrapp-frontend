@@ -9,6 +9,7 @@ import FolderIcon from '@/components/icons/FolderIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
+import ActionButton from '@/components/atoms/ActionButton.vue'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { WorkspaceInfo } from '@/types/workspace'
 import { downloadWorkspaceFile } from '@/utils/download'
@@ -94,6 +95,15 @@ const downloadFile = async (entry: any) => {
   await downloadWorkspaceFile(alias, commitId, filename)
 }
 
+const archiveDownloadUrls = computed(() => {
+  if (!workspaceInfo.value) return { zip: '', tgz: '' }
+  const base = `https://models.physiomeproject.org/workspace/${props.alias}/@@archive/${workspaceInfo.value.commit.commit_id}`
+  return {
+    zip: `${base}/zip`,
+    tgz: `${base}/tgz`
+  }
+})
+
 const loadWorkspaceInfo = async () => {
   isLoading.value = true
   error.value = null
@@ -152,6 +162,29 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
       <div v-if="workspaceInfo.commit.author">
         <span class="font-medium text-gray-600 dark:text-gray-400">Author:</span>
         <span class="ml-2">{{ workspaceInfo.commit.author }}</span>
+      </div>
+      <div class="pt-4">
+        <div class="flex items-center gap-2">
+          <p class="text-gray-600 dark:text-gray-400">Complete workspace archive:</p>
+          <ActionButton
+            variant="primary"
+            :href="archiveDownloadUrls.zip"
+            :download="true"
+            content-section="Workspace Detail"
+          >
+            <DownloadIcon class="w-4 h-4" />
+            Download as .zip
+          </ActionButton>
+          <ActionButton
+            variant="primary"
+            :href="archiveDownloadUrls.tgz"
+            :download="true"
+            content-section="Workspace Detail"
+          >
+            <DownloadIcon class="w-4 h-4" />
+            Download as .tgz
+          </ActionButton>
+        </div>
       </div>
     </div>
 
