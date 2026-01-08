@@ -11,7 +11,7 @@ import FolderIcon from '@/components/icons/FolderIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useWorkspaceStore } from '@/stores/workspace'
-import type { WorkspaceFileEntry, WorkspaceInfo } from '@/types/workspace'
+import type { WorkspaceInfo } from '@/types/workspace'
 import { downloadWorkspaceFile } from '@/utils/download'
 
 const props = defineProps<{
@@ -87,12 +87,14 @@ const sortedEntries = computed(() => {
   })
 })
 
-const downloadFile = async (entry: WorkspaceFileEntry) => {
+const downloadFile = async (filename: string) => {
+  if (!workspaceInfo.value) return
+
   const alias = props.alias
   const commitId = workspaceInfo.value?.commit.commit_id
+  const fullFilename = (props.path ? `${props.path}/` : '') + filename
   if (!commitId) return
-  const filename = (props.path ? `${props.path}/` : '') + entry.name
-  await downloadWorkspaceFile(alias, commitId, filename)
+  await downloadWorkspaceFile(alias, commitId, fullFilename)
 }
 
 const archiveDownloadUrls = computed(() => {
@@ -214,7 +216,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
             </div>
             <button
               v-if="entry.kind !== 'tree'"
-              @click.prevent="downloadFile(entry)"
+              @click.prevent="downloadFile(entry.name)"
               class="ml-4 p-2 text-gray-500 cursor-pointer hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
               :title="`Download ${entry.name}`"
             >
