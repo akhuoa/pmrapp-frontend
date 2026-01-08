@@ -11,7 +11,7 @@ import FolderIcon from '@/components/icons/FolderIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useWorkspaceStore } from '@/stores/workspace'
-import type { WorkspaceInfo } from '@/types/workspace'
+import type { WorkspaceFileEntry, WorkspaceInfo } from '@/types/workspace'
 import { downloadWorkspaceFile } from '@/utils/download'
 
 const props = defineProps<{
@@ -87,11 +87,11 @@ const sortedEntries = computed(() => {
   })
 })
 
-const downloadFile = async (entry: any) => {
+const downloadFile = async (entry: WorkspaceFileEntry) => {
   const alias = props.alias
   const commitId = workspaceInfo.value?.commit.commit_id
   if (!commitId) return
-  const filename = (props.path ? props.path + '/' : '') + entry.name
+  const filename = (props.path ? `${props.path}/` : '') + entry.name
   await downloadWorkspaceFile(alias, commitId, filename)
 }
 

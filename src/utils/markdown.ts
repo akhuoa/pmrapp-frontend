@@ -34,7 +34,7 @@ export const renderMarkdown = (markdown: string): string => {
     .replace(/^- (.*$)/gim, '<li class="mb-1">$1</li>')
 
   // Wrap in paragraph tags.
-  html = '<p class="mb-4">' + html + '</p>'
+  html = `<p class="mb-4">${html}</p>`
   // Clean up multiple paragraph tags.
   html = html.replace(/<\/p><p class="mb-4">/g, '</p>\n<p class="mb-4">')
   // Wrap list items in ul.
