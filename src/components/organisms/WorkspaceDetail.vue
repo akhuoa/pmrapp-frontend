@@ -1,9 +1,10 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
+import FolderIcon from '@/components/icons/FolderIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
@@ -13,14 +14,16 @@ import type { WorkspaceInfo } from '@/types/workspace'
 import { downloadWorkspaceFile } from '@/utils/download'
 
 const props = defineProps<{
-  alias: string
+  alias: string,
+  commitId?: string,
+  path?: string,
 }>()
 
 const workspaceStore = useWorkspaceStore()
 const workspaceInfo = ref<WorkspaceInfo | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
-const { goBack } = useBackNavigation('/workspaces')
+const { goBack } = useBackNavigation(props.path ? `/workspaces/${props.alias}` : '/workspaces')
 
 const fileCountText = computed(() => {
   if (!workspaceInfo.value) return ''
@@ -28,28 +31,40 @@ const fileCountText = computed(() => {
   return `${count} ${count === 1 ? 'file' : 'files'}`
 })
 
-const downloadFile = async (fileName: string) => {
+const downloadFile = async (entry: any) => {
   const alias = props.alias
   const commitId = workspaceInfo.value?.commit.commit_id
   if (!commitId) return
-  await downloadWorkspaceFile(alias, commitId, fileName)
+  const filename = (props.path ? props.path + '/' : '') + entry.name
+  await downloadWorkspaceFile(alias, commitId, filename)
 }
 
-onMounted(async () => {
+const loadWorkspaceInfo = async () => {
+  isLoading.value = true
+  error.value = null
+
   try {
-    workspaceInfo.value = await workspaceStore.getWorkspaceInfo(props.alias)
+    const alias = props.alias
+    const commitId = props.commitId || ''
+    const path = props.path || ''
+    workspaceInfo.value = await workspaceStore.getWorkspaceInfo(alias, commitId, path)
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to load workspace'
+    error.value = err instanceof Error ? err.message : 'Failed to load workspace.'
     console.error('Error loading workspace:', err)
   } finally {
     isLoading.value = false
   }
-})
+}
+
+onMounted(loadWorkspaceInfo)
+
+// Watch for changes in props to reload data when navigating between folders.
+watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
 </script>
 
 <template>
   <BackButton
-    label="Back to Workspaces"
+    label="Back"
     content-section="Workspace Detail"
     :on-click="goBack"
   />
@@ -99,16 +114,27 @@ onMounted(async () => {
         >
           <div class="px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-3 flex-1 min-w-0">
-              <FileIcon class="text-gray-500 dark:text-gray-400 flex-shrink-0 w-4 h-4" />
+              <FolderIcon v-if="entry.kind === 'tree'" class="text-gray-500 dark:text-gray-400 flex-shrink-0 w-4 h-4" />
+              <FileIcon v-else class="text-gray-500 dark:text-gray-400 flex-shrink-0 w-4 h-4" />
+
               <RouterLink
-                :to="`/workspaces/${alias}/file/${workspaceInfo.commit.commit_id}/${entry.name}`"
+                v-if="entry.kind === 'tree'"
+                :to="`/workspaces/${props.alias}/folder/${workspaceInfo.commit.commit_id}/${(props.path ? props.path + '/' : '') + entry.name}`"
+                class="text-link font-medium truncate"
+              >
+                {{ entry.name }}
+              </RouterLink>
+              <RouterLink
+                v-else
+                :to="`/workspaces/${props.alias}/file/${workspaceInfo.commit.commit_id}/${(props.path ? props.path + '/' : '') + entry.name}`"
                 class="text-link font-medium truncate"
               >
                 {{ entry.name }}
               </RouterLink>
             </div>
             <button
-              @click.prevent="downloadFile(entry.name)"
+              v-if="entry.kind !== 'tree'"
+              @click.prevent="downloadFile(entry)"
               class="ml-4 p-2 text-gray-500 cursor-pointer hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
               :title="`Download ${entry.name}`"
             >

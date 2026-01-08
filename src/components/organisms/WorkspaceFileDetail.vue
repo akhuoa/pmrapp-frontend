@@ -17,7 +17,7 @@ import { renderMarkdown } from '@/utils/markdown'
 const props = defineProps<{
   alias: string
   commitId: string
-  filename: string
+  path: string
 }>()
 
 const fileContent = ref<string>('')
@@ -27,10 +27,10 @@ const isLoading = ref(true)
 const showCode = ref(false)
 const { goBack } = useBackNavigation(`/workspaces/${props.alias}`)
 
-const isImage = computed(() => isImageFile(props.filename))
-const isSvg = computed(() => isSvgFile(props.filename))
-const isMarkdown = computed(() => isMarkdownFile(props.filename))
-const isCode = computed(() => isCodeFile(props.filename))
+const isImage = computed(() => isImageFile(props.path))
+const isSvg = computed(() => isSvgFile(props.path))
+const isMarkdown = computed(() => isMarkdownFile(props.path))
+const isCode = computed(() => isCodeFile(props.path))
 
 const shouldShowAsText = computed(() => {
   return isCode.value || (isSvg.value && showCode.value) || (isMarkdown.value && showCode.value)
@@ -51,7 +51,7 @@ const imageDataUrl = computed(() => {
 })
 
 const downloadFile = () => {
-  downloadFileFromContent(fileContent.value, props.filename)
+  downloadFileFromContent(fileContent.value, props.path)
 }
 
 const toggleCodeView = () => {
@@ -65,7 +65,7 @@ onMounted(async () => {
       const blob = await getWorkspaceService().getRawFileBlob(
         props.alias,
         props.commitId,
-        props.filename
+        props.path
       )
       fileBlobUrl.value = URL.createObjectURL(blob)
 
@@ -78,7 +78,7 @@ onMounted(async () => {
       fileContent.value = await getWorkspaceService().getRawFile(
         props.alias,
         props.commitId,
-        props.filename
+        props.path
       )
     }
   } catch (err) {
@@ -106,7 +106,7 @@ onMounted(async () => {
   <LoadingBox v-else-if="isLoading" message="Loading file..." />
 
   <div v-else-if="fileContent !== null">
-    <PageHeader :title="filename" />
+    <PageHeader :title="path" />
 
     <div class="box p-0! overflow-hidden">
       <div class="flex items-center justify-end px-4 py-3 border-b border-gray-200 dark:border-gray-700">
@@ -133,7 +133,7 @@ onMounted(async () => {
 
       <!-- SVG Rendered View -->
       <div v-if="isSvg && shouldShowPreview" class="flex justify-center p-8 bg-gray-50 dark:bg-gray-900 rounded">
-        <img :src="fileBlobUrl" :alt="filename" class="max-w-full h-auto" />
+        <img :src="fileBlobUrl" :alt="path" class="max-w-full h-auto" />
       </div>
 
       <!-- Markdown Preview -->
@@ -143,7 +143,7 @@ onMounted(async () => {
 
       <!-- Image View -->
       <div v-else-if="isImage && imageDataUrl" class="flex justify-center p-8 bg-gray-50 dark:bg-gray-900 rounded">
-        <img :src="imageDataUrl" :alt="filename" class="max-w-full h-auto" />
+        <img :src="imageDataUrl" :alt="path" class="max-w-full h-auto" />
       </div>
 
       <!-- Code/Text View -->
