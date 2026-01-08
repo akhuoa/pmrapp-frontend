@@ -3,6 +3,7 @@
 import { computed, onMounted, ref } from 'vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
+import CopyButton from '@/components/atoms/CopyButton.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import CodeIcon from '@/components/icons/CodeIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
@@ -148,6 +149,10 @@ onMounted(async () => {
       <!-- Code/Text View -->
       <div v-else-if="shouldShowAsText" class="relative">
         <pre class="p-4 bg-gray-50 dark:bg-gray-900 rounded overflow-x-auto text-sm"><code>{{ fileContent }}</code></pre>
+
+        <div class="absolute top-2 right-2">
+          <CopyButton :text="fileContent" title="Copy code" />
+        </div>
       </div>
 
       <!-- Binary/Unknown File Type -->
