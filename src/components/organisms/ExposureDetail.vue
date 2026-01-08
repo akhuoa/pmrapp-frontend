@@ -55,6 +55,11 @@ const archiveDownloadUrls = computed(() => {
   }
 })
 
+const combineArchiveUrl = computed(() => {
+  if (!exposureInfo.value) return ''
+  return `https://models.physiomeproject.org/e/${props.alias}/download_generated_omex`
+})
+
 const buildOpenCORURL = (option?: string) => {
   if (!exposureInfo.value || openCORFiles.value.length === 0) return ''
 
@@ -312,7 +317,7 @@ onMounted(async () => {
               <ActionButton
                 variant="secondary"
                 size="sm"
-                :href="`'https://models.physiomeproject.org/e/${exposureInfo.workspace_alias}/download_generated_omex'`"
+                :href="combineArchiveUrl"
                 :download="true"
                 content-section="Exposure Detail"
               >
