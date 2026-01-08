@@ -260,7 +260,7 @@ onMounted(async () => {
           </ul>
         </nav>
       </section>
-      <section v-if="navigationFiles.length > 0" class="pt-6 border-t border-gray-200 dark:border-gray-700">
+      <section v-if="navigationFiles.length > 0" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Navigation</h4>
         <nav>
           <ul class="space-y-2">
