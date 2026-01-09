@@ -26,7 +26,7 @@ const handleCopy = async () => {
 <template>
   <button
     @click="handleCopy"
-    class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+    class="p-2 text-gray-500 cursor-pointer hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
     :title="isCopied ? 'Copied!' : (title || 'Copy')"
   >
     <CopyIcon class="w-4 h-4" />

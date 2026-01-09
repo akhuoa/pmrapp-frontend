@@ -135,7 +135,7 @@ onMounted(async () => {
           <button
             v-if="isSvg || isMarkdown"
             @click="toggleCodeView"
-            class="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+            class="flex items-center cursor-pointer gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
             :title="showCode ? 'Show preview' : 'Show code'"
           >
             <PreviewIcon class="w-4 h-4" v-if="showCode" />
@@ -144,7 +144,7 @@ onMounted(async () => {
           </button>
           <button
             @click="downloadFile"
-            class="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+            class="flex items-center cursor-pointer gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
             title="Download file"
           >
             <DownloadIcon class="w-4 h-4" />
