@@ -272,7 +272,7 @@ onMounted(async () => {
               class="text-sm"
             >
               <p v-if="licenseInfo">
-                <a :href="licenseInfo" class="text-link">{{ licenseInfo }}</a>
+                <a :href="licenseInfo" class="text-link" target="_blank" rel="noopener noreferrer">{{ licenseInfo }}</a>
               </p>
 
               <p v-else>
