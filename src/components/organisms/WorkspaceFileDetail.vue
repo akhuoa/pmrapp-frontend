@@ -5,6 +5,7 @@ import BackButton from '@/components/atoms/BackButton.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import CodeIcon from '@/components/icons/CodeIcon.vue'
+import PreviewIcon from '@/components/icons/PreviewIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
@@ -137,7 +138,8 @@ onMounted(async () => {
             class="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
             :title="showCode ? 'Show preview' : 'Show code'"
           >
-            <CodeIcon class="w-4 h-4" />
+            <PreviewIcon class="w-4 h-4" v-if="showCode" />
+            <CodeIcon class="w-4 h-4" v-else />
             {{ showCode ? 'Preview' : 'Code' }}
           </button>
           <button
