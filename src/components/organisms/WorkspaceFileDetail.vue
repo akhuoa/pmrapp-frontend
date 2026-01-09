@@ -6,12 +6,13 @@ import CopyButton from '@/components/atoms/CopyButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import CodeIcon from '@/components/icons/CodeIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
+import PreviewIcon from '@/components/icons/PreviewIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { getWorkspaceService } from '@/services'
-import { downloadFileFromContent } from '@/utils/download'
-import { isCodeFile, isImageFile, isMarkdownFile, isSvgFile } from '@/utils/file'
+import { downloadFileFromBlob, downloadFileFromContent } from '@/utils/download'
+import { isCodeFile, isImageFile, isMarkdownFile, isPdfFile, isSvgFile } from '@/utils/file'
 import { renderMarkdown } from '@/utils/markdown'
 import ActionButton from '../atoms/ActionButton.vue'
 
@@ -22,6 +23,7 @@ const props = defineProps<{
 }>()
 
 const fileContent = ref<string>('')
+const fileBlob = ref<Blob>(new Blob())
 const fileBlobUrl = ref<string>('')
 const error = ref<string | null>(null)
 const isLoading = ref(true)
@@ -41,6 +43,7 @@ const backPath = computed(() => {
 const { goBack } = useBackNavigation(backPath.value)
 
 const isImage = computed(() => isImageFile(props.path))
+const isPDF = computed(() => isPdfFile(props.path))
 const isSvg = computed(() => isSvgFile(props.path))
 const isMarkdown = computed(() => isMarkdownFile(props.path))
 const isCode = computed(() => isCodeFile(props.path))
@@ -64,7 +67,11 @@ const imageDataUrl = computed(() => {
 })
 
 const downloadFile = () => {
-  downloadFileFromContent(fileContent.value, props.path)
+  if (isImage.value || isSvg.value || isPDF.value) {
+    downloadFileFromBlob(fileBlob.value, props.path)
+  } else {
+    downloadFileFromContent(fileContent.value, props.path)
+  }
 }
 
 const toggleCodeView = () => {
@@ -73,13 +80,14 @@ const toggleCodeView = () => {
 
 onMounted(async () => {
   try {
-    // Fetch images and SVGs as blobs.
-    if (isImage.value || isSvg.value) {
+    // Fetch images, SVGs, and PDFs as blobs.
+    if (isImage.value || isSvg.value || isPDF.value) {
       const blob = await getWorkspaceService().getRawFileBlob(
         props.alias,
         props.commitId,
         props.path,
       )
+      fileBlob.value = blob
       fileBlobUrl.value = URL.createObjectURL(blob)
 
       // For SVG, also get text content for code view.
@@ -127,15 +135,16 @@ onMounted(async () => {
           <button
             v-if="isSvg || isMarkdown"
             @click="toggleCodeView"
-            class="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+            class="flex items-center cursor-pointer gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
             :title="showCode ? 'Show preview' : 'Show code'"
           >
-            <CodeIcon class="w-4 h-4" />
+            <PreviewIcon class="w-4 h-4" v-if="showCode" />
+            <CodeIcon class="w-4 h-4" v-else />
             {{ showCode ? 'Preview' : 'Code' }}
           </button>
           <button
             @click="downloadFile"
-            class="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+            class="flex items-center cursor-pointer gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
             title="Download file"
           >
             <DownloadIcon class="w-4 h-4" />
@@ -157,6 +166,11 @@ onMounted(async () => {
       <!-- Image View -->
       <div v-else-if="isImage && imageDataUrl" class="flex justify-center p-8 bg-gray-50 dark:bg-gray-900 rounded">
         <img :src="imageDataUrl" :alt="path" class="max-w-full h-auto" />
+      </div>
+
+      <!-- PDF View -->
+      <div v-else-if="isPDF" class="flex justify-center p-8 bg-gray-50 dark:bg-gray-900 rounded">
+        <embed :src="fileBlobUrl" type="application/pdf" width="100%" height="800px" />
       </div>
 
       <!-- Code/Text View -->

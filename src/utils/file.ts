@@ -1,10 +1,17 @@
 /**
  * Get file extension from filename.
+ * For dotfiles (like .gitignore), returns the part after the leading dot.
  */
 export const getFileExtension = (filename: string): string => {
+  // Handle dotfiles (e.g., .gitignore, .editorconfig).
+  if (filename.startsWith('.') && filename.indexOf('.', 1) === -1) {
+    // File starts with dot and has no other dots - return the part after the dot.
+    return filename.substring(1).toLowerCase()
+  }
+
   const lastDotIndex = filename.lastIndexOf('.')
 
-  // No extension if no dot, or dot is at the start (hidden file), or dot is at the end.
+  // No extension if no dot, or dot is at the end.
   if (lastDotIndex <= 0 || lastDotIndex === filename.length - 1) {
     return ''
   }
@@ -25,6 +32,13 @@ export const isImageFile = (filename: string): boolean => {
  */
 export const isSvgFile = (filename: string): boolean => {
   return getFileExtension(filename) === 'svg'
+}
+
+/**
+ * Check if file is a PDF file.
+ */
+export const isPdfFile = (filename: string): boolean => {
+  return getFileExtension(filename) === 'pdf'
 }
 
 /**
@@ -72,8 +86,43 @@ export const isCodeFile = (filename: string): boolean => {
     'r',
     'matlab',
     'm',
+    'gitignore',
+    'gitmodules',
+    'gitattributes',
+    'editorconfig',
+    'eslintrc',
+    'prettierrc',
+    'env',
+    'dockerfile',
+    'makefile',
+    'cmake',
+    'gradle',
+    'maven',
+    'gradle',
+    'ini',
+    'conf',
+    'config',
+    'toml',
+    'lock',
   ]
-  return codeExtensions.includes(extension)
+
+  // Check by extension first.
+  if (codeExtensions.includes(extension)) {
+    return true
+  }
+
+  // Check for files that don't have extension (like Makefile, Dockerfile, etc.).
+  const filenameExtensionless = [
+    'Makefile',
+    'Dockerfile',
+    'Gemfile',
+    'Rakefile',
+    'Procfile',
+    'Vagrantfile',
+    'LICENSE',
+    'README',
+  ]
+  return filenameExtensionless.includes(filename)
 }
 
 /**
