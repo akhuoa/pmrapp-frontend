@@ -342,7 +342,7 @@ onMounted(async () => {
         </nav>
       </section>
       <section class="pt-6 border-t border-gray-200 dark:border-gray-700">
-        <h4 class="text-lg font-semibold mb-3">License and Citation</h4>
+        <h4 class="text-lg font-semibold mb-3">License</h4>
         <nav>
           <ul class="space-y-2">
             <li
@@ -351,12 +351,12 @@ onMounted(async () => {
               <p v-if="licenseInfo">
                 <a :href="licenseInfo" class="text-link" target="_blank" rel="noopener noreferrer">{{ licenseInfo }}</a>
               </p>
-
               <p v-else>
                 <em>
-                  All publicly accessible content of the Physiome model repository
-                  is licensed to the public under the
-                  <a class="text-link" href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 License</a>.
+                  All publicly accessible content of the Physiome model repository is licensed to the public under the
+                  <a class="text-link" target="_blank" rel="noopener noreferrer" href="http://creativecommons.org/licenses/by/3.0/">
+                    Creative Commons Attribution 3.0 License
+                  </a>.
                 </em>
               </p>
             </li>
