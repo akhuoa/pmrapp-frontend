@@ -28,6 +28,13 @@ export const isSvgFile = (filename: string): boolean => {
 }
 
 /**
+ * Check if file is a PDF file.
+ */
+export const isPdfFile = (filename: string): boolean => {
+  return getFileExtension(filename) === 'pdf'
+}
+
+/**
  * Check if file is a markdown file.
  */
 export const isMarkdownFile = (filename: string): boolean => {
