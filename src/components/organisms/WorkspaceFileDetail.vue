@@ -29,6 +29,12 @@ const error = ref<string | null>(null)
 const isLoading = ref(true)
 const showCode = ref(false)
 
+// Extract filename from full path for download purposes.
+const filename = computed(() => {
+  const lastSlash = props.path.lastIndexOf('/')
+  return lastSlash === -1 ? props.path : props.path.substring(lastSlash + 1)
+})
+
 const backPath = computed(() => {
   const lastSlash = props.path.lastIndexOf('/')
   if (lastSlash === -1) {
@@ -68,9 +74,9 @@ const imageDataUrl = computed(() => {
 
 const downloadFile = () => {
   if (isImage.value || isSvg.value || isPDF.value) {
-    downloadFileFromBlob(fileBlob.value, props.path)
+    downloadFileFromBlob(fileBlob.value, filename.value)
   } else {
-    downloadFileFromContent(fileContent.value, props.path)
+    downloadFileFromContent(fileContent.value, filename.value)
   }
 }
 
