@@ -60,14 +60,19 @@ const goBack = () => {
 
 const fileCountText = computed(() => {
   if (!workspaceInfo.value) return ''
-  const count = workspaceInfo.value.target.TreeInfo.filecount
+  const treeInfo = workspaceInfo.value.target?.TreeInfo
+  if (!treeInfo) return ''
+  const count = treeInfo.filecount ?? 0
   return `${count} ${count === 1 ? 'file' : 'files'}`
 })
 
 const sortedEntries = computed(() => {
   if (!workspaceInfo.value) return []
 
-  const entries = [...workspaceInfo.value.target.TreeInfo.entries]
+  const treeInfo = workspaceInfo.value.target?.TreeInfo
+  if (!treeInfo || !treeInfo.entries) return []
+
+  const entries = [...treeInfo.entries]
 
   return entries.sort((a, b) => {
     // Folders first.
