@@ -13,8 +13,10 @@ import { useExposureStore } from '@/stores/exposure'
 import type { ExposureInfo } from '@/types/exposure'
 import { trackButtonClick } from '@/utils/analytics'
 import { downloadWorkspaceFile } from '@/utils/download'
-
-const MODELS_URL = import.meta.env.VITE_MODELS_URL
+import {
+  getCombineArchiveUrl,
+  getArchiveDownloadUrls,
+} from '@/services/downloadUrlService'
 
 const props = defineProps<{
   alias: string
@@ -50,16 +52,14 @@ const navigationFiles = computed(() => {
 
 const archiveDownloadUrls = computed(() => {
   if (!exposureInfo.value) return { zip: '', tgz: '' }
-  const base = `${MODELS_URL}/workspace/${exposureInfo.value.workspace_alias}/@@archive/${exposureInfo.value.exposure.commit_id}`
-  return {
-    zip: `${base}/zip`,
-    tgz: `${base}/tgz`,
-  }
+  return getArchiveDownloadUrls(
+    exposureInfo.value.workspace_alias,
+    exposureInfo.value.exposure.commit_id,
+  )
 })
 
 const combineArchiveUrl = computed(() => {
-  if (!exposureInfo.value) return ''
-  return `${MODELS_URL}/e/${props.alias}/download_generated_omex`
+  return getCombineArchiveUrl(props.alias)
 })
 
 const buildOpenCORURL = (option?: string) => {
