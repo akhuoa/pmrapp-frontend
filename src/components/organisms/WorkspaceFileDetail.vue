@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
@@ -113,6 +113,13 @@ onMounted(async () => {
     console.error('Error loading file:', err)
   } finally {
     isLoading.value = false
+  }
+})
+
+onBeforeUnmount(() => {
+  // Revoke blob URL to prevent memory leaks.
+  if (fileBlobUrl.value) {
+    URL.revokeObjectURL(fileBlobUrl.value)
   }
 })
 </script>
