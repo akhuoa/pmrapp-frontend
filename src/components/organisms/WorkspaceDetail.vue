@@ -26,6 +26,7 @@ const workspaceStore = useWorkspaceStore()
 const workspaceInfo = ref<WorkspaceInfo | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
+let requestCounter = 0
 
 const backPath = computed(() => {
   if (!props.path) {
@@ -115,16 +116,26 @@ const loadWorkspaceInfo = async () => {
   isLoading.value = true
   error.value = null
 
+  const currentRequest = ++requestCounter
+
   try {
     const alias = props.alias
     const commitId = props.commitId || ''
     const path = props.path || ''
-    workspaceInfo.value = await workspaceStore.getWorkspaceInfo(alias, commitId, path)
+    const workspaceData = await workspaceStore.getWorkspaceInfo(alias, commitId, path)
+
+    if (currentRequest === requestCounter) {
+      workspaceInfo.value = workspaceData
+    }
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to load workspace.'
-    console.error('Error loading workspace:', err)
+    if (currentRequest === requestCounter) {
+      error.value = err instanceof Error ? err.message : 'Failed to load workspace.'
+      console.error('Error loading workspace:', err)
+    }
   } finally {
-    isLoading.value = false
+    if (currentRequest === requestCounter) {
+      isLoading.value = false
+    }
   }
 }
 
