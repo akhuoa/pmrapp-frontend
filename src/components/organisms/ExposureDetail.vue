@@ -299,7 +299,7 @@ onMounted(async () => {
                 :download="true"
                 content-section="Exposure Detail"
               >
-                <DownloadIcon class="w-1 h-1" />
+                <DownloadIcon class="w-4 h-4" />
                 Complete Archive as .zip
               </ActionButton>
             </li>
@@ -311,7 +311,7 @@ onMounted(async () => {
                 :download="true"
                 content-section="Exposure Detail"
               >
-                <DownloadIcon class="w-1 h-1" />
+              <DownloadIcon class="w-4 h-4" />
                 Complete Archive as .tgz
               </ActionButton>
             </li>
@@ -323,7 +323,7 @@ onMounted(async () => {
                 :download="true"
                 content-section="Exposure Detail"
               >
-                <DownloadIcon class="w-1 h-1" />
+              <DownloadIcon class="w-4 h-4" />
                 COMBINE Archive (exposure)
               </ActionButton>
             </li>

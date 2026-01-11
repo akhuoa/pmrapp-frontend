@@ -1,3 +1,9 @@
+<script setup lang="ts">
+withDefaults(defineProps<{ class?: string }>(), {
+  class: 'w-6 h-6',
+})
+</script>
+
 <template>
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -5,7 +11,7 @@
     fill="none"
     stroke="currentColor"
     stroke-width="1.5"
-    class="w-6 h-6"
+    :class="$props.class"
   >
     <path
       stroke-linecap="round"
