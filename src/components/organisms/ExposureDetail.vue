@@ -323,7 +323,6 @@ onMounted(async () => {
                 :download="true"
                 content-section="Exposure Detail"
               >
-
                 <DownloadIcon class="w-1 h-1" />
                 COMBINE Archive (exposure)
               </ActionButton>
