@@ -82,7 +82,6 @@ export const isCodeFile = (filename: string): boolean => {
     'sedml',
     'omex',
     'csv',
-    'xls',
     'r',
     'matlab',
     'm',
