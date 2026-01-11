@@ -98,7 +98,6 @@ export const isCodeFile = (filename: string): boolean => {
     'cmake',
     'gradle',
     'maven',
-    'gradle',
     'ini',
     'conf',
     'config',
