@@ -14,6 +14,8 @@ import type { ExposureInfo } from '@/types/exposure'
 import { trackButtonClick } from '@/utils/analytics'
 import { downloadWorkspaceFile } from '@/utils/download'
 
+const MODELS_URL = import.meta.env.VITE_MODELS_URL
+
 const props = defineProps<{
   alias: string
 }>()
@@ -48,7 +50,7 @@ const navigationFiles = computed(() => {
 
 const archiveDownloadUrls = computed(() => {
   if (!exposureInfo.value) return { zip: '', tgz: '' }
-  const base = `https://models.physiomeproject.org/workspace/${exposureInfo.value.workspace_alias}/@@archive/${exposureInfo.value.exposure.commit_id}`
+  const base = `${MODELS_URL}/workspace/${exposureInfo.value.workspace_alias}/@@archive/${exposureInfo.value.exposure.commit_id}`
   return {
     zip: `${base}/zip`,
     tgz: `${base}/tgz`,
@@ -57,7 +59,7 @@ const archiveDownloadUrls = computed(() => {
 
 const combineArchiveUrl = computed(() => {
   if (!exposureInfo.value) return ''
-  return `https://models.physiomeproject.org/e/${props.alias}/download_generated_omex`
+  return `${MODELS_URL}/e/${props.alias}/download_generated_omex`
 })
 
 const buildOpenCORURL = (option?: string) => {

@@ -14,6 +14,8 @@ import { useWorkspaceStore } from '@/stores/workspace'
 import type { WorkspaceInfo } from '@/types/workspace'
 import { downloadWorkspaceFile } from '@/utils/download'
 
+const MODELS_URL = import.meta.env.VITE_MODELS_URL
+
 const props = defineProps<{
   alias: string
   commitId?: string
@@ -104,7 +106,7 @@ const downloadFile = async (filename: string) => {
 
 const archiveDownloadUrls = computed(() => {
   if (!workspaceInfo.value) return { zip: '', tgz: '' }
-  const base = `https://models.physiomeproject.org/workspace/${props.alias}/@@archive/${workspaceInfo.value.commit.commit_id}`
+  const base = `${MODELS_URL}/workspace/${props.alias}/@@archive/${workspaceInfo.value.commit.commit_id}`
   return {
     zip: `${base}/zip`,
     tgz: `${base}/tgz`,
