@@ -195,7 +195,6 @@ onMounted(async () => {
           variant="primary"
           size="lg"
           @click="downloadFile"
-          :download="true"
           content-section="Workspace File Detail"
         >
           <DownloadIcon class="w-4 h-4" />
