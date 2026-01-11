@@ -15,31 +15,41 @@ const workspaceInfo = ref<WorkspaceInfo | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 const isWorkspaceFile = ref(false)
+let requestCounter = 0
 
 const loadWorkspaceInfo = async () => {
   isLoading.value = true
   error.value = null
 
+  const currentRequest = ++requestCounter
+
   try {
     const aliasValue = alias.value
     const commitIdValue = commitId.value || ''
     const pathValue = path.value || ''
-    workspaceInfo.value = await workspaceStore.getWorkspaceInfo(
+    const workspaceData = await workspaceStore.getWorkspaceInfo(
       aliasValue,
       commitIdValue,
       pathValue,
     )
 
-    if (workspaceInfo.value?.target?.TreeInfo) {
-      isWorkspaceFile.value = false
-    } else {
-      isWorkspaceFile.value = true
+    if (currentRequest === requestCounter) {
+      workspaceInfo.value = workspaceData
+      if (workspaceInfo.value?.target?.TreeInfo) {
+        isWorkspaceFile.value = false
+      } else {
+        isWorkspaceFile.value = true
+      }
     }
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to load workspace.'
-    console.error('Error loading workspace:', err)
+    if (currentRequest === requestCounter) {
+      error.value = err instanceof Error ? err.message : 'Failed to load workspace.'
+      console.error('Error loading workspace:', err)
+    }
   } finally {
-    isLoading.value = false
+    if (currentRequest === requestCounter) {
+      isLoading.value = false
+    }
   }
 }
 
