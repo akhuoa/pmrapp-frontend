@@ -10,11 +10,10 @@ export function useBackNavigation(basePath: string) {
   const router = useRouter()
 
   const goBack = () => {
-    // If there's history with the base path (but not a detail path), go back to it.
+    // If there's history, go back to it.
     // Otherwise, navigate to the base path.
     if (
-      window.history.state.back?.includes(basePath) &&
-      !window.history.state.back?.includes(`${basePath}/`)
+      router.options.history.state.back
     ) {
       router.back()
     } else {
