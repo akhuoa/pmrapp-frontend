@@ -191,7 +191,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
             content-section="Workspace Detail"
           >
             <DownloadIcon class="w-4 h-4" />
-            Download as .zip
+            Download (as a .zip file)
           </ActionButton>
           <ActionButton
             variant="primary"
@@ -200,7 +200,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
             content-section="Workspace Detail"
           >
             <DownloadIcon class="w-4 h-4" />
-            Download as .tgz
+            Download (as a .tgz file)
           </ActionButton>
         </div>
       </div>
