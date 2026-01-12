@@ -20,11 +20,13 @@ export const workspaceService = {
   },
 
   async getWorkspaceInfo(alias: string, commitId: string, path: string): Promise<WorkspaceInfo> {
-    const payloadObj = {}
-
-    if (alias) {
-      Object.assign(payloadObj, { id: { Aliased: alias } })
+    // Throw error if alias is not provided.
+    if (!alias) {
+      throw new Error('Workspace alias is required to get workspace info.')
     }
+
+    const payloadObj = {}
+    Object.assign(payloadObj, { id: { Aliased: alias } })
 
     if (commitId) {
       Object.assign(payloadObj, { commit: commitId })

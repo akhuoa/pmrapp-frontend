@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
@@ -28,6 +28,12 @@ const fileBlobUrl = ref<string>('')
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 const showCode = ref(false)
+
+// Extract filename from full path for download purposes.
+const filename = computed(() => {
+  const lastSlash = props.path.lastIndexOf('/')
+  return lastSlash === -1 ? props.path : props.path.substring(lastSlash + 1)
+})
 
 const backPath = computed(() => {
   const lastSlash = props.path.lastIndexOf('/')
@@ -68,9 +74,9 @@ const imageDataUrl = computed(() => {
 
 const downloadFile = () => {
   if (isImage.value || isSvg.value || isPDF.value) {
-    downloadFileFromBlob(fileBlob.value, props.path)
+    downloadFileFromBlob(fileBlob.value, filename.value)
   } else {
-    downloadFileFromContent(fileContent.value, props.path)
+    downloadFileFromContent(fileContent.value, filename.value)
   }
 }
 
@@ -109,6 +115,13 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
+
+onBeforeUnmount(() => {
+  // Revoke blob URL to prevent memory leaks.
+  if (fileBlobUrl.value) {
+    URL.revokeObjectURL(fileBlobUrl.value)
+  }
+})
 </script>
 
 <template>
@@ -126,7 +139,7 @@ onMounted(async () => {
 
   <LoadingBox v-else-if="isLoading" message="Loading file..." />
 
-  <div v-else-if="fileContent !== null">
+  <div v-else>
     <PageHeader :title="path" />
 
     <div class="box p-0! overflow-hidden">
@@ -137,6 +150,7 @@ onMounted(async () => {
             @click="toggleCodeView"
             class="flex items-center cursor-pointer gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
             :title="showCode ? 'Show preview' : 'Show code'"
+            :aria-label="showCode ? 'Show preview' : 'Show code'"
           >
             <PreviewIcon class="w-4 h-4" v-if="showCode" />
             <CodeIcon class="w-4 h-4" v-else />
@@ -146,6 +160,7 @@ onMounted(async () => {
             @click="downloadFile"
             class="flex items-center cursor-pointer gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
             title="Download file"
+            :aria-label="'Download file'"
           >
             <DownloadIcon class="w-4 h-4" />
             Download
@@ -189,7 +204,6 @@ onMounted(async () => {
           variant="primary"
           size="lg"
           @click="downloadFile"
-          :download="true"
           content-section="Workspace File Detail"
         >
           <DownloadIcon class="w-4 h-4" />

@@ -82,7 +82,6 @@ export const isCodeFile = (filename: string): boolean => {
     'sedml',
     'omex',
     'csv',
-    'xls',
     'r',
     'matlab',
     'm',
@@ -98,12 +97,12 @@ export const isCodeFile = (filename: string): boolean => {
     'cmake',
     'gradle',
     'maven',
-    'gradle',
     'ini',
     'conf',
     'config',
     'toml',
     'lock',
+    'rst',
   ]
 
   // Check by extension first.

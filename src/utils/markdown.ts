@@ -2,43 +2,79 @@
  * Simple markdown to HTML converter with basic support.
  */
 export const renderMarkdown = (markdown: string): string => {
-  let html = markdown
-    // Headers.
+  if (!markdown) return ''
+
+  // 1. Safety: Escape HTML to prevent XSS (basic implementation).
+  let html = markdown.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+  // 2. Extract Code Blocks to prevent internal formatting.
+  // We store them in a map and replace them with a unique placeholder.
+  const codeBlocks: string[] = []
+  const inlineCodes: string[] = []
+
+  // Extract multi-line code blocks.
+  html = html.replace(/```([\s\S]*?)```/g, (_, code) => {
+    codeBlocks.push(code)
+    return `__CODEBLOCK_${codeBlocks.length - 1}__`
+  })
+
+  // Extract inline code.
+  html = html.replace(/`([^`]+)`/g, (_, code) => {
+    inlineCodes.push(code)
+    return `__INLINECODE_${inlineCodes.length - 1}__`
+  })
+
+  // 3. Process General Markdown.
+  html = html
+    // Headers (H3 -> H1 order matters to prevent # matching ###).
     .replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold mt-4 mb-2">$1</h3>')
     .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold mt-6 mb-3">$1</h2>')
     .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold mt-0 mb-4">$1</h1>')
-    // Bold.
+
+    // Bold & Italic.
     .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
-    // Italic.
     .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
+
     // Links.
     .replace(
       /\[([^\]]+)\]\(([^)]+)\)/g,
       '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300">$1</a>',
     )
-    // Line breaks.
-    .replace(/\n\n/g, '</p><p class="mb-4">')
-    .replace(/\n/g, '<br>')
-    // Code blocks.
-    .replace(
-      /```([\s\S]*?)```/g,
-      '<pre class="bg-gray-100 dark:bg-gray-800 p-4 rounded overflow-x-auto mb-4"><code class="text-sm font-mono">$1</code></pre>',
-    )
-    // Inline code.
-    .replace(
-      /`([^`]+)`/g,
-      '<code class="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-sm font-mono">$1</code>',
-    )
-    // Lists.
-    .replace(/^\* (.*$)/gim, '<li class="mb-1">$1</li>')
-    .replace(/^- (.*$)/gim, '<li class="mb-1">$1</li>')
 
-  // Wrap in paragraph tags.
-  html = `<p class="mb-4">${html}</p>`
-  // Clean up multiple paragraph tags.
-  html = html.replace(/<\/p><p class="mb-4">/g, '</p>\n<p class="mb-4">')
-  // Wrap list items in ul.
-  html = html.replace(/(<li class="mb-1">.*<\/li>)/gs, '<ul class="list-disc ml-6 mb-4">$1</ul>')
+    // Lists (Simple implementation - wrapping adjacent lines).
+    // This looks for lines starting with * or - and wraps them in li.
+    .replace(/^\s*[-*] (.*$)/gim, '<li class="mb-1">$1</li>')
+
+  // Wrap lists in <ul>.
+  // We use a non-greedy logic: Look for a group of <li> lines and wrap them.
+  // Note: Regex list parsing is fragile. This handles basic contiguous lists.
+  html = html.replace(/(<li class="mb-1">.*<\/li>\n?)+/g, (match) => {
+    return `<ul class="list-disc ml-6 mb-4">${match}</ul>`
+  })
+
+  // 4. Handle Paragraphs and Line Breaks.
+  // Split by double newlines for paragraphs, but ignore lines that are already HTML block elements.
+  html = html
+    .split('\n\n')
+    .map((paragraph) => {
+      const trimmed = paragraph.trim()
+      if (!trimmed) return ''
+      // If the paragraph starts with a block tag (h1, h2, ul, etc), don't wrap in <p>.
+      if (trimmed.match(/^<(h\d|ul|pre|blockquote)/)) {
+        return trimmed
+      }
+      return `<p class="mb-4">${trimmed.replace(/\n/g, '<br>')}</p>`
+    })
+    .join('\n')
+
+  // 5. Restore Code Blocks (Injecting back the HTML structure).
+  html = html.replace(/__CODEBLOCK_(\d+)__/g, (_, index) => {
+    return `<pre class="bg-gray-100 dark:bg-gray-800 p-4 rounded overflow-x-auto mb-4"><code class="text-sm font-mono">${codeBlocks[Number(index)]}</code></pre>`
+  })
+
+  html = html.replace(/__INLINECODE_(\d+)__/g, (_, index) => {
+    return `<code class="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-sm font-mono">${inlineCodes[Number(index)]}</code>`
+  })
 
   return html
 }

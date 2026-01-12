@@ -13,6 +13,7 @@ import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { WorkspaceInfo } from '@/types/workspace'
 import { downloadWorkspaceFile } from '@/utils/download'
+import { getArchiveDownloadUrls } from '@/services/downloadUrlService'
 
 const props = defineProps<{
   alias: string
@@ -25,6 +26,7 @@ const workspaceStore = useWorkspaceStore()
 const workspaceInfo = ref<WorkspaceInfo | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
+const requestCounter = ref(0)
 
 const backPath = computed(() => {
   if (!props.path) {
@@ -60,14 +62,19 @@ const goBack = () => {
 
 const fileCountText = computed(() => {
   if (!workspaceInfo.value) return ''
-  const count = workspaceInfo.value.target.TreeInfo.filecount
+  const treeInfo = workspaceInfo.value.target?.TreeInfo
+  if (!treeInfo) return ''
+  const count = treeInfo.filecount ?? 0
   return `${count} ${count === 1 ? 'file' : 'files'}`
 })
 
 const sortedEntries = computed(() => {
   if (!workspaceInfo.value) return []
 
-  const entries = [...workspaceInfo.value.target.TreeInfo.entries]
+  const treeInfo = workspaceInfo.value.target?.TreeInfo
+  if (!treeInfo || !treeInfo.entries) return []
+
+  const entries = [...treeInfo.entries]
 
   return entries.sort((a, b) => {
     // Folders first.
@@ -99,27 +106,36 @@ const downloadFile = async (filename: string) => {
 
 const archiveDownloadUrls = computed(() => {
   if (!workspaceInfo.value) return { zip: '', tgz: '' }
-  const base = `https://models.physiomeproject.org/workspace/${props.alias}/@@archive/${workspaceInfo.value.commit.commit_id}`
-  return {
-    zip: `${base}/zip`,
-    tgz: `${base}/tgz`,
-  }
+  return getArchiveDownloadUrls(
+    props.alias,
+    workspaceInfo.value.commit.commit_id,
+  )
 })
 
 const loadWorkspaceInfo = async () => {
   isLoading.value = true
   error.value = null
 
+  const currentRequest = ++requestCounter.value
+
   try {
     const alias = props.alias
     const commitId = props.commitId || ''
     const path = props.path || ''
-    workspaceInfo.value = await workspaceStore.getWorkspaceInfo(alias, commitId, path)
+    const workspaceData = await workspaceStore.getWorkspaceInfo(alias, commitId, path)
+
+    if (currentRequest === requestCounter.value) {
+      workspaceInfo.value = workspaceData
+    }
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to load workspace.'
-    console.error('Error loading workspace:', err)
+    if (currentRequest === requestCounter.value) {
+      error.value = err instanceof Error ? err.message : 'Failed to load workspace.'
+      console.error('Error loading workspace:', err)
+    }
   } finally {
-    isLoading.value = false
+    if (currentRequest === requestCounter.value) {
+      isLoading.value = false
+    }
   }
 }
 
@@ -219,6 +235,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
               @click.prevent="downloadFile(entry.name)"
               class="ml-4 p-2 text-gray-500 cursor-pointer hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
               :title="`Download ${entry.name}`"
+              :aria-label="`Download ${entry.name}`"
             >
               <DownloadIcon class="w-4 h-4" />
             </button>

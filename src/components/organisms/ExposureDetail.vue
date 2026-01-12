@@ -13,6 +13,10 @@ import { useExposureStore } from '@/stores/exposure'
 import type { ExposureInfo } from '@/types/exposure'
 import { trackButtonClick } from '@/utils/analytics'
 import { downloadWorkspaceFile } from '@/utils/download'
+import {
+  getCombineArchiveUrl,
+  getArchiveDownloadUrls,
+} from '@/services/downloadUrlService'
 
 const props = defineProps<{
   alias: string
@@ -49,16 +53,14 @@ const navigationFiles = computed(() => {
 
 const archiveDownloadUrls = computed(() => {
   if (!exposureInfo.value) return { zip: '', tgz: '' }
-  const base = `https://models.physiomeproject.org/workspace/${exposureInfo.value.workspace_alias}/@@archive/${exposureInfo.value.exposure.commit_id}`
-  return {
-    zip: `${base}/zip`,
-    tgz: `${base}/tgz`,
-  }
+  return getArchiveDownloadUrls(
+    exposureInfo.value.workspace_alias,
+    exposureInfo.value.exposure.commit_id,
+  )
 })
 
 const combineArchiveUrl = computed(() => {
-  if (!exposureInfo.value) return ''
-  return `https://models.physiomeproject.org/e/${props.alias}/download_generated_omex`
+  return getCombineArchiveUrl(props.alias)
 })
 
 const buildOpenCORURL = (option?: string) => {
@@ -213,22 +215,19 @@ onMounted(async () => {
             <div class="px-4 py-3 flex items-center justify-between">
               <div class="flex items-center gap-3 flex-1 min-w-0">
                 <FileIcon class="text-gray-500 dark:text-gray-400 flex-shrink-0 w-4 h-4" />
-                <span class="text-sm break-all">{{ entry[0] }}</span>
+                <RouterLink
+                  :to="`/workspaces/${exposureInfo.workspace_alias}/file/${exposureInfo.exposure.commit_id}/${entry[0]}`"
+                  class="text-link font-medium truncate"
+                >
+                  {{ entry[0] }}
+                </RouterLink>
               </div>
               <div class="flex items-center gap-2 ml-4 flex-shrink-0">
-                <ActionButton
-                  v-if="entry[1] === true"
-                  variant="primary"
-                  size="sm"
-                  :to="`/exposures/${alias}/${entry[0]}`"
-                  contentSection="exposure_file_list"
-                >
-                  View
-                </ActionButton>
                 <button
                   @click.prevent="downloadFile(entry[0])"
                   class="ml-4 p-2 text-gray-500 cursor-pointer hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
                   :title="`Download ${entry[0]}`"
+                  :aria-label="`Download ${entry[0]}`"
                 >
                   <DownloadIcon class="w-4 h-4" />
                 </button>
@@ -309,7 +308,7 @@ onMounted(async () => {
                 :download="true"
                 content-section="Exposure Detail"
               >
-                <DownloadIcon class="w-1 h-1" />
+                <DownloadIcon class="w-4 h-4" />
                 Complete Archive as .zip
               </ActionButton>
             </li>
@@ -321,7 +320,7 @@ onMounted(async () => {
                 :download="true"
                 content-section="Exposure Detail"
               >
-                <DownloadIcon class="w-1 h-1" />
+              <DownloadIcon class="w-4 h-4" />
                 Complete Archive as .tgz
               </ActionButton>
             </li>
@@ -333,8 +332,7 @@ onMounted(async () => {
                 :download="true"
                 content-section="Exposure Detail"
               >
-
-                <DownloadIcon class="w-1 h-1" />
+              <DownloadIcon class="w-4 h-4" />
                 COMBINE Archive (exposure)
               </ActionButton>
             </li>
