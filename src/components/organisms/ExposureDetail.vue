@@ -22,12 +22,14 @@ const props = defineProps<{
   alias: string
 }>()
 
+const DEFAULT_LICENSE = 'https://creativecommons.org/licenses/by/3.0/'
 const exposureStore = useExposureStore()
 const exposureInfo = ref<ExposureInfo | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 const detailHTML = ref<string>('')
 const htmlViewRef = ref<HTMLElement | null>(null)
+const licenseInfo = ref<string>(DEFAULT_LICENSE)
 const { goBack } = useBackNavigation('/exposures')
 
 const pageTitle = computed(() => {
@@ -139,6 +141,7 @@ onMounted(async () => {
 
     if (fileWithViews) {
       const viewEntry = fileWithViews.views.find((v) => v.view_key === 'view')
+      const licenseEntry = fileWithViews.views.find((v) => v.view_key === 'license_citation')
       // This route path is used to fix relative paths in the HTML content.
       // It is not a part of the API request parameters.
       // Note: Keep as "exposure" (singular) to match server file paths, not the router path.
@@ -150,6 +153,16 @@ onMounted(async () => {
           viewEntry.exposure_file_id,
           'view',
           'index.html',
+          routePath,
+        )
+      }
+
+      if (licenseEntry) {
+        licenseInfo.value = await exposureStore.getExposureSafeHTML(
+          fileWithViews.exposure_id,
+          licenseEntry.exposure_file_id,
+          'license_citation',
+          'license.txt',
           routePath,
         )
       }
@@ -284,7 +297,7 @@ onMounted(async () => {
           </ul>
         </nav>
       </section>
-      <section class="pt-6 border-t border-gray-200 dark:border-gray-700">
+      <section class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Downloads</h4>
         <nav>
           <ul class="space-y-2">
@@ -323,6 +336,18 @@ onMounted(async () => {
               <DownloadIcon class="w-4 h-4" />
                 COMBINE Archive (exposure)
               </ActionButton>
+            </li>
+          </ul>
+        </nav>
+      </section>
+      <section v-if="licenseInfo" class="pt-6 border-t border-gray-200 dark:border-gray-700">
+        <h4 class="text-lg font-semibold mb-3">License</h4>
+        <nav>
+          <ul class="space-y-2">
+            <li
+              class="text-sm"
+            >
+              <a :href="licenseInfo" class="text-link" target="_blank" rel="noopener noreferrer">{{ licenseInfo }}</a>
             </li>
           </ul>
         </nav>
