@@ -26,10 +26,7 @@ export const workspaceService = {
     }
 
     const payloadObj = {}
-
-    if (alias) {
-      Object.assign(payloadObj, { id: { Aliased: alias } })
-    }
+    Object.assign(payloadObj, { id: { Aliased: alias } })
 
     if (commitId) {
       Object.assign(payloadObj, { commit: commitId })
