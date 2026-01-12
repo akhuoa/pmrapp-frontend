@@ -16,13 +16,14 @@ const props = defineProps<{
   alias: string
 }>()
 
+const DEFAULT_LICENSE = 'https://creativecommons.org/licenses/by/3.0/'
 const exposureStore = useExposureStore()
 const exposureInfo = ref<ExposureInfo | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 const detailHTML = ref<string>('')
 const htmlViewRef = ref<HTMLElement | null>(null)
-const licenseInfo = ref<string>('')
+const licenseInfo = ref<string>(DEFAULT_LICENSE)
 const { goBack } = useBackNavigation('/exposures')
 
 const pageTitle = computed(() => {
@@ -271,16 +272,7 @@ onMounted(async () => {
             <li
               class="text-sm"
             >
-              <p v-if="licenseInfo">
-                <a :href="licenseInfo" class="text-link" target="_blank" rel="noopener noreferrer">{{ licenseInfo }}</a>
-              </p>
-              <p v-else>
-                <em>
-                  All publicly accessible content of the Physiome Model Repository is licensed to the public under the
-                  <a class="text-link" target="_blank" rel="noopener noreferrer" href="http://creativecommons.org/licenses/by/3.0/">
-                    Creative Commons Attribution 3.0 License</a>.
-                </em>
-              </p>
+              <a :href="licenseInfo" class="text-link" target="_blank" rel="noopener noreferrer">{{ licenseInfo }}</a>
             </li>
           </ul>
         </nav>
