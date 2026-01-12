@@ -203,18 +203,14 @@ onMounted(async () => {
             <div class="px-4 py-3 flex items-center justify-between">
               <div class="flex items-center gap-3 flex-1 min-w-0">
                 <FileIcon class="text-gray-500 dark:text-gray-400 flex-shrink-0 w-4 h-4" />
-                <span class="text-sm break-all">{{ entry[0] }}</span>
+                <RouterLink
+                  :to="`/workspaces/${exposureInfo.workspace_alias}/file/${exposureInfo.exposure.commit_id}/${entry[0]}`"
+                  class="text-link font-medium truncate"
+                >
+                  {{ entry[0] }}
+                </RouterLink>
               </div>
               <div class="flex items-center gap-2 ml-4 flex-shrink-0">
-                <ActionButton
-                  v-if="entry[1] === true"
-                  variant="primary"
-                  size="sm"
-                  :to="`/exposures/${alias}/${entry[0]}`"
-                  contentSection="exposure_file_list"
-                >
-                  View
-                </ActionButton>
                 <button
                   @click.prevent="downloadFile(entry[0])"
                   class="ml-4 p-2 text-gray-500 cursor-pointer hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
