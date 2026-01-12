@@ -159,8 +159,8 @@ onBeforeUnmount(() => {
           <button
             @click="downloadFile"
             class="flex items-center cursor-pointer gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-            title="Download file"
-            :aria-label="'Download file'"
+            title="Download"
+            :aria-label="'Download'"
           >
             <DownloadIcon class="w-4 h-4" />
             Download
@@ -207,7 +207,7 @@ onBeforeUnmount(() => {
           content-section="Workspace File Detail"
         >
           <DownloadIcon class="w-4 h-4" />
-          Download File
+          Download
         </ActionButton>
       </div>
     </div>
