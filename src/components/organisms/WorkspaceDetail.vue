@@ -167,7 +167,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
 
     <div class="mb-6 space-y-2">
       <div>
-        <span class="font-medium text-gray-600 dark:text-gray-400">Git Repository URL:</span>
+        <span class="font-medium text-gray-600 dark:text-gray-400">Git repository:</span>
         <a
           :href="workspaceInfo.workspace.url"
           target="_blank"
