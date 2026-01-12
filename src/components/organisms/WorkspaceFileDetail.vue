@@ -139,7 +139,7 @@ onBeforeUnmount(() => {
 
   <LoadingBox v-else-if="isLoading" message="Loading file..." />
 
-  <div v-else-if="fileContent !== null">
+  <div v-else>
     <PageHeader :title="path" />
 
     <div class="box p-0! overflow-hidden">
