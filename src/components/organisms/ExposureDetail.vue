@@ -219,6 +219,7 @@ onMounted(async () => {
                   @click.prevent="downloadFile(entry[0])"
                   class="ml-4 p-2 text-gray-500 cursor-pointer hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
                   :title="`Download ${entry[0]}`"
+                  :aria-label="`Download ${entry[0]}`"
                 >
                   <DownloadIcon class="w-4 h-4" />
                 </button>
