@@ -276,10 +276,9 @@ onMounted(async () => {
               </p>
               <p v-else>
                 <em>
-                  All publicly accessible content of the Physiome model repository is licensed to the public under the
+                  All publicly accessible content of the Physiome Model Repository is licensed to the public under the
                   <a class="text-link" target="_blank" rel="noopener noreferrer" href="http://creativecommons.org/licenses/by/3.0/">
-                    Creative Commons Attribution 3.0 License
-                  </a>.
+                    Creative Commons Attribution 3.0 License</a>.
                 </em>
               </p>
             </li>
