@@ -102,6 +102,7 @@ export const isCodeFile = (filename: string): boolean => {
     'config',
     'toml',
     'lock',
+    'rst',
   ]
 
   // Check by extension first.
