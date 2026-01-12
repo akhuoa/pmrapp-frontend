@@ -65,7 +65,7 @@ const fileCountText = computed(() => {
   const treeInfo = workspaceInfo.value.target?.TreeInfo
   if (!treeInfo) return ''
   const count = treeInfo.filecount ?? 0
-  return `${count} ${count === 1 ? 'file' : 'files'}`
+  return `${count} ${count === 1 ? 'item' : 'items'}`
 })
 
 const sortedEntries = computed(() => {

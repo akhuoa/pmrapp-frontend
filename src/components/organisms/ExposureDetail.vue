@@ -204,7 +204,7 @@ onMounted(async () => {
       <div class="box p-0! overflow-hidden">
         <div class="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
           <span class="text-gray-600 dark:text-gray-400">
-            Files
+            {{ `${exposureInfo.files.length} ${exposureInfo.files.length === 1 ? 'item' : 'items'}` }}
           </span>
         </div>
         <ul class="divide-y divide-gray-200 dark:divide-gray-700">
