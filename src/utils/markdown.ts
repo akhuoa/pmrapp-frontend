@@ -58,12 +58,12 @@ export const renderMarkdown = (markdown: string): string => {
 
     // Lists (Simple implementation - wrapping adjacent lines).
     // This looks for lines starting with * or - and wraps them in li.
-    .replace(/^\s*[-*] (.*$)/gim, '<li class="mb-1">$1</li>')
+    .replace(/^\s*[-*] (.*$)/gim, '<li>$1</li>')
 
   // Wrap lists in <ul>.
   // We use a non-greedy logic: Look for a group of <li> lines and wrap them.
   // Note: Regex list parsing is fragile. This handles basic contiguous lists.
-  html = html.replace(/(<li class="mb-1">.*<\/li>\n?)+/g, (match) => {
+  html = html.replace(/(<li>.*<\/li>\n?)+/g, (match) => {
     return `<ul class="list-disc ml-6 mb-4">${match}</ul>`
   })
 
@@ -78,7 +78,7 @@ export const renderMarkdown = (markdown: string): string => {
       if (trimmed.match(/^<(h\d|ul|pre|blockquote)/)) {
         return trimmed
       }
-      return `<p class="mb-4">${trimmed.replace(/\n/g, '<br>')}</p>`
+      return `<p class="mb-4">${trimmed.replace(/\n/g, '')}</p>`
     })
     .join('\n')
 
