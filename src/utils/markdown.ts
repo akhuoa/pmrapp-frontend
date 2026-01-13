@@ -64,7 +64,7 @@ export const renderMarkdown = (markdown: string): string => {
   // We use a non-greedy logic: Look for a group of <li> lines and wrap them.
   // Note: Regex list parsing is fragile. This handles basic contiguous lists.
   html = html.replace(/(<li>.*<\/li>\n?)+/g, (match) => {
-    return `<ul class="list-disc ml-6 mb-4">${match}</ul>`
+    return `\n\n<ul class="list-disc ml-6 mb-4">${match}</ul>\n\n`
   })
 
   // 4. Handle Paragraphs and Line Breaks.
