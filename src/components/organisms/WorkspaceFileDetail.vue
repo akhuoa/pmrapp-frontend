@@ -3,7 +3,6 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
-import CodeBlock2 from '@/components/atoms/CodeBlock2.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import CodeIcon from '@/components/icons/CodeIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
@@ -191,7 +190,7 @@ onBeforeUnmount(() => {
 
       <!-- Code/Text View -->
       <div v-else-if="shouldShowAsText" class="relative">
-        <CodeBlock2
+        <CodeBlock
           :code="fileContent"
           :filename="filename"
         />

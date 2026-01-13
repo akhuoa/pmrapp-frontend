@@ -21,9 +21,7 @@
     "format": "bunx --bun biome format --fix --max-diagnostics=none"
   },
   "dependencies": {
-    "@highlightjs/vue-plugin": "^2.1.0",
     "@tailwindcss/vite": "^4.1.18",
-    "highlight.js": "^11.11.1",
     "pinia": "^3.0.3",
     "prismjs": "^1.30.0",
     "tailwindcss": "^4.1.18",
