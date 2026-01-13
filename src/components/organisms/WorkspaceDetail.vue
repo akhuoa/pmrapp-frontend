@@ -60,6 +60,10 @@ const goBack = () => {
   }
 }
 
+const backButtonText = computed(() => {
+  return !props.path ? 'Back to workspaces' : `Back to ${props.path}`
+})
+
 const fileCountText = computed(() => {
   if (!workspaceInfo.value) return ''
   const treeInfo = workspaceInfo.value.target?.TreeInfo
@@ -147,7 +151,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
 
 <template>
   <BackButton
-    label="Back"
+    :label="backButtonText"
     content-section="Workspace Detail"
     :on-click="goBack"
   />
