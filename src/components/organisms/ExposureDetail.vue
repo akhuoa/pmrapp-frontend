@@ -340,7 +340,7 @@ onMounted(async () => {
           </ul>
         </nav>
       </section>
-      <section v-if="licenseInfo" class="pt-6 border-t border-gray-200 dark:border-gray-700">
+      <section class="pt-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">License</h4>
         <nav>
           <ul class="space-y-2">
