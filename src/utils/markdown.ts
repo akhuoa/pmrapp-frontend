@@ -41,6 +41,14 @@ export const renderMarkdown = (markdown: string): string => {
       '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300">$1</a>',
     )
 
+    // Auto-linkify raw URLs (http:// and https://).
+    // Match URLs that are not already inside <a> tags.
+    // Uses negative lookbehind to exclude trailing punctuation.
+    .replace(
+      /(?<!href="|">)(https?:\/\/[^\s<]+(?<![.,;:!?)\]]))/g,
+      '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300">$1</a>',
+    )
+
     // Lists (Simple implementation - wrapping adjacent lines).
     // This looks for lines starting with * or - and wraps them in li.
     .replace(/^\s*[-*] (.*$)/gim, '<li class="mb-1">$1</li>')
