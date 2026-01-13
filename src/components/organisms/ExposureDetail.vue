@@ -178,7 +178,7 @@ onMounted(async () => {
 
 <template>
   <BackButton
-    label="Back to Exposures"
+    label="Back to exposures"
     content-section="Exposure Detail"
     :on-click="goBack"
   />
