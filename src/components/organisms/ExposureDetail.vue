@@ -178,7 +178,7 @@ onMounted(async () => {
 
 <template>
   <BackButton
-    label="Back to Exposures"
+    label="Back to exposures"
     content-section="Exposure Detail"
     :on-click="goBack"
   />
@@ -204,7 +204,7 @@ onMounted(async () => {
       <div class="box p-0! overflow-hidden">
         <div class="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
           <span class="text-gray-600 dark:text-gray-400">
-            Files
+            {{ `${exposureInfo.files.length} ${exposureInfo.files.length === 1 ? 'item' : 'items'}` }}
           </span>
         </div>
         <ul class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -310,7 +310,7 @@ onMounted(async () => {
                 content-section="Exposure Detail"
               >
                 <DownloadIcon class="w-4 h-4" />
-                Complete Archive as .zip
+                Complete archive (as a <code class="code-inline bg-gray-100 dark:bg-gray-700">.zip</code> file)
               </ActionButton>
             </li>
             <li class="text-sm">
@@ -321,8 +321,8 @@ onMounted(async () => {
                 :download="true"
                 content-section="Exposure Detail"
               >
-              <DownloadIcon class="w-4 h-4" />
-                Complete Archive as .tgz
+                <DownloadIcon class="w-4 h-4" />
+                Complete archive (as a <code class="code-inline bg-gray-100 dark:bg-gray-700">.tgz</code> file)
               </ActionButton>
             </li>
             <li class="text-sm">
@@ -333,8 +333,8 @@ onMounted(async () => {
                 :download="true"
                 content-section="Exposure Detail"
               >
-              <DownloadIcon class="w-4 h-4" />
-                COMBINE Archive (exposure)
+                <DownloadIcon class="w-4 h-4" />
+                COMBINE archive
               </ActionButton>
             </li>
           </ul>
@@ -359,6 +359,13 @@ onMounted(async () => {
 <style scoped>
 @import '@/assets/text-link.css';
 @import '@/assets/box.css';
+
+.code-inline {
+  display: inline-block;
+  padding: 0 0.25em;
+  border-radius: 0.25rem;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
 
 .html-view {
   @apply text-sm;

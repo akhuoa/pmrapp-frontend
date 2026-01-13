@@ -60,12 +60,16 @@ const goBack = () => {
   }
 }
 
+const backButtonText = computed(() => {
+  return !props.path ? 'Back to workspaces' : `Back to ${props.path}`
+})
+
 const fileCountText = computed(() => {
   if (!workspaceInfo.value) return ''
   const treeInfo = workspaceInfo.value.target?.TreeInfo
   if (!treeInfo) return ''
   const count = treeInfo.filecount ?? 0
-  return `${count} ${count === 1 ? 'file' : 'files'}`
+  return `${count} ${count === 1 ? 'item' : 'items'}`
 })
 
 const sortedEntries = computed(() => {
@@ -147,7 +151,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
 
 <template>
   <BackButton
-    label="Back"
+    :label="backButtonText"
     content-section="Workspace Detail"
     :on-click="goBack"
   />
@@ -167,7 +171,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
 
     <div class="mb-6 space-y-2">
       <div>
-        <span class="font-medium text-gray-600 dark:text-gray-400">Git Repository URL:</span>
+        <span class="font-medium text-gray-600 dark:text-gray-400">Git repository:</span>
         <a
           :href="workspaceInfo.workspace.url"
           target="_blank"
@@ -191,7 +195,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
             content-section="Workspace Detail"
           >
             <DownloadIcon class="w-4 h-4" />
-            Download as .zip
+            Download (as a .zip file)
           </ActionButton>
           <ActionButton
             variant="primary"
@@ -200,7 +204,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
             content-section="Workspace Detail"
           >
             <DownloadIcon class="w-4 h-4" />
-            Download as .tgz
+            Download (as a .tgz file)
           </ActionButton>
         </div>
       </div>
