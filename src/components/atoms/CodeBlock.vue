@@ -8,6 +8,8 @@ import 'prismjs/components/prism-javascript'
 import 'prismjs/components/prism-python'
 import 'prismjs/components/prism-markdown'
 import 'prismjs/themes/prism.css'
+import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
+import 'prismjs/plugins/line-numbers/prism-line-numbers'
 import CopyButton from './CopyButton.vue'
 
 const props = defineProps<{
@@ -71,7 +73,7 @@ watch(() => props.code, () => {
 
 <template>
   <div class="relative">
-    <pre class="bg-gray-50 dark:bg-gray-900 rounded overflow-x-auto text-sm! m-0"><code
+    <pre class="line-numbers bg-gray-50 dark:bg-gray-900 rounded overflow-x-auto text-sm! m-0"><code
       ref="codeBlock"
       :class="`language-${detectedLanguage}`"
     >{{ code }}</code></pre>
@@ -105,6 +107,14 @@ code {
   pre[class*="language-"] {
     color: #24292e !important;
   }
+
+  .line-numbers .line-numbers-rows {
+    border-right-color: #d1d5da !important;
+  }
+
+  .line-numbers-rows > span:before {
+    color: #6e7781 !important;
+  }
 }
 
 /* Dark mode - GitHub dark theme colors. */
@@ -114,6 +124,14 @@ code {
     background: rgb(17 24 39) !important;
     color: #c9d1d9 !important;
     text-shadow: none;
+  }
+
+  .line-numbers .line-numbers-rows {
+    border-right-color: #30363d !important;
+  }
+
+  .line-numbers-rows > span:before {
+    color: #6e7681 !important;
   }
 
   .token.comment,

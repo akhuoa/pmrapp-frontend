@@ -310,7 +310,7 @@ onMounted(async () => {
                 content-section="Exposure Detail"
               >
                 <DownloadIcon class="w-4 h-4" />
-                Complete archive (as a <code class="code-inline bg-gray-100 dark:bg-gray-700">.zip</code> file)
+                <span>Complete archive (as a <code class="code-inline bg-gray-100 dark:bg-gray-700">.zip</code> file)</span>
               </ActionButton>
             </li>
             <li class="text-sm">
@@ -322,7 +322,7 @@ onMounted(async () => {
                 content-section="Exposure Detail"
               >
                 <DownloadIcon class="w-4 h-4" />
-                Complete archive (as a <code class="code-inline bg-gray-100 dark:bg-gray-700">.tgz</code> file)
+                <span>Complete archive (as a <code class="code-inline bg-gray-100 dark:bg-gray-700">.tgz</code> file)</span>
               </ActionButton>
             </li>
             <li class="text-sm">
