@@ -71,7 +71,7 @@ watch(() => props.code, () => {
 
 <template>
   <div class="relative">
-    <pre class="bg-gray-50 dark:bg-gray-900 rounded overflow-x-auto text-sm m-0"><code
+    <pre class="bg-gray-50 dark:bg-gray-900 rounded overflow-x-auto text-sm! m-0"><code
       ref="codeBlock"
       :class="`language-${detectedLanguage}`"
     >{{ code }}</code></pre>
