@@ -13,6 +13,7 @@ import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { WorkspaceInfo } from '@/types/workspace'
 import { downloadWorkspaceFile } from '@/utils/download'
+import { formatFileCount } from '@/utils/format'
 import { getArchiveDownloadUrls } from '@/services/downloadUrlService'
 
 const props = defineProps<{
@@ -65,11 +66,8 @@ const backButtonText = computed(() => {
 })
 
 const fileCountText = computed(() => {
-  if (!workspaceInfo.value) return ''
-  const treeInfo = workspaceInfo.value.target?.TreeInfo
-  if (!treeInfo) return ''
-  const count = treeInfo.filecount ?? 0
-  return `${count} ${count === 1 ? 'item' : 'items'}`
+  const count = workspaceInfo.value?.target?.TreeInfo?.filecount
+  return formatFileCount(count)
 })
 
 const sortedEntries = computed(() => {
