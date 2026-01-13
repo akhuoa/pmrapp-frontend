@@ -49,6 +49,13 @@ export const renderMarkdown = (markdown: string): string => {
       '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300">$1</a>',
     )
 
+    // Auto-linkify email addresses.
+    // Match email patterns and convert to mailto: links.
+    .replace(
+      /(?<!href="|">|mailto:)([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g,
+      '<a href="mailto:$1" class="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300">$1</a>',
+    )
+
     // Lists (Simple implementation - wrapping adjacent lines).
     // This looks for lines starting with * or - and wraps them in li.
     .replace(/^\s*[-*] (.*$)/gim, '<li class="mb-1">$1</li>')
