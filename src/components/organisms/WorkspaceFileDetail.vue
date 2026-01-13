@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import BackButton from '@/components/atoms/BackButton.vue'
-import CopyButton from '@/components/atoms/CopyButton.vue'
+import CodeBlock from '@/components/atoms/CodeBlock.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import CodeIcon from '@/components/icons/CodeIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
@@ -190,11 +190,10 @@ onBeforeUnmount(() => {
 
       <!-- Code/Text View -->
       <div v-else-if="shouldShowAsText" class="relative">
-        <pre class="p-4 bg-gray-50 dark:bg-gray-900 rounded overflow-x-auto text-sm"><code>{{ fileContent }}</code></pre>
-
-        <div class="absolute top-2 right-2">
-          <CopyButton :text="fileContent" title="Copy code" />
-        </div>
+        <CodeBlock
+          :code="fileContent"
+          :filename="filename"
+        />
       </div>
 
       <!-- Binary/Unknown File Type -->
@@ -216,14 +215,4 @@ onBeforeUnmount(() => {
 
 <style scoped>
 @import '@/assets/box.css';
-
-pre {
-  margin: 0;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  line-height: 1.5;
-}
-
-code {
-  font-family: inherit;
-}
 </style>
