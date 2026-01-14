@@ -7,7 +7,6 @@ import 'prismjs/components/prism-css'
 import 'prismjs/components/prism-javascript'
 import 'prismjs/components/prism-python'
 import 'prismjs/components/prism-markdown'
-import 'prismjs/themes/prism.css'
 import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
 import 'prismjs/plugins/line-numbers/prism-line-numbers'
 import CopyButton from './CopyButton.vue'
@@ -62,8 +61,40 @@ const highlightCode = async () => {
   }
 }
 
+const loadPrismTheme = async (isDark: boolean) => {
+  // Remove existing Prism theme stylesheets.
+  const existingThemes = document.querySelectorAll('link[data-prism-theme]')
+  existingThemes.forEach(link => link.remove())
+
+  // Create and add new theme stylesheet.
+  const link = document.createElement('link')
+  link.rel = 'stylesheet'
+  link.setAttribute('data-prism-theme', 'true')
+
+  // Import from local node_modules.
+  if (isDark) {
+    const theme = await import('prismjs/themes/prism-okaidia.css?url')
+    link.href = theme.default
+  } else {
+    const theme = await import('prismjs/themes/prism.css?url')
+    link.href = theme.default
+  }
+
+  document.head.appendChild(link)
+}
+
 onMounted(() => {
   highlightCode()
+
+  const darkThemeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+
+  // Load initial theme.
+  loadPrismTheme(darkThemeMediaQuery.matches)
+
+  // Listen for theme changes.
+  darkThemeMediaQuery.addEventListener('change', (e) => {
+    loadPrismTheme(e.matches)
+  })
 })
 
 watch(() => props.code, () => {
@@ -73,7 +104,7 @@ watch(() => props.code, () => {
 
 <template>
   <div class="relative">
-    <pre class="line-numbers bg-gray-50 dark:bg-gray-900 rounded overflow-x-auto text-sm! m-0"><code
+    <pre class="line-numbers bg-gray-50 dark:bg-gray-900 rounded overflow-x-auto text-sm! m-0!"><code
       ref="codeBlock"
       :class="`language-${detectedLanguage}`"
     >{{ code }}</code></pre>
@@ -93,109 +124,5 @@ pre {
 
 code {
   font-family: inherit;
-}
-</style>
-
-<style>
-/* Light mode - default Prism theme. */
-@media (prefers-color-scheme: light) {
-  pre[class*="language-"] {
-    background: rgb(249 250 251) !important;
-  }
-
-  code[class*="language-"],
-  pre[class*="language-"] {
-    color: #24292e !important;
-  }
-
-  .line-numbers .line-numbers-rows {
-    border-right-color: #d1d5da !important;
-  }
-
-  .line-numbers-rows > span:before {
-    color: #6e7781 !important;
-  }
-}
-
-/* Dark mode - GitHub dark theme colors. */
-@media (prefers-color-scheme: dark) {
-  pre[class*="language-"],
-  code[class*="language-"] {
-    background: rgb(17 24 39) !important;
-    color: #c9d1d9 !important;
-    text-shadow: none;
-  }
-
-  .line-numbers .line-numbers-rows {
-    border-right-color: #30363d !important;
-  }
-
-  .line-numbers-rows > span:before {
-    color: #6e7681 !important;
-  }
-
-  .token.comment,
-  .token.prolog,
-  .token.doctype,
-  .token.cdata {
-    color: #8b949e !important;
-  }
-
-  .token.punctuation {
-    color: #c9d1d9 !important;
-  }
-
-  .token.property,
-  .token.tag,
-  .token.boolean,
-  .token.number,
-  .token.constant,
-  .token.symbol,
-  .token.deleted {
-    color: #79c0ff !important;
-  }
-
-  .token.selector,
-  .token.attr-name,
-  .token.string,
-  .token.char,
-  .token.builtin,
-  .token.inserted {
-    color: #a5d6ff !important;
-  }
-
-  .token.operator,
-  .token.entity,
-  .token.url,
-  .language-css .token.string,
-  .style .token.string {
-    color: #ffa657 !important;
-  }
-
-  .token.atrule,
-  .token.attr-value,
-  .token.keyword {
-    color: #ff7b72 !important;
-  }
-
-  .token.function,
-  .token.class-name {
-    color: #d2a8ff !important;
-  }
-
-  .token.regex,
-  .token.important,
-  .token.variable {
-    color: #ffa198 !important;
-  }
-
-  .token.important,
-  .token.bold {
-    font-weight: bold;
-  }
-
-  .token.italic {
-    font-style: italic;
-  }
 }
 </style>
