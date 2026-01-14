@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import Prism from 'prismjs'
 import 'prismjs/components/prism-markup'
 import 'prismjs/components/prism-css'
@@ -17,6 +17,7 @@ const props = defineProps<{
 }>()
 
 const codeBlock = ref<HTMLElement | null>(null)
+const darkThemeMediaQuery = ref<MediaQueryList | null>(null)
 
 const detectedLanguage = computed(() => {
   const ext = props.filename.split('.').pop()?.toLowerCase()
@@ -83,18 +84,26 @@ const loadPrismTheme = async (isDark: boolean) => {
   document.head.appendChild(link)
 }
 
+const handleThemeChange = (e: MediaQueryListEvent) => {
+  loadPrismTheme(e.matches)
+}
+
 onMounted(() => {
   highlightCode()
 
-  const darkThemeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+  darkThemeMediaQuery.value = window.matchMedia('(prefers-color-scheme: dark)')
 
   // Load initial theme.
-  loadPrismTheme(darkThemeMediaQuery.matches)
+  loadPrismTheme(darkThemeMediaQuery.value.matches)
 
   // Listen for theme changes.
-  darkThemeMediaQuery.addEventListener('change', (e) => {
-    loadPrismTheme(e.matches)
-  })
+  darkThemeMediaQuery.value.addEventListener('change', handleThemeChange)
+})
+
+onBeforeUnmount(() => {
+  if (darkThemeMediaQuery.value) {
+    darkThemeMediaQuery.value.removeEventListener('change', handleThemeChange)
+  }
 })
 
 watch(() => props.code, () => {
