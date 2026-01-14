@@ -65,7 +65,9 @@ const highlightCode = async () => {
 const loadPrismTheme = async (isDark: boolean) => {
   // Remove existing Prism theme stylesheets.
   const existingThemes = document.querySelectorAll('link[data-prism-theme]')
-  existingThemes.forEach(link => link.remove())
+  existingThemes.forEach((link) => {
+    link.remove()
+  })
 
   // Create and add new theme stylesheet.
   const link = document.createElement('link')
