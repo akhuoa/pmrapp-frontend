@@ -41,15 +41,43 @@ export const renderMarkdown = (markdown: string): string => {
       '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300">$1</a>',
     )
 
-    // Lists (Simple implementation - wrapping adjacent lines).
-    // This looks for lines starting with * or - and wraps them in li.
-    .replace(/^\s*[-*] (.*$)/gim, '<li class="mb-1">$1</li>')
+    // Auto-linkify raw URLs (http:// and https://).
+    // Match URLs that are not already inside <a> tags.
+    // Uses negative lookbehind to exclude trailing punctuation.
+    .replace(
+      /(?<!href="|">)(https?:\/\/[^\s<]+(?<![.,;:!?)\]]))/g,
+      '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300">$1</a>',
+    )
+
+    // Auto-linkify email addresses.
+    // Match email patterns and convert to mailto: links.
+    .replace(
+      /(?<!href="|">|mailto:)([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g,
+      '<a href="mailto:$1" class="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300">$1</a>',
+    )
+
+  // Convert list items - check for loose lists (items separated by blank lines) per item.
+  html = html.replace(/^\s*[-*] (.*$)/gim, (match, content, offset, string) => {
+    // Look ahead to see if this list item is followed by a blank line before the next list item.
+    const remainingText = string.substring(offset + match.length)
+    const hasBlankLineAfter = /^\n\n\s*[-*] /.test(remainingText)
+
+    // Look behind to see if there was a blank line before this item.
+    const precedingText = string.substring(0, offset)
+    const hasBlankLineBefore = /[-*] .*\n\n\s*$/.test(precedingText)
+
+    // If either before or after has blank lines, it's a loose list.
+    if (hasBlankLineAfter || hasBlankLineBefore) {
+      return `<li><p class="mb-4">${content}</p></li>`
+    }
+    return `<li>${content}</li>`
+  })
 
   // Wrap lists in <ul>.
   // We use a non-greedy logic: Look for a group of <li> lines and wrap them.
   // Note: Regex list parsing is fragile. This handles basic contiguous lists.
-  html = html.replace(/(<li class="mb-1">.*<\/li>\n?)+/g, (match) => {
-    return `<ul class="list-disc ml-6 mb-4">${match}</ul>`
+  html = html.replace(/(<li>.*<\/li>\n?)+/g, (match) => {
+    return `\n\n<ul class="list-disc ml-6 mb-4">${match}</ul>\n\n`
   })
 
   // 4. Handle Paragraphs and Line Breaks.
@@ -63,7 +91,7 @@ export const renderMarkdown = (markdown: string): string => {
       if (trimmed.match(/^<(h\d|ul|pre|blockquote)/)) {
         return trimmed
       }
-      return `<p class="mb-4">${trimmed.replace(/\n/g, '<br>')}</p>`
+      return `<p class="mb-4">${trimmed.replace(/\n/g, '')}</p>`
     })
     .join('\n')
 

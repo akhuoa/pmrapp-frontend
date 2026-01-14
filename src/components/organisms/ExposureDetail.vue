@@ -9,14 +9,12 @@ import FileIcon from '@/components/icons/FileIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
+import { getArchiveDownloadUrls, getCombineArchiveUrl } from '@/services/downloadUrlService'
 import { useExposureStore } from '@/stores/exposure'
 import type { ExposureInfo } from '@/types/exposure'
 import { trackButtonClick } from '@/utils/analytics'
 import { downloadWorkspaceFile } from '@/utils/download'
-import {
-  getCombineArchiveUrl,
-  getArchiveDownloadUrls,
-} from '@/services/downloadUrlService'
+import { formatFileCount } from '@/utils/format'
 
 const props = defineProps<{
   alias: string
@@ -124,6 +122,11 @@ const downloadFile = async (filename: string) => {
   await downloadWorkspaceFile(alias, commitId, filename)
 }
 
+const fileCountText = computed(() => {
+  const count = exposureInfo.value?.files?.length
+  return formatFileCount(count)
+})
+
 watch(detailHTML, async () => {
   if (detailHTML.value) {
     await nextTick()
@@ -204,7 +207,7 @@ onMounted(async () => {
       <div class="box p-0! overflow-hidden">
         <div class="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
           <span class="text-gray-600 dark:text-gray-400">
-            {{ `${exposureInfo.files.length} ${exposureInfo.files.length === 1 ? 'item' : 'items'}` }}
+            {{ fileCountText }}
           </span>
         </div>
         <ul class="divide-y divide-gray-200 dark:divide-gray-700">

@@ -10,10 +10,11 @@ import FileIcon from '@/components/icons/FileIcon.vue'
 import FolderIcon from '@/components/icons/FolderIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
+import { getArchiveDownloadUrls } from '@/services/downloadUrlService'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { WorkspaceInfo } from '@/types/workspace'
 import { downloadWorkspaceFile } from '@/utils/download'
-import { getArchiveDownloadUrls } from '@/services/downloadUrlService'
+import { formatFileCount } from '@/utils/format'
 
 const props = defineProps<{
   alias: string
@@ -65,11 +66,8 @@ const backButtonText = computed(() => {
 })
 
 const fileCountText = computed(() => {
-  if (!workspaceInfo.value) return ''
-  const treeInfo = workspaceInfo.value.target?.TreeInfo
-  if (!treeInfo) return ''
-  const count = treeInfo.filecount ?? 0
-  return `${count} ${count === 1 ? 'item' : 'items'}`
+  const count = workspaceInfo.value?.target?.TreeInfo?.filecount
+  return formatFileCount(count)
 })
 
 const sortedEntries = computed(() => {
@@ -110,10 +108,7 @@ const downloadFile = async (filename: string) => {
 
 const archiveDownloadUrls = computed(() => {
   if (!workspaceInfo.value) return { zip: '', tgz: '' }
-  return getArchiveDownloadUrls(
-    props.alias,
-    workspaceInfo.value.commit.commit_id,
-  )
+  return getArchiveDownloadUrls(props.alias, workspaceInfo.value.commit.commit_id)
 })
 
 const loadWorkspaceInfo = async () => {
@@ -169,42 +164,46 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
       :title="workspaceInfo.workspace.description || alias"
     />
 
-    <div class="mb-6 space-y-2">
-      <div>
-        <span class="font-medium text-gray-600 dark:text-gray-400">Git repository:</span>
+    <div class="mb-6 space-y-4">
+      <div class="flex flex-col lg:flex-row items-start lg:items-center gap-2">
+        <span class="font-bold text-gray-600 dark:text-gray-400">Git repository:</span>
         <a
           :href="workspaceInfo.workspace.url"
           target="_blank"
           rel="noopener noreferrer"
-          class="text-link ml-2"
+          class="text-link"
         >
           {{ workspaceInfo.workspace.url }}
         </a>
       </div>
-      <div v-if="workspaceInfo.commit.author">
-        <span class="font-medium text-gray-600 dark:text-gray-400">Author:</span>
-        <span class="ml-2">{{ workspaceInfo.commit.author }}</span>
+
+      <div class="flex flex-col lg:flex-row items-start lg:items-center gap-2" v-if="workspaceInfo.commit.author">
+        <span class="font-bold text-gray-600 dark:text-gray-400">Author:</span>
+        <span>{{ workspaceInfo.commit.author }}</span>
       </div>
-      <div class="pt-4">
-        <div class="flex items-center gap-2">
-          <p class="text-gray-600 dark:text-gray-400">Complete workspace archive:</p>
+
+      <div class="flex flex-col lg:flex-row items-start lg:items-center gap-2">
+        <span class="font-bold text-gray-600 dark:text-gray-400">Downloads:</span>
+        <div class="flex flex-col lg:flex-row items-start gap-2">
           <ActionButton
-            variant="primary"
+            variant="secondary"
+            size="sm"
             :href="archiveDownloadUrls.zip"
             :download="true"
             content-section="Workspace Detail"
           >
             <DownloadIcon class="w-4 h-4" />
-            Download (as a .zip file)
+            <span>Complete archive (as a <code class="code-inline bg-gray-100 dark:bg-gray-700">.zip</code> file)</span>
           </ActionButton>
           <ActionButton
-            variant="primary"
+            variant="secondary"
+            size="sm"
             :href="archiveDownloadUrls.tgz"
             :download="true"
             content-section="Workspace Detail"
           >
             <DownloadIcon class="w-4 h-4" />
-            Download (as a .tgz file)
+            <span>Complete archive (as a <code class="code-inline bg-gray-100 dark:bg-gray-700">.tgz</code> file)</span>
           </ActionButton>
         </div>
       </div>
@@ -253,4 +252,11 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
 <style scoped>
 @import '@/assets/text-link.css';
 @import '@/assets/box.css';
+
+.code-inline {
+  display: inline-block;
+  padding: 0 0.25em;
+  border-radius: 0.25rem;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
 </style>

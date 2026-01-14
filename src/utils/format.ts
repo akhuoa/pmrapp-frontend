@@ -5,7 +5,7 @@
  * @example formatNumber(1234567) // "1,234,567".
  */
 export function formatNumber(num: number): string {
-  return num.toLocaleString('en-US')
+  return num.toLocaleString('en-NZ')
 }
 
 /**
@@ -20,4 +20,19 @@ export function formatDate(timestamp: number): string {
     month: 'long',
     day: 'numeric',
   })
+}
+
+/**
+ * Format a file count with formatting.
+ * Returns empty string if count is zero, negative, or falsy.
+ * @param count - The number of files/items.
+ * @returns Formatted string like "1,234 items" or empty string if count is invalid.
+ * @example formatFileCount(1) // "1 item".
+ * @example formatFileCount(1234) // "1,234 items".
+ * @example formatFileCount(0) // "".
+ */
+export function formatFileCount(count: number | undefined | null): string {
+  if (!count || count <= 0) return ''
+  const formatted = formatNumber(count)
+  return `${formatted} ${count === 1 ? 'item' : 'items'}`
 }

@@ -80,7 +80,6 @@ export const isCodeFile = (filename: string): boolean => {
     'sql',
     'cellml',
     'sedml',
-    'omex',
     'csv',
     'r',
     'matlab',
@@ -159,6 +158,7 @@ export const isBinaryFile = (filename: string): boolean => {
     'ppt',
     'pptx',
     'ai',
+    'omex',
   ]
   return binaryExtensions.includes(extension)
 }
