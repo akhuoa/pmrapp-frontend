@@ -56,9 +56,22 @@ export const renderMarkdown = (markdown: string): string => {
       '<a href="mailto:$1" class="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300">$1</a>',
     )
 
-    // Lists (Simple implementation - wrapping adjacent lines).
-    // This looks for lines starting with * or - and wraps them in li.
-    .replace(/^\s*[-*] (.*$)/gim, '<li>$1</li>')
+  // Convert list items - check for loose lists (items separated by blank lines) per item.
+  html = html.replace(/^\s*[-*] (.*$)/gim, (match, content, offset, string) => {
+    // Look ahead to see if this list item is followed by a blank line before the next list item.
+    const remainingText = string.substring(offset + match.length)
+    const hasBlankLineAfter = /^\n\n\s*[-*] /.test(remainingText)
+
+    // Look behind to see if there was a blank line before this item.
+    const precedingText = string.substring(0, offset)
+    const hasBlankLineBefore = /[-*] .*\n\n\s*$/.test(precedingText)
+
+    // If either before or after has blank lines, it's a loose list.
+    if (hasBlankLineAfter || hasBlankLineBefore) {
+      return `<li><p class="mb-4">${content}</p></li>`
+    }
+    return `<li>${content}</li>`
+  })
 
   // Wrap lists in <ul>.
   // We use a non-greedy logic: Look for a group of <li> lines and wrap them.
