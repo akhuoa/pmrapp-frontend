@@ -108,9 +108,12 @@ onBeforeUnmount(() => {
   }
 })
 
-watch(() => props.code, () => {
-  highlightCode()
-})
+watch(
+  () => props.code,
+  () => {
+    highlightCode()
+  },
+)
 </script>
 
 <template>

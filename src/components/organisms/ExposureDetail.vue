@@ -14,10 +14,7 @@ import type { ExposureInfo } from '@/types/exposure'
 import { trackButtonClick } from '@/utils/analytics'
 import { downloadWorkspaceFile } from '@/utils/download'
 import { formatFileCount } from '@/utils/format'
-import {
-  getCombineArchiveUrl,
-  getArchiveDownloadUrls,
-} from '@/services/downloadUrlService'
+import { getCombineArchiveUrl, getArchiveDownloadUrls } from '@/services/downloadUrlService'
 
 const props = defineProps<{
   alias: string

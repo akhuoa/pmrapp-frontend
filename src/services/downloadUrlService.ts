@@ -8,10 +8,7 @@ export interface ArchiveUrls {
 /**
  * Generate archive download URLs for a workspace.
  */
-export const getArchiveDownloadUrls = (
-  alias: string,
-  commitId: string,
-): ArchiveUrls => {
+export const getArchiveDownloadUrls = (alias: string, commitId: string): ArchiveUrls => {
   if (!alias || !commitId) {
     return { zip: '', tgz: '' }
   }

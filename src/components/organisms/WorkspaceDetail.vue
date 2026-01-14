@@ -108,10 +108,7 @@ const downloadFile = async (filename: string) => {
 
 const archiveDownloadUrls = computed(() => {
   if (!workspaceInfo.value) return { zip: '', tgz: '' }
-  return getArchiveDownloadUrls(
-    props.alias,
-    workspaceInfo.value.commit.commit_id,
-  )
+  return getArchiveDownloadUrls(props.alias, workspaceInfo.value.commit.commit_id)
 })
 
 const loadWorkspaceInfo = async () => {
