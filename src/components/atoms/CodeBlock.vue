@@ -140,3 +140,15 @@ code {
   font-family: inherit;
 }
 </style>
+
+<style>
+@media (prefers-color-scheme: light) {
+  .token.operator,
+  .token.entity,
+  .token.url,
+  .language-css .token.string,
+  .style .token.string {
+    background: transparent !important;
+  }
+}
+</style>
