@@ -4,8 +4,9 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ListContainer from '@/components/molecules/ListContainer.vue'
 import ListItem from '@/components/molecules/ListItem.vue'
-import ListToolbar, { type SortOption } from '@/components/molecules/ListToolbar.vue'
+import ListToolbar from '@/components/molecules/ListToolbar.vue'
 import { useWorkspaceStore } from '@/stores/workspace'
+import type { SortOption } from '@/types/common'
 import type { Workspace } from '@/types/workspace'
 
 const emit = defineEmits<{

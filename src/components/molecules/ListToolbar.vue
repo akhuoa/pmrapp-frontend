@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import RefreshIcon from '@/components/icons/RefreshIcon.vue'
-
-export type SortOption = 'alphabetical' | 'id' | 'date-asc' | 'date-desc'
+import type { SortOption } from '@/types/common'
 
 interface Props {
   filterQuery: string
