@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import ListItem from '@/components/molecules/ListItem.vue'
-import SortableFilterableList from '@/components/organisms/SortableFilterableList.vue'
+import Listing from '@/components/molecules/Listing.vue'
 import { useWorkspaceStore } from '@/stores/workspace'
 
 const emit = defineEmits<{
@@ -29,7 +29,7 @@ const handleUpdateFilteredCount = (
 </script>
 
 <template>
-  <SortableFilterableList
+  <Listing
     :items="workspaceStore.workspaces"
     :is-loading="workspaceStore.isLoading"
     :error="workspaceStore.error"
@@ -48,5 +48,5 @@ const handleUpdateFilteredCount = (
         :link="`/workspaces/${workspace.alias}`"
       />
     </template>
-  </SortableFilterableList>
+  </Listing>
 </template>

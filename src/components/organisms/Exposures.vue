@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import ListItem from '@/components/molecules/ListItem.vue'
-import SortableFilterableList from '@/components/organisms/SortableFilterableList.vue'
+import Listing from '@/components/molecules/Listing.vue'
 import { useExposureStore } from '@/stores/exposure'
 import { formatDate } from '@/utils/format'
 
@@ -30,7 +30,7 @@ const handleUpdateFilteredCount = (
 </script>
 
 <template>
-  <SortableFilterableList
+  <Listing
     :items="exposureStore.exposures"
     :is-loading="exposureStore.isLoading"
     :error="exposureStore.error"
@@ -55,5 +55,5 @@ const handleUpdateFilteredCount = (
         </p>
       </ListItem>
     </template>
-  </SortableFilterableList>
+  </Listing>
 </template>
