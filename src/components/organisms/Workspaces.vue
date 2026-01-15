@@ -6,6 +6,7 @@ import ListContainer from '@/components/molecules/ListContainer.vue'
 import ListItem from '@/components/molecules/ListItem.vue'
 import ListToolbar from '@/components/molecules/ListToolbar.vue'
 import { useWorkspaceStore } from '@/stores/workspace'
+import type { Workspace } from '@/types/workspace'
 
 const emit = defineEmits<{
   updateFilteredCount: [filteredCount: number, totalCount: number, hasFilter: boolean]
@@ -31,14 +32,29 @@ const handleRefresh = async () => {
 }
 
 const filteredWorkspaces = computed(() => {
-  if (!filterQuery.value.trim()) {
-    return workspaceStore.workspaces
+  let result = workspaceStore.workspaces
+
+  // Filter by search query
+  if (filterQuery.value.trim()) {
+    const query = filterQuery.value.toLowerCase()
+
+    result = result.filter((workspace: Workspace) => {
+      const description = workspace.entity.description?.toLowerCase() || ''
+      return description.includes(query)
+    })
   }
 
-  const query = filterQuery.value.toLowerCase()
-  return workspaceStore.workspaces.filter((workspace) => {
-    const description = workspace.entity.description?.toLowerCase() || ''
-    return description.includes(query)
+  // Sort by entity.description alphabetically (default).
+  // If the description is null, move the item to the end of the sorted array.
+  return [...result].sort((a: Workspace, b: Workspace) => {
+    const descA = a.entity.description
+    const descB = b.entity.description
+
+    if (descA === null && descB === null) return 0
+    if (descA === null) return 1
+    if (descB === null) return -1
+
+    return descA.localeCompare(descB)
   })
 })
 

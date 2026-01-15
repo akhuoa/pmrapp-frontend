@@ -7,6 +7,7 @@ import ListItem from '@/components/molecules/ListItem.vue'
 import ListToolbar from '@/components/molecules/ListToolbar.vue'
 import { useExposureStore } from '@/stores/exposure'
 import { formatDate } from '@/utils/format'
+import type { Exposure } from '@/types/exposure'
 
 const emit = defineEmits<{
   updateFilteredCount: [filteredCount: number, totalCount: number, hasFilter: boolean]
@@ -32,14 +33,29 @@ const handleRefresh = async () => {
 }
 
 const filteredExposures = computed(() => {
-  if (!filterQuery.value.trim()) {
-    return exposureStore.exposures
+  let result = exposureStore.exposures
+
+  // Filter by search query
+  if (filterQuery.value.trim()) {
+    const query = filterQuery.value.toLowerCase()
+
+    result = result.filter((exposure: Exposure) => {
+      const description = exposure.entity.description?.toLowerCase() || ''
+      return description.includes(query)
+    })
   }
 
-  const query = filterQuery.value.toLowerCase()
-  return exposureStore.exposures.filter((exposure) => {
-    const description = exposure.entity.description?.toLowerCase() || ''
-    return description.includes(query)
+  // Sort by entity.description alphabetically (default).
+  // If the description is null, move the item to the end of the sorted array.
+  return [...result].sort((a: Exposure, b: Exposure) => {
+    const descA = a.entity.description
+    const descB = b.entity.description
+
+    if (descA === null && descB === null) return 0
+    if (descA === null) return 1
+    if (descB === null) return -1
+
+    return descA.localeCompare(descB)
   })
 })
 
