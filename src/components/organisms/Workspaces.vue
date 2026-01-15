@@ -8,6 +8,7 @@ import ListToolbar from '@/components/molecules/ListToolbar.vue'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { SortOption } from '@/types/common'
 import type { Workspace } from '@/types/workspace'
+import { formatDate } from '@/utils/format'
 
 const emit = defineEmits<{
   updateFilteredCount: [filteredCount: number, totalCount: number, hasFilter: boolean]
@@ -106,9 +107,15 @@ watch(
         v-for="workspace in filteredWorkspaces"
         :key="workspace.alias"
         :title="workspace.entity.description || workspace.alias"
-        :subtitle="workspace.entity.long_description || workspace.entity.url"
         :link="`/workspaces/${workspace.alias}`"
-      />
+      >
+        <p>
+          <small>
+            #{{ workspace.entity.id }} ·
+            Created on {{ formatDate(workspace.entity.created_ts) }}
+          </small>
+        </p>
+      </ListItem>
     </template>
   </ListContainer>
 </template>
