@@ -55,7 +55,7 @@ const handleRefresh = () => {
         <select
           id="sort-select"
           :value="sortBy"
-          class="input-field w-full sm:w-auto"
+          class="input-field w-full sm:w-auto h-[42px]"
           @change="handleSortChange"
         >
           <option value="alphabetical">Alphabetically</option>
