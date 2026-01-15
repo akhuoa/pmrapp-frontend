@@ -23,7 +23,7 @@ defineProps<{
     </div>
     <div class="flex-shrink-0">
       <ArrowRightIcon
-        class="text-primary transform group-hover:translate-x-1 transition-transform"
+        class="w-6 h-6 text-primary transform group-hover:translate-x-1 transition-transform"
       />
     </div>
   </RouterLink>

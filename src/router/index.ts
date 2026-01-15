@@ -31,6 +31,12 @@ const router = createRouter({
       meta: { title: `Workspace Detail – ${title}` },
     },
     {
+      path: '/workspaces/:alias/file/:commitId/:path(.+)',
+      name: 'workspace-file-detail',
+      component: WorkspaceDetailView,
+      meta: { title: `Workspace File – ${title}` },
+    },
+    {
       path: '/exposures',
       name: 'exposures',
       component: ExposureView,

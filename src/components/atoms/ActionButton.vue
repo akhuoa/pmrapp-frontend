@@ -10,8 +10,12 @@ interface Props {
   variant?: ButtonVariant
   size?: ButtonSize
   to?: RouteLocationRaw
+  href?: string
   disabled?: boolean
   contentSection?: string
+  download?: boolean
+  target?: string
+  rel?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -20,6 +24,8 @@ const props = withDefaults(defineProps<Props>(), {
   size: 'md',
   disabled: false,
   contentSection: 'global',
+  target: '_self',
+  rel: '',
 })
 
 const route = useRoute()
@@ -58,8 +64,19 @@ const buttonClasses = 'inline-flex items-center justify-center gap-2 cursor-poin
 </script>
 
 <template>
+  <a
+    v-if="href"
+    :href="href"
+    :class="[variantClasses[variant], sizeClasses[size], disabledClasses[variant], buttonClasses]"
+    :download="download || undefined"
+    :target="target"
+    :rel="rel"
+    @click="handleClick"
+  >
+    <slot />
+  </a>
   <RouterLink
-    v-if="to"
+    v-else-if="to"
     :to="to"
     :class="[variantClasses[variant], sizeClasses[size], buttonClasses]"
     @click="handleClick"
