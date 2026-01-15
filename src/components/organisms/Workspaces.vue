@@ -6,6 +6,8 @@ import ListContainer from '@/components/molecules/ListContainer.vue'
 import ListItem from '@/components/molecules/ListItem.vue'
 import ListToolbar from '@/components/molecules/ListToolbar.vue'
 import { useWorkspaceStore } from '@/stores/workspace'
+import type { SortOption } from '@/types/common'
+import type { Workspace } from '@/types/workspace'
 
 const emit = defineEmits<{
   updateFilteredCount: [filteredCount: number, totalCount: number, hasFilter: boolean]
@@ -15,6 +17,7 @@ const workspaceStore = useWorkspaceStore()
 const route = useRoute()
 const router = useRouter()
 const filterQuery = ref((route.query.filter as string) || '')
+const sortBy = ref<SortOption>('description')
 
 onMounted(async () => {
   await workspaceStore.fetchWorkspaces()
@@ -31,14 +34,40 @@ const handleRefresh = async () => {
 }
 
 const filteredWorkspaces = computed(() => {
-  if (!filterQuery.value.trim()) {
-    return workspaceStore.workspaces
+  let result = workspaceStore.workspaces
+
+  // Filter by search query.
+  if (filterQuery.value.trim()) {
+    const query = filterQuery.value.toLowerCase()
+
+    result = result.filter((workspace: Workspace) => {
+      const description = workspace.entity.description?.toLowerCase() || ''
+      return description.includes(query)
+    })
   }
 
-  const query = filterQuery.value.toLowerCase()
-  return workspaceStore.workspaces.filter((workspace) => {
-    const description = workspace.entity.description?.toLowerCase() || ''
-    return description.includes(query)
+  // Sort based on selected option.
+  return [...result].sort((a: Workspace, b: Workspace) => {
+    switch (sortBy.value) {
+      case 'description': {
+        const descA = a.entity.description
+        const descB = b.entity.description
+
+        if (descA === null && descB === null) return 0
+        if (descA === null) return 1
+        if (descB === null) return -1
+
+        return descA.localeCompare(descB)
+      }
+      case 'id':
+        return a.entity.id - b.entity.id
+      case 'date-asc':
+        return a.entity.created_ts - b.entity.created_ts
+      case 'date-desc':
+        return b.entity.created_ts - a.entity.created_ts
+      default:
+        return 0
+    }
   })
 })
 
@@ -59,6 +88,7 @@ watch(
 <template>
   <ListToolbar
     v-model:filter-query="filterQuery"
+    v-model:sort-by="sortBy"
     :is-loading="workspaceStore.isLoading"
     content-section="Workspace Listing"
     @refresh="handleRefresh"
