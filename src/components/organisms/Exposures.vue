@@ -4,7 +4,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ListContainer from '@/components/molecules/ListContainer.vue'
 import ListItem from '@/components/molecules/ListItem.vue'
-import ListToolbar from '@/components/molecules/ListToolbar.vue'
+import ListToolbar, { type SortOption } from '@/components/molecules/ListToolbar.vue'
 import { useExposureStore } from '@/stores/exposure'
 import { formatDate } from '@/utils/format'
 import type { Exposure } from '@/types/exposure'
@@ -17,6 +17,7 @@ const exposureStore = useExposureStore()
 const route = useRoute()
 const router = useRouter()
 const filterQuery = ref((route.query.filter as string) || '')
+const sortBy = ref<SortOption>('alphabetical')
 
 onMounted(async () => {
   await exposureStore.fetchExposures()
@@ -45,17 +46,28 @@ const filteredExposures = computed(() => {
     })
   }
 
-  // Sort by entity.description alphabetically (default).
-  // If the description is null, move the item to the end of the sorted array.
+  // Sort based on selected option
   return [...result].sort((a: Exposure, b: Exposure) => {
-    const descA = a.entity.description
-    const descB = b.entity.description
+    switch (sortBy.value) {
+      case 'alphabetical': {
+        const descA = a.entity.description
+        const descB = b.entity.description
 
-    if (descA === null && descB === null) return 0
-    if (descA === null) return 1
-    if (descB === null) return -1
+        if (descA === null && descB === null) return 0
+        if (descA === null) return 1
+        if (descB === null) return -1
 
-    return descA.localeCompare(descB)
+        return descA.localeCompare(descB)
+      }
+      case 'id':
+        return a.entity.id - b.entity.id
+      case 'date-asc':
+        return a.entity.created_ts - b.entity.created_ts
+      case 'date-desc':
+        return b.entity.created_ts - a.entity.created_ts
+      default:
+        return 0
+    }
   })
 })
 
@@ -76,6 +88,7 @@ watch(
 <template>
   <ListToolbar
     v-model:filter-query="filterQuery"
+    v-model:sort-by="sortBy"
     :is-loading="exposureStore.isLoading"
     content-section="Exposure Listing"
     @refresh="handleRefresh"
