@@ -1,110 +1,48 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import ListContainer from '@/components/molecules/ListContainer.vue'
+import { onMounted } from 'vue'
 import ListItem from '@/components/molecules/ListItem.vue'
-import ListToolbar from '@/components/molecules/ListToolbar.vue'
+import SortableFilterableList from '@/components/organisms/SortableFilterableList.vue'
 import { useExposureStore } from '@/stores/exposure'
-import type { SortOption } from '@/types/common'
 import { formatDate } from '@/utils/format'
-import type { Exposure } from '@/types/exposure'
 
 const emit = defineEmits<{
   updateFilteredCount: [filteredCount: number, totalCount: number, hasFilter: boolean]
 }>()
 
 const exposureStore = useExposureStore()
-const route = useRoute()
-const router = useRouter()
-const filterQuery = ref((route.query.filter as string) || '')
-const sortBy = ref<SortOption>('description')
 
 onMounted(async () => {
   await exposureStore.fetchExposures()
-})
-
-// Sync filter query with URL query parameter.
-watch(filterQuery, (newValue) => {
-  const query = newValue.trim() ? { filter: newValue } : {}
-  router.replace({ query })
 })
 
 const handleRefresh = async () => {
   await exposureStore.fetchExposures(true)
 }
 
-const filteredExposures = computed(() => {
-  let result = exposureStore.exposures
-
-  // Filter by search query.
-  if (filterQuery.value.trim()) {
-    const query = filterQuery.value.toLowerCase()
-
-    result = result.filter((exposure: Exposure) => {
-      const description = exposure.entity.description?.toLowerCase() || ''
-      return description.includes(query)
-    })
-  }
-
-  // Sort based on selected option.
-  return [...result].sort((a: Exposure, b: Exposure) => {
-    switch (sortBy.value) {
-      case 'description': {
-        const descA = a.entity.description
-        const descB = b.entity.description
-
-        if (descA === null && descB === null) return 0
-        if (descA === null) return 1
-        if (descB === null) return -1
-
-        return descA.localeCompare(descB)
-      }
-      case 'id':
-        return a.entity.id - b.entity.id
-      case 'date-asc':
-        return a.entity.created_ts - b.entity.created_ts
-      case 'date-desc':
-        return b.entity.created_ts - a.entity.created_ts
-      default:
-        return 0
-    }
-  })
-})
-
-watch(
-  [filteredExposures, () => exposureStore.exposures.length],
-  () => {
-    emit(
-      'updateFilteredCount',
-      filteredExposures.value.length,
-      exposureStore.exposures.length,
-      !!filterQuery.value.trim(),
-    )
-  },
-  { immediate: true },
-)
+const handleUpdateFilteredCount = (
+  filteredCount: number,
+  totalCount: number,
+  hasFilter: boolean,
+) => {
+  emit('updateFilteredCount', filteredCount, totalCount, hasFilter)
+}
 </script>
 
 <template>
-  <ListToolbar
-    v-model:filter-query="filterQuery"
-    v-model:sort-by="sortBy"
+  <SortableFilterableList
+    :items="exposureStore.exposures"
     :is-loading="exposureStore.isLoading"
-    content-section="Exposure Listing"
-    @refresh="handleRefresh"
-  />
-
-  <ListContainer
-    :items="filteredExposures"
     :error="exposureStore.error"
-    :is-loading="exposureStore.isLoading"
+    content-section="Exposure Listing"
     error-title="Error loading exposures"
     empty-message="No exposures found."
+    @refresh="handleRefresh"
+    @update-filtered-count="handleUpdateFilteredCount"
   >
-    <template #item>
+    <template #item="{ items }">
       <ListItem
-        v-for="exposure in filteredExposures"
+        v-for="exposure in items"
         :key="exposure.alias"
         :title="exposure.entity.description || `Exposure ${exposure.entity.id}`"
         :link="`/exposures/${exposure.alias}`"
@@ -117,5 +55,5 @@ watch(
         </p>
       </ListItem>
     </template>
-  </ListContainer>
+  </SortableFilterableList>
 </template>
