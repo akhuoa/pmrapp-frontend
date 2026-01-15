@@ -1,4 +1,4 @@
 /**
- * Sort options for list displays
+ * Sort options for list displays.
  */
-export type SortOption = 'alphabetical' | 'id' | 'date-asc' | 'date-desc'
+export type SortOption = 'description' | 'id' | 'date-asc' | 'date-desc'

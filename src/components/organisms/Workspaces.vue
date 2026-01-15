@@ -17,7 +17,7 @@ const workspaceStore = useWorkspaceStore()
 const route = useRoute()
 const router = useRouter()
 const filterQuery = ref((route.query.filter as string) || '')
-const sortBy = ref<SortOption>('alphabetical')
+const sortBy = ref<SortOption>('description')
 
 onMounted(async () => {
   await workspaceStore.fetchWorkspaces()
@@ -36,7 +36,7 @@ const handleRefresh = async () => {
 const filteredWorkspaces = computed(() => {
   let result = workspaceStore.workspaces
 
-  // Filter by search query
+  // Filter by search query.
   if (filterQuery.value.trim()) {
     const query = filterQuery.value.toLowerCase()
 
@@ -46,10 +46,10 @@ const filteredWorkspaces = computed(() => {
     })
   }
 
-  // Sort based on selected option
+  // Sort based on selected option.
   return [...result].sort((a: Workspace, b: Workspace) => {
     switch (sortBy.value) {
-      case 'alphabetical': {
+      case 'description': {
         const descA = a.entity.description
         const descB = b.entity.description
 

@@ -18,7 +18,7 @@ const exposureStore = useExposureStore()
 const route = useRoute()
 const router = useRouter()
 const filterQuery = ref((route.query.filter as string) || '')
-const sortBy = ref<SortOption>('alphabetical')
+const sortBy = ref<SortOption>('description')
 
 onMounted(async () => {
   await exposureStore.fetchExposures()
@@ -37,7 +37,7 @@ const handleRefresh = async () => {
 const filteredExposures = computed(() => {
   let result = exposureStore.exposures
 
-  // Filter by search query
+  // Filter by search query.
   if (filterQuery.value.trim()) {
     const query = filterQuery.value.toLowerCase()
 
@@ -47,10 +47,10 @@ const filteredExposures = computed(() => {
     })
   }
 
-  // Sort based on selected option
+  // Sort based on selected option.
   return [...result].sort((a: Exposure, b: Exposure) => {
     switch (sortBy.value) {
-      case 'alphabetical': {
+      case 'description': {
         const descA = a.entity.description
         const descB = b.entity.description
 

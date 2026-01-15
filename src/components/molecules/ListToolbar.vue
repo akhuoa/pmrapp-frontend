@@ -13,7 +13,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   filterPlaceholder: 'Filter by description...',
-  sortBy: 'alphabetical',
+  sortBy: 'description',
 })
 
 const emit = defineEmits<{
@@ -57,7 +57,7 @@ const handleRefresh = () => {
           class="input-field w-full sm:w-auto h-[42px]"
           @change="handleSortChange"
         >
-          <option value="alphabetical">Alphabetically</option>
+          <option value="description">Description</option>
           <option value="id">ID</option>
           <option value="date-asc">Date (Oldest First)</option>
           <option value="date-desc">Date (Newest First)</option>
