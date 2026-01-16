@@ -7,8 +7,40 @@ const searchStore = useSearchStore()
 const searchService = getSearchService()
 const searchResults = ref<string[]>([])
 const selectedTerm = ref<{ kind: string; term: string } | null>(null)
+const termLoading = ref(false)
 const categoryFilters = ref<Map<string, string>>(new Map())
 const resultsSection = ref<HTMLElement | null>(null)
+
+const termButtonClass = [
+  "px-3",
+  "py-1.5",
+  "bg-gray-100",
+  "cursor-pointer",
+  "dark:bg-gray-800",
+  "hover:bg-gray-200",
+  "dark:hover:bg-gray-700",
+  "rounded-md",
+  "text-sm",
+  "transition-colors",
+  "relative",
+  "disabled:opacity-50",
+  "disabled:cursor-not-allowed",
+].join(' ')
+
+const termLoadingClass = [
+  'absolute',
+  'top-0',
+  'left-0',
+  'w-full',
+  'h-full',
+  'flex',
+  'items-center',
+  'justify-center',
+  'bg-white/75',
+  'dark:bg-gray-900/75',
+  'rounded-md',
+  'text-sm'
+].join(' ')
 
 onMounted(async () => {
   await searchStore.fetchCategories()
@@ -16,14 +48,14 @@ onMounted(async () => {
 
 const handleTermClick = async (kind: string, term: string) => {
   try {
+    termLoading.value = true
+    selectedTerm.value = { kind, term }
     const result = await searchService.searchIndexTerm(kind, term)
 
     if (result?.resource_paths && Array.isArray(result.resource_paths)) {
       searchResults.value = result.resource_paths
-      selectedTerm.value = { kind, term }
     } else {
       searchResults.value = []
-      selectedTerm.value = { kind, term }
     }
 
     // Scroll to results section after updating.
@@ -33,6 +65,8 @@ const handleTermClick = async (kind: string, term: string) => {
     }
   } catch (err) {
     console.error('Failed to search term:', err)
+  } finally {
+    termLoading.value = false
   }
 }
 
@@ -87,10 +121,17 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
         <button
           v-for="term in getFilteredTerms(category.kindInfo.terms, category.kind)"
           :key="term"
-          class="px-3 py-1.5 bg-gray-100 cursor-pointer dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md text-sm transition-colors"
+          :class="termButtonClass"
+          :disabled="termLoading"
           @click="handleTermClick(category.kind, term)"
         >
           {{ term }}
+          <span
+            v-if="termLoading && selectedTerm?.term === term && selectedTerm?.kind === category.kind"
+            :class="termLoadingClass"
+          >
+            Loading...
+          </span>
         </button>
       </div>
     </div>
