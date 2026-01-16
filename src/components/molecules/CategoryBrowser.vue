@@ -7,6 +7,7 @@ const searchStore = useSearchStore()
 const searchService = getSearchService()
 const searchResults = ref<string[]>([])
 const selectedTerm = ref<{ kind: string; term: string } | null>(null)
+const categoryFilters = ref<Map<string, string>>(new Map())
 
 onMounted(async () => {
   await searchStore.fetchCategories()
@@ -27,6 +28,13 @@ const handleTermClick = async (kind: string, term: string) => {
     console.error('Failed to search term:', err)
   }
 }
+
+const getFilteredTerms = (terms: string[], kind: string): string[] => {
+  const filter = categoryFilters.value.get(kind)?.toLowerCase() || ''
+  return terms
+    .filter(t => t.trim())
+    .filter(t => filter === '' || t.toLowerCase().includes(filter))
+}
 </script>
 
 <template>
@@ -46,9 +54,19 @@ const handleTermClick = async (kind: string, term: string) => {
       :key="category.kind"
       class="box p-6"
     >
-      <h3 class="text-xl font-semibold mb-4">
-        {{ category.kindInfo?.kind.description || category.kind }}
-      </h3>
+      <div class="flex items-center justify-between mb-4 gap-4">
+        <h3 class="text-xl font-semibold">
+          {{ category.kindInfo?.kind.description || category.kind }}
+        </h3>
+        <input
+          v-if="category.kindInfo"
+          type="text"
+          placeholder="Filter terms..."
+          class="px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-md text-sm bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+          :value="categoryFilters.get(category.kind) || ''"
+          @input="categoryFilters.set(category.kind, ($event.target as HTMLInputElement).value)"
+        />
+      </div>
 
       <div v-if="category.loading" class="text-gray-500 dark:text-gray-400">
         Loading...
@@ -60,7 +78,7 @@ const handleTermClick = async (kind: string, term: string) => {
 
       <div v-else-if="category.kindInfo" class="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
         <button
-          v-for="term in category.kindInfo.terms.filter(t => t.trim())"
+          v-for="term in getFilteredTerms(category.kindInfo.terms, category.kind)"
           :key="term"
           class="px-3 py-1.5 bg-gray-100 cursor-pointer dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md text-sm transition-colors"
           @click="handleTermClick(category.kind, term)"
