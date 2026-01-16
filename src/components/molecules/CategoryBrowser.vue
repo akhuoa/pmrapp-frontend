@@ -1,49 +1,15 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useSearchStore } from '@/stores/search'
 import { getSearchService } from '@/services'
-import type { IndexKindResponse } from '@/types/search'
 
-interface CategoryData {
-  kind: string
-  kindInfo: IndexKindResponse | null
-  loading: boolean
-  error: string | null
-}
-
+const searchStore = useSearchStore()
 const searchService = getSearchService()
-const categories = ref<CategoryData[]>([])
-const loading = ref(true)
-const error = ref<string | null>(null)
 const searchResults = ref<string[]>([])
 const selectedTerm = ref<{ kind: string; term: string } | null>(null)
 
 onMounted(async () => {
-  try {
-    const response = await searchService.getIndexes()
-    categories.value = response.indexes.map((kind) => ({
-      kind,
-      kindInfo: null,
-      loading: true,
-      error: null,
-    }))
-
-    // Fetch data for each category.
-    await Promise.all(
-      categories.value.map(async (category) => {
-        try {
-          category.kindInfo = await searchService.getIndexKind(category.kind)
-        } catch (err) {
-          category.error = err instanceof Error ? err.message : 'Failed to load category'
-        } finally {
-          category.loading = false
-        }
-      })
-    )
-  } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to load categories'
-  } finally {
-    loading.value = false
-  }
+  await searchStore.fetchCategories()
 })
 
 const handleTermClick = async (kind: string, term: string) => {
@@ -66,17 +32,17 @@ const handleTermClick = async (kind: string, term: string) => {
 <template>
   <h2 class="text-3xl font-bold mb-6">Browse by Category</h2>
 
-  <div v-if="loading" class="text-center py-8">
+  <div v-if="searchStore.isLoading" class="text-center py-8">
     <p class="text-gray-500 dark:text-gray-400">Loading categories...</p>
   </div>
 
-  <div v-else-if="error" class="text-center py-8">
-    <p class="text-red-600 dark:text-red-400">{{ error }}</p>
+  <div v-else-if="searchStore.error" class="text-center py-8">
+    <p class="text-red-600 dark:text-red-400">{{ searchStore.error }}</p>
   </div>
 
   <div v-else class="space-y-6">
     <div
-      v-for="category in categories"
+      v-for="category in searchStore.categories"
       :key="category.kind"
       class="box p-6"
     >
