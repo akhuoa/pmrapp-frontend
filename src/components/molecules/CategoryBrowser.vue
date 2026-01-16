@@ -81,7 +81,7 @@ const handleTermClick = (kind: string, term: string) => {
 
       <div v-else-if="category.kindInfo" class="flex flex-wrap gap-2">
         <button
-          v-for="term in category.kindInfo.terms"
+          v-for="term in category.kindInfo.terms.filter(t => t.trim())"
           :key="term"
           class="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md text-sm transition-colors"
           @click="handleTermClick(category.kind, term)"
