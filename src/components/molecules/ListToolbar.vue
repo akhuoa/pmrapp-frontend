@@ -2,6 +2,7 @@
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import RefreshIcon from '@/components/icons/RefreshIcon.vue'
 import type { SortOption } from '@/types/common'
+import { DEFAULT_SORT_OPTION, SORT_OPTIONS } from '@/utils/sort'
 
 interface Props {
   filterQuery: string
@@ -13,7 +14,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   filterPlaceholder: 'Filter by description...',
-  sortBy: 'description',
+  sortBy: DEFAULT_SORT_OPTION,
 })
 
 const emit = defineEmits<{
@@ -57,10 +58,13 @@ const handleRefresh = () => {
           class="input-field w-full sm:w-auto h-[42px]"
           @change="handleSortChange"
         >
-          <option value="description">Description</option>
-          <option value="id">ID</option>
-          <option value="date-asc">Date (Oldest First)</option>
-          <option value="date-desc">Date (Newest First)</option>
+          <option
+            v-for="option in SORT_OPTIONS"
+            :key="option.value"
+            :value="option.value"
+          >
+            {{ option.label }}
+          </option>
         </select>
       </div>
     </div>
