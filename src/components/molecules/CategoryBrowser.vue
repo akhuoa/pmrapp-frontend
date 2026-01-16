@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useSearchStore } from '@/stores/search'
 import { getSearchService } from '@/services'
 
@@ -8,6 +8,7 @@ const searchService = getSearchService()
 const searchResults = ref<string[]>([])
 const selectedTerm = ref<{ kind: string; term: string } | null>(null)
 const categoryFilters = ref<Map<string, string>>(new Map())
+const resultsSection = ref<HTMLElement | null>(null)
 
 onMounted(async () => {
   await searchStore.fetchCategories()
@@ -23,6 +24,12 @@ const handleTermClick = async (kind: string, term: string) => {
     } else {
       searchResults.value = []
       selectedTerm.value = { kind, term }
+    }
+
+    // Scroll to results section after updating.
+    await nextTick()
+    if (resultsSection.value) {
+      resultsSection.value.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   } catch (err) {
     console.error('Failed to search term:', err)
@@ -88,7 +95,7 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
       </div>
     </div>
 
-    <div v-if="selectedTerm" class="box p-6">
+    <div v-if="selectedTerm" ref="resultsSection" class="box p-6">
       <h3 class="text-xl font-semibold mb-4">
         Search Results for "{{ selectedTerm.term }}" in {{ selectedTerm.kind }}
       </h3>
