@@ -130,7 +130,7 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
             v-if="termLoading && selectedTerm?.term === term && selectedTerm?.kind === category.kind"
             :class="termLoadingClass"
           >
-            Loading...
+            <span class="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
           </span>
         </button>
       </div>
