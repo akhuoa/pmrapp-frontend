@@ -58,7 +58,7 @@ const handleTermClick = async (kind: string, term: string) => {
         {{ category.error }}
       </div>
 
-      <div v-else-if="category.kindInfo" class="flex flex-wrap gap-2">
+      <div v-else-if="category.kindInfo" class="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
         <button
           v-for="term in category.kindInfo.terms.filter(t => t.trim())"
           :key="term"
