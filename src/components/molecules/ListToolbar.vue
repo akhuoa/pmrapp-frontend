@@ -1,26 +1,36 @@
 <script setup lang="ts">
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import RefreshIcon from '@/components/icons/RefreshIcon.vue'
+import type { SortOption } from '@/types/common'
+import { DEFAULT_SORT_OPTION, SORT_OPTIONS } from '@/utils/sort'
 
 interface Props {
   filterQuery: string
   isLoading: boolean
   filterPlaceholder?: string
   contentSection: string
+  sortBy?: SortOption
 }
 
 const props = withDefaults(defineProps<Props>(), {
   filterPlaceholder: 'Filter by description...',
+  sortBy: DEFAULT_SORT_OPTION,
 })
 
 const emit = defineEmits<{
   'update:filterQuery': [value: string]
+  'update:sortBy': [value: SortOption]
   refresh: []
 }>()
 
 const handleFilterInput = (event: Event) => {
   const target = event.target as HTMLInputElement
   emit('update:filterQuery', target.value)
+}
+
+const handleSortChange = (event: Event) => {
+  const target = event.target as HTMLSelectElement
+  emit('update:sortBy', target.value as SortOption)
 }
 
 const handleRefresh = () => {
@@ -30,14 +40,33 @@ const handleRefresh = () => {
 
 <template>
   <div class="mb-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-    <div class="flex-1 w-full sm:w-auto">
+    <div class="flex-1 w-full sm:w-auto flex flex-col sm:flex-row gap-4">
       <input
         :value="filterQuery"
         type="search"
         :placeholder="filterPlaceholder"
-        class="input-field w-full"
+        class="input-field w-full sm:flex-1"
         @input="handleFilterInput"
       />
+      <div class="flex items-center gap-2">
+        <label for="sort-select" class="text-sm font-medium text-gray-700 whitespace-nowrap">
+          Sort by:
+        </label>
+        <select
+          id="sort-select"
+          :value="sortBy"
+          class="input-field w-full sm:w-auto h-[42px]"
+          @change="handleSortChange"
+        >
+          <option
+            v-for="option in SORT_OPTIONS"
+            :key="option.value"
+            :value="option.value"
+          >
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
     </div>
     <ActionButton
       variant="secondary"
