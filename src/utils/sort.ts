@@ -1,8 +1,8 @@
 import type { SortableEntity, SortOption, SortOptionConfig } from '@/types/common'
 
 export const SORT_OPTIONS: SortOptionConfig[] = [
-  { value: 'description-asc', label: 'Description (A-Z)' },
-  { value: 'description-desc', label: 'Description (Z-A)' },
+  { value: 'description-asc', label: 'Description (Ascending)' },
+  { value: 'description-desc', label: 'Description (Descending)' },
   { value: 'id-asc', label: 'ID (Ascending)' },
   { value: 'id-desc', label: 'ID (Descending)' },
   { value: 'date-asc', label: 'Date (Oldest First)' },
