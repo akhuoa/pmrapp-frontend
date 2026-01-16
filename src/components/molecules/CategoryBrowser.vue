@@ -50,12 +50,12 @@ const handleTermClick = async (kind: string, term: string) => {
   try {
     termLoading.value = true
     selectedTerm.value = { kind, term }
+    searchResults.value = []
+
     const result = await searchService.searchIndexTerm(kind, term)
 
     if (result?.resource_paths && Array.isArray(result.resource_paths)) {
       searchResults.value = result.resource_paths
-    } else {
-      searchResults.value = []
     }
 
     // Scroll to results section after updating.
@@ -140,7 +140,10 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
       <h3 class="text-xl font-semibold mb-4">
         Search Results for "{{ selectedTerm.term }}" in {{ selectedTerm.kind }}
       </h3>
-      <div v-if="searchResults.length > 0" class="space-y-2">
+      <div v-if="termLoading">
+        <div class="text-gray-500 dark:text-gray-400">Searching...</div>
+      </div>
+      <div v-else-if="searchResults.length > 0" class="space-y-2">
         <div
           v-for="(path, index) in searchResults"
           :key="index"
