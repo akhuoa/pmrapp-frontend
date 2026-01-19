@@ -80,6 +80,8 @@ onUnmounted(() => {
     <ActionButton
       variant="secondary"
       size="lg"
+      aria-haspopup="true"
+      :aria-expanded="isOpen"
       @click="isOpen = !isOpen"
       content-section="List sorting dropdown"
     >
@@ -98,6 +100,7 @@ onUnmounted(() => {
     >
       <div
         v-if="isOpen"
+        role="menu"
         class="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-background border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50"
       >
         <div class="py-1">
@@ -110,6 +113,7 @@ onUnmounted(() => {
             <button
               v-for="option in group.options"
               :key="option.value"
+              role="menuitem"
               class="w-full text-left px-3 py-2 text-sm cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
               :class="{
                 'bg-gray-100 dark:bg-gray-700': isOptionSelected(option)
