@@ -85,8 +85,9 @@ onUnmounted(() => {
       size="lg"
       aria-haspopup="true"
       :aria-expanded="isOpen"
+      aria-label="Sort options"
       @click="isOpen = !isOpen"
-      content-section="List sorting dropdown"
+      content-section="List toolbar: sort dropdown"
     >
       <ArrowUpIcon :class="getDirectionArrowClass(currentSort.direction)" />
       <span>{{ currentFieldLabel }}</span>
