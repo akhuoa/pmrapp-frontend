@@ -9,7 +9,7 @@ import { useWorkspaceStore } from '@/stores/workspace'
 import type { SortOption } from '@/types/common'
 import type { Workspace } from '@/types/workspace'
 import { formatDate } from '@/utils/format'
-import { sortEntities, DEFAULT_SORT_OPTION } from '@/utils/sort'
+import { DEFAULT_SORT_OPTION, sortEntities } from '@/utils/sort'
 
 const emit = defineEmits<{
   updateFilteredCount: [filteredCount: number, totalCount: number, hasFilter: boolean]

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import ActionButton from '@/components/atoms/ActionButton.vue'
+import ArrowUpIcon from '@/components/icons/ArrowUpIcon.vue'
+import CheckmarkIcon from '@/components/icons/CheckmarkIcon.vue'
+import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
 import type { SortOption } from '@/types/common'
 import type { SortOptionGroup } from '@/utils/sort'
-import ArrowUpIcon from '@/components/icons/ArrowUpIcon.vue'
-import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
-import CheckmarkIcon from '@/components/icons/CheckmarkIcon.vue'
-import ActionButton from '@/components/atoms/ActionButton.vue'
 
 interface Props {
   modelValue: SortOption

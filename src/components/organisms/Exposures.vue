@@ -7,9 +7,9 @@ import ListItem from '@/components/molecules/ListItem.vue'
 import ListToolbar from '@/components/molecules/ListToolbar.vue'
 import { useExposureStore } from '@/stores/exposure'
 import type { SortOption } from '@/types/common'
-import { formatDate } from '@/utils/format'
 import type { Exposure } from '@/types/exposure'
-import { sortEntities, DEFAULT_SORT_OPTION } from '@/utils/sort'
+import { formatDate } from '@/utils/format'
+import { DEFAULT_SORT_OPTION, sortEntities } from '@/utils/sort'
 
 const emit = defineEmits<{
   updateFilteredCount: [filteredCount: number, totalCount: number, hasFilter: boolean]

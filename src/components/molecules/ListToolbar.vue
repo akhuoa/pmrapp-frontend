@@ -3,7 +3,7 @@ import ActionButton from '@/components/atoms/ActionButton.vue'
 import RefreshIcon from '@/components/icons/RefreshIcon.vue'
 import SortDropdown from '@/components/molecules/SortDropdown.vue'
 import type { SortOption } from '@/types/common'
-import { SORT_OPTIONS_GROUPED, DEFAULT_SORT_OPTION } from '@/utils/sort'
+import { DEFAULT_SORT_OPTION, SORT_OPTIONS_GROUPED } from '@/utils/sort'
 
 interface Props {
   filterQuery: string
