@@ -79,7 +79,7 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
 </script>
 
 <template>
-  <h2 class="text-3xl font-bold mb-6">Browse by Category</h2>
+  <h2 class="text-3xl font-bold mb-6">Browse by keyword</h2>
 
   <div v-if="searchStore.isLoading" class="text-center py-8">
     <p class="text-gray-500 dark:text-gray-400">Loading categories...</p>
@@ -102,7 +102,7 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
         <input
           v-if="category.kindInfo"
           type="search"
-          placeholder="Filter terms..."
+          placeholder="Filter keywords..."
           class="px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-md text-sm bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
           :value="categoryFilters.get(category.kind) || ''"
           @input="categoryFilters.set(category.kind, ($event.target as HTMLInputElement).value)"
