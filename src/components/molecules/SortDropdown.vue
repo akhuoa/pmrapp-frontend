@@ -108,10 +108,10 @@ onUnmounted(() => {
       >
         <div class="py-1">
           <div
-            v-for="group in options"
+            v-for="(group, index) in options"
             :key="group.group"
             class="py-2"
-            :class="{ 'border-b border-gray-200 dark:border-gray-700': options.indexOf(group) < options.length - 1 }"
+            :class="{ 'border-b border-gray-200 dark:border-gray-700': index < options.length - 1 }"
           >
             <button
               v-for="option in group.options"
