@@ -31,10 +31,7 @@ export const DEFAULT_SORT_OPTION: SortOption = 'description-asc'
 /**
  * Generic sorting function for entities with id, description, and created_ts.
  */
-export function sortEntities<T extends SortableEntity>(
-  items: T[],
-  sortBy: SortOption
-): T[] {
+export function sortEntities<T extends SortableEntity>(items: T[], sortBy: SortOption): T[] {
   return [...items].sort((a: T, b: T) => {
     switch (sortBy) {
       case 'description-asc': {

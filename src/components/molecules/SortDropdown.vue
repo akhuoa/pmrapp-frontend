@@ -28,8 +28,11 @@ const currentSort = computed(() => {
 })
 
 const currentFieldLabel = computed(() => {
-  const fieldsGroup = props.options.find(g => g.group === 'Fields')
-  return fieldsGroup?.options.find(o => o.value === currentSort.value.field)?.label || currentSort.value.field
+  const fieldsGroup = props.options.find((g) => g.group === 'Fields')
+  return (
+    fieldsGroup?.options.find((o) => o.value === currentSort.value.field)?.label ||
+    currentSort.value.field
+  )
 })
 
 const getDirectionArrowClass = (direction: string) => {
