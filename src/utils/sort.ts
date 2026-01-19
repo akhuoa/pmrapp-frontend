@@ -1,12 +1,29 @@
-import type { SortableEntity, SortOption, SortOptionConfig } from '@/types/common'
+import type { SortableEntity, SortOption } from '@/types/common'
 
-export const SORT_OPTIONS: SortOptionConfig[] = [
-  { value: 'description-asc', label: 'Description (Ascending)' },
-  { value: 'description-desc', label: 'Description (Descending)' },
-  { value: 'id-asc', label: 'ID (Ascending)' },
-  { value: 'id-desc', label: 'ID (Descending)' },
-  { value: 'date-asc', label: 'Date (Oldest First)' },
-  { value: 'date-desc', label: 'Date (Newest First)' },
+/**
+ * Grouped sort options for dropdown with two groups: Fields and Direction
+ */
+export interface SortOptionGroup {
+  group: string
+  options: Array<{ value: string; label: string; type: 'field' | 'direction' }>
+}
+
+export const SORT_OPTIONS_GROUPED: SortOptionGroup[] = [
+  {
+    group: 'Fields',
+    options: [
+      { value: 'description', label: 'Description', type: 'field' },
+      { value: 'id', label: 'ID', type: 'field' },
+      { value: 'date', label: 'Date', type: 'field' },
+    ],
+  },
+  {
+    group: 'Direction',
+    options: [
+      { value: 'asc', label: 'Ascending', type: 'direction' },
+      { value: 'desc', label: 'Descending', type: 'direction' },
+    ],
+  },
 ]
 
 export const DEFAULT_SORT_OPTION: SortOption = 'description-asc'
