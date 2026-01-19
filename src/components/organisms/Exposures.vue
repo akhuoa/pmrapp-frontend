@@ -6,7 +6,10 @@ import ListContainer from '@/components/molecules/ListContainer.vue'
 import ListItem from '@/components/molecules/ListItem.vue'
 import ListToolbar from '@/components/molecules/ListToolbar.vue'
 import { useExposureStore } from '@/stores/exposure'
+import type { SortOption } from '@/types/common'
+import type { Exposure } from '@/types/exposure'
 import { formatDate } from '@/utils/format'
+import { DEFAULT_SORT_OPTION, sortEntities } from '@/utils/sort'
 
 const emit = defineEmits<{
   updateFilteredCount: [filteredCount: number, totalCount: number, hasFilter: boolean]
@@ -16,6 +19,7 @@ const exposureStore = useExposureStore()
 const route = useRoute()
 const router = useRouter()
 const filterQuery = ref((route.query.filter as string) || '')
+const sortBy = ref<SortOption>(DEFAULT_SORT_OPTION)
 
 onMounted(async () => {
   await exposureStore.fetchExposures()
@@ -32,15 +36,20 @@ const handleRefresh = async () => {
 }
 
 const filteredExposures = computed(() => {
-  if (!filterQuery.value.trim()) {
-    return exposureStore.exposures
+  let result = exposureStore.exposures
+
+  // Filter by search query.
+  if (filterQuery.value.trim()) {
+    const query = filterQuery.value.toLowerCase()
+
+    result = result.filter((exposure: Exposure) => {
+      const description = exposure.entity.description?.toLowerCase() || ''
+      return description.includes(query)
+    })
   }
 
-  const query = filterQuery.value.toLowerCase()
-  return exposureStore.exposures.filter((exposure) => {
-    const description = exposure.entity.description?.toLowerCase() || ''
-    return description.includes(query)
-  })
+  // Sort based on selected option.
+  return sortEntities(result, sortBy.value)
 })
 
 watch(
@@ -60,6 +69,7 @@ watch(
 <template>
   <ListToolbar
     v-model:filter-query="filterQuery"
+    v-model:sort-by="sortBy"
     :is-loading="exposureStore.isLoading"
     content-section="Exposure Listing"
     @refresh="handleRefresh"
