@@ -95,10 +95,7 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
       :key="category.kind"
       class="box p-6"
     >
-      <div class="flex items-center justify-between mb-4 gap-4">
-        <h3 class="text-xl font-semibold">
-          {{ category.kindInfo?.kind.description || category.kind }}
-        </h3>
+      <div class="flex items-center justify-end mb-4 gap-4">
         <input
           v-if="category.kindInfo"
           type="search"
