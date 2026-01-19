@@ -32,9 +32,9 @@ const currentFieldLabel = computed(() => {
   return fieldsGroup?.options.find(o => o.value === currentSort.value.field)?.label || currentSort.value.field
 })
 
-const getDirectionArrowClass = (option: { value: string }) => {
-  const classes = ['w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform']
-  if (option.value === 'desc') {
+const getDirectionArrowClass = (direction: string) => {
+  const classes = ['w-4 h-4 transition-transform']
+  if (direction === 'desc') {
     classes.push('rotate-180')
   }
   return classes.join(' ')
@@ -77,7 +77,7 @@ onUnmounted(() => {
       @click="isOpen = !isOpen"
       content-section="List sorting dropdown"
     >
-      <ArrowUpIcon :class="`w-4 h-4 transition-transform ${currentSort.direction === 'desc' ? 'rotate-180' : ''}`" />
+      <ArrowUpIcon :class="getDirectionArrowClass(currentSort.direction)" />
       <span>{{ currentFieldLabel }}</span>
       <ChevronDownIcon class="w-4 h-4" />
     </ActionButton>
@@ -117,7 +117,7 @@ onUnmounted(() => {
               <span v-else class="w-4 flex-shrink-0" />
               <ArrowUpIcon
                 v-if="option.type === 'direction'"
-                :class="getDirectionArrowClass(option)"
+                :class="getDirectionArrowClass(option.value)"
               />
               <span>{{ option.label }}</span>
             </button>
