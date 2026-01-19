@@ -6,6 +6,10 @@ import ListContainer from '@/components/molecules/ListContainer.vue'
 import ListItem from '@/components/molecules/ListItem.vue'
 import ListToolbar from '@/components/molecules/ListToolbar.vue'
 import { useWorkspaceStore } from '@/stores/workspace'
+import type { SortOption } from '@/types/common'
+import type { Workspace } from '@/types/workspace'
+import { formatDate } from '@/utils/format'
+import { DEFAULT_SORT_OPTION, sortEntities } from '@/utils/sort'
 
 const emit = defineEmits<{
   updateFilteredCount: [filteredCount: number, totalCount: number, hasFilter: boolean]
@@ -15,6 +19,7 @@ const workspaceStore = useWorkspaceStore()
 const route = useRoute()
 const router = useRouter()
 const filterQuery = ref((route.query.filter as string) || '')
+const sortBy = ref<SortOption>(DEFAULT_SORT_OPTION)
 
 onMounted(async () => {
   await workspaceStore.fetchWorkspaces()
@@ -31,15 +36,20 @@ const handleRefresh = async () => {
 }
 
 const filteredWorkspaces = computed(() => {
-  if (!filterQuery.value.trim()) {
-    return workspaceStore.workspaces
+  let result = workspaceStore.workspaces
+
+  // Filter by search query.
+  if (filterQuery.value.trim()) {
+    const query = filterQuery.value.toLowerCase()
+
+    result = result.filter((workspace: Workspace) => {
+      const description = workspace.entity.description?.toLowerCase() || ''
+      return description.includes(query)
+    })
   }
 
-  const query = filterQuery.value.toLowerCase()
-  return workspaceStore.workspaces.filter((workspace) => {
-    const description = workspace.entity.description?.toLowerCase() || ''
-    return description.includes(query)
-  })
+  // Sort based on selected option.
+  return sortEntities(result, sortBy.value)
 })
 
 watch(
@@ -59,6 +69,7 @@ watch(
 <template>
   <ListToolbar
     v-model:filter-query="filterQuery"
+    v-model:sort-by="sortBy"
     :is-loading="workspaceStore.isLoading"
     content-section="Workspace Listing"
     @refresh="handleRefresh"
@@ -76,9 +87,15 @@ watch(
         v-for="workspace in filteredWorkspaces"
         :key="workspace.alias"
         :title="workspace.entity.description || workspace.alias"
-        :subtitle="workspace.entity.long_description || workspace.entity.url"
         :link="`/workspaces/${workspace.alias}`"
-      />
+      >
+        <p>
+          <small>
+            #{{ workspace.entity.id }} ·
+            Created on {{ formatDate(workspace.entity.created_ts) }}
+          </small>
+        </p>
+      </ListItem>
     </template>
   </ListContainer>
 </template>
