@@ -37,7 +37,8 @@ export const useSearchStore = defineStore('search', () => {
       const searchService = getSearchService()
       const response = await searchService.getIndexes()
 
-      categories.value = response.indexes.map((kind) => ({
+      // Filter to only 'cellml_keyword'.
+      categories.value = response.indexes.filter((kind) => kind.trim() === 'cellml_keyword').map((kind) => ({
         kind,
         kindInfo: null,
         loading: true,
