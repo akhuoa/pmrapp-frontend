@@ -135,7 +135,7 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
 
     <div v-if="selectedTerm" ref="resultsSection" class="box p-6">
       <h3 class="text-xl font-semibold mb-4">
-        Search Results for "{{ selectedTerm.term }}" in {{ selectedTerm.kind }}
+        Results for "{{ selectedTerm.term }}"
       </h3>
       <div v-if="termLoading">
         <div class="text-gray-500 dark:text-gray-400">Searching...</div>
