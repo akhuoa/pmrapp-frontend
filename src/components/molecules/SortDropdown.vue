@@ -92,7 +92,7 @@ onUnmounted(() => {
     >
       <div
         v-if="isOpen"
-        class="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50"
+        class="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-background border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50"
       >
         <div class="py-1">
           <div
