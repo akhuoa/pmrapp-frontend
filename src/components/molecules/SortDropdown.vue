@@ -40,6 +40,12 @@ const getDirectionArrowClass = (direction: string) => {
   return classes.join(' ')
 }
 
+const isOptionSelected = (option: { value: string; type: 'field' | 'direction' }) => {
+  return option.type === 'field'
+    ? props.modelValue.startsWith(option.value)
+    : props.modelValue.endsWith(option.value)
+}
+
 const handleSelectOption = (value: string, type: 'field' | 'direction') => {
   let newSortOption: SortOption
 
@@ -106,12 +112,12 @@ onUnmounted(() => {
               :key="option.value"
               class="w-full text-left px-3 py-2 text-sm cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
               :class="{
-                'bg-gray-100 dark:bg-gray-700': option.type === 'field' ? modelValue.startsWith(option.value) : modelValue.endsWith(option.value)
+                'bg-gray-100 dark:bg-gray-700': isOptionSelected(option)
               }"
               @click="handleSelectOption(option.value, option.type)"
             >
               <CheckmarkIcon
-                v-if="option.type === 'field' ? modelValue.startsWith(option.value) : modelValue.endsWith(option.value)"
+                v-if="isOptionSelected(option)"
                 class="w-4 h-4 text-primary flex-shrink-0"
               />
               <span v-else class="w-4 flex-shrink-0" />
