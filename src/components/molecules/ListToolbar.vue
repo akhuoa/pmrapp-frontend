@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import RefreshIcon from '@/components/icons/RefreshIcon.vue'
+import SortDropdown from '@/components/molecules/SortDropdown.vue'
 import type { SortOption } from '@/types/common'
-import { DEFAULT_SORT_OPTION, SORT_OPTIONS } from '@/utils/sort'
+import { DEFAULT_SORT_OPTION, SORT_OPTIONS_GROUPED } from '@/utils/sort'
 
 interface Props {
   filterQuery: string
@@ -28,11 +29,6 @@ const handleFilterInput = (event: Event) => {
   emit('update:filterQuery', target.value)
 }
 
-const handleSortChange = (event: Event) => {
-  const target = event.target as HTMLSelectElement
-  emit('update:sortBy', target.value as SortOption)
-}
-
 const handleRefresh = () => {
   emit('refresh')
 }
@@ -49,23 +45,11 @@ const handleRefresh = () => {
         @input="handleFilterInput"
       />
       <div class="flex items-center gap-2">
-        <label for="sort-select" class="text-sm font-medium text-gray-700 whitespace-nowrap">
-          Sort by:
-        </label>
-        <select
-          id="sort-select"
-          :value="sortBy"
-          class="input-field w-full sm:w-auto h-[42px]"
-          @change="handleSortChange"
-        >
-          <option
-            v-for="option in SORT_OPTIONS"
-            :key="option.value"
-            :value="option.value"
-          >
-            {{ option.label }}
-          </option>
-        </select>
+        <SortDropdown
+          :model-value="sortBy"
+          :options="SORT_OPTIONS_GROUPED"
+          @update:model-value="(value) => emit('update:sortBy', value)"
+        />
       </div>
     </div>
     <ActionButton
