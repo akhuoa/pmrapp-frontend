@@ -1,7 +1,7 @@
 import { authService } from './authService'
 import { exposureService } from './exposureService'
-import { workspaceService } from './workspaceService'
 import { searchService } from './searchService'
+import { workspaceService } from './workspaceService'
 
 // Service selection.
 export const getWorkspaceService = () => workspaceService

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
-import SearchIcon from '@/components/icons/SearchIcon.vue'
+import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import CloseButton from '@/components/atoms/CloseButton.vue'
+import SearchIcon from '@/components/icons/SearchIcon.vue'
 
 const props = defineProps<{
   modelValue: boolean

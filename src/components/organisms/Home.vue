@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import NavigationCard from '@/components/molecules/NavigationCard.vue'
 import CategoryBrowser from '@/components/molecules/CategoryBrowser.vue'
+import NavigationCard from '@/components/molecules/NavigationCard.vue'
 </script>
 
 <template>

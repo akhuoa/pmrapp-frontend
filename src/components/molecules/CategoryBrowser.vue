@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, nextTick, computed } from 'vue'
-import { useSearchStore } from '@/stores/search'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { getSearchService } from '@/services'
+import { useSearchStore } from '@/stores/search'
 import type { SearchResult } from '@/types/search'
 import { formatDate } from '@/utils/format'
 
