@@ -39,14 +39,17 @@ const handleBackdropClick = (e: MouseEvent) => {
 }
 
 // Focus input when modal opens.
-watch(() => props.modelValue, (newVal) => {
-  if (newVal) {
-    // Wait for next tick to ensure DOM is updated.
-    nextTick(() => {
-      searchInput.value?.focus()
-    })
-  }
-})
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    if (newVal) {
+      // Wait for next tick to ensure DOM is updated.
+      nextTick(() => {
+        searchInput.value?.focus()
+      })
+    }
+  },
+)
 
 onMounted(() => {
   document.addEventListener('keydown', handleKeydown)

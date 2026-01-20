@@ -38,12 +38,14 @@ export const useSearchStore = defineStore('search', () => {
       const response = await searchService.getIndexes()
 
       // Filter to only 'cellml_keyword'.
-      categories.value = response.indexes.filter((kind) => kind.trim() === 'cellml_keyword').map((kind) => ({
-        kind,
-        kindInfo: null,
-        loading: true,
-        error: null,
-      }))
+      categories.value = response.indexes
+        .filter((kind) => kind.trim() === 'cellml_keyword')
+        .map((kind) => ({
+          kind,
+          kindInfo: null,
+          loading: true,
+          error: null,
+        }))
 
       // Fetch data for each category.
       await Promise.all(
@@ -55,7 +57,7 @@ export const useSearchStore = defineStore('search', () => {
           } finally {
             category.loading = false
           }
-        })
+        }),
       )
 
       lastFetchTime.value = Date.now()

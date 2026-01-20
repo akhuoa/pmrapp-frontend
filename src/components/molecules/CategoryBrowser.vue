@@ -14,19 +14,19 @@ const categoryFilters = ref<Map<string, string>>(new Map())
 const resultsSection = ref<HTMLElement | null>(null)
 
 const termButtonClass = [
-  "px-3",
-  "py-1.5",
-  "bg-gray-100",
-  "cursor-pointer",
-  "dark:bg-gray-800",
-  "hover:bg-gray-200",
-  "dark:hover:bg-gray-700",
-  "rounded-md",
-  "text-sm",
-  "transition-colors",
-  "relative",
-  "disabled:opacity-50",
-  "disabled:cursor-not-allowed",
+  'px-3',
+  'py-1.5',
+  'bg-gray-100',
+  'cursor-pointer',
+  'dark:bg-gray-800',
+  'hover:bg-gray-200',
+  'dark:hover:bg-gray-700',
+  'rounded-md',
+  'text-sm',
+  'transition-colors',
+  'relative',
+  'disabled:opacity-50',
+  'disabled:cursor-not-allowed',
 ].join(' ')
 
 const termLoadingClass = [
@@ -41,7 +41,7 @@ const termLoadingClass = [
   'bg-white/75',
   'dark:bg-gray-900/75',
   'rounded-md',
-  'text-sm'
+  'text-sm',
 ].join(' ')
 
 onMounted(async () => {
@@ -75,8 +75,8 @@ const handleTermClick = async (kind: string, term: string) => {
 const getFilteredTerms = (terms: string[], kind: string): string[] => {
   const filter = categoryFilters.value.get(kind)?.toLowerCase() || ''
   return terms
-    .filter(t => t.trim())
-    .filter(t => filter === '' || t.toLowerCase().includes(filter))
+    .filter((t) => t.trim())
+    .filter((t) => filter === '' || t.toLowerCase().includes(filter))
 }
 
 const getExposureIdFromResourcePath = (resourcePath: string): string => {
