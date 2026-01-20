@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, computed } from 'vue'
 import { useSearchStore } from '@/stores/search'
 import { getSearchService } from '@/services'
+import type { SearchResult } from '@/types/search'
 
 const searchStore = useSearchStore()
 const searchService = getSearchService()
-const searchResults = ref<string[]>([])
+const searchResults = ref<SearchResult[]>([])
 const selectedTerm = ref<{ kind: string; term: string } | null>(null)
 const termLoading = ref(false)
 const categoryFilters = ref<Map<string, string>>(new Map())
@@ -140,13 +141,28 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
       <div v-if="termLoading">
         <div class="text-gray-500 dark:text-gray-400">Searching...</div>
       </div>
-      <div v-else-if="searchResults.length > 0" class="space-y-2">
+      <div v-else-if="searchResults.length > 0">
         <div
-          v-for="(path, index) in searchResults"
+          v-for="(item, index) in searchResults"
           :key="index"
-          class="px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-md"
+          class="flex flex-col gap-2 py-6"
+          :class="{ 'border-t border-gray-200 dark:border-gray-700': index > 0 }"
         >
-          {{ path }}
+          <RouterLink
+            :to="item.data.aliased_uri[0] || ''"
+            class="text-link font-semibold"
+          >
+            {{ item.data.description[0] || item.resource_path }}
+          </RouterLink>
+          <div v-if="item.data.cellml_keyword?.length" class="flex flex-wrap gap-2 mt-2">
+            <button
+              v-for="keyword in item.data.cellml_keyword"
+              :class="termButtonClass"
+              @click="handleTermClick('cellml_keyword', keyword)"
+            >
+              {{ keyword }}
+            </button>
+          </div>
         </div>
       </div>
       <div v-else class="text-gray-500 dark:text-gray-400">

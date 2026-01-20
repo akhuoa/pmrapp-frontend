@@ -12,8 +12,23 @@ export interface IndexKindResponse {
   terms: string[]
 }
 
+export interface SearchResult {
+  data: {
+    aliased_uri: string[]
+    cellml_keyword: string[]
+    commit_authored_ts: string[]
+    created_ts: string[]
+    description: string[]
+    exposure_alias: string[]
+  }
+  resource_path: string
+}
+
 export interface IndexSearchResult {
-  // Define the structure based on what the API returns
-  // This can be updated when you know the actual response structure
-  [key: string]: unknown
+  kind: {
+    description: string
+    id: number
+  }
+  resource_paths: SearchResult[]
+  term: string
 }
