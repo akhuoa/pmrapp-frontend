@@ -81,7 +81,7 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
 
 const getExposureIdFromResourcePath = (resourcePath: string): string => {
   const match = resourcePath.match(/\/exposure\/(\d+)\//)
-  if (match && match[1]) {
+  if (match?.[1]) {
     return `#${match[1]}`
   }
   return ''
