@@ -3,6 +3,7 @@ import { ref, onMounted, nextTick, computed } from 'vue'
 import { useSearchStore } from '@/stores/search'
 import { getSearchService } from '@/services'
 import type { SearchResult } from '@/types/search'
+import { formatDate } from '@/utils/format'
 
 const searchStore = useSearchStore()
 const searchService = getSearchService()
@@ -77,6 +78,14 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
     .filter(t => t.trim())
     .filter(t => filter === '' || t.toLowerCase().includes(filter))
 }
+
+const getExposureIdFromResourcePath = (resourcePath: string): string => {
+  const match = resourcePath.match(/\/exposure\/(\d+)\//)
+  if (match && match[1]) {
+    return `#${match[1]}`
+  }
+  return ''
+}
 </script>
 
 <template>
@@ -145,7 +154,7 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
         <div
           v-for="(item, index) in searchResults"
           :key="index"
-          class="flex flex-col gap-2 py-6"
+          class="py-6"
           :class="{ 'border-t border-gray-200 dark:border-gray-700': index > 0 }"
         >
           <RouterLink
@@ -154,6 +163,15 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
           >
             {{ item.data.description[0] || item.resource_path }}
           </RouterLink>
+          <p>
+            <small>
+              {{ getExposureIdFromResourcePath(item.resource_path) }}
+              <span v-if="item.data.created_ts?.[0]">
+                ·
+                Created on {{ formatDate(Number(item.data.created_ts[0])) }}
+              </span>
+            </small>
+          </p>
           <div v-if="item.data.cellml_keyword?.length" class="flex flex-wrap gap-2 mt-2">
             <button
               v-for="keyword in item.data.cellml_keyword"
