@@ -41,65 +41,65 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
 </script>
 
 <template>
-  <div class="box box-small">
-  <h2 class="text-3xl font-bold mb-6" v-if="!inSidebar">
-    Browse by keyword
-  </h2>
+  <div :class="{ 'box box-small': inSidebar }">
+    <h2 class="text-3xl font-bold mb-6" v-if="!inSidebar">
+      Browse by keyword
+    </h2>
 
-  <div v-if="searchStore.isLoading" class="text-center py-8">
-    <p class="text-gray-500 dark:text-gray-400">Loading categories...</p>
-  </div>
+    <div v-if="searchStore.isLoading" class="text-center py-8">
+      <p class="text-gray-500 dark:text-gray-400">Loading categories...</p>
+    </div>
 
-  <div v-else-if="searchStore.error" class="text-center py-8">
-    <p class="text-red-600 dark:text-red-400">{{ searchStore.error }}</p>
-  </div>
+    <div v-else-if="searchStore.error" class="text-center py-8">
+      <p class="text-red-600 dark:text-red-400">{{ searchStore.error }}</p>
+    </div>
 
-  <div v-else class="space-y-4">
-    <h3 v-if="inSidebar" class="font-semibold">Keywords</h3>
-    <div
-      v-for="category in searchStore.categories"
-      :key="category.kind"
-      :class="{ 'box p-6': !inSidebar }"
-    >
+    <div v-else class="space-y-4">
+      <h3 v-if="inSidebar" class="font-semibold">Keywords</h3>
       <div
-        class="flex items-center mb-4 gap-4"
-        :class="{ 'justify-end': !inSidebar }"
+        v-for="category in searchStore.categories"
+        :key="category.kind"
+        :class="{ 'box p-6': !inSidebar }"
       >
-        <input
-          v-if="category.kindInfo"
-          type="search"
-          placeholder="Filter keywords..."
-          class="px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-md text-sm bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-          :class="{ 'w-full' : inSidebar }"
-          :value="categoryFilters.get(category.kind) || ''"
-          @input="categoryFilters.set(category.kind, ($event.target as HTMLInputElement).value)"
-        />
-      </div>
+        <div
+          class="flex items-center mb-4 gap-4"
+          :class="{ 'justify-end': !inSidebar }"
+        >
+          <input
+            v-if="category.kindInfo"
+            type="search"
+            placeholder="Filter keywords..."
+            class="px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-md text-sm bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+            :class="{ 'w-full' : inSidebar }"
+            :value="categoryFilters.get(category.kind) || ''"
+            @input="categoryFilters.set(category.kind, ($event.target as HTMLInputElement).value)"
+          />
+        </div>
 
-      <div v-if="category.loading" class="text-gray-500 dark:text-gray-400">
-        Loading...
-      </div>
+        <div v-if="category.loading" class="text-gray-500 dark:text-gray-400">
+          Loading...
+        </div>
 
-      <div v-else-if="category.error" class="text-red-600 dark:text-red-400">
-        {{ category.error }}
-      </div>
+        <div v-else-if="category.error" class="text-red-600 dark:text-red-400">
+          {{ category.error }}
+        </div>
 
-      <div
-        v-else-if="category.kindInfo"
-        class="flex flex-wrap gap-2 overflow-y-auto"
-        :class="inSidebar ? 'max-h-[300px]' : 'max-h-40'"
-      >
-        <TermButton
-          v-for="term in getFilteredTerms(category.kindInfo.terms, category.kind)"
-          :key="term"
-          :term="term"
-          :disabled="termLoading"
-          :is-loading="termLoading && selectedTerm?.term === term && selectedTerm?.kind === category.kind"
-          @click="handleTermClick(category.kind, term)"
-        />
+        <div
+          v-else-if="category.kindInfo"
+          class="flex flex-wrap gap-2 overflow-y-auto"
+          :class="inSidebar ? 'max-h-[300px]' : 'max-h-40'"
+        >
+          <TermButton
+            v-for="term in getFilteredTerms(category.kindInfo.terms, category.kind)"
+            :key="term"
+            :term="term"
+            :disabled="termLoading"
+            :is-loading="termLoading && selectedTerm?.term === term && selectedTerm?.kind === category.kind"
+            @click="handleTermClick(category.kind, term)"
+          />
+        </div>
       </div>
     </div>
-  </div>
   </div>
 </template>
 
