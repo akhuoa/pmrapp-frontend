@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import CategoryBrowser from '@/components/molecules/CategoryBrowser.vue'
+import KeywordBrowser from '@/components/molecules/KeywordBrowser.vue'
 import SearchResults from '@/components/molecules/SearchResults.vue'
 import { useSearchStore } from '@/stores/search'
 import type { SearchResult } from '@/types/search'
@@ -62,7 +62,7 @@ const loadResults = async () => {
     <!-- Left Sidebar -->
     <aside class="w-80 flex-shrink-0">
       <div class="sticky top-[97px]">
-        <CategoryBrowser :inSidebar="true" />
+        <KeywordBrowser :inSidebar="true" />
       </div>
     </aside>
 

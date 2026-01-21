@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import CategoryBrowser from '@/components/molecules/CategoryBrowser.vue'
+import KeywordBrowser from '@/components/molecules/KeywordBrowser.vue'
 import NavigationCard from '@/components/molecules/NavigationCard.vue'
 </script>
 
@@ -30,7 +30,7 @@ import NavigationCard from '@/components/molecules/NavigationCard.vue'
   </section>
 
   <section class="max-w-5xl mx-auto mb-12">
-    <CategoryBrowser :inSidebar="false" />
+    <KeywordBrowser :inSidebar="false" />
   </section>
 </template>
 
