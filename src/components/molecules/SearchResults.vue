@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import ListContainer from '@/components/molecules/ListContainer.vue'
 import ListItem from '@/components/molecules/ListItem.vue'
+import TermButton from '@/components/atoms/TermButton.vue'
 import type { SearchResult } from '@/types/search'
 import { formatDate, formatNumber } from '@/utils/format'
 
@@ -16,19 +17,6 @@ interface Props {
 const props = defineProps<Props>()
 
 const router = useRouter()
-
-const termButtonClass = [
-  'px-3',
-  'py-1.5',
-  'bg-gray-100',
-  'cursor-pointer',
-  'dark:bg-gray-800',
-  'hover:bg-gray-200',
-  'dark:hover:bg-gray-700',
-  'rounded-md',
-  'text-sm',
-  'transition-colors',
-].join(' ')
 
 const handleKeywordClick = (kind: string, keyword: string) => {
   router.push({ path: '/search', query: { kind, term: keyword } })
@@ -87,14 +75,12 @@ const resultsText = computed(() => {
             </small>
           </p>
           <div v-if="item.data.cellml_keyword?.length" class="flex flex-wrap gap-2 mt-2">
-            <button
+            <TermButton
               v-for="keyword in item.data.cellml_keyword"
               :key="keyword"
-              :class="termButtonClass"
+              :term="keyword"
               @click="handleKeywordClick('cellml_keyword', keyword)"
-            >
-              {{ keyword }}
-            </button>
+            />
           </div>
         </ListItem>
       </template>

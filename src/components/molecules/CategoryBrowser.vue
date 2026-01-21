@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import TermButton from '@/components/atoms/TermButton.vue'
 import { useSearchStore } from '@/stores/search'
 
 interface Props {
@@ -14,37 +15,6 @@ const router = useRouter()
 const categoryFilters = ref<Map<string, string>>(new Map())
 const termLoading = ref(false)
 const selectedTerm = ref<{ kind: string; term: string } | null>(null)
-
-const termButtonClass = [
-  'px-3',
-  'py-1.5',
-  'bg-gray-100',
-  'cursor-pointer',
-  'dark:bg-gray-800',
-  'hover:bg-gray-200',
-  'dark:hover:bg-gray-700',
-  'rounded-md',
-  'text-sm',
-  'transition-colors',
-  'relative',
-  'disabled:opacity-50',
-  'disabled:cursor-not-allowed',
-].join(' ')
-
-const termLoadingClass = [
-  'absolute',
-  'top-0',
-  'left-0',
-  'w-full',
-  'h-full',
-  'flex',
-  'items-center',
-  'justify-center',
-  'bg-white/75',
-  'dark:bg-gray-900/75',
-  'rounded-md',
-  'text-sm',
-].join(' ')
 
 onMounted(async () => {
   await searchStore.fetchCategories()
@@ -119,21 +89,14 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
         class="flex flex-wrap gap-2 overflow-y-auto"
         :class="inSidebar ? 'max-h-[300px]' : 'max-h-40'"
       >
-        <button
+        <TermButton
           v-for="term in getFilteredTerms(category.kindInfo.terms, category.kind)"
           :key="term"
-          :class="termButtonClass"
+          :term="term"
           :disabled="termLoading"
+          :is-loading="termLoading && selectedTerm?.term === term && selectedTerm?.kind === category.kind"
           @click="handleTermClick(category.kind, term)"
-        >
-          {{ term }}
-          <span
-            v-if="termLoading && selectedTerm?.term === term && selectedTerm?.kind === category.kind"
-            :class="termLoadingClass"
-          >
-            <span class="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-          </span>
-        </button>
+        />
       </div>
     </div>
   </div>
