@@ -71,6 +71,7 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
 </script>
 
 <template>
+  <div class="box box-small">
   <h2 class="text-3xl font-bold mb-6" v-if="!inSidebar">
     Browse by keyword
   </h2>
@@ -83,7 +84,8 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
     <p class="text-red-600 dark:text-red-400">{{ searchStore.error }}</p>
   </div>
 
-  <div v-else class="space-y-6">
+  <div v-else class="space-y-4">
+    <h3 v-if="inSidebar" class="font-semibold">Keywords</h3>
     <div
       v-for="category in searchStore.categories"
       :key="category.kind"
@@ -134,6 +136,7 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
         </button>
       </div>
     </div>
+  </div>
   </div>
 </template>
 
