@@ -44,6 +44,7 @@ const loadResults = async () => {
   // Otherwise fetch new results.
   isLoading.value = true
   error.value = null
+  searchResults.value = []
 
   try {
     searchResults.value = await searchStore.searchIndexTerm(kind.value, term.value)
