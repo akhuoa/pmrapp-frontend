@@ -3,7 +3,8 @@ import { useRouter } from 'vue-router'
 import ListContainer from '@/components/molecules/ListContainer.vue'
 import ListItem from '@/components/molecules/ListItem.vue'
 import type { SearchResult } from '@/types/search'
-import { formatDate } from '@/utils/format'
+import { formatDate, formatNumber } from '@/utils/format'
+import { computed } from 'vue'
 
 interface Props {
   results: SearchResult[]
@@ -12,7 +13,7 @@ interface Props {
   term: string
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
 
 const router = useRouter()
 
@@ -40,13 +41,27 @@ const getExposureIdFromResourcePath = (resourcePath: string): string => {
   }
   return ''
 }
+
+const resultsText = computed(() => {
+  const resultsCount = props.results.length
+
+  if (resultsCount === 0) {
+    return `No results for "${props.term}"`
+  }
+
+  if (resultsCount === 1) {
+    return `1 result for "${props.term}"`
+  }
+
+  return `${formatNumber(resultsCount)} results for "${props.term}"`
+})
 </script>
 
 <template>
   <div class="">
-    <h2 class="text-2xl font-bold mb-4">
-      Results for "{{ term }}"
-    </h2>
+    <p class="text-xl font-bold mb-4" v-if="!isLoading">
+      {{ resultsText }}
+    </p>
 
     <ListContainer
       :items="results"
