@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue'
-import { getSearchService } from '@/services'
+import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useSearchStore } from '@/stores/search'
-import type { SearchResult } from '@/types/search'
-import { formatDate } from '@/utils/format'
+
+interface Props {
+  inSidebar: boolean
+}
+
+defineProps<Props>()
 
 const searchStore = useSearchStore()
-const searchService = getSearchService()
-const searchResults = ref<SearchResult[]>([])
-const selectedTerm = ref<{ kind: string; term: string } | null>(null)
-const termLoading = ref(false)
+const router = useRouter()
 const categoryFilters = ref<Map<string, string>>(new Map())
-const resultsSection = ref<HTMLElement | null>(null)
+const termLoading = ref(false)
+const selectedTerm = ref<{ kind: string; term: string } | null>(null)
 
 const termButtonClass = [
   'px-3',
@@ -49,24 +51,12 @@ onMounted(async () => {
 })
 
 const handleTermClick = async (kind: string, term: string) => {
+  termLoading.value = true
+  selectedTerm.value = { kind, term }
+
   try {
-    termLoading.value = true
-    selectedTerm.value = { kind, term }
-    searchResults.value = []
-
-    const result = await searchService.searchIndexTerm(kind, term)
-
-    if (result?.resource_paths && Array.isArray(result.resource_paths)) {
-      searchResults.value = result.resource_paths
-    }
-
-    // Scroll to results section after updating.
-    await nextTick()
-    if (resultsSection.value) {
-      resultsSection.value.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
-  } catch (err) {
-    console.error('Failed to search term:', err)
+    // Navigate to search results page.
+    await router.push(`/search/${kind}/${encodeURIComponent(term)}`)
   } finally {
     termLoading.value = false
   }
@@ -78,18 +68,12 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
     .filter((t) => t.trim())
     .filter((t) => filter === '' || t.toLowerCase().includes(filter))
 }
-
-const getExposureIdFromResourcePath = (resourcePath: string): string => {
-  const match = resourcePath.match(/\/exposure\/(\d+)\//)
-  if (match?.[1]) {
-    return `#${match[1]}`
-  }
-  return ''
-}
 </script>
 
 <template>
-  <h2 class="text-3xl font-bold mb-6">Browse by keyword</h2>
+  <h2 class="text-3xl font-bold mb-6" v-if="!inSidebar">
+    Browse by keyword
+  </h2>
 
   <div v-if="searchStore.isLoading" class="text-center py-8">
     <p class="text-gray-500 dark:text-gray-400">Loading categories...</p>
@@ -103,14 +87,18 @@ const getExposureIdFromResourcePath = (resourcePath: string): string => {
     <div
       v-for="category in searchStore.categories"
       :key="category.kind"
-      class="box p-6"
+      :class="{ 'box p-6': !inSidebar }"
     >
-      <div class="flex items-center justify-end mb-4 gap-4">
+      <div
+        class="flex items-center mb-4 gap-4"
+        :class="{ 'justify-end': !inSidebar }"
+      >
         <input
           v-if="category.kindInfo"
           type="search"
           placeholder="Filter keywords..."
           class="px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-md text-sm bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+          :class="{ 'w-full' : inSidebar }"
           :value="categoryFilters.get(category.kind) || ''"
           @input="categoryFilters.set(category.kind, ($event.target as HTMLInputElement).value)"
         />
@@ -124,7 +112,11 @@ const getExposureIdFromResourcePath = (resourcePath: string): string => {
         {{ category.error }}
       </div>
 
-      <div v-else-if="category.kindInfo" class="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+      <div
+        v-else-if="category.kindInfo"
+        class="flex flex-wrap gap-2 overflow-y-auto"
+        :class="inSidebar ? 'max-h-[300px]' : 'max-h-40'"
+      >
         <button
           v-for="term in getFilteredTerms(category.kindInfo.terms, category.kind)"
           :key="term"
@@ -140,51 +132,6 @@ const getExposureIdFromResourcePath = (resourcePath: string): string => {
             <span class="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
           </span>
         </button>
-      </div>
-    </div>
-
-    <div v-if="selectedTerm" ref="resultsSection" class="box p-6">
-      <h3 class="text-xl font-semibold mb-4">
-        Results for "{{ selectedTerm.term }}"
-      </h3>
-      <div v-if="termLoading">
-        <div class="text-gray-500 dark:text-gray-400">Searching...</div>
-      </div>
-      <div v-else-if="searchResults.length > 0">
-        <div
-          v-for="(item, index) in searchResults"
-          :key="index"
-          class="py-6"
-          :class="{ 'border-t border-gray-200 dark:border-gray-700': index > 0 }"
-        >
-          <RouterLink
-            :to="item.data.aliased_uri[0] || ''"
-            class="text-link font-semibold"
-          >
-            {{ item.data.description[0] || item.resource_path }}
-          </RouterLink>
-          <p>
-            <small>
-              {{ getExposureIdFromResourcePath(item.resource_path) }}
-              <span v-if="item.data.created_ts?.[0]">
-                ·
-                Created on {{ formatDate(Number(item.data.created_ts[0])) }}
-              </span>
-            </small>
-          </p>
-          <div v-if="item.data.cellml_keyword?.length" class="flex flex-wrap gap-2 mt-2">
-            <button
-              v-for="keyword in item.data.cellml_keyword"
-              :class="termButtonClass"
-              @click="handleTermClick('cellml_keyword', keyword)"
-            >
-              {{ keyword }}
-            </button>
-          </div>
-        </div>
-      </div>
-      <div v-else class="text-gray-500 dark:text-gray-400">
-        No results found.
       </div>
     </div>
   </div>

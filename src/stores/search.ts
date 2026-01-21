@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { getSearchService } from '@/services'
-import type { IndexKindResponse } from '@/types/search'
+import type { IndexKindResponse, SearchResult } from '@/types/search'
 
 const CACHE_TTL = 30 * 60 * 1000 // 30 minutes in milliseconds
 
@@ -12,11 +12,19 @@ export interface CategoryData {
   error: string | null
 }
 
+export interface SearchResultCache {
+  kind: string
+  term: string
+  results: SearchResult[]
+  timestamp: number
+}
+
 export const useSearchStore = defineStore('search', () => {
   const categories = ref<CategoryData[]>([])
   const lastFetchTime = ref<number | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
+  const searchResultsCache = ref<Map<string, SearchResultCache>>(new Map())
 
   const isCacheValid = (): boolean => {
     if (!lastFetchTime.value) return false
@@ -74,11 +82,54 @@ export const useSearchStore = defineStore('search', () => {
     await fetchCategories(true)
   }
 
+  const searchIndexTerm = async (kind: string, term: string): Promise<SearchResult[]> => {
+    const cacheKey = `${kind}:${term}`
+    const cached = searchResultsCache.value.get(cacheKey)
+
+    // Return cached results if valid.
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      return cached.results
+    }
+
+    try {
+      const searchService = getSearchService()
+      const response = await searchService.searchIndexTerm(kind, term)
+      const results = response?.resource_paths || []
+
+      // Cache the results.
+      searchResultsCache.value.set(cacheKey, {
+        kind,
+        term,
+        results,
+        timestamp: Date.now(),
+      })
+
+      return results
+    } catch (err) {
+      console.error('Search error:', err)
+      throw err
+    }
+  }
+
+  const getCachedResults = (kind: string, term: string): SearchResult[] | null => {
+    const cacheKey = `${kind}:${term}`
+    const cached = searchResultsCache.value.get(cacheKey)
+
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      return cached.results
+    }
+
+    return null
+  }
+
   return {
     categories,
     isLoading,
     error,
+    searchResultsCache,
     fetchCategories,
     refreshCategories,
+    searchIndexTerm,
+    getCachedResults,
   }
 })

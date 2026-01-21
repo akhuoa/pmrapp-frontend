@@ -30,7 +30,7 @@ import NavigationCard from '@/components/molecules/NavigationCard.vue'
   </section>
 
   <section class="max-w-5xl mx-auto mb-12">
-    <CategoryBrowser />
+    <CategoryBrowser :inSidebar="false" />
   </section>
 </template>
 

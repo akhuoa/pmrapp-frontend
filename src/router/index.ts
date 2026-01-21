@@ -5,6 +5,7 @@ import ExposureView from '@/views/ExposureView.vue'
 import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
+import SearchView from '@/views/SearchView.vue'
 import WorkspaceDetailView from '@/views/WorkspaceDetailView.vue'
 import WorkspaceView from '@/views/WorkspaceView.vue'
 
@@ -57,6 +58,12 @@ const router = createRouter({
       component: ExposureFileDetailView,
       alias: ['/exposure/:alias/:file'],
       meta: { title: `Exposure File – ${title}` },
+    },
+    {
+      path: '/search/:kind/:term',
+      name: 'search-results',
+      component: SearchView,
+      meta: { title: `Search Results – ${title}` },
     },
     {
       path: '/login',
