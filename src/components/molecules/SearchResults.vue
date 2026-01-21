@@ -58,7 +58,7 @@ const resultsText = computed(() => {
 </script>
 
 <template>
-  <div class="">
+  <div>
     <p class="text-xl font-bold mb-4" v-if="!isLoading">
       {{ resultsText }}
     </p>
