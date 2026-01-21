@@ -30,7 +30,7 @@ const termButtonClass = [
 ].join(' ')
 
 const handleKeywordClick = (kind: string, keyword: string) => {
-  router.push(`/search/${kind}/${encodeURIComponent(keyword)}`)
+  router.push({ path: '/search', query: { kind, term: keyword } })
 }
 
 const getExposureIdFromResourcePath = (resourcePath: string): string => {

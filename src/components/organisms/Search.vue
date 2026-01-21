@@ -11,8 +11,8 @@ const route = useRoute()
 const router = useRouter()
 const searchStore = useSearchStore()
 
-const kind = computed(() => route.params.kind as string)
-const term = computed(() => route.params.term as string)
+const kind = computed(() => (route.query.kind as string) || '')
+const term = computed(() => (route.query.term as string) || '')
 const searchResults = ref<SearchResult[]>([])
 const isLoading = ref(false)
 const error = ref<string | null>(null)
@@ -30,7 +30,7 @@ watch([kind, term], async () => {
 
 const loadResults = async () => {
   if (!kind.value || !term.value) {
-    router.push('/')
+    router.push('/search')
     return
   }
 

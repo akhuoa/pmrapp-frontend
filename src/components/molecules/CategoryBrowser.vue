@@ -55,8 +55,8 @@ const handleTermClick = async (kind: string, term: string) => {
   selectedTerm.value = { kind, term }
 
   try {
-    // Navigate to search results page.
-    await router.push(`/search/${kind}/${encodeURIComponent(term)}`)
+    // Navigate to search results page using query parameters for flexibility.
+    await router.push({ path: '/search', query: { kind, term } })
   } finally {
     termLoading.value = false
   }

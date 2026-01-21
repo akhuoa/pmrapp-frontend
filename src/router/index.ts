@@ -60,7 +60,7 @@ const router = createRouter({
       meta: { title: `Exposure File – ${title}` },
     },
     {
-      path: '/search/:kind/:term',
+      path: '/search',
       name: 'search-results',
       component: SearchView,
       meta: { title: `Search Results – ${title}` },
