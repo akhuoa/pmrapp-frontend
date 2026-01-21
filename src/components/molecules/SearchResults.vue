@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import ListContainer from '@/components/molecules/ListContainer.vue'
 import ListItem from '@/components/molecules/ListItem.vue'
 import type { SearchResult } from '@/types/search'
 import { formatDate, formatNumber } from '@/utils/format'
-import { computed } from 'vue'
 
 interface Props {
   results: SearchResult[]
