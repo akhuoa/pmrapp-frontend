@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import { getSearchService } from '@/services'
 import { useSearchStore } from '@/stores/search'
 import type { SearchResult } from '@/types/search'
