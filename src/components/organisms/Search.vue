@@ -2,13 +2,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import ActionButton from '@/components/atoms/ActionButton.vue'
+import CloseButton from '@/components/atoms/CloseButton.vue'
+import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
 import KeywordBrowser from '@/components/molecules/KeywordBrowser.vue'
 import SearchResults from '@/components/molecules/SearchResults.vue'
 import { useSearchStore } from '@/stores/search'
 import type { SearchResult } from '@/types/search'
-import ActionButton from '@/components/atoms/ActionButton.vue'
-import CloseButton from '@/components/atoms/CloseButton.vue'
-import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
 
 const route = useRoute()
 const router = useRouter()
