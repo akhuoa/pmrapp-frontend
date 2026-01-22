@@ -2,8 +2,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import SearchButton from '@/components/atoms/SearchButton.vue'
-import SearchModal from '@/components/molecules/SearchModal.vue'
 import UserDropdown from '@/components/molecules/UserDropdown.vue'
 
 const route = useRoute()
@@ -26,9 +24,6 @@ const isActive = (path: string) => computed(() => route.path.startsWith(path))
 
       <nav>
         <ul class="flex items-center gap-4">
-          <li>
-            <SearchButton @click="isSearchOpen = true" />
-          </li>
           <li v-for="link in navLinks" :key="link.path">
             <RouterLink
               :to="link.path"
@@ -45,8 +40,6 @@ const isActive = (path: string) => computed(() => route.path.startsWith(path))
         </ul>
       </nav>
     </div>
-
-    <SearchModal v-model="isSearchOpen" />
   </header>
 </template>
 

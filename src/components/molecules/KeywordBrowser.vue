@@ -63,7 +63,7 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
       >
         <div
           class="flex items-center mb-4 gap-4"
-          :class="{ 'justify-end': !inSidebar }"
+          :class="{ 'justify-end mb-6': !inSidebar }"
         >
           <input
             v-if="category.kindInfo"
@@ -86,7 +86,7 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
 
         <div
           v-else-if="category.kindInfo"
-          class="flex flex-wrap gap-2 overflow-y-auto"
+          class="flex flex-wrap gap-2 overflow-y-auto border border-gray-200 dark:border-gray-700 p-2 rounded-md thin-scrollbar"
           :class="inSidebar ? 'max-h-[300px]' : 'max-h-40'"
         >
           <TermButton
