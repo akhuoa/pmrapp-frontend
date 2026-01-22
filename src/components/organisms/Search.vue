@@ -34,9 +34,8 @@ watch([kind, term], async () => {
 
 const loadResults = async () => {
   if (!kind.value || !term.value) {
-    if (route.path !== '/search') {
-      router.replace('/search')
-    }
+    // If no search parameters are provided, do not redirect.
+    // Simply return without loading results to avoid confusing UX.
     return
   }
 
