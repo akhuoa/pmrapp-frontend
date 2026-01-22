@@ -63,8 +63,8 @@ const resultsText = computed(() => {
     >
       <template #item>
         <ListItem
-          v-for="(item, index) in results"
-          :key="index"
+          v-for="item in results"
+          :key="item.resource_path"
           :title="item.data.description?.[0] || item.resource_path"
           :link="item.data.aliased_uri?.[0] || ''"
         >
