@@ -34,7 +34,9 @@ watch([kind, term], async () => {
 
 const loadResults = async () => {
   if (!kind.value || !term.value) {
-    router.push('/search')
+    if (route.path !== '/search') {
+      router.replace('/search')
+    }
     return
   }
 
