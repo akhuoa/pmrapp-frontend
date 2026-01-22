@@ -12,8 +12,8 @@ interface Props<T> {
   items: T[]
   isLoading: boolean
   error: string | null
-  contentSection: string
   errorTitle: string
+  contentSection: string
   emptyMessage: string
   routeBase: string
   getTitle: (item: T) => string
@@ -76,24 +76,24 @@ watch(
   <ListToolbar
     v-model:filter-query="filterQuery"
     v-model:sort-by="sortBy"
-    :is-loading="isLoading"
-    :content-section="contentSection"
+    :is-loading="props.isLoading"
+    :content-section="props.contentSection"
     @refresh="handleRefresh"
   />
 
   <ListContent
     :items="filteredItems"
-    :error="error"
-    :is-loading="isLoading"
-    :error-title="errorTitle"
-    :empty-message="emptyMessage"
+    :error="props.error"
+    :is-loading="props.isLoading"
+    :error-title="props.errorTitle"
+    :empty-message="props.emptyMessage"
   >
     <template #item>
       <ListItem
         v-for="item in filteredItems"
         :key="item.alias"
-        :title="getTitle(item)"
-        :link="`${routeBase}/${item.alias}`"
+        :title="props.getTitle(item)"
+        :link="`${props.routeBase}/${item.alias}`"
       >
         <p>
           <small>
