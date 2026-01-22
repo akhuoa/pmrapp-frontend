@@ -25,18 +25,23 @@ const handleTermClick = async (kind: string, term: string) => {
   selectedTerm.value = { kind, term }
 
   try {
-    // Navigate to search results page using query parameters for flexibility.
-    await router.push({ path: '/search', query: { kind, term } })
+    const currentRoute = router.currentRoute.value
+    // If already on search page, replace query params to avoid duplicate navigation.
+    // Otherwise, push to search page.
+    if (currentRoute.path === '/search') {
+      await router.replace({ path: '/search', query: { kind, term } })
+    } else {
+      await router.push({ path: '/search', query: { kind, term } })
+    }
   } finally {
     termLoading.value = false
   }
 }
 
-const getFilteredTerms = (terms: string[], kind: string): string[] => {
+const getFilteredTerms = (terms: string[] | null | undefined, kind: string): string[] => {
   const filter = categoryFilters.value.get(kind)?.toLowerCase() || ''
-  return terms
-    .filter((t) => t.trim())
-    .filter((t) => filter === '' || t.toLowerCase().includes(filter))
+  const safeTerms = terms ?? []
+  return safeTerms.filter((t) => t.trim() && (filter === '' || t.toLowerCase().includes(filter)))
 }
 </script>
 
@@ -94,7 +99,7 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
             v-for="term in getFilteredTerms(category.kindInfo.terms, category.kind)"
             :key="term"
             :term="term"
-            :disabled="termLoading"
+            :disabled="termLoading || (selectedTerm?.term === term && selectedTerm?.kind === category.kind)"
             :is-loading="termLoading && selectedTerm?.term === term && selectedTerm?.kind === category.kind"
             @click="handleTermClick(category.kind, term)"
           />
