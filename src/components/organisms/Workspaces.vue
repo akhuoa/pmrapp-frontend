@@ -33,7 +33,7 @@ onMounted(async () => {
     error-title="Error loading workspaces"
     empty-message="No workspaces found."
     route-base="/workspaces"
-    :get-title-fn="getTitle"
+    :get-title="getTitle"
     @refresh="handleRefresh"
     @update-filtered-count="(...args) => emit('updateFilteredCount', ...args)"
   />

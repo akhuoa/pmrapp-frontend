@@ -16,7 +16,7 @@ interface Props<T> {
   errorTitle: string
   emptyMessage: string
   routeBase: string
-  getTitleFn: (item: T) => string
+  getTitle: (item: T) => string
 }
 
 const props = defineProps<Props<T>>()
@@ -92,7 +92,7 @@ watch(
       <ListItem
         v-for="item in filteredItems"
         :key="item.alias"
-        :title="getTitleFn(item)"
+        :title="getTitle(item)"
         :link="`${routeBase}/${item.alias}`"
       >
         <p>
