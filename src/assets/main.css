@@ -52,7 +52,7 @@
     width: 6px;
   }
   .thin-scrollbar::-webkit-scrollbar-thumb {
-    background-color: theme('color-border');
+    background-color: theme("color-border");
     border-radius: 4px;
   }
 }
