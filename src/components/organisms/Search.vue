@@ -6,6 +6,9 @@ import KeywordBrowser from '@/components/molecules/KeywordBrowser.vue'
 import SearchResults from '@/components/molecules/SearchResults.vue'
 import { useSearchStore } from '@/stores/search'
 import type { SearchResult } from '@/types/search'
+import ActionButton from '@/components/atoms/ActionButton.vue'
+import CloseButton from '@/components/atoms/CloseButton.vue'
+import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -16,6 +19,7 @@ const term = computed(() => (route.query.term as string) || '')
 const searchResults = ref<SearchResult[]>([])
 const isLoading = ref(false)
 const error = ref<string | null>(null)
+const showSearchTools = ref(false)
 
 onMounted(async () => {
   await loadResults()
@@ -33,6 +37,9 @@ const loadResults = async () => {
     router.push('/search')
     return
   }
+
+  // Reset search tools visibility.
+  showSearchTools.value = false
 
   // Try to get cached results first.
   const cached = searchStore.getCachedResults(kind.value, term.value)
@@ -58,16 +65,32 @@ const loadResults = async () => {
 </script>
 
 <template>
-  <div class="flex gap-6">
-    <!-- Left Sidebar -->
-    <aside class="w-80 flex-shrink-0">
-      <div class="sticky top-[97px]">
+  <div class="flex flex-col lg:flex-row gap-6 lg:mt-12">
+    <aside class="w-full lg:w-80 flex-shrink-0 relative">
+      <div class="lg:hidden">
+        <ActionButton
+          variant="secondary"
+          size="md"
+          content-section="Search Page - Show Search Tools Button"
+          @click="showSearchTools = true"
+        >
+          Search Tools
+          <ChevronDownIcon class="w-4 h-4 ml-2" />
+        </ActionButton>
+      </div>
+      <div
+        class="hidden absolute top-0 left-0 w-full lg:block lg:sticky lg:top-[97px] z-100"
+        :class="{ 'block!': showSearchTools }"
+      >
         <KeywordBrowser :inSidebar="true" />
+        <CloseButton @click="showSearchTools = false" class="lg:hidden absolute top-4 right-4" />
       </div>
     </aside>
 
-    <!-- Main Content -->
-    <main class="flex-1 min-w-0">
+    <main
+      class="flex-1 min-w-0 relative lg:opacity-100 lg:pointer-events-auto"
+      :class="{ 'opacity-10 pointer-events-none' : showSearchTools }"
+    >
       <SearchResults
         :results="searchResults"
         :is-loading="isLoading"
