@@ -392,8 +392,13 @@ onMounted(async () => {
     @apply mt-0;
   }
 
+  & :deep(dl),
   & :deep(p) {
     @apply text-sm mb-4;
+  }
+
+  & :deep(dt) {
+    @apply font-semibold;
   }
 
   & :deep(img) {
