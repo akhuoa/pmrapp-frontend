@@ -126,7 +126,6 @@ export const useSearchStore = defineStore('search', () => {
     categories,
     isLoading,
     error,
-    searchResultsCache,
     fetchCategories,
     refreshCategories,
     searchIndexTerm,
