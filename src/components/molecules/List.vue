@@ -31,10 +31,6 @@ const router = useRouter()
 const filterQuery = ref((route.query.filter as string) || '')
 const sortBy = ref<SortOption>(DEFAULT_SORT_OPTION)
 
-onMounted(async () => {
-  emit('refresh')
-})
-
 // Sync filter query with URL query parameter.
 watch(filterQuery, (newValue) => {
   const query = newValue.trim() ? { filter: newValue } : {}
