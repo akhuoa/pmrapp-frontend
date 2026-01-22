@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import ListContainer from '@/components/molecules/ListContainer.vue'
+import ListContent from '@/components/molecules/ListContent.vue'
 import ListItem from '@/components/molecules/ListItem.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import type { SearchResult } from '@/types/search'
@@ -51,7 +51,7 @@ const resultsText = computed(() => {
       {{ resultsText }}
     </p>
 
-    <ListContainer
+    <ListContent
       :items="results"
       :error="error"
       :is-loading="isLoading"
@@ -84,7 +84,7 @@ const resultsText = computed(() => {
           </div>
         </ListItem>
       </template>
-    </ListContainer>
+    </ListContent>
   </div>
 </template>
 
