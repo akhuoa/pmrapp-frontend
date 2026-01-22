@@ -2,9 +2,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import UserDropdown from '@/components/molecules/UserDropdown.vue'
-import SearchModal from '@/components/molecules/SearchModal.vue'
 import SearchButton from '@/components/atoms/SearchButton.vue'
+import SearchModal from '@/components/molecules/SearchModal.vue'
+import UserDropdown from '@/components/molecules/UserDropdown.vue'
 
 const route = useRoute()
 const isSearchOpen = ref(false)

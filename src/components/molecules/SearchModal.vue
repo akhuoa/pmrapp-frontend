@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
-import SearchIcon from '@/components/icons/SearchIcon.vue'
+import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import CloseButton from '@/components/atoms/CloseButton.vue'
+import SearchIcon from '@/components/icons/SearchIcon.vue'
 
 const props = defineProps<{
   modelValue: boolean
@@ -39,14 +39,17 @@ const handleBackdropClick = (e: MouseEvent) => {
 }
 
 // Focus input when modal opens.
-watch(() => props.modelValue, (newVal) => {
-  if (newVal) {
-    // Wait for next tick to ensure DOM is updated.
-    nextTick(() => {
-      searchInput.value?.focus()
-    })
-  }
-})
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    if (newVal) {
+      // Wait for next tick to ensure DOM is updated.
+      nextTick(() => {
+        searchInput.value?.focus()
+      })
+    }
+  },
+)
 
 onMounted(() => {
   document.addEventListener('keydown', handleKeydown)

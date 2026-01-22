@@ -34,12 +34,15 @@ export const searchService = {
   },
 
   async searchIndexTerm(kind: string, term: string): Promise<IndexSearchResult> {
-    const response = await fetch(`${API_BASE_URL}/api/index/${encodeURIComponent(kind)}/${encodeURIComponent(term)}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `${API_BASE_URL}/api/index/${encodeURIComponent(kind)}/${encodeURIComponent(term)}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       },
-    })
+    )
 
     if (!response.ok) {
       throw new Error(`Request failed: ${response.status}`)
