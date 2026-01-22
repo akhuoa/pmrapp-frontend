@@ -69,6 +69,7 @@ const getFilteredTerms = (terms: string[], kind: string): string[] => {
             v-if="category.kindInfo"
             type="search"
             placeholder="Filter keywords..."
+            aria-label="Filter keywords"
             class="px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-md text-sm bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
             :class="{ 'w-full' : inSidebar }"
             :value="categoryFilters.get(category.kind) || ''"
