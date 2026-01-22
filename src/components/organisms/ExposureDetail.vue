@@ -21,13 +21,39 @@ const props = defineProps<{
 }>()
 
 const DEFAULT_LICENSE = 'https://creativecommons.org/licenses/by/3.0/'
+const CODEGEN_LANGUAGES = [
+  {
+    name: 'C',
+    path: 'code.C.c',
+  },
+  {
+    name: 'C (Implicit Differential Algebraic equation system solver)',
+    path: 'code.C_IDA.c',
+  },
+  {
+    name: 'Fortran 77',
+    path: 'code.F77.f77',
+  },
+  {
+    name: 'MATLAB',
+    path: 'code.MATLAB.m',
+  },
+  {
+    name: 'Python',
+    path: 'code.Python.py',
+  },
+]
 const exposureStore = useExposureStore()
 const exposureInfo = ref<ExposureInfo | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
+const fileWithViews = ref<any>(null)
+const exposureId = ref<number>(NaN)
+const codegenFileId = ref<number>(NaN)
 const detailHTML = ref<string>('')
 const htmlViewRef = ref<HTMLElement | null>(null)
 const licenseInfo = ref<string>(DEFAULT_LICENSE)
+const codegenAvailable = ref<boolean>(false)
 const { goBack } = useBackNavigation('/exposures')
 
 const pageTitle = computed(() => {
@@ -127,6 +153,18 @@ const fileCountText = computed(() => {
   return formatFileCount(count)
 })
 
+const generateCode = async (langPath: string) => {
+  const routePath = `/exposure/${props.alias}`
+  const code = await exposureStore.getExposureSafeHTML(
+    exposureId.value,
+    codegenFileId.value,
+    'cellml_codegen',
+    langPath,
+    routePath,
+  )
+  // TODO: Implement a way to present the generated code to users.
+}
+
 watch(detailHTML, async () => {
   if (detailHTML.value) {
     await nextTick()
@@ -145,6 +183,8 @@ onMounted(async () => {
     if (fileWithViews) {
       const viewEntry = fileWithViews.views.find((v) => v.view_key === 'view')
       const licenseEntry = fileWithViews.views.find((v) => v.view_key === 'license_citation')
+      const codegenEntry = fileWithViews.views.find((v) => v.view_key === 'cellml_codegen')
+      exposureId.value = fileWithViews.exposure_id
       // This route path is used to fix relative paths in the HTML content.
       // It is not a part of the API request parameters.
       // Note: Keep as "exposure" (singular) to match server file paths, not the router path.
@@ -152,7 +192,7 @@ onMounted(async () => {
 
       if (viewEntry) {
         detailHTML.value = await exposureStore.getExposureSafeHTML(
-          fileWithViews.exposure_id,
+          exposureId.value,
           viewEntry.exposure_file_id,
           'view',
           'index.html',
@@ -162,12 +202,17 @@ onMounted(async () => {
 
       if (licenseEntry) {
         licenseInfo.value = await exposureStore.getExposureSafeHTML(
-          fileWithViews.exposure_id,
+          exposureId.value,
           licenseEntry.exposure_file_id,
           'license_citation',
           'license.txt',
           routePath,
         )
+      }
+
+      if (codegenEntry) {
+        codegenAvailable.value = true
+        codegenFileId.value = codegenEntry.exposure_file_id
       }
     }
   } catch (err) {
@@ -276,6 +321,26 @@ onMounted(async () => {
                 <span class="text-foreground">›</span>
                 Open in OpenCOR's Web app
               </a>
+            </li>
+          </ul>
+        </nav>
+      </section>
+      <section v-if="codegenAvailable" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+        <h4 class="text-lg font-semibold mb-3">Code Generation</h4>
+        <nav>
+          <ul class="space-y-2">
+            <li
+              v-for="lang in CODEGEN_LANGUAGES"
+              :key="lang.name"
+              class="text-sm"
+            >
+              <button
+                class="text-link inline-block text-left"
+                @click="generateCode(lang.path)"
+              >
+                <span class="text-foreground">›</span>
+                {{ lang.name }}
+              </button>
             </li>
           </ul>
         </nav>
