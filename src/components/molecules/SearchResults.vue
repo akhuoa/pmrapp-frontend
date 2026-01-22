@@ -34,6 +34,9 @@ const resultsText = computed(() => {
   const resultsCount = props.results.length
 
   if (resultsCount === 0) {
+    if (props.term.trim() === '') {
+      return 'Perform a search to see results.'
+    }
     return `No results for "${props.term}"`
   }
 
@@ -56,7 +59,7 @@ const resultsText = computed(() => {
       :error="error"
       :is-loading="isLoading"
       error-title="Error loading search results"
-      empty-message="No results found for this keyword."
+      empty-message="No results found."
     >
       <template #item>
         <ListItem
