@@ -38,9 +38,10 @@ const handleTermClick = async (kind: string, term: string) => {
   }
 }
 
-const getFilteredTerms = (terms: string[], kind: string): string[] => {
+const getFilteredTerms = (terms: string[] | null | undefined, kind: string): string[] => {
   const filter = categoryFilters.value.get(kind)?.toLowerCase() || ''
-  return terms.filter((t) => t.trim() && (filter === '' || t.toLowerCase().includes(filter)))
+  const safeTerms = terms ?? []
+  return safeTerms.filter((t) => t.trim() && (filter === '' || t.toLowerCase().includes(filter)))
 }
 </script>
 
