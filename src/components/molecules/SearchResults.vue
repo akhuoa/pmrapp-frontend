@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import TermButton from '@/components/atoms/TermButton.vue'
 import ListContent from '@/components/molecules/ListContent.vue'
 import ListItem from '@/components/molecules/ListItem.vue'
-import TermButton from '@/components/atoms/TermButton.vue'
 import type { SearchResult } from '@/types/search'
 import { formatDate, formatNumber } from '@/utils/format'
 
