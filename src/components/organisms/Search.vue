@@ -84,7 +84,7 @@ const loadResults = async () => {
         class="hidden absolute top-0 left-0 w-full lg:block lg:sticky lg:top-[97px] z-100"
         :class="{ 'block!': showSearchTools }"
       >
-        <KeywordBrowser :inSidebar="true" />
+        <KeywordBrowser :in-sidebar="true" />
         <CloseButton @click="showSearchTools = false" class="lg:hidden absolute top-4 right-4" />
       </div>
     </aside>
