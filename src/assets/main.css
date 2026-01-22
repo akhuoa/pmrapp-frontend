@@ -48,13 +48,6 @@
   .thin-scrollbar {
     scrollbar-width: thin;
   }
-  .thin-scrollbar::-webkit-scrollbar {
-    width: 6px;
-  }
-  .thin-scrollbar::-webkit-scrollbar-thumb {
-    background-color: theme("color-border");
-    border-radius: 4px;
-  }
 }
 
 :root {
