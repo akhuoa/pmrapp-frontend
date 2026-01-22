@@ -33,7 +33,7 @@ onMounted(async () => {
     error-title="Error loading exposures"
     empty-message="No exposures found."
     route-base="/exposures"
-    :get-title-fn="getTitle"
+    :get-title="getTitle"
     @refresh="handleRefresh"
     @update-filtered-count="(...args) => emit('updateFilteredCount', ...args)"
   />

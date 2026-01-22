@@ -1,5 +1,5 @@
 <script setup lang="ts" generic="T extends { alias: string; entity: { id: number; created_ts: number; description: string | null } }">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ListContent from '@/components/molecules/ListContent.vue'
 import ListItem from '@/components/molecules/ListItem.vue'
@@ -12,11 +12,11 @@ interface Props<T> {
   items: T[]
   isLoading: boolean
   error: string | null
-  contentSection: string
   errorTitle: string
+  contentSection: string
   emptyMessage: string
   routeBase: string
-  getTitleFn: (item: T) => string
+  getTitle: (item: T) => string
 }
 
 const props = defineProps<Props<T>>()
@@ -30,10 +30,6 @@ const route = useRoute()
 const router = useRouter()
 const filterQuery = ref((route.query.filter as string) || '')
 const sortBy = ref<SortOption>(DEFAULT_SORT_OPTION)
-
-onMounted(async () => {
-  emit('refresh')
-})
 
 // Sync filter query with URL query parameter.
 watch(filterQuery, (newValue) => {
@@ -80,24 +76,24 @@ watch(
   <ListToolbar
     v-model:filter-query="filterQuery"
     v-model:sort-by="sortBy"
-    :is-loading="isLoading"
-    :content-section="contentSection"
+    :is-loading="props.isLoading"
+    :content-section="props.contentSection"
     @refresh="handleRefresh"
   />
 
   <ListContent
     :items="filteredItems"
-    :error="error"
-    :is-loading="isLoading"
-    :error-title="errorTitle"
-    :empty-message="emptyMessage"
+    :error="props.error"
+    :is-loading="props.isLoading"
+    :error-title="props.errorTitle"
+    :empty-message="props.emptyMessage"
   >
     <template #item>
       <ListItem
         v-for="item in filteredItems"
         :key="item.alias"
-        :title="getTitleFn(item)"
-        :link="`${routeBase}/${item.alias}`"
+        :title="props.getTitle(item)"
+        :link="`${props.routeBase}/${item.alias}`"
       >
         <p>
           <small>
