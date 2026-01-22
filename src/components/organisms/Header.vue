@@ -1,11 +1,10 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import UserDropdown from '@/components/molecules/UserDropdown.vue'
 
 const route = useRoute()
-const isSearchOpen = ref(false)
 
 const navLinks = [
   { path: '/workspaces', label: 'Workspaces' },
