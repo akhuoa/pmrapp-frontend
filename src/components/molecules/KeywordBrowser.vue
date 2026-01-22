@@ -34,9 +34,7 @@ const handleTermClick = async (kind: string, term: string) => {
 
 const getFilteredTerms = (terms: string[], kind: string): string[] => {
   const filter = categoryFilters.value.get(kind)?.toLowerCase() || ''
-  return terms
-    .filter((t) => t.trim())
-    .filter((t) => filter === '' || t.toLowerCase().includes(filter))
+  return terms.filter((t) => t.trim() && (filter === '' || t.toLowerCase().includes(filter)))
 }
 </script>
 
