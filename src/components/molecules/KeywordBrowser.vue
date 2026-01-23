@@ -99,7 +99,6 @@ const getFilteredTerms = (terms: string[] | null | undefined, kind: string): str
             v-for="term in getFilteredTerms(category.kindInfo.terms, category.kind)"
             :key="term"
             :term="term"
-            :disabled="termLoading || (selectedTerm?.term === term && selectedTerm?.kind === category.kind)"
             :is-loading="termLoading && selectedTerm?.term === term && selectedTerm?.kind === category.kind"
             @click="handleTermClick(category.kind, term)"
           />

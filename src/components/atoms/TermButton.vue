@@ -1,7 +1,6 @@
 <script setup lang="ts">
 interface Props {
   term: string
-  disabled?: boolean
   isLoading?: boolean
 }
 
@@ -18,8 +17,7 @@ const handleClick = () => {
 
 <template>
   <button
-    class="px-3 py-1.5 bg-gray-100 cursor-pointer dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md text-sm transition-colors relative disabled:opacity-75 disabled:cursor-default disabled:pointer-events-none"
-    :disabled="disabled"
+    class="px-3 py-1.5 bg-gray-100 cursor-pointer dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md text-sm transition-colors relative"
     :aria-label="`Search for ${term}`"
     @click="handleClick"
   >
