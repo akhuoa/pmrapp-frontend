@@ -4,9 +4,12 @@ import Prism from 'prismjs'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import 'prismjs/components/prism-markup'
 import 'prismjs/components/prism-css'
+import 'prismjs/components/prism-clike'
+import 'prismjs/components/prism-fortran'
 import 'prismjs/components/prism-javascript'
 import 'prismjs/components/prism-python'
 import 'prismjs/components/prism-markdown'
+import 'prismjs/components/prism-matlab'
 import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
 import 'prismjs/plugins/line-numbers/prism-line-numbers'
 import CopyButton from './CopyButton.vue'
@@ -33,6 +36,11 @@ const detectedLanguage = computed(() => {
     css: 'css',
     scss: 'css',
     sass: 'css',
+    c: 'clike',
+    cpp: 'clike',
+    h: 'clike',
+    fortran: 'fortran',
+    f77: 'fortran',
     html: 'markup',
     htm: 'markup',
     xml: 'markup',
@@ -41,6 +49,8 @@ const detectedLanguage = computed(() => {
     markdown: 'markdown',
     cellml: 'markup',
     sedml: 'markup',
+    matlab: 'matlab',
+    m: 'matlab',
   }
 
   return ext ? languageMap[ext] || 'none' : 'none'
