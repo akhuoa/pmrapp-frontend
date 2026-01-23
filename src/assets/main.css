@@ -45,7 +45,7 @@
 }
 
 @layer utilities {
-  .thin-scrollbar {
+  .scrollbar-thin {
     scrollbar-width: thin;
   }
 }

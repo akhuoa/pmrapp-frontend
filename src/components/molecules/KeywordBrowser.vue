@@ -92,7 +92,7 @@ const getFilteredTerms = (terms: string[] | null | undefined, kind: string): str
 
         <div
           v-else-if="category.kindInfo"
-          class="flex flex-wrap gap-2 overflow-y-auto border border-gray-200 dark:border-gray-700 p-2 rounded-md thin-scrollbar"
+          class="flex flex-wrap gap-2 overflow-y-auto border border-gray-200 dark:border-gray-700 p-2 rounded-md scrollbar-thin"
           :class="inSidebar ? 'max-h-[300px]' : 'max-h-40'"
         >
           <TermButton
