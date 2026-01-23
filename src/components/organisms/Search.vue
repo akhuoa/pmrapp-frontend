@@ -11,7 +11,6 @@ import { useSearchStore } from '@/stores/search'
 import type { SearchResult } from '@/types/search'
 
 const route = useRoute()
-const router = useRouter()
 const searchStore = useSearchStore()
 
 const kind = computed(() => (route.query.kind as string) || '')

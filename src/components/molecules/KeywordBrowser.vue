@@ -13,28 +13,19 @@ defineProps<Props>()
 const searchStore = useSearchStore()
 const router = useRouter()
 const categoryFilters = ref<Map<string, string>>(new Map())
-const termLoading = ref(false)
-const selectedTerm = ref<{ kind: string; term: string } | null>(null)
 
 onMounted(async () => {
   await searchStore.fetchCategories()
 })
 
 const handleTermClick = async (kind: string, term: string) => {
-  termLoading.value = true
-  selectedTerm.value = { kind, term }
-
-  try {
-    const currentRoute = router.currentRoute.value
-    // If already on search page, replace query params to avoid duplicate navigation.
-    // Otherwise, push to search page.
-    if (currentRoute.path === '/search') {
-      await router.replace({ path: '/search', query: { kind, term } })
-    } else {
-      await router.push({ path: '/search', query: { kind, term } })
-    }
-  } finally {
-    termLoading.value = false
+  const currentRoute = router.currentRoute.value
+  // If already on search page, replace query params to avoid duplicate navigation.
+  // Otherwise, push to search page.
+  if (currentRoute.path === '/search') {
+    await router.replace({ path: '/search', query: { kind, term } })
+  } else {
+    await router.push({ path: '/search', query: { kind, term } })
   }
 }
 
@@ -99,8 +90,6 @@ const getFilteredTerms = (terms: string[] | null | undefined, kind: string): str
             v-for="term in getFilteredTerms(category.kindInfo.terms, category.kind)"
             :key="term"
             :term="term"
-            :disabled="termLoading || (selectedTerm?.term === term && selectedTerm?.kind === category.kind)"
-            :is-loading="termLoading && selectedTerm?.term === term && selectedTerm?.kind === category.kind"
             @click="handleTermClick(category.kind, term)"
           />
         </div>
