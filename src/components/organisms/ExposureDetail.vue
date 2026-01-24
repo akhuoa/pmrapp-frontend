@@ -15,19 +15,45 @@ import type { ExposureInfo } from '@/types/exposure'
 import { trackButtonClick } from '@/utils/analytics'
 import { downloadWorkspaceFile } from '@/utils/download'
 import { formatFileCount } from '@/utils/format'
+import CodeBlock from '@/components/atoms/CodeBlock.vue'
 
 const props = defineProps<{
   alias: string
+  file: string
+  view: string
 }>()
 
+interface ViewEntry {
+  name: string
+  view_key: string
+}
+
 const DEFAULT_LICENSE = 'https://creativecommons.org/licenses/by/3.0/'
+const AVAILABLE_VIEWS = [
+  {
+    name: 'Default View',
+    view_key: 'view',
+  },
+  {
+    name: 'Code Generation',
+    view_key: 'cellml_codegen',
+  },
+  {
+    name: 'Mathematics',
+    view_key: 'cellml_math',
+  },
+  {
+    name: 'Metadata',
+    view_key: 'cellml_metadata',
+  },
+]
 const CODEGEN_LANGUAGES = [
   {
     name: 'C',
     path: 'code.C.c',
   },
   {
-    name: 'C (Implicit Differential Algebraic equation system solver)',
+    name: 'C_IDA',
     path: 'code.C_IDA.c',
   },
   {
@@ -43,19 +69,32 @@ const CODEGEN_LANGUAGES = [
     path: 'code.Python.py',
   },
 ]
+
 const exposureStore = useExposureStore()
 const exposureInfo = ref<ExposureInfo | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 const exposureId = ref<number>(NaN)
-const codegenFileId = ref<number>(NaN)
+const exposureFilePath = ref<string>(props.file)
+const exposureFileId = ref<number>(NaN)
 const detailHTML = ref<string>('')
+const generatedCode = ref<string>('')
+const generatedCodeFilename = ref<string>('')
 const htmlViewRef = ref<HTMLElement | null>(null)
 const licenseInfo = ref<string>(DEFAULT_LICENSE)
-const codegenAvailable = ref<boolean>(false)
+const availableViews = ref<ViewEntry[]>([])
 const { goBack } = useBackNavigation('/exposures')
 
 const pageTitle = computed(() => {
+  if (props.view) {
+    const viewEntry = AVAILABLE_VIEWS.find((v) => v.view_key === props.view)
+    if (viewEntry) {
+      if (viewEntry.view_key === 'view') {
+        return `${exposureFilePath.value}`
+      }
+      return `${viewEntry.name}`
+    }
+  }
   if (!exposureInfo.value) return 'No information.'
   return exposureInfo.value.exposure.description || `Exposure ${exposureInfo.value.exposure.id}`
 })
@@ -156,12 +195,13 @@ const generateCode = async (langPath: string) => {
   const routePath = `/exposure/${props.alias}`
   const code = await exposureStore.getExposureSafeHTML(
     exposureId.value,
-    codegenFileId.value,
+    exposureFileId.value,
     'cellml_codegen',
     langPath,
     routePath,
   )
-  // TODO: Implement a way to present the generated code to users.
+  generatedCode.value = code
+  generatedCodeFilename.value = langPath
 }
 
 watch(detailHTML, async () => {
@@ -180,10 +220,14 @@ onMounted(async () => {
     )
 
     if (fileWithViews) {
+      availableViews.value = AVAILABLE_VIEWS.filter((view) => fileWithViews.views.some(v => v.view_key === view.view_key))
+      exposureFileId.value = fileWithViews.id
+      exposureFilePath.value = fileWithViews.workspace_file_path
+      exposureId.value = fileWithViews.exposure_id
+
       const viewEntry = fileWithViews.views.find((v) => v.view_key === 'view')
       const licenseEntry = fileWithViews.views.find((v) => v.view_key === 'license_citation')
-      const codegenEntry = fileWithViews.views.find((v) => v.view_key === 'cellml_codegen')
-      exposureId.value = fileWithViews.exposure_id
+
       // This route path is used to fix relative paths in the HTML content.
       // It is not a part of the API request parameters.
       // Note: Keep as "exposure" (singular) to match server file paths, not the router path.
@@ -207,11 +251,6 @@ onMounted(async () => {
           'license.txt',
           routePath,
         )
-      }
-
-      if (codegenEntry) {
-        codegenAvailable.value = true
-        codegenFileId.value = codegenEntry.exposure_file_id
       }
     }
   } catch (err) {
@@ -239,12 +278,49 @@ onMounted(async () => {
   <LoadingBox v-else-if="isLoading" message="Loading exposure..." />
 
   <div v-else-if="exposureInfo" class="flex flex-col lg:flex-row gap-8">
-    <article class="w-full lg:flex-1 lg:min-w-0">
+    <article class="w-full lg:flex-1 lg:min-w-0 space-y-6">
       <PageHeader
         :title="pageTitle"
       />
 
-      <div v-if="detailHTML" class="box mb-8">
+      <div v-if="props.view === 'cellml_codegen'" class="relative">
+        <nav>
+          <ul class="space-x-2 mb-4 inline-flex">
+            <li
+              v-for="lang in CODEGEN_LANGUAGES"
+              :key="lang.name"
+            >
+              <ActionButton
+                :variant="generatedCodeFilename === lang.path ? 'primary' : 'secondary'"
+                size="sm"
+                @click="generateCode(lang.path)"
+              >
+                {{ lang.name }}
+              </ActionButton>
+            </li>
+          </ul>
+        </nav>
+        <div class="box p-0! overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+            <span>{{ generatedCodeFilename }}</span>
+            <button
+              @click.prevent="downloadFile(generatedCodeFilename)"
+              class="flex items-center cursor-pointer gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+              title="Download"
+              aria-label="Download"
+            >
+              <DownloadIcon class="w-4 h-4" />
+              Download
+            </button>
+          </div>
+          <CodeBlock
+            :code="generatedCode"
+            :filename="generatedCodeFilename"
+          />
+        </div>
+      </div>
+
+      <div v-else-if="detailHTML" class="box">
         <div ref="htmlViewRef" v-html="detailHTML" class="html-view"></div>
       </div>
 
@@ -321,25 +397,18 @@ onMounted(async () => {
                 Open in OpenCOR's Web app
               </a>
             </li>
-          </ul>
-        </nav>
-      </section>
-      <section v-if="codegenAvailable" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
-        <h4 class="text-lg font-semibold mb-3">Code Generation</h4>
-        <nav>
-          <ul class="space-y-2">
             <li
-              v-for="lang in CODEGEN_LANGUAGES"
-              :key="lang.name"
               class="text-sm"
+              v-for="view in availableViews"
+              :key="view.view_key"
             >
-              <button
-                class="text-link inline-block text-left"
-                @click="generateCode(lang.path)"
+              <RouterLink
+                :to="`/exposures/${alias}/${exposureFilePath}/${view.view_key}`"
+                class="text-link inline-flex items-center gap-2 break-all"
               >
                 <span class="text-foreground">›</span>
-                {{ lang.name }}
-              </button>
+                {{ view.name }}
+              </RouterLink>
             </li>
           </ul>
         </nav>
