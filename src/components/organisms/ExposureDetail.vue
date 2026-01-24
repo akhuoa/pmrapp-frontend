@@ -204,10 +204,22 @@ const generateCode = async (langPath: string) => {
   generatedCodeFilename.value = langPath
 }
 
+const loadCodegenView = async () => {
+  if (!exposureInfo.value) return
+  // Load code generation view with the first language as default.
+  await generateCode(CODEGEN_LANGUAGES[0]?.path || 'code.C.c')
+}
+
 watch(detailHTML, async () => {
   if (detailHTML.value) {
     await nextTick()
     convertFirstTextNodeToTitle()
+  }
+})
+
+watch(() => props.view, async (newView) => {
+  if (newView === 'cellml_codegen') {
+    await loadCodegenView()
   }
 })
 
@@ -253,6 +265,11 @@ onMounted(async () => {
           'license.txt',
           routePath,
         )
+      }
+
+      // Load codegen view with default language.
+      if (props.view === 'cellml_codegen') {
+        await loadCodegenView()
       }
     }
   } catch (err) {
