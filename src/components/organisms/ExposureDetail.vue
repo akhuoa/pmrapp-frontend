@@ -220,7 +220,9 @@ onMounted(async () => {
     )
 
     if (fileWithViews) {
-      availableViews.value = AVAILABLE_VIEWS.filter((view) => fileWithViews.views.some(v => v.view_key === view.view_key))
+      availableViews.value = AVAILABLE_VIEWS.filter((view) =>
+        fileWithViews.views.some((v) => v.view_key === view.view_key),
+      )
       exposureFileId.value = fileWithViews.id
       exposureFilePath.value = fileWithViews.workspace_file_path
       exposureId.value = fileWithViews.exposure_id
