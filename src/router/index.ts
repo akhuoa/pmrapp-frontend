@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import ExposureDetailView from '@/views/ExposureDetailView.vue'
-import ExposureFileDetailView from '@/views/ExposureFileDetailView.vue'
 import ExposureView from '@/views/ExposureView.vue'
 import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
@@ -51,7 +50,13 @@ const router = createRouter({
     {
       path: '/exposures/:alias/:file',
       name: 'exposure-file-detail',
-      component: ExposureFileDetailView,
+      component: ExposureDetailView,
+      meta: { title: `Exposure File – ${title}` },
+    },
+    {
+      path: '/exposures/:alias/:file/:view',
+      name: 'exposure-file-detail-view',
+      component: ExposureDetailView,
       meta: { title: `Exposure File – ${title}` },
     },
     {
