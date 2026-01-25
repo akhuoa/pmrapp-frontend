@@ -28,6 +28,19 @@ interface ViewEntry {
   view_key: string
 }
 
+interface Metadata {
+  model_title?: string
+  model_authors?: string
+  model_author_org?: string
+  keywords?: string[]
+  citations?: string[]
+  citation_title?: string
+  citation_issued?: string
+  citation_id?: string
+  citation_bibliographicCitation?: string
+  citation_authors?: string[]
+}
+
 const DEFAULT_LICENSE = 'https://creativecommons.org/licenses/by/3.0/'
 const AVAILABLE_VIEWS = [
   {
@@ -81,6 +94,7 @@ const detailHTML = ref<string>('')
 const generatedCode = ref<string>('')
 const generatedCodeFilename = ref<string>('')
 const mathsJSON = ref<string[]>([])
+const metadataJSON = ref<Metadata>({})
 const htmlViewRef = ref<HTMLElement | null>(null)
 const licenseInfo = ref<string>(DEFAULT_LICENSE)
 const availableViews = ref<ViewEntry[]>([])
@@ -218,6 +232,19 @@ const generateMath = async () => {
   mathsJSON.value = JSON.parse(response)
 }
 
+const generateMetadata = async () => {
+  const routePath = `/exposure/${props.alias}`
+  const metadata = await exposureStore.getExposureSafeHTML(
+    exposureId.value,
+    exposureFileId.value,
+    'cellml_metadata',
+    'cmeta.json',
+    routePath,
+    true,
+  )
+  metadataJSON.value = JSON.parse(metadata)
+}
+
 const loadCodegenView = async () => {
   if (!exposureInfo.value) return
   // Load code generation view with the first language as default.
@@ -257,6 +284,9 @@ onMounted(async () => {
 
       const viewEntry = fileWithViews.views.find((v) => v.view_key === 'view')
       const licenseEntry = fileWithViews.views.find((v) => v.view_key === 'license_citation')
+
+      // Show metadata onload.
+      await generateMetadata()
 
       // This route path is used to fix relative paths in the HTML content.
       // It is not a part of the API request parameters.
@@ -427,6 +457,63 @@ onMounted(async () => {
           >
             {{ exposureInfo.exposure.commit_id.substring(0, 12) }}
           </RouterLink>.
+        </div>
+      </section>
+      <section v-if="metadataJSON.model_title" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+        <h4 class="text-lg font-semibold mb-3">Info</h4>
+        <dl class="text-sm leading-relaxed space-y-2">
+          <div v-if="metadataJSON.model_title">
+            <dt class="font-semibold">Model Title</dt>
+            <dd>{{ metadataJSON.model_title }}</dd>
+          </div>
+          <div v-if="metadataJSON.model_authors">
+            <dt class="font-semibold">Model Authors</dt>
+            <dd>{{ metadataJSON.model_authors }}</dd>
+          </div>
+          <div v-if="metadataJSON.model_author_org">
+            <dt class="font-semibold">Authoring Organization</dt>
+            <dd>{{ metadataJSON.model_author_org }}</dd>
+          </div>
+          <div v-if="metadataJSON.citation_authors">
+            <dt class="font-semibold">Citation Authors</dt>
+            <dd>{{ metadataJSON.citation_authors }}</dd>
+          </div>
+          <div v-if="metadataJSON.citation_title">
+            <dt class="font-semibold">Citation Title</dt>
+            <dd>{{ metadataJSON.citation_title }}</dd>
+          </div>
+          <div v-if="metadataJSON.citation_id">
+            <dt class="font-semibold">Citation ID</dt>
+            <dd>{{ metadataJSON.citation_id }}</dd>
+          </div>
+          <div v-if="metadataJSON.citation_issued">
+            <dt class="font-semibold">Citation Issued</dt>
+            <dd>{{ metadataJSON.citation_issued }}</dd>
+          </div>
+          <div v-if="metadataJSON.citation_bibliographicCitation">
+            <dt class="font-semibold">Citation Bibliographic Citation</dt>
+            <dd>{{ metadataJSON.citation_bibliographicCitation }}</dd>
+          </div>
+          <div v-if="metadataJSON.citations && metadataJSON.citations.length > 0">
+            <dt class="font-semibold">Citations</dt>
+            <dd>
+              <ul class="list-disc list-inside space-y-1">
+                <li v-for="citation in metadataJSON.citations" :key="citation">{{ citation }}</li>
+              </ul>
+            </dd>
+          </div>
+        </dl>
+      </section>
+      <section v-if="metadataJSON.keywords?.length" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+        <h4 class="text-lg font-semibold mb-3">Keywords</h4>
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="keyword in metadataJSON.keywords"
+            :key="keyword"
+            class="px-3 py-1.5 bg-gray-100 cursor-pointer dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md text-sm transition-colors relative"
+          >
+            {{ keyword[1] }}
+          </button>
         </div>
       </section>
       <section v-if="openCORFiles.length > 0" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
