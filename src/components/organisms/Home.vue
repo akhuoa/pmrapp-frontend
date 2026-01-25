@@ -1,5 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
+import KeywordBrowser from '@/components/molecules/KeywordBrowser.vue'
 import NavigationCard from '@/components/molecules/NavigationCard.vue'
 </script>
 
@@ -26,6 +27,10 @@ import NavigationCard from '@/components/molecules/NavigationCard.vue'
       title="Exposures"
       description="Explore published models and simulation results for citation and public use."
     />
+  </section>
+
+  <section class="max-w-5xl mx-auto mb-12">
+    <KeywordBrowser :in-sidebar="false" />
   </section>
 </template>
 

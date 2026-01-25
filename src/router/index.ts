@@ -4,6 +4,7 @@ import ExposureView from '@/views/ExposureView.vue'
 import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
+import SearchView from '@/views/SearchView.vue'
 import WorkspaceDetailView from '@/views/WorkspaceDetailView.vue'
 import WorkspaceView from '@/views/WorkspaceView.vue'
 
@@ -27,12 +28,14 @@ const router = createRouter({
       path: '/workspaces/:alias',
       name: 'workspace-detail',
       component: WorkspaceDetailView,
+      alias: ['/workspace/:alias'],
       meta: { title: `Workspace Detail – ${title}` },
     },
     {
       path: '/workspaces/:alias/file/:commitId/:path(.+)',
       name: 'workspace-file-detail',
       component: WorkspaceDetailView,
+      alias: ['/workspace/:alias/file/:commitId/:path(.+)'],
       meta: { title: `Workspace File – ${title}` },
     },
     {
@@ -45,6 +48,7 @@ const router = createRouter({
       path: '/exposures/:alias',
       name: 'exposure-detail',
       component: ExposureDetailView,
+      alias: ['/exposure/:alias'],
       meta: { title: `Exposure Detail – ${title}` },
     },
     {
@@ -58,6 +62,12 @@ const router = createRouter({
       name: 'exposure-file-detail-view',
       component: ExposureDetailView,
       meta: { title: `Exposure File – ${title}` },
+    },
+    {
+      path: '/search',
+      name: 'search-results',
+      component: SearchView,
+      meta: { title: `Search Results – ${title}` },
     },
     {
       path: '/login',

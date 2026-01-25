@@ -44,6 +44,12 @@
   }
 }
 
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+}
+
 :root {
   /* Light theme colours */
   --primary: #cc0000;
