@@ -3,6 +3,10 @@
 
 .box {
   @apply bg-white rounded-lg shadow-lg p-8 border border-gray-200;
+
+  &.box-small {
+    @apply p-4;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
