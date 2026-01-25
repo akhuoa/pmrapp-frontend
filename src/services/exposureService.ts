@@ -67,10 +67,13 @@ export const exposureService = {
     viewKey: string,
     path: string,
     routePath: string,
+    safeHTML: boolean = true,
   ): Promise<string> {
-    const response = await fetch(
-      `${API_BASE_URL}/api/exposure/safe_html/${exposureId}/${exposureFileId}/${viewKey}/${path}`,
-    )
+
+    const apiURL = safeHTML ?
+      `${API_BASE_URL}/api/exposure/safe_html/${exposureId}/${exposureFileId}/${viewKey}/${path}` :
+      `${API_BASE_URL}/api/exposure/${exposureId}/${exposureFileId}/${viewKey}/${path}`
+    const response = await fetch(apiURL)
 
     if (!response.ok) {
       throw new Error(`Failed to fetch HTML: ${response.status}`)

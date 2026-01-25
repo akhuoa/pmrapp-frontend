@@ -80,6 +80,7 @@ const exposureFileId = ref<number>(NaN)
 const detailHTML = ref<string>('')
 const generatedCode = ref<string>('')
 const generatedCodeFilename = ref<string>('')
+const mathsJSON = ref<string[]>([])
 const htmlViewRef = ref<HTMLElement | null>(null)
 const licenseInfo = ref<string>(DEFAULT_LICENSE)
 const availableViews = ref<ViewEntry[]>([])
@@ -204,6 +205,19 @@ const generateCode = async (langPath: string) => {
   generatedCodeFilename.value = langPath
 }
 
+const generateMath = async () => {
+  const routePath = `/exposure/${props.alias}`
+  const response = await exposureStore.getExposureSafeHTML(
+    exposureId.value,
+    exposureFileId.value,
+    'cellml_math',
+    'math.json',
+    routePath,
+    false,
+  )
+  mathsJSON.value = JSON.parse(response)
+}
+
 const loadCodegenView = async () => {
   if (!exposureInfo.value) return
   // Load code generation view with the first language as default.
@@ -220,6 +234,8 @@ watch(detailHTML, async () => {
 watch(() => props.view, async (newView) => {
   if (newView === 'cellml_codegen') {
     await loadCodegenView()
+  } else if (newView === 'cellml_math') {
+    await generateMath()
   }
 })
 
@@ -270,6 +286,10 @@ onMounted(async () => {
       // Load codegen view with default language.
       if (props.view === 'cellml_codegen') {
         await loadCodegenView()
+      }
+
+      if (props.view === 'cellml_math') {
+        await generateMath()
       }
     }
   } catch (err) {
@@ -336,6 +356,15 @@ onMounted(async () => {
             :code="generatedCode"
             :filename="generatedCodeFilename"
           />
+        </div>
+      </div>
+
+      <div v-else-if="mathsJSON.length" class="box">
+        <div v-for="value in mathsJSON" :key="value[0]" class="mb-6">
+          <h4 class="font-semibold mb-4">Component: {{ value[0] }}</h4>
+          <div v-for="math in value[1]" :key="math">
+            <div v-html="math" class="text-sm math-view"></div>
+          </div>
         </div>
       </div>
 
@@ -571,6 +600,12 @@ onMounted(async () => {
 
   & :deep(table td) {
     @apply align-top text-sm;
+  }
+}
+
+.math-view {
+  & :deep(math) {
+    @apply flex flex-col gap-4;
   }
 }
 </style>
