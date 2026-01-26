@@ -258,13 +258,16 @@ watch(detailHTML, async () => {
   }
 })
 
-watch(() => props.view, async (newView) => {
-  if (newView === 'cellml_codegen') {
-    await loadCodegenView()
-  } else if (newView === 'cellml_math') {
-    await generateMath()
-  }
-})
+watch(
+  () => props.view,
+  async (newView) => {
+    if (newView === 'cellml_codegen') {
+      await loadCodegenView()
+    } else if (newView === 'cellml_math') {
+      await generateMath()
+    }
+  },
+)
 
 onMounted(async () => {
   try {
