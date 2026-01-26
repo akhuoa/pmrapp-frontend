@@ -264,6 +264,21 @@ const filteredKeywords = computed(() => {
   return originalKeywords.map((keywordTuple) => keywordTuple[1] || '')
 })
 
+const formatCitationAuthors = (authors: string[]): string => {
+  return authors
+    .map((author) => {
+      const parts = author
+      if (parts.length === 3) {
+        const [lastName, firstName, middleInitial] = parts
+        return middleInitial
+          ? `${firstName} ${middleInitial}. ${lastName}`
+          : `${firstName} ${lastName}`
+      }
+      return author
+    })
+    .join(', ')
+}
+
 watch(detailHTML, async () => {
   if (detailHTML.value) {
     await nextTick()
@@ -492,7 +507,7 @@ onMounted(async () => {
           </div>
           <div v-if="metadataJSON.citation_authors">
             <dt class="font-semibold">Citation Authors</dt>
-            <dd>{{ metadataJSON.citation_authors }}</dd>
+            <dd>{{ formatCitationAuthors(metadataJSON.citation_authors) }}</dd>
           </div>
           <div v-if="metadataJSON.citation_title">
             <dt class="font-semibold">Citation Title</dt>
