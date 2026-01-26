@@ -20,6 +20,7 @@ import { downloadWorkspaceFile } from '@/utils/download'
 import { formatFileCount } from '@/utils/format'
 import TermButton from '../atoms/TermButton.vue'
 import { useRouter } from 'vue-router'
+import CopyButton from '@/components/atoms/CopyButton.vue'
 
 const props = defineProps<{
   alias: string
@@ -597,11 +598,19 @@ onMounted(async () => {
       </section>
       <section v-if="metadataJSON.citation_title" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Citations</h4>
-        <div v-if="metadataJSON.citations && metadataJSON.citations.length > 0" class="text-sm mb-4">
-          <ul class="space-y-4">
-            <li v-for="citation in metadataJSON.citations" :key="citation">{{ formatCitation(citation) }}</li>
-          </ul>
-        </div>
+        <ul class="space-y-4 text-sm mb-4" v-if="metadataJSON.citations && metadataJSON.citations.length > 0">
+          <li v-for="citation in metadataJSON.citations" :key="citation">
+            <div class="group p-4 pr-8 bg-gray-50 dark:bg-gray-800 rounded-md relative">
+              {{ formatCitation(citation) }}
+              <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <CopyButton
+                  :text="formatCitation(citation)"
+                  title="Copy citation"
+                />
+              </div>
+            </div>
+          </li>
+        </ul>
         <div>
           <button
             @click="isCitationDetailsOpen = !isCitationDetailsOpen"
