@@ -16,7 +16,7 @@ import { useExposureStore } from '@/stores/exposure'
 import type { ExposureInfo } from '@/types/exposure'
 import { trackButtonClick } from '@/utils/analytics'
 import { formatCitation, formatCitationAuthors } from '@/utils/citation'
-import { downloadWorkspaceFile } from '@/utils/download'
+import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
 import { formatFileCount } from '@/utils/format'
 import TermButton from '../atoms/TermButton.vue'
 import { useRouter } from 'vue-router'
@@ -219,6 +219,13 @@ const generateCode = async (langPath: string) => {
   generatedCodeFilename.value = langPath
 }
 
+const downloadCode = () => {
+  downloadFileFromContent(
+    generatedCode.value,
+    generatedCodeFilename.value,
+  )
+}
+
 const generateMath = async () => {
   const routePath = `/exposure/${props.alias}`
   const response = await exposureStore.getExposureSafeHTML(
@@ -385,7 +392,7 @@ onMounted(async () => {
           <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
             <span>{{ generatedCodeFilename }}</span>
             <button
-              @click.prevent="downloadFile(generatedCodeFilename)"
+              @click.prevent="downloadCode"
               class="flex items-center cursor-pointer gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
               title="Download"
               aria-label="Download"
