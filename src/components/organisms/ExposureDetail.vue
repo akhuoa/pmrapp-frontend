@@ -610,10 +610,12 @@ onMounted(async () => {
             aria-controls="citation-details"
           >
             <span>Details</span>
-            <ChevronDownIcon
-              class="w-4 h-4 transition-transform duration-200"
+            <span
+              class="transition-transform duration-200"
               :class="{ 'rotate-180': isCitationDetailsOpen }"
-            />
+            >
+              <ChevronDownIcon class="w-4 h-4"/>
+            </span>
           </button>
           <dl
             v-if="isCitationDetailsOpen"
