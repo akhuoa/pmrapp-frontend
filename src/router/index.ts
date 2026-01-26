@@ -55,12 +55,14 @@ const router = createRouter({
       path: '/exposures/:alias/:file',
       name: 'exposure-file-detail',
       component: ExposureDetailView,
+      alias: ['/exposure/:alias/:file'],
       meta: { title: `Exposure File – ${title}` },
     },
     {
       path: '/exposures/:alias/:file/:view',
       name: 'exposure-file-detail-view',
       component: ExposureDetailView,
+      alias: ['/exposure/:alias/:file/:view'],
       meta: { title: `Exposure File – ${title}` },
     },
     {
