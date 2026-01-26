@@ -14,6 +14,7 @@ import { getArchiveDownloadUrls, getCombineArchiveUrl } from '@/services/downloa
 import { useExposureStore } from '@/stores/exposure'
 import type { ExposureInfo } from '@/types/exposure'
 import { trackButtonClick } from '@/utils/analytics'
+import { formatCitation, formatCitationAuthors } from '@/utils/citation'
 import { downloadWorkspaceFile } from '@/utils/download'
 import { formatFileCount } from '@/utils/format'
 import TermButton from '../atoms/TermButton.vue'
@@ -264,21 +265,6 @@ const filteredKeywords = computed(() => {
   return originalKeywords.map((keywordTuple) => keywordTuple[1] || '')
 })
 
-const formatCitationAuthors = (authors: string[]): string => {
-  return authors
-    .map((author) => {
-      const parts = author
-      if (parts.length === 3) {
-        const [lastName, firstName, middleInitial] = parts
-        return middleInitial
-          ? `${firstName} ${middleInitial}. ${lastName}`
-          : `${firstName} ${lastName}`
-      }
-      return author
-    })
-    .join(', ')
-}
-
 watch(detailHTML, async () => {
   if (detailHTML.value) {
     await nextTick()
@@ -494,42 +480,42 @@ onMounted(async () => {
         <h4 class="text-lg font-semibold mb-3">Info</h4>
         <dl class="text-sm leading-relaxed space-y-2">
           <div v-if="metadataJSON.model_title">
-            <dt class="font-semibold">Model Title</dt>
+            <dt class="font-semibold mb-1">Model Title</dt>
             <dd>{{ metadataJSON.model_title }}</dd>
           </div>
           <div v-if="metadataJSON.model_authors">
-            <dt class="font-semibold">Model Authors</dt>
+            <dt class="font-semibold mb-1">Model Authors</dt>
             <dd>{{ metadataJSON.model_authors }}</dd>
           </div>
           <div v-if="metadataJSON.model_author_org">
-            <dt class="font-semibold">Authoring Organization</dt>
+            <dt class="font-semibold mb-1">Authoring Organization</dt>
             <dd>{{ metadataJSON.model_author_org }}</dd>
           </div>
           <div v-if="metadataJSON.citation_authors">
-            <dt class="font-semibold">Citation Authors</dt>
+            <dt class="font-semibold mb-1">Citation Authors</dt>
             <dd>{{ formatCitationAuthors(metadataJSON.citation_authors) }}</dd>
           </div>
           <div v-if="metadataJSON.citation_title">
-            <dt class="font-semibold">Citation Title</dt>
+            <dt class="font-semibold mb-1">Citation Title</dt>
             <dd>{{ metadataJSON.citation_title }}</dd>
           </div>
           <div v-if="metadataJSON.citation_id">
-            <dt class="font-semibold">Citation ID</dt>
+            <dt class="font-semibold mb-1">Citation ID</dt>
             <dd>{{ metadataJSON.citation_id }}</dd>
           </div>
           <div v-if="metadataJSON.citation_issued">
-            <dt class="font-semibold">Citation Issued</dt>
+            <dt class="font-semibold mb-1">Citation Issued</dt>
             <dd>{{ metadataJSON.citation_issued }}</dd>
           </div>
           <div v-if="metadataJSON.citation_bibliographicCitation">
-            <dt class="font-semibold">Citation Bibliographic Citation</dt>
+            <dt class="font-semibold mb-1">Citation Bibliographic Citation</dt>
             <dd>{{ metadataJSON.citation_bibliographicCitation }}</dd>
           </div>
           <div v-if="metadataJSON.citations && metadataJSON.citations.length > 0">
-            <dt class="font-semibold">Citations</dt>
+            <dt class="font-semibold mb-1">Citations</dt>
             <dd>
               <ul class="list-disc list-inside space-y-1">
-                <li v-for="citation in metadataJSON.citations" :key="citation">{{ citation }}</li>
+                <li v-for="citation in metadataJSON.citations" :key="citation">{{ formatCitation(citation) }}</li>
               </ul>
             </dd>
           </div>
