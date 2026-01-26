@@ -16,6 +16,8 @@ import type { ExposureInfo } from '@/types/exposure'
 import { trackButtonClick } from '@/utils/analytics'
 import { downloadWorkspaceFile } from '@/utils/download'
 import { formatFileCount } from '@/utils/format'
+import TermButton from '../atoms/TermButton.vue'
+import { useRouter } from 'vue-router'
 
 const props = defineProps<{
   alias: string
@@ -99,6 +101,8 @@ const htmlViewRef = ref<HTMLElement | null>(null)
 const licenseInfo = ref<string>(DEFAULT_LICENSE)
 const availableViews = ref<ViewEntry[]>([])
 const { goBack } = useBackNavigation('/exposures')
+
+const router = useRouter()
 
 const pageTitle = computed(() => {
   if (props.view) {
@@ -250,6 +254,15 @@ const loadCodegenView = async () => {
   // Load code generation view with the first language as default.
   await generateCode(CODEGEN_LANGUAGES[0]?.path || 'code.C.c')
 }
+
+const handleKeywordClick = (kind: string, keyword: string) => {
+  router.push({ path: '/search', query: { kind, term: keyword } })
+}
+
+const filteredKeywords = computed(() => {
+  const originalKeywords = metadataJSON.value.keywords || []
+  return originalKeywords.map((keywordTuple) => keywordTuple[1] || '')
+})
 
 watch(detailHTML, async () => {
   if (detailHTML.value) {
@@ -510,13 +523,12 @@ onMounted(async () => {
       <section v-if="metadataJSON.keywords?.length" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Keywords</h4>
         <div class="flex flex-wrap gap-2">
-          <button
-            v-for="keyword in metadataJSON.keywords"
-            :key="keyword"
-            class="px-3 py-1.5 bg-gray-100 cursor-pointer dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md text-sm transition-colors relative"
-          >
-            {{ keyword[1] }}
-          </button>
+          <TermButton
+            v-for="term in filteredKeywords"
+            :key="term"
+            :term="term"
+            @click="handleKeywordClick('cellml_keyword', term)"
+          />
         </div>
       </section>
       <section v-if="openCORFiles.length > 0" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
