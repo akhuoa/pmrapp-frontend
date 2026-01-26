@@ -18,6 +18,7 @@ import { trackButtonClick } from '@/utils/analytics'
 import { formatCitation, formatCitationAuthors } from '@/utils/citation'
 import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
 import { formatFileCount } from '@/utils/format'
+import { formatLicenseUrl } from '@/utils/license'
 import TermButton from '../atoms/TermButton.vue'
 import { useRouter } from 'vue-router'
 import CopyButton from '@/components/atoms/CopyButton.vue'
@@ -665,10 +666,10 @@ onMounted(async () => {
         <h4 class="text-lg font-semibold mb-3">License</h4>
         <nav>
           <ul class="space-y-2">
-            <li
-              class="text-sm"
-            >
-              <a :href="licenseInfo" class="text-link" target="_blank" rel="noopener noreferrer">{{ licenseInfo }}</a>
+            <li class="text-sm">
+              <a :href="licenseInfo" class="text-link" target="_blank" rel="noopener noreferrer">
+                {{ formatLicenseUrl(licenseInfo) }}
+              </a>
             </li>
           </ul>
         </nav>
