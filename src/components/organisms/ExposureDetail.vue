@@ -5,6 +5,7 @@ import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
+import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
@@ -93,6 +94,7 @@ const metadataJSON = ref<Metadata>({})
 const htmlViewRef = ref<HTMLElement | null>(null)
 const licenseInfo = ref<string>(DEFAULT_LICENSE)
 const availableViews = ref<ViewEntry[]>([])
+const isCitationDetailsOpen = ref(false)
 const { goBack } = useBackNavigation('/exposures')
 
 const router = useRouter()
@@ -601,8 +603,23 @@ onMounted(async () => {
           </ul>
         </div>
         <div>
-          <h5 class="font-semibold mb-2">Details</h5>
-          <dl class="text-sm leading-relaxed space-y-4 pl-4">
+          <button
+            @click="isCitationDetailsOpen = !isCitationDetailsOpen"
+            class="text-link flex items-center gap-2 text-left"
+            :aria-expanded="isCitationDetailsOpen"
+            aria-controls="citation-details"
+          >
+            <span>Details</span>
+            <ChevronDownIcon
+              class="w-4 h-4 transition-transform duration-200"
+              :class="{ 'rotate-180': isCitationDetailsOpen }"
+            />
+          </button>
+          <dl
+            v-if="isCitationDetailsOpen"
+            id="citation-details"
+            class="text-sm leading-relaxed space-y-4 mt-4"
+          >
             <div v-if="metadataJSON.citation_authors">
               <dt class="font-semibold mb-1">Authors</dt>
               <dd>{{ formatCitationAuthors(metadataJSON.citation_authors) }}</dd>
