@@ -477,8 +477,8 @@ onMounted(async () => {
         </div>
       </section>
       <section v-if="metadataJSON.model_title" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
-        <h4 class="text-lg font-semibold mb-3">Info</h4>
-        <dl class="text-sm leading-relaxed space-y-2">
+        <h4 class="text-lg font-semibold mb-3">About</h4>
+        <dl class="text-sm leading-relaxed space-y-4">
           <div v-if="metadataJSON.model_title">
             <dt class="font-semibold mb-1">Model Title</dt>
             <dd>{{ metadataJSON.model_title }}</dd>
@@ -490,34 +490,6 @@ onMounted(async () => {
           <div v-if="metadataJSON.model_author_org">
             <dt class="font-semibold mb-1">Authoring Organization</dt>
             <dd>{{ metadataJSON.model_author_org }}</dd>
-          </div>
-          <div v-if="metadataJSON.citation_authors">
-            <dt class="font-semibold mb-1">Citation Authors</dt>
-            <dd>{{ formatCitationAuthors(metadataJSON.citation_authors) }}</dd>
-          </div>
-          <div v-if="metadataJSON.citation_title">
-            <dt class="font-semibold mb-1">Citation Title</dt>
-            <dd>{{ metadataJSON.citation_title }}</dd>
-          </div>
-          <div v-if="metadataJSON.citation_id">
-            <dt class="font-semibold mb-1">Citation ID</dt>
-            <dd>{{ metadataJSON.citation_id }}</dd>
-          </div>
-          <div v-if="metadataJSON.citation_issued">
-            <dt class="font-semibold mb-1">Citation Issued</dt>
-            <dd>{{ metadataJSON.citation_issued }}</dd>
-          </div>
-          <div v-if="metadataJSON.citation_bibliographicCitation">
-            <dt class="font-semibold mb-1">Citation Bibliographic Citation</dt>
-            <dd>{{ metadataJSON.citation_bibliographicCitation }}</dd>
-          </div>
-          <div v-if="metadataJSON.citations && metadataJSON.citations.length > 0">
-            <dt class="font-semibold mb-1">Citations</dt>
-            <dd>
-              <ul class="list-disc list-inside space-y-1">
-                <li v-for="citation in metadataJSON.citations" :key="citation">{{ formatCitation(citation) }}</li>
-              </ul>
-            </dd>
           </div>
         </dl>
       </section>
@@ -626,6 +598,39 @@ onMounted(async () => {
             </li>
           </ul>
         </nav>
+      </section>
+      <section v-if="metadataJSON.citation_title" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+        <h4 class="text-lg font-semibold mb-3">Citations</h4>
+        <div v-if="metadataJSON.citations && metadataJSON.citations.length > 0" class="text-sm mb-4">
+          <ul class="space-y-4">
+            <li v-for="citation in metadataJSON.citations" :key="citation">{{ formatCitation(citation) }}</li>
+          </ul>
+        </div>
+        <div>
+          <h5 class="font-semibold mb-2">Details</h5>
+          <dl class="text-sm leading-relaxed space-y-4 pl-4">
+            <div v-if="metadataJSON.citation_authors">
+              <dt class="font-semibold mb-1">Authors</dt>
+              <dd>{{ formatCitationAuthors(metadataJSON.citation_authors) }}</dd>
+            </div>
+            <div v-if="metadataJSON.citation_title">
+              <dt class="font-semibold mb-1">Title</dt>
+              <dd>{{ metadataJSON.citation_title }}</dd>
+            </div>
+            <div v-if="metadataJSON.citation_id">
+              <dt class="font-semibold mb-1">ID</dt>
+              <dd>{{ metadataJSON.citation_id }}</dd>
+            </div>
+            <div v-if="metadataJSON.citation_issued">
+              <dt class="font-semibold mb-1">Issued</dt>
+              <dd>{{ metadataJSON.citation_issued }}</dd>
+            </div>
+            <div v-if="metadataJSON.citation_bibliographicCitation">
+              <dt class="font-semibold mb-1">Bibliographic Citation</dt>
+              <dd>{{ metadataJSON.citation_bibliographicCitation }}</dd>
+            </div>
+          </dl>
+        </div>
       </section>
       <section v-if="licenseInfo" class="pt-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">License</h4>
