@@ -47,20 +47,12 @@ interface Metadata {
 const DEFAULT_LICENSE = 'https://creativecommons.org/licenses/by/3.0/'
 const AVAILABLE_VIEWS = [
   {
-    name: 'Default View',
-    view_key: 'view',
-  },
-  {
-    name: 'Code Generation',
+    name: 'Generate Code',
     view_key: 'cellml_codegen',
   },
   {
     name: 'Mathematics',
     view_key: 'cellml_math',
-  },
-  {
-    name: 'Metadata',
-    view_key: 'cellml_metadata',
   },
 ]
 const CODEGEN_LANGUAGES = [
@@ -509,29 +501,31 @@ onMounted(async () => {
         <nav>
           <ul class="space-y-2">
             <li class="text-sm">
-              <a
+              <ActionButton
+                variant="secondary"
+                size="sm"
                 :href="buildOpenCORURL()"
-                class="text-link inline-flex items-center gap-2"
                 target="_blank"
                 rel="noopener noreferrer"
                 @click="handleClick"
+                content-section="Exposure Detail"
               >
-                <span class="text-foreground">›</span>
                 Open in OpenCOR's Web app
-              </a>
+              </ActionButton>
             </li>
             <li
               class="text-sm"
               v-for="view in availableViews"
               :key="view.view_key"
             >
-              <RouterLink
+              <ActionButton
+                variant="secondary"
+                size="sm"
                 :to="`/exposures/${alias}/${exposureFilePath}/${view.view_key}`"
-                class="text-link inline-flex items-center gap-2 break-all"
+                content-section="Exposure Detail"
               >
-                <span class="text-foreground">›</span>
                 {{ view.name }}
-              </RouterLink>
+              </ActionButton>
             </li>
           </ul>
         </nav>
