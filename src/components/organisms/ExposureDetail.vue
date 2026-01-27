@@ -279,12 +279,84 @@ const filteredKeywords = computed(() => {
   return originalKeywords.map((keywordTuple) => keywordTuple[1] || '')
 })
 
+const loadInitialView = async () => {
+  if (!exposureInfo.value) return
+
+  const filesWithViews = exposureInfo.value.exposure?.files?.filter(
+    (file) => file.views && file.views.length > 0,
+  )
+  let fileWithViews = filesWithViews?.[0]
+
+  if (props.file) {
+    fileWithViews = filesWithViews?.find(
+      (file) => file.workspace_file_path === props.file,
+    )
+  }
+
+  if (fileWithViews) {
+    availableViews.value = AVAILABLE_VIEWS.filter((view) =>
+      fileWithViews.views.some((v) => v.view_key === view.view_key),
+    )
+    exposureFileId.value = fileWithViews.id
+    exposureFilePath.value = fileWithViews.workspace_file_path
+    exposureId.value = fileWithViews.exposure_id
+
+    const viewEntry = fileWithViews.views.find((v) => v.view_key === 'view')
+    const licenseEntry = fileWithViews.views.find((v) => v.view_key === 'license_citation')
+
+    // Show metadata onload.
+    await generateMetadata()
+
+    // This route path is used to fix relative paths in the HTML content.
+    // It is not a part of the API request parameters.
+    // Note: Keep as "exposure" (singular) to match server file paths, not the router path.
+    const routePath = `/exposure/${props.alias}`
+
+    if (viewEntry) {
+      detailHTML.value = await exposureStore.getExposureSafeHTML(
+        exposureId.value,
+        viewEntry.exposure_file_id,
+        'view',
+        'index.html',
+        routePath,
+      )
+    }
+
+    if (licenseEntry) {
+      licenseInfo.value = await exposureStore.getExposureSafeHTML(
+        exposureId.value,
+        licenseEntry.exposure_file_id,
+        'license_citation',
+        'license.txt',
+        routePath,
+      )
+    }
+
+    // Load codegen view with default language.
+    if (props.view === 'cellml_codegen') {
+      await loadCodegenView()
+    }
+
+    if (props.view === 'cellml_math') {
+      await generateMath()
+    }
+  }
+}
+
 watch(detailHTML, async () => {
   if (detailHTML.value) {
     await nextTick()
     convertFirstTextNodeToTitle()
   }
 })
+
+watch(
+  () => props.file,
+  async (oldFile, newFile) => {
+    if (oldFile === newFile) return
+    await loadInitialView()
+  },
+)
 
 watch(
   () => props.view,
@@ -302,59 +374,7 @@ watch(
 onMounted(async () => {
   try {
     exposureInfo.value = await exposureStore.getExposureInfo(props.alias)
-
-    const fileWithViews = exposureInfo.value.exposure?.files?.find(
-      (file) => file.views && file.views.length > 0,
-    )
-
-    if (fileWithViews) {
-      availableViews.value = AVAILABLE_VIEWS.filter((view) =>
-        fileWithViews.views.some((v) => v.view_key === view.view_key),
-      )
-      exposureFileId.value = fileWithViews.id
-      exposureFilePath.value = fileWithViews.workspace_file_path
-      exposureId.value = fileWithViews.exposure_id
-
-      const viewEntry = fileWithViews.views.find((v) => v.view_key === 'view')
-      const licenseEntry = fileWithViews.views.find((v) => v.view_key === 'license_citation')
-
-      // Show metadata onload.
-      await generateMetadata()
-
-      // This route path is used to fix relative paths in the HTML content.
-      // It is not a part of the API request parameters.
-      // Note: Keep as "exposure" (singular) to match server file paths, not the router path.
-      const routePath = `/exposure/${props.alias}`
-
-      if (viewEntry) {
-        detailHTML.value = await exposureStore.getExposureSafeHTML(
-          exposureId.value,
-          viewEntry.exposure_file_id,
-          'view',
-          'index.html',
-          routePath,
-        )
-      }
-
-      if (licenseEntry) {
-        licenseInfo.value = await exposureStore.getExposureSafeHTML(
-          exposureId.value,
-          licenseEntry.exposure_file_id,
-          'license_citation',
-          'license.txt',
-          routePath,
-        )
-      }
-
-      // Load codegen view with default language.
-      if (props.view === 'cellml_codegen') {
-        await loadCodegenView()
-      }
-
-      if (props.view === 'cellml_math') {
-        await generateMath()
-      }
-    }
+    await loadInitialView()
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to load exposure'
     console.error('Error loading exposure:', err)
