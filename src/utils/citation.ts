@@ -36,8 +36,8 @@ export const formatCitation = (citation: any): string => {
     const authorStrings = citation.authors.map((author: any) => {
       const family = author.family || ''
       const given = author.given || ''
-      const initials = given ? given.charAt(0).toUpperCase() + '.' : ''
-      return `${family}${initials ? ', ' + initials : ''}`
+      const initials = given ? `${given.charAt(0).toUpperCase()}.` : ''
+      return `${family}${initials ? `, ${initials}` : ''}`
     })
 
     if (authorStrings.length === 1) {
@@ -57,12 +57,12 @@ export const formatCitation = (citation: any): string => {
 
   // Title
   if (citation.title) {
-    parts.push(citation.title + '.')
+    parts.push(`${citation.title}.`)
   }
 
   // Journal
   if (citation.journal) {
-    parts.push(citation.journal + ',')
+    parts.push(`${citation.journal},`)
   }
 
   // Volume and Pages
@@ -73,7 +73,7 @@ export const formatCitation = (citation: any): string => {
     } else if (citation.first_page) {
       volumeSection += `, ${citation.first_page}`
     }
-    parts.push(volumeSection + '.')
+    parts.push(`${volumeSection}.`)
   }
 
   return parts.join(' ')
