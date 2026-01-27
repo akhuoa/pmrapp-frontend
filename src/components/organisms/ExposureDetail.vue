@@ -1,9 +1,11 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
+import CopyButton from '@/components/atoms/CopyButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
@@ -13,6 +15,7 @@ import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { getArchiveDownloadUrls, getCombineArchiveUrl } from '@/services/downloadUrlService'
 import { useExposureStore } from '@/stores/exposure'
+import type { Citation } from '@/types/citation'
 import type { ExposureInfo } from '@/types/exposure'
 import { trackButtonClick } from '@/utils/analytics'
 import { formatCitation, formatCitationAuthors } from '@/utils/citation'
@@ -20,9 +23,6 @@ import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download
 import { formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
 import TermButton from '../atoms/TermButton.vue'
-import { useRouter } from 'vue-router'
-import CopyButton from '@/components/atoms/CopyButton.vue'
-import type { Citation } from '@/types/citation'
 
 const props = defineProps<{
   alias: string
