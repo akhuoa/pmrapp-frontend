@@ -253,6 +253,17 @@ const generateMetadata = async () => {
   metadataJSON.value = JSON.parse(metadata)
 }
 
+const loadDefaultView = async () => {
+  const routePath = `/exposure/${props.alias}`
+  detailHTML.value = await exposureStore.getExposureSafeHTML(
+    exposureId.value,
+    exposureFileId.value,
+    'view',
+    'index.html',
+    routePath,
+  )
+}
+
 const loadCodegenView = async () => {
   if (!exposureInfo.value) return
   // Load code generation view with the first language as default.
@@ -282,6 +293,8 @@ watch(
       await loadCodegenView()
     } else if (newView === 'cellml_math') {
       await generateMath()
+    } else {
+      await loadDefaultView()
     }
   },
 )
@@ -409,7 +422,7 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div v-else-if="mathsJSON.length" class="box overflow-auto">
+      <div v-else-if="props.view === 'cellml_math' && mathsJSON.length" class="box overflow-auto">
         <div v-for="value in mathsJSON" :key="value[0]"
           class="mb-6 pb-6 last:mb-0 last:pb-0 border-b border-gray-200 dark:border-gray-700 last:border-0"
         >
