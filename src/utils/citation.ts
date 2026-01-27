@@ -1,4 +1,4 @@
-import type { Author, Citation } from "@/types/citation"
+import type { Author, Citation } from '@/types/citation'
 
 /**
  * Format an array of author names to a readable string.
@@ -48,7 +48,9 @@ export const formatCitation = (citation: Citation): string => {
     } else if (authorStrings.length === 2) {
       parts.push(`${authorStrings[0] || ''}, & ${authorStrings[1] || ''}`)
     } else if (authorStrings.length > 2) {
-      parts.push(`${authorStrings.slice(0, -1).join(', ')}, & ${authorStrings[authorStrings.length - 1]}`)
+      parts.push(
+        `${authorStrings.slice(0, -1).join(', ')}, & ${authorStrings[authorStrings.length - 1]}`,
+      )
     }
   }
 

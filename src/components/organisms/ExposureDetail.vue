@@ -222,10 +222,7 @@ const generateCode = async (langPath: string) => {
 }
 
 const downloadCode = () => {
-  downloadFileFromContent(
-    generatedCode.value,
-    generatedCodeFilename.value,
-  )
+  downloadFileFromContent(generatedCode.value, generatedCodeFilename.value)
 }
 
 const generateMath = async () => {
@@ -289,9 +286,7 @@ const loadInitialView = async () => {
   let fileWithViews = filesWithViews?.[0]
 
   if (props.file) {
-    fileWithViews = filesWithViews?.find(
-      (file) => file.workspace_file_path === props.file,
-    )
+    fileWithViews = filesWithViews?.find((file) => file.workspace_file_path === props.file)
   }
 
   if (fileWithViews) {
