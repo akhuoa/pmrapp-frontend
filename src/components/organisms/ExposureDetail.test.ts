@@ -133,6 +133,8 @@ describe('ExposureDetail', () => {
     const wrapper = mount(ExposureDetail, {
       props: {
         alias: 'test-alias',
+        file: '',
+        view: '',
       },
       global: {
         stubs: {
@@ -173,6 +175,8 @@ describe('ExposureDetail', () => {
     const wrapper = mount(ExposureDetail, {
       props: {
         alias: 'test-alias',
+        file: '',
+        view: '',
       },
       global: {
         stubs: {
