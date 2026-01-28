@@ -101,6 +101,11 @@ const { goBack } = useBackNavigation('/exposures')
 
 const router = useRouter()
 
+// This route path is used to fix relative paths in the HTML content.
+// It is not a part of the API request parameters.
+// Note: Keep as "exposure" (singular) to match server file paths, not the router path.
+const routePath = `/exposure/${props.alias}`
+
 const pageTitle = computed(() => {
   if (props.view) {
     const viewEntry = AVAILABLE_VIEWS.find((v) => v.view_key === props.view)
@@ -196,7 +201,6 @@ const fileCountText = computed(() => {
 })
 
 const generateCode = async (langPath: string) => {
-  const routePath = `/exposure/${props.alias}`
   const code = await exposureStore.getExposureSafeHTML(
     exposureId.value,
     exposureFileId.value,
@@ -213,7 +217,6 @@ const downloadCode = () => {
 }
 
 const generateMath = async () => {
-  const routePath = `/exposure/${props.alias}`
   const response = await exposureStore.getExposureSafeHTML(
     exposureId.value,
     exposureFileId.value,
@@ -226,7 +229,6 @@ const generateMath = async () => {
 }
 
 const generateMetadata = async () => {
-  const routePath = `/exposure/${props.alias}`
   const metadata = await exposureStore.getExposureSafeHTML(
     exposureId.value,
     exposureFileId.value,
@@ -239,7 +241,6 @@ const generateMetadata = async () => {
 }
 
 const loadDefaultView = async () => {
-  const routePath = `/exposure/${props.alias}`
   detailHTML.value = await exposureStore.getExposureSafeHTML(
     exposureId.value,
     exposureFileId.value,
@@ -289,11 +290,6 @@ const loadInitialView = async () => {
 
     // Show metadata onload.
     await generateMetadata()
-
-    // This route path is used to fix relative paths in the HTML content.
-    // It is not a part of the API request parameters.
-    // Note: Keep as "exposure" (singular) to match server file paths, not the router path.
-    const routePath = `/exposure/${props.alias}`
 
     if (viewEntry) {
       detailHTML.value = await exposureStore.getExposureSafeHTML(
