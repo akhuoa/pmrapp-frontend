@@ -78,7 +78,7 @@ const buttonClasses = 'inline-flex items-center justify-center gap-2 cursor-poin
   <RouterLink
     v-else-if="to"
     :to="to"
-    :class="[variantClasses[variant], sizeClasses[size], disabledClasses[variant], buttonClasses]"
+    :class="[variantClasses[variant], sizeClasses[size], buttonClasses]"
     @click="handleClick"
   >
     <slot />
