@@ -37,7 +37,7 @@ interface ViewEntry {
 
 interface Metadata {
   model_title?: string
-  model_authors?: string
+  model_author?: string
   model_author_org?: string
   keywords?: string[]
   citations?: Citation[]
@@ -505,9 +505,9 @@ onMounted(async () => {
             <dt class="font-semibold mb-1">Model Title</dt>
             <dd>{{ metadataJSON.model_title }}</dd>
           </div>
-          <div v-if="metadataJSON.model_authors">
+          <div v-if="metadataJSON.model_author">
             <dt class="font-semibold mb-1">Model Authors</dt>
-            <dd>{{ metadataJSON.model_authors }}</dd>
+            <dd>{{ metadataJSON.model_author }}</dd>
           </div>
           <div v-if="metadataJSON.model_author_org">
             <dt class="font-semibold mb-1">Authoring Organization</dt>
