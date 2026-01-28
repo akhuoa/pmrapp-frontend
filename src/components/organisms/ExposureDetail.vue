@@ -17,7 +17,6 @@ import { getArchiveDownloadUrls, getCombineArchiveUrl } from '@/services/downloa
 import { useExposureStore } from '@/stores/exposure'
 import type { Citation } from '@/types/citation'
 import type { ExposureInfo } from '@/types/exposure'
-import { trackButtonClick } from '@/utils/analytics'
 import { formatCitation, formatCitationAuthors } from '@/utils/citation'
 import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
 import { formatFileCount } from '@/utils/format'
