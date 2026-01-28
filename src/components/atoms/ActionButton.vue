@@ -42,7 +42,7 @@ const handleClick = (event: Event) => {
 
 const disabledClasses = {
   primary: 'disabled:opacity-60 disabled:cursor-not-allowed',
-  secondary: 'disabled:opacity-60 disabled:cursor-not-allowed hover:bg-transparent',
+  secondary: 'disabled:opacity-60 disabled:cursor-not-allowed',
   link: 'disabled:opacity-60 disabled:cursor-not-allowed',
 }
 
@@ -50,7 +50,7 @@ const variantClasses = {
   primary:
     'px-3 py-1 rounded border border-primary bg-primary text-white hover:opacity-90 transition-opacity',
   secondary:
-    'px-3 py-1 rounded border border-primary text-primary hover:bg-primary/10 transition-colors',
+    'px-3 py-1 rounded border border-primary text-primary hover:text-primary-hover hover:shadow transition-all',
   link: 'text-primary hover:text-primary-hover transition-colors',
 }
 
