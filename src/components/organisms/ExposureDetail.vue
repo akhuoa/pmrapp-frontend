@@ -201,12 +201,11 @@ const fileCountText = computed(() => {
 })
 
 const generateCode = async (langPath: string) => {
-  const code = await exposureStore.getExposureSafeHTML(
+  const code = await exposureStore.getExposureRawContent(
     exposureId.value,
     exposureFileId.value,
     'cellml_codegen',
     langPath,
-    routePath,
   )
   generatedCode.value = code
   generatedCodeFilename.value = langPath
@@ -218,13 +217,11 @@ const downloadCode = () => {
 
 const generateMath = async () => {
   try {
-    const response = await exposureStore.getExposureSafeHTML(
+    const response = await exposureStore.getExposureRawContent(
       exposureId.value,
       exposureFileId.value,
       'cellml_math',
       'math.json',
-      routePath,
-      false,
     )
     mathsJSON.value = JSON.parse(response)
   } catch (err) {
@@ -235,13 +232,11 @@ const generateMath = async () => {
 
 const generateMetadata = async () => {
   try {
-    const metadata = await exposureStore.getExposureSafeHTML(
+    const metadata = await exposureStore.getExposureRawContent(
       exposureId.value,
       exposureFileId.value,
       'cellml_metadata',
       'cmeta.json',
-      routePath,
-      true,
     )
     metadataJSON.value = JSON.parse(metadata)
   } catch (err) {

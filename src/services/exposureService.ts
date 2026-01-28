@@ -67,11 +67,8 @@ export const exposureService = {
     viewKey: string,
     path: string,
     routePath: string,
-    safeHTML: boolean = true,
   ): Promise<string> {
-    const apiURL = safeHTML
-      ? `${API_BASE_URL}/api/exposure/safe_html/${exposureId}/${exposureFileId}/${viewKey}/${path}`
-      : `${API_BASE_URL}/api/exposure/${exposureId}/${exposureFileId}/${viewKey}/${path}`
+    const apiURL = `${API_BASE_URL}/api/exposure/safe_html/${exposureId}/${exposureFileId}/${viewKey}/${path}`
     const response = await fetch(apiURL)
 
     if (!response.ok) {
@@ -80,5 +77,21 @@ export const exposureService = {
 
     const responseText = await response.text()
     return resolveHtmlPaths(responseText, API_BASE_URL, routePath)
+  },
+
+  async getExposureRawContent(
+    exposureId: number,
+    exposureFileId: number,
+    viewKey: string,
+    path: string,
+  ): Promise<string> {
+    const apiURL = `${API_BASE_URL}/api/exposure/${exposureId}/${exposureFileId}/${viewKey}/${path}`
+    const response = await fetch(apiURL)
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch content: ${response.status}`)
+    }
+
+    return await response.text()
   },
 }
