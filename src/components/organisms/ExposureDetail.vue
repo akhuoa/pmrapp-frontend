@@ -38,7 +38,7 @@ interface Metadata {
   model_title?: string
   model_author?: string
   model_author_org?: string
-  keywords?: string[]
+  keywords?: string[][]
   citations?: Citation[]
   citation_title?: string
   citation_issued?: string
