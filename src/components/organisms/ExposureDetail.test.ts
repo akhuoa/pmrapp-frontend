@@ -79,6 +79,17 @@ describe('ExposureDetail', () => {
     expect(title.text()).toBe(titleText)
   })
 
+  it('renders html-view with content', async () => {
+    const wrapper = await mountComponent()
+
+    const htmlView = wrapper.find('.html-view')
+    expect(htmlView.exists()).toBe(true)
+
+    const modelStatusHeading = htmlView.find('h4')
+    expect(modelStatusHeading.exists()).toBe(true)
+    expect(modelStatusHeading.text()).toBe('Model Status')
+  })
+
   it('renders "Open in OpenCOR\'s Web app" link that opens in new tab', async () => {
     const wrapper = await mountComponent()
 
@@ -144,16 +155,5 @@ describe('ExposureDetail', () => {
 
     expect(sourceHeading?.exists()).toBe(true)
     expect(sourceHeading?.text()).toBe('License')
-  })
-
-  it('renders html-view with content', async () => {
-    const wrapper = await mountComponent()
-
-    const htmlView = wrapper.find('.html-view')
-    expect(htmlView.exists()).toBe(true)
-
-    const modelStatusHeading = htmlView.find('h4')
-    expect(modelStatusHeading.exists()).toBe(true)
-    expect(modelStatusHeading.text()).toBe('Model Status')
   })
 })
