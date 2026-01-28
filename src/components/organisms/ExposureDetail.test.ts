@@ -120,6 +120,43 @@ const mockExposureInfo: ExposureInfo = {
 describe('ExposureDetail', () => {
   let exposureStore: ReturnType<typeof useExposureStore>
 
+  const mountComponent = async () => {
+    vi.spyOn(exposureStore, 'getExposureInfo').mockResolvedValue(mockExposureInfo)
+    vi.spyOn(exposureStore, 'getExposureSafeHTML').mockImplementation(async (_id, _fileId, _view, filename) => {
+      if (filename === 'cmeta.json') return '{}'
+      if (filename === 'math.json') return '[]'
+      if (filename === 'license.txt') return 'https://creativecommons.org/licenses/by/3.0/'
+      return ''
+    })
+
+    const wrapper = mount(ExposureDetail, {
+      props: {
+        alias: mockExposureInfo.exposure_alias,
+        file: '',
+        view: '',
+      },
+      global: {
+        stubs: {
+          RouterLink: true,
+          BackButton: true,
+          CodeBlock: true,
+          CopyButton: true,
+          LoadingBox: true,
+          ErrorBlock: true,
+          TermButton: true,
+          ChevronDownIcon: true,
+          DownloadIcon: true,
+          FileIcon: true,
+        },
+      },
+    })
+
+    await flushPromises()
+    await nextTick()
+
+    return wrapper
+  }
+
   beforeEach(() => {
     setActivePinia(createPinia())
     exposureStore = useExposureStore()
@@ -127,39 +164,7 @@ describe('ExposureDetail', () => {
   })
 
   it('shows title', async () => {
-    vi.spyOn(exposureStore, 'getExposureInfo').mockResolvedValue(mockExposureInfo)
-    vi.spyOn(exposureStore, 'getExposureSafeHTML').mockImplementation(async (_id, _fileId, _view, filename) => {
-      if (filename === 'cmeta.json') return '{}'
-      if (filename === 'math.json') return '[]'
-      if (filename === 'license.txt') return 'https://creativecommons.org/licenses/by/3.0/'
-      return ''
-    })
-
-    const wrapper = mount(ExposureDetail, {
-      props: {
-        alias: mockExposureInfo.exposure_alias,
-        file: '',
-        view: '',
-      },
-      global: {
-        stubs: {
-          RouterLink: true,
-          BackButton: true,
-          ActionButton: true,
-          CodeBlock: true,
-          CopyButton: true,
-          LoadingBox: true,
-          ErrorBlock: true,
-          TermButton: true,
-          ChevronDownIcon: true,
-          DownloadIcon: true,
-          FileIcon: true,
-        },
-      },
-    })
-
-    await flushPromises()
-    await nextTick()
+    const wrapper = await mountComponent()
 
     const title = wrapper.find('h1')
     expect(title.exists()).toBe(true)
@@ -167,38 +172,7 @@ describe('ExposureDetail', () => {
   })
 
   it('renders "Open in OpenCOR\'s Web app" link that opens in new tab', async () => {
-    vi.spyOn(exposureStore, 'getExposureInfo').mockResolvedValue(mockExposureInfo)
-    vi.spyOn(exposureStore, 'getExposureSafeHTML').mockImplementation(async (_id, _fileId, _view, filename) => {
-      if (filename === 'cmeta.json') return '{}'
-      if (filename === 'math.json') return '[]'
-      if (filename === 'license.txt') return 'https://creativecommons.org/licenses/by/3.0/'
-      return ''
-    })
-
-    const wrapper = mount(ExposureDetail, {
-      props: {
-        alias: mockExposureInfo.exposure_alias,
-        file: '',
-        view: '',
-      },
-      global: {
-        stubs: {
-          RouterLink: true,
-          BackButton: true,
-          CodeBlock: true,
-          CopyButton: true,
-          LoadingBox: true,
-          ErrorBlock: true,
-          TermButton: true,
-          ChevronDownIcon: true,
-          DownloadIcon: true,
-          FileIcon: true,
-        },
-      },
-    })
-
-    await flushPromises()
-    await nextTick()
+    const wrapper = await mountComponent()
 
     const openCorLink = wrapper
       .findAll('a')
