@@ -341,8 +341,8 @@ watch(detailHTML, async () => {
 
 watch(
   () => props.file,
-  async (oldFile, newFile) => {
-    if (oldFile === newFile) return
+  async (newFile, oldFile) => {
+    if (newFile === oldFile) return
     await loadInitialView()
   },
 )
