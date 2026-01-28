@@ -167,7 +167,46 @@ describe('ExposureDetail', () => {
   })
 
   it('renders "Open in OpenCOR\'s Web app" link that opens in new tab', async () => {
+    vi.spyOn(exposureStore, 'getExposureInfo').mockResolvedValue(mockExposureInfo)
+    vi.spyOn(exposureStore, 'getExposureSafeHTML').mockImplementation(async (_id, _fileId, _view, filename) => {
+      if (filename === 'cmeta.json') return '{}'
+      if (filename === 'math.json') return '[]'
+      if (filename === 'license.txt') return 'https://creativecommons.org/licenses/by/3.0/'
+      return ''
+    })
 
+    const wrapper = mount(ExposureDetail, {
+      props: {
+        alias: mockExposureInfo.exposure_alias,
+        file: '',
+        view: '',
+      },
+      global: {
+        stubs: {
+          RouterLink: true,
+          BackButton: true,
+          CodeBlock: true,
+          CopyButton: true,
+          LoadingBox: true,
+          ErrorBlock: true,
+          TermButton: true,
+          ChevronDownIcon: true,
+          DownloadIcon: true,
+          FileIcon: true,
+        },
+      },
+    })
+
+    await flushPromises()
+    await nextTick()
+
+    const openCorLink = wrapper
+      .findAll('a')
+      .find((link) => link.text().trim() === "Open in OpenCOR's Web app")
+
+    expect(openCorLink?.exists()).toBe(true)
+    expect(openCorLink?.attributes('target')).toBe('_blank')
+    expect(openCorLink?.attributes('rel')).toBe('noopener noreferrer')
   })
 
   it('calls trackButtonClick when "Open in OpenCOR\'s Web app" is clicked', async () => {
