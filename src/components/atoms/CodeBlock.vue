@@ -4,7 +4,8 @@ import Prism from 'prismjs'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import 'prismjs/components/prism-markup'
 import 'prismjs/components/prism-css'
-import 'prismjs/components/prism-clike'
+import 'prismjs/components/prism-c'
+import 'prismjs/components/prism-cpp'
 import 'prismjs/components/prism-fortran'
 import 'prismjs/components/prism-javascript'
 import 'prismjs/components/prism-python'
@@ -36,9 +37,9 @@ const detectedLanguage = computed(() => {
     css: 'css',
     scss: 'css',
     sass: 'css',
-    c: 'clike',
-    cpp: 'clike',
-    h: 'clike',
+    c: 'c',
+    cpp: 'cpp',
+    h: 'cpp',
     fortran: 'fortran',
     f77: 'fortran',
     html: 'markup',
