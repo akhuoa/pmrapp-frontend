@@ -555,7 +555,7 @@ onMounted(async () => {
               <ActionButton
                 variant="secondary"
                 size="sm"
-                :to="`/exposures/${alias}/${exposureFilePath}/${view.view_key}`"
+                :to="`/exposures/${props.alias}/${exposureFilePath}/${view.view_key}`"
                 content-section="Exposure Detail"
               >
                 {{ view.name }}
@@ -574,7 +574,7 @@ onMounted(async () => {
               class="text-sm"
             >
               <RouterLink
-                :to="`/exposures/${alias}/${entry[0]}`"
+                :to="`/exposures/${props.alias}/${entry[0]}`"
                 class="text-link inline-flex items-center gap-2 break-all"
               >
                 <span class="text-foreground">›</span>
