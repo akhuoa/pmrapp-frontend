@@ -26,7 +26,7 @@ describe('ExposureDetail', () => {
   const mountComponent = async () => {
     vi.spyOn(exposureStore, 'getExposureInfo').mockResolvedValue(mockExposureInfo)
     vi.spyOn(exposureStore, 'getExposureSafeHTML').mockImplementation(async (_id, _fileId, _view, filename) => {
-      if (filename === 'index.html') return ''
+      if (filename === 'index.html') return '<h4>Model Status</h4>'
       if (filename === 'license.txt') return 'https://creativecommons.org/licenses/by/3.0/'
       return ''
     })
@@ -144,5 +144,16 @@ describe('ExposureDetail', () => {
 
     expect(sourceHeading?.exists()).toBe(true)
     expect(sourceHeading?.text()).toBe('License')
+  })
+
+  it('renders html-view with content', async () => {
+    const wrapper = await mountComponent()
+
+    const htmlView = wrapper.find('.html-view')
+    expect(htmlView.exists()).toBe(true)
+
+    const modelStatusHeading = htmlView.find('h4')
+    expect(modelStatusHeading.exists()).toBe(true)
+    expect(modelStatusHeading.text()).toBe('Model Status')
   })
 })
