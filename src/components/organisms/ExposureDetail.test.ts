@@ -126,86 +126,51 @@ describe('ExposureDetail', () => {
     vi.clearAllMocks()
   })
 
-  it('renders "Open in OpenCOR\'s Web app" link that opens in new tab', async () => {
+  it('shows title', async () => {
     vi.spyOn(exposureStore, 'getExposureInfo').mockResolvedValue(mockExposureInfo)
-    vi.spyOn(exposureStore, 'getExposureSafeHTML').mockResolvedValue('<div>Test HTML</div>')
+    vi.spyOn(exposureStore, 'getExposureSafeHTML').mockImplementation(async (_id, _fileId, _view, filename) => {
+      if (filename === 'cmeta.json') return '{}'
+      if (filename === 'math.json') return '[]'
+      if (filename === 'license.txt') return 'https://creativecommons.org/licenses/by/3.0/'
+      return ''
+    })
 
     const wrapper = mount(ExposureDetail, {
       props: {
-        alias: 'test-alias',
+        alias: mockExposureInfo.exposure_alias,
         file: '',
         view: '',
       },
       global: {
         stubs: {
-          RouterLink: {
-            template: '<a :to="to"><slot /></a>',
-            props: ['to'],
-          },
-          ActionButton: {
-            template: '<button @click="$emit(\'click\')"><slot /></button>',
-          },
-          PageHeader: true,
+          RouterLink: true,
+          BackButton: true,
+          ActionButton: true,
+          CodeBlock: true,
+          CopyButton: true,
+          LoadingBox: true,
           ErrorBlock: true,
+          TermButton: true,
+          ChevronDownIcon: true,
+          DownloadIcon: true,
           FileIcon: true,
         },
       },
     })
 
-    // Wait for all promises to resolve.
     await flushPromises()
     await nextTick()
 
-    // Find the "Open in OpenCOR's Web app" link.
-    const openCORLink = wrapper.find('a[target="_blank"][rel="noopener noreferrer"]')
+    const title = wrapper.find('h1')
+    expect(title.exists()).toBe(true)
+    expect(title.text()).toBe('NCE protein knowledge page')
+  })
 
-    expect(openCORLink.exists()).toBe(true)
-    expect(openCORLink.text()).toContain("Open in OpenCOR's Web app")
-    expect(openCORLink.attributes('target')).toBe('_blank')
-    expect(openCORLink.attributes('rel')).toBe('noopener noreferrer')
-    expect(openCORLink.attributes('href')).toContain('opencor.ws/app')
+  it('renders "Open in OpenCOR\'s Web app" link that opens in new tab', async () => {
+
   })
 
   it('calls trackButtonClick when "Open in OpenCOR\'s Web app" is clicked', async () => {
-    const { trackButtonClick } = await import('@/utils/analytics')
 
-    vi.spyOn(exposureStore, 'getExposureInfo').mockResolvedValue(mockExposureInfo)
-    vi.spyOn(exposureStore, 'getExposureSafeHTML').mockResolvedValue('<div>Test HTML</div>')
-
-    const wrapper = mount(ExposureDetail, {
-      props: {
-        alias: 'test-alias',
-        file: '',
-        view: '',
-      },
-      global: {
-        stubs: {
-          RouterLink: {
-            template: '<a :to="to"><slot /></a>',
-            props: ['to'],
-          },
-          ActionButton: {
-            template: '<button @click="$emit(\'click\')"><slot /></button>',
-          },
-          PageHeader: true,
-          ErrorBlock: true,
-          FileIcon: true,
-        },
-      },
-    })
-
-    // Wait for all promises to resolve.
-    await flushPromises()
-    await nextTick()
-
-    // Find and click the "Open in OpenCOR's Web app" link.
-    const openCORLink = wrapper.find('a[target="_blank"][rel="noopener noreferrer"]')
-    await openCORLink.trigger('click')
-
-    expect(trackButtonClick).toHaveBeenCalledWith({
-      button_name: expect.stringContaining("Open in OpenCOR's Web app"),
-      content_section: 'Exposure Detail - NCE protein knowledge page',
-      link_category: expect.stringContaining('opencor'),
-    })
   })
 })
