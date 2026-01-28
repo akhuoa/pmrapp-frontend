@@ -163,7 +163,7 @@ describe('ExposureDetail', () => {
     vi.clearAllMocks()
   })
 
-  it('shows title', async () => {
+  it('renders title with "NCE protein knowledge page"', async () => {
     const wrapper = await mountComponent()
 
     const title = wrapper.find('h1')
@@ -183,7 +183,58 @@ describe('ExposureDetail', () => {
     expect(openCorLink?.attributes('rel')).toBe('noopener noreferrer')
   })
 
-  it('calls trackButtonClick when "Open in OpenCOR\'s Web app" is clicked', async () => {
+  it('renders h4 with "Source" text', async () => {
+    const wrapper = await mountComponent()
 
+    const sourceHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'Source')
+
+    expect(sourceHeading?.exists()).toBe(true)
+    expect(sourceHeading?.text()).toBe('Source')
+  })
+
+  it('renders h4 with "Views Available" text', async () => {
+    const wrapper = await mountComponent()
+
+    const sourceHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'Views Available')
+
+    expect(sourceHeading?.exists()).toBe(true)
+    expect(sourceHeading?.text()).toBe('Views Available')
+  })
+
+  it('renders h4 with "Navigation" text', async () => {
+    const wrapper = await mountComponent()
+
+    const sourceHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'Navigation')
+
+    expect(sourceHeading?.exists()).toBe(true)
+    expect(sourceHeading?.text()).toBe('Navigation')
+  })
+
+  it('renders h4 with "Downloads" text', async () => {
+    const wrapper = await mountComponent()
+
+    const sourceHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'Downloads')
+
+    expect(sourceHeading?.exists()).toBe(true)
+    expect(sourceHeading?.text()).toBe('Downloads')
+  })
+
+  it('renders h4 with "License" text', async () => {
+    const wrapper = await mountComponent()
+
+    const sourceHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'License')
+
+    expect(sourceHeading?.exists()).toBe(true)
+    expect(sourceHeading?.text()).toBe('License')
   })
 })
