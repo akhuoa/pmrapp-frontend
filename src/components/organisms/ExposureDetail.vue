@@ -45,7 +45,7 @@ interface Metadata {
   citation_issued?: string
   citation_id?: string
   citation_bibliographicCitation?: string
-  citation_authors?: string[]
+  citation_authors?: string[][]
 }
 
 const DEFAULT_LICENSE = 'https://creativecommons.org/licenses/by/3.0/'
