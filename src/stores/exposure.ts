@@ -109,6 +109,35 @@ export const useExposureStore = defineStore('exposure', () => {
     }
   }
 
+  const getExposureRawContent = async (
+    exposureId: number,
+    exposureFileId: number,
+    viewKey: string,
+    path: string,
+  ): Promise<string> => {
+    const cacheKey = `${exposureId}:${exposureFileId}:${viewKey}:${path}:raw`
+
+    // Check cache first.
+    const cached = exposureHTMLCache.value.get(cacheKey)
+    if (cached) {
+      return cached
+    }
+
+    try {
+      const content = await getExposureService().getExposureRawContent(
+        exposureId,
+        exposureFileId,
+        viewKey,
+        path,
+      )
+      exposureHTMLCache.value.set(cacheKey, content)
+      return content
+    } catch (err) {
+      console.error(`Error loading raw content for exposure ${exposureId}:`, err)
+      throw err
+    }
+  }
+
   const clearCache = (): void => {
     exposures.value = []
     exposureInfoCache.value.clear()
@@ -127,6 +156,7 @@ export const useExposureStore = defineStore('exposure', () => {
     getExposureInfo,
     getExposureFileInfo,
     getExposureSafeHTML,
+    getExposureRawContent,
     clearCache,
   }
 })
