@@ -116,7 +116,7 @@ const pageTitle = computed(() => {
       return `${viewEntry.name}`
     }
   }
-  if (!exposureInfo.value) return 'No information.'
+  if (!exposureInfo.value) return ''
   return exposureInfo.value.exposure.description || `Exposure ${exposureInfo.value.exposure.id}`
 })
 
