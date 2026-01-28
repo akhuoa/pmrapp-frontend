@@ -1,8 +1,9 @@
 import type { Author, Citation } from '@/types/citation'
 
 /**
- * Format an array of author names to a readable string.
- * @param authors Array of author name strings.
+ * Format an array of author name arrays to a readable string.
+ * Each author should be an array of name parts, typically [lastName, firstName, middleInitial].
+ * @param authors Array of author name arrays.
  * @returns Formatted author string.
  */
 export const formatCitationAuthors = (authors: string[][]): string => {
