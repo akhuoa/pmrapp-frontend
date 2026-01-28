@@ -5,17 +5,16 @@ import type { Author, Citation } from '@/types/citation'
  * @param authors Array of author name strings.
  * @returns Formatted author string.
  */
-export const formatCitationAuthors = (authors: string[]): string => {
+export const formatCitationAuthors = (authors: string[][]): string => {
   return authors
-    .map((author) => {
-      const parts = author
-      if (parts.length === 3) {
-        const [lastName, firstName, middleInitial] = parts
+    .map((authorParts) => {
+      if (authorParts.length === 3) {
+        const [lastName, firstName, middleInitial] = authorParts
         return middleInitial
           ? `${firstName} ${middleInitial}. ${lastName}`
           : `${firstName} ${lastName}`
       }
-      return author
+      return authorParts.join(' ')
     })
     .join(', ')
 }
