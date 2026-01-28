@@ -217,27 +217,37 @@ const downloadCode = () => {
 }
 
 const generateMath = async () => {
-  const response = await exposureStore.getExposureSafeHTML(
-    exposureId.value,
-    exposureFileId.value,
-    'cellml_math',
-    'math.json',
-    routePath,
-    false,
-  )
-  mathsJSON.value = JSON.parse(response)
+  try {
+    const response = await exposureStore.getExposureSafeHTML(
+      exposureId.value,
+      exposureFileId.value,
+      'cellml_math',
+      'math.json',
+      routePath,
+      false,
+    )
+    mathsJSON.value = JSON.parse(response)
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Failed to parse mathematics data'
+    console.error('Error parsing mathematics JSON:', err)
+  }
 }
 
 const generateMetadata = async () => {
-  const metadata = await exposureStore.getExposureSafeHTML(
-    exposureId.value,
-    exposureFileId.value,
-    'cellml_metadata',
-    'cmeta.json',
-    routePath,
-    true,
-  )
-  metadataJSON.value = JSON.parse(metadata)
+  try {
+    const metadata = await exposureStore.getExposureSafeHTML(
+      exposureId.value,
+      exposureFileId.value,
+      'cellml_metadata',
+      'cmeta.json',
+      routePath,
+      true,
+    )
+    metadataJSON.value = JSON.parse(metadata)
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Failed to parse metadata'
+    console.error('Error parsing metadata JSON:', err)
+  }
 }
 
 const loadDefaultView = async () => {
