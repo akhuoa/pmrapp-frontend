@@ -21,100 +21,394 @@ vi.mock('@/utils/analytics', () => ({
 }))
 
 const mockExposureInfo: ExposureInfo = {
-  exposure: {
-    id: 1,
-    description: 'NCE protein knowledge page',
-    workspace_id: 2,
-    workspace_tag_id: null,
-    commit_id: '536fb3ace66e523b5ad41b5333faf90f1251df51',
-    created_ts: 1765425335,
-    default_file_id: null,
-    files: [
+  "exposure": {
+    "id": 523,
+    "description": "Baylor, Hollingworth, Chandler, 2002",
+    "workspace_id": 682,
+    "workspace_tag_id": null,
+    "commit_id": "29a94f9c5718c0aa7438593c2e55d1a2088eeb19",
+    "created_ts": 1768824129,
+    "default_file_id": null,
+    "files": [
       {
-        id: 1,
-        exposure_id: 1,
-        workspace_file_path: 'exposure/alphafold_NCE2.png',
-        default_view_id: null,
-        views: [],
+        "id": 598,
+        "exposure_id": 523,
+        "workspace_file_path": "baylor_hollingworth_chandler_2002_a.cellml",
+        "default_view_id": null,
+        "views": [
+          {
+            "id": 1440,
+            "exposure_file_id": 598,
+            "view_task_template_id": 2,
+            "exposure_file_view_task_id": 1440,
+            "view_key": "view",
+            "updated_ts": 1768824129
+          },
+          {
+            "id": 1441,
+            "exposure_file_id": 598,
+            "view_task_template_id": 3,
+            "exposure_file_view_task_id": 1441,
+            "view_key": "cellml_codegen",
+            "updated_ts": 1768824129
+          },
+          {
+            "id": 1442,
+            "exposure_file_id": 598,
+            "view_task_template_id": 4,
+            "exposure_file_view_task_id": 1442,
+            "view_key": "cellml_math",
+            "updated_ts": 1768824129
+          },
+          {
+            "id": 1443,
+            "exposure_file_id": 598,
+            "view_task_template_id": 5,
+            "exposure_file_view_task_id": 1443,
+            "view_key": "cellml_metadata",
+            "updated_ts": 1768824129
+          },
+          {
+            "id": 1444,
+            "exposure_file_id": 598,
+            "view_task_template_id": 6,
+            "exposure_file_view_task_id": 1444,
+            "view_key": "license_citation",
+            "updated_ts": 1768824129
+          },
+          {
+            "id": 1445,
+            "exposure_file_id": 598,
+            "view_task_template_id": 7,
+            "exposure_file_view_task_id": 1445,
+            "view_key": "references",
+            "updated_ts": 1768824129
+          }
+        ]
       },
       {
-        id: 2,
-        exposure_id: 1,
-        workspace_file_path: 'BG_NCE.cellml',
-        default_view_id: null,
-        views: [
+        "id": 599,
+        "exposure_id": 523,
+        "workspace_file_path": "baylor_hollingworth_chandler_2002_b.cellml",
+        "default_view_id": null,
+        "views": [
           {
-            id: 1,
-            exposure_file_id: 2,
-            view_task_template_id: 2,
-            exposure_file_view_task_id: 1,
-            view_key: 'view',
-            updated_ts: 1765425335,
+            "id": 1446,
+            "exposure_file_id": 599,
+            "view_task_template_id": 2,
+            "exposure_file_view_task_id": 1446,
+            "view_key": "view",
+            "updated_ts": 1768824129
           },
           {
-            id: 2,
-            exposure_file_id: 2,
-            view_task_template_id: 3,
-            exposure_file_view_task_id: 2,
-            view_key: 'cellml_codegen',
-            updated_ts: 1765425335,
+            "id": 1447,
+            "exposure_file_id": 599,
+            "view_task_template_id": 3,
+            "exposure_file_view_task_id": 1447,
+            "view_key": "cellml_codegen",
+            "updated_ts": 1768824129
           },
           {
-            id: 3,
-            exposure_file_id: 2,
-            view_task_template_id: 4,
-            exposure_file_view_task_id: 3,
-            view_key: 'cellml_math',
-            updated_ts: 1765425335,
+            "id": 1448,
+            "exposure_file_id": 599,
+            "view_task_template_id": 4,
+            "exposure_file_view_task_id": 1448,
+            "view_key": "cellml_math",
+            "updated_ts": 1768824129
           },
           {
-            id: 4,
-            exposure_file_id: 2,
-            view_task_template_id: 5,
-            exposure_file_view_task_id: 4,
-            view_key: 'cellml_metadata',
-            updated_ts: 1765425335,
+            "id": 1449,
+            "exposure_file_id": 599,
+            "view_task_template_id": 5,
+            "exposure_file_view_task_id": 1449,
+            "view_key": "cellml_metadata",
+            "updated_ts": 1768824129
           },
           {
-            id: 5,
-            exposure_file_id: 2,
-            view_task_template_id: 6,
-            exposure_file_view_task_id: 5,
-            view_key: 'license_citation',
-            updated_ts: 1765425335,
+            "id": 1450,
+            "exposure_file_id": 599,
+            "view_task_template_id": 6,
+            "exposure_file_view_task_id": 1450,
+            "view_key": "license_citation",
+            "updated_ts": 1768824129
           },
           {
-            id: 6,
-            exposure_file_id: 2,
-            view_task_template_id: 7,
-            exposure_file_view_task_id: 6,
-            view_key: 'references',
-            updated_ts: 1765425335,
-          },
-        ],
+            "id": 1451,
+            "exposure_file_id": 599,
+            "view_task_template_id": 7,
+            "exposure_file_view_task_id": 1451,
+            "view_key": "references",
+            "updated_ts": 1768824129
+          }
+        ]
       },
+      {
+        "id": 600,
+        "exposure_id": 523,
+        "workspace_file_path": "baylor_hollingworth_chandler_2002_c.cellml",
+        "default_view_id": null,
+        "views": [
+          {
+            "id": 1452,
+            "exposure_file_id": 600,
+            "view_task_template_id": 2,
+            "exposure_file_view_task_id": 1452,
+            "view_key": "view",
+            "updated_ts": 1768824129
+          },
+          {
+            "id": 1453,
+            "exposure_file_id": 600,
+            "view_task_template_id": 3,
+            "exposure_file_view_task_id": 1453,
+            "view_key": "cellml_codegen",
+            "updated_ts": 1768824129
+          },
+          {
+            "id": 1454,
+            "exposure_file_id": 600,
+            "view_task_template_id": 4,
+            "exposure_file_view_task_id": 1454,
+            "view_key": "cellml_math",
+            "updated_ts": 1768824129
+          },
+          {
+            "id": 1455,
+            "exposure_file_id": 600,
+            "view_task_template_id": 5,
+            "exposure_file_view_task_id": 1455,
+            "view_key": "cellml_metadata",
+            "updated_ts": 1768824129
+          },
+          {
+            "id": 1456,
+            "exposure_file_id": 600,
+            "view_task_template_id": 6,
+            "exposure_file_view_task_id": 1456,
+            "view_key": "license_citation",
+            "updated_ts": 1768824129
+          },
+          {
+            "id": 1457,
+            "exposure_file_id": 600,
+            "view_task_template_id": 7,
+            "exposure_file_view_task_id": 1457,
+            "view_key": "references",
+            "updated_ts": 1768824130
+          }
+        ]
+      },
+      {
+        "id": 601,
+        "exposure_id": 523,
+        "workspace_file_path": "baylor_hollingworth_chandler_2002_d.cellml",
+        "default_view_id": null,
+        "views": [
+          {
+            "id": 1458,
+            "exposure_file_id": 601,
+            "view_task_template_id": 2,
+            "exposure_file_view_task_id": 1458,
+            "view_key": "view",
+            "updated_ts": 1768824130
+          },
+          {
+            "id": 1459,
+            "exposure_file_id": 601,
+            "view_task_template_id": 3,
+            "exposure_file_view_task_id": 1459,
+            "view_key": "cellml_codegen",
+            "updated_ts": 1768824130
+          },
+          {
+            "id": 1460,
+            "exposure_file_id": 601,
+            "view_task_template_id": 4,
+            "exposure_file_view_task_id": 1460,
+            "view_key": "cellml_math",
+            "updated_ts": 1768824130
+          },
+          {
+            "id": 1461,
+            "exposure_file_id": 601,
+            "view_task_template_id": 5,
+            "exposure_file_view_task_id": 1461,
+            "view_key": "cellml_metadata",
+            "updated_ts": 1768824130
+          },
+          {
+            "id": 1462,
+            "exposure_file_id": 601,
+            "view_task_template_id": 6,
+            "exposure_file_view_task_id": 1462,
+            "view_key": "license_citation",
+            "updated_ts": 1768824130
+          },
+          {
+            "id": 1463,
+            "exposure_file_id": 601,
+            "view_task_template_id": 7,
+            "exposure_file_view_task_id": 1463,
+            "view_key": "references",
+            "updated_ts": 1768824130
+          }
+        ]
+      },
+      {
+        "id": 602,
+        "exposure_id": 523,
+        "workspace_file_path": "baylor_hollingworth_chandler_2002_e.cellml",
+        "default_view_id": null,
+        "views": [
+          {
+            "id": 1464,
+            "exposure_file_id": 602,
+            "view_task_template_id": 2,
+            "exposure_file_view_task_id": 1464,
+            "view_key": "view",
+            "updated_ts": 1768824130
+          },
+          {
+            "id": 1465,
+            "exposure_file_id": 602,
+            "view_task_template_id": 3,
+            "exposure_file_view_task_id": 1465,
+            "view_key": "cellml_codegen",
+            "updated_ts": 1768824130
+          },
+          {
+            "id": 1466,
+            "exposure_file_id": 602,
+            "view_task_template_id": 4,
+            "exposure_file_view_task_id": 1466,
+            "view_key": "cellml_math",
+            "updated_ts": 1768824130
+          },
+          {
+            "id": 1467,
+            "exposure_file_id": 602,
+            "view_task_template_id": 5,
+            "exposure_file_view_task_id": 1467,
+            "view_key": "cellml_metadata",
+            "updated_ts": 1768824130
+          },
+          {
+            "id": 1468,
+            "exposure_file_id": 602,
+            "view_task_template_id": 6,
+            "exposure_file_view_task_id": 1468,
+            "view_key": "license_citation",
+            "updated_ts": 1768824130
+          },
+          {
+            "id": 1469,
+            "exposure_file_id": 602,
+            "view_task_template_id": 7,
+            "exposure_file_view_task_id": 1469,
+            "view_key": "references",
+            "updated_ts": 1768824130
+          }
+        ]
+      },
+      {
+        "id": 603,
+        "exposure_id": 523,
+        "workspace_file_path": "baylor_hollingworth_chandler_2002_f.cellml",
+        "default_view_id": null,
+        "views": [
+          {
+            "id": 1470,
+            "exposure_file_id": 603,
+            "view_task_template_id": 2,
+            "exposure_file_view_task_id": 1470,
+            "view_key": "view",
+            "updated_ts": 1768824130
+          },
+          {
+            "id": 1471,
+            "exposure_file_id": 603,
+            "view_task_template_id": 3,
+            "exposure_file_view_task_id": 1471,
+            "view_key": "cellml_codegen",
+            "updated_ts": 1768824130
+          },
+          {
+            "id": 1472,
+            "exposure_file_id": 603,
+            "view_task_template_id": 4,
+            "exposure_file_view_task_id": 1472,
+            "view_key": "cellml_math",
+            "updated_ts": 1768824130
+          },
+          {
+            "id": 1473,
+            "exposure_file_id": 603,
+            "view_task_template_id": 5,
+            "exposure_file_view_task_id": 1473,
+            "view_key": "cellml_metadata",
+            "updated_ts": 1768824130
+          },
+          {
+            "id": 1474,
+            "exposure_file_id": 603,
+            "view_task_template_id": 6,
+            "exposure_file_view_task_id": 1474,
+            "view_key": "license_citation",
+            "updated_ts": 1768824130
+          },
+          {
+            "id": 1475,
+            "exposure_file_id": 603,
+            "view_task_template_id": 7,
+            "exposure_file_view_task_id": 1475,
+            "view_key": "references",
+            "updated_ts": 1768824130
+          }
+        ]
+      }
+    ]
+  },
+  "exposure_alias": "210f6601f6461be8443592ff071d2592",
+  "files": [
+    [
+      "baylor_2002.png",
+      false
     ],
-  },
-  exposure_alias: 'ce8',
-  files: [
-    ['BG_NCE.cellml', true],
-    ['NCE_annotations.rdf', false],
-    ['exposure/alphafold_NCE2.png', true],
-    ['exposure/exposure_frontpage.rst', false],
-    ['units_and_constants/constants_BG.cellml', false],
-    ['units_and_constants/ion_valency.cellml', false],
-    ['units_and_constants/units_BG.cellml', false],
+    [
+      "baylor_hollingworth_chandler_2002_a.cellml",
+      true
+    ],
+    [
+      "baylor_hollingworth_chandler_2002_b.cellml",
+      true
+    ],
+    [
+      "baylor_hollingworth_chandler_2002_c.cellml",
+      true
+    ],
+    [
+      "baylor_hollingworth_chandler_2002_d.cellml",
+      true
+    ],
+    [
+      "baylor_hollingworth_chandler_2002_e.cellml",
+      true
+    ],
+    [
+      "baylor_hollingworth_chandler_2002_f.cellml",
+      true
+    ]
   ],
-  workspace: {
-    id: 2,
-    url: 'https://models.physiomeproject.org/workspace/bd6/',
-    superceded_by_id: null,
-    description: 'NCE protein knowledge page',
-    long_description: null,
-    created_ts: 1765425314,
-    exposures: null,
+  "workspace": {
+    "id": 682,
+    "url": "https://models.physiomeproject.org/workspace/baylor_hollingworth_chandler_2002/",
+    "superceded_by_id": null,
+    "description": "Baylor, Hollingworth, Chandler, 2002",
+    "long_description": null,
+    "created_ts": 1768823983,
+    "exposures": null
   },
-  workspace_alias: 'bd6',
+  "workspace_alias": "baylor_hollingworth_chandler_2002"
 }
 
 describe('ExposureDetail', () => {
@@ -163,12 +457,13 @@ describe('ExposureDetail', () => {
     vi.clearAllMocks()
   })
 
-  it('renders title with "NCE protein knowledge page"', async () => {
+  it('renders title with correct description', async () => {
     const wrapper = await mountComponent()
+    const titleText = mockExposureInfo.exposure.description
 
     const title = wrapper.find('h1')
     expect(title.exists()).toBe(true)
-    expect(title.text()).toBe('NCE protein knowledge page')
+    expect(title.text()).toBe(titleText)
   })
 
   it('renders "Open in OpenCOR\'s Web app" link that opens in new tab', async () => {
