@@ -622,7 +622,7 @@ onMounted(async () => {
         </nav>
       </section>
       <section v-if="metadataJSON.citation_title" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
-        <h4 class="text-lg font-semibold mb-3">Citations</h4>
+        <h4 class="text-lg font-semibold mb-3">References</h4>
         <ul class="space-y-4 text-sm mb-4" v-if="metadataJSON.citations && metadataJSON.citations.length > 0">
           <li v-for="citation in metadataJSON.citations" :key="citation.id">
             <div class="group p-4 pr-8 bg-gray-50 dark:bg-gray-800 rounded-md relative">
@@ -639,7 +639,7 @@ onMounted(async () => {
         <div>
           <button
             @click="isCitationDetailsOpen = !isCitationDetailsOpen"
-            class="text-link flex items-center gap-2 text-left"
+            class="text-link text-sm flex items-center gap-2 text-left"
             :aria-expanded="isCitationDetailsOpen"
             aria-controls="citation-details"
           >
