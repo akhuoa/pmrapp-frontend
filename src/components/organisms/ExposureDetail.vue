@@ -182,18 +182,6 @@ const convertFirstTextNodeToTitle = () => {
   }
 }
 
-const handleClick = (event: Event) => {
-  const buttonText = (event.currentTarget as HTMLElement)?.textContent?.trim() || ''
-  const contentSection = `Exposure Detail - ${pageTitle.value}`
-  const link = (event.currentTarget as HTMLElement)?.getAttribute('href') || ''
-
-  trackButtonClick({
-    button_name: buttonText,
-    content_section: contentSection,
-    link_category: link,
-  })
-}
-
 const downloadFile = async (filename: string) => {
   if (!exposureInfo.value) return
 
@@ -549,8 +537,7 @@ onMounted(async () => {
                 :href="buildOpenCORURL()"
                 target="_blank"
                 rel="noopener noreferrer"
-                @click="handleClick"
-                content-section="Exposure Detail"
+                :content-section="`Exposure Detail - ${pageTitle}`"
               >
                 Open in OpenCOR's Web app
               </ActionButton>
