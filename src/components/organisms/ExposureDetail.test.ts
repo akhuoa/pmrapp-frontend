@@ -155,6 +155,10 @@ describe('ExposureDetail', () => {
 
     expect(sectionHeading?.exists()).toBe(true)
     expect(sectionHeading?.text()).toBe('Navigation')
+
+    const sectionContent = sectionHeading?.element.nextElementSibling
+    const viewItems = sectionContent?.querySelectorAll('li')
+    expect(viewItems).toHaveLength(6)
   })
 
   it('renders "Downloads" section', async () => {
@@ -166,6 +170,10 @@ describe('ExposureDetail', () => {
 
     expect(sectionHeading?.exists()).toBe(true)
     expect(sectionHeading?.text()).toBe('Downloads')
+
+    const sectionContent = sectionHeading?.element.nextElementSibling
+    const viewItems = sectionContent?.querySelectorAll('li')
+    expect(viewItems).toHaveLength(3)
   })
 
   it('renders "License" section', async () => {
@@ -177,5 +185,8 @@ describe('ExposureDetail', () => {
 
     expect(sectionHeading?.exists()).toBe(true)
     expect(sectionHeading?.text()).toBe('License')
+
+    const sectionContent = sectionHeading?.element.nextElementSibling?.textContent
+    expect(sectionContent).toContain('CC BY 3.0')
   })
 })
