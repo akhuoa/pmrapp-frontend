@@ -182,19 +182,21 @@ const pushSearchQuery = (searchKind: string, searchTerm: string) => {
           </div>
         </div>
         <div
-          class="basis-10/12 flex flex-row items-start justify-start flex-wrap gap-2 h-auto max-h-64 overflow-y-auto scrollbar-thin"
+          class="basis-10/12 h-auto max-h-64 overflow-y-auto scrollbar-thin"
         >
           <div v-if="!filteredSearchTerms?.length">
             <p class="text-gray-500 dark:text-gray-400">
               No matching {{ currentCategoryLabel }} found for {{ searchInput }}.
             </p>
           </div>
-          <TermButton
-            v-for="filteredTerm in filteredSearchTerms"
-            :key="filteredTerm"
-            :term="filteredTerm"
-            @click="handleSearchTermClick(filteredTerm)"
-          />
+          <div v-else class="flex flex-row items-start justify-start flex-wrap gap-2">
+            <TermButton
+              v-for="filteredTerm in filteredSearchTerms"
+              :key="filteredTerm"
+              :term="filteredTerm"
+              @click="handleSearchTermClick(filteredTerm)"
+            />
+          </div>
         </div>
       </div>
     </div>
