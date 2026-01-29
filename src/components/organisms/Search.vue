@@ -82,7 +82,9 @@ const loadResults = async () => {
 }
 
 const filteredTerms = computed(() => {
-  const categoryObj = searchStore.categories.find((cat) => cat.kind === (searchCategory.value === 'all' ? '' : searchCategory.value))
+  const categoryObj = searchStore.categories.find(
+    (cat) => cat.kind === (searchCategory.value === 'all' ? '' : searchCategory.value),
+  )
   if (categoryObj?.kindInfo) {
     return searchStore.categories.find((cat) => cat.kind === categoryObj.kind)?.kindInfo?.terms
   }
@@ -93,11 +95,16 @@ const currentCategoryLabel = computed(() => {
   if (searchCategory.value === 'all') {
     return 'keywords'
   }
-  return searchCategories.find((cat) => cat.value === searchCategory.value)?.label.toLowerCase() || 'options'
+  return (
+    searchCategories.find((cat) => cat.value === searchCategory.value)?.label.toLowerCase() ||
+    'options'
+  )
 })
 
 const filteredSearchTerms = computed(() => {
-  return filteredTerms.value?.filter((t) => t.toLowerCase().includes(searchInput.value.toLowerCase()))
+  return filteredTerms.value?.filter((t) =>
+    t.toLowerCase().includes(searchInput.value.toLowerCase()),
+  )
 })
 
 const handleSearch = () => {
@@ -111,7 +118,7 @@ const handleSearch = () => {
 
   if (searchCategoryObj) {
     termMatch = searchCategoryObj.kindInfo?.terms.find((term) =>
-      term.toLowerCase().includes(searchTerm.toLowerCase())
+      term.toLowerCase().includes(searchTerm.toLowerCase()),
     )
     if (termMatch) {
       searchTerm = termMatch
