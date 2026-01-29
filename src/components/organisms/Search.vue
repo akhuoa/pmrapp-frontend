@@ -93,7 +93,9 @@ const handleSearch = () => {
   const searchCategoryObj = searchStore.categories.find((cat) => cat.kind === searchKind)
 
   if (searchCategoryObj) {
-    termMatch = searchCategoryObj.kindInfo?.terms.find((term) => term.includes(searchTerm))
+    termMatch = searchCategoryObj.kindInfo?.terms.find((term) =>
+      term.toLowerCase().includes(searchTerm.toLowerCase())
+    )
     if (termMatch) {
       searchTerm = termMatch
     }
