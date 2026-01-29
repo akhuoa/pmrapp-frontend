@@ -104,6 +104,36 @@ describe('ExposureDetail', () => {
     expect(fileCountText.text()).toContain('7 items')
   })
 
+  it('renders "Source" section with correct content', async () => {
+    const wrapper = await mountComponent()
+
+    const sectionHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'Source')
+
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('Source')
+
+    const sectionContent = sectionHeading?.element.nextElementSibling?.textContent
+    expect(sectionContent).toContain('Baylor, Hollingworth, Chandler, 2002')
+    expect(sectionContent).toContain('29a94f9c5718')
+  })
+
+  it('renders "Views Available" section', async () => {
+    const wrapper = await mountComponent()
+
+    const sectionHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'Views Available')
+
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('Views Available')
+
+    const sectionContent = sectionHeading?.element.nextElementSibling
+    const viewItems = sectionContent?.querySelectorAll('li')
+    expect(viewItems).toHaveLength(3)
+  })
+
   it('renders "Open in OpenCOR\'s Web app" link that opens in new tab', async () => {
     const wrapper = await mountComponent()
 
@@ -116,33 +146,7 @@ describe('ExposureDetail', () => {
     expect(openCorLink?.attributes('rel')).toBe('noopener noreferrer')
   })
 
-  it('renders "Source" section with correct content', async () => {
-    const wrapper = await mountComponent()
-
-    const sectionHeading = wrapper
-      .findAll('h4')
-      .find((heading) => heading.text().trim() === 'Source')
-
-    expect(sectionHeading?.exists()).toBe(true)
-    expect(sectionHeading?.text()).toBe('Source')
-
-    const sourceContent = sectionHeading?.element.nextElementSibling?.textContent
-    expect(sourceContent).toContain('Baylor, Hollingworth, Chandler, 2002')
-    expect(sourceContent).toContain('29a94f9c5718')
-  })
-
-  it('renders h4 with "Views Available" text', async () => {
-    const wrapper = await mountComponent()
-
-    const sectionHeading = wrapper
-      .findAll('h4')
-      .find((heading) => heading.text().trim() === 'Views Available')
-
-    expect(sectionHeading?.exists()).toBe(true)
-    expect(sectionHeading?.text()).toBe('Views Available')
-  })
-
-  it('renders h4 with "Navigation" text', async () => {
+  it('renders "Navigation" section', async () => {
     const wrapper = await mountComponent()
 
     const sectionHeading = wrapper
@@ -153,7 +157,7 @@ describe('ExposureDetail', () => {
     expect(sectionHeading?.text()).toBe('Navigation')
   })
 
-  it('renders h4 with "Downloads" text', async () => {
+  it('renders "Downloads" section', async () => {
     const wrapper = await mountComponent()
 
     const sectionHeading = wrapper
@@ -164,7 +168,7 @@ describe('ExposureDetail', () => {
     expect(sectionHeading?.text()).toBe('Downloads')
   })
 
-  it('renders h4 with "License" text', async () => {
+  it('renders "License" section', async () => {
     const wrapper = await mountComponent()
 
     const sectionHeading = wrapper
