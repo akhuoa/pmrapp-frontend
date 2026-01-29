@@ -4,6 +4,9 @@ import Search from '@/components/organisms/Search.vue'
 </script>
 
 <template>
-  <PageHeader title="Search" description="Search for publications, authors, and more." />
+  <PageHeader
+    title="Search"
+    description="Search publications, authors, and keywords."
+  />
   <Search />
 </template>

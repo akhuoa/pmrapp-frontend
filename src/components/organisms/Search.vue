@@ -4,12 +4,13 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import CloseButton from '@/components/atoms/CloseButton.vue'
+import TermButton from '@/components/atoms/TermButton.vue'
 import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
+import SearchIcon from '@/components/icons/SearchIcon.vue'
 import KeywordBrowser from '@/components/molecules/KeywordBrowser.vue'
 import SearchResults from '@/components/molecules/SearchResults.vue'
 import { useSearchStore } from '@/stores/search'
 import type { SearchResult } from '@/types/search'
-import SearchIcon from '../icons/SearchIcon.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -22,10 +23,10 @@ const isLoading = ref(false)
 const error = ref<string | null>(null)
 const showSearchTools = ref(false)
 const searchInput = ref<string>(term.value)
-const searchCategory = ref<string>(kind.value || 'all')
+const searchInputRef = ref<HTMLInputElement | null>(null)
+const searchCategory = ref<string>(kind.value || 'citation_id')
 const isSearchFocused = ref(false)
 const searchCategories = [
-  { value: 'all', label: 'All' },
   { value: 'citation_id', label: 'Publications' },
   { value: 'citation_author_family_name', label: 'Citation Authors' },
   { value: 'model_author', label: 'Model Authors' },
@@ -33,7 +34,7 @@ const searchCategories = [
 ]
 
 onMounted(async () => {
-  const validKinds = searchCategories.map((cat) => cat.value).filter((k) => k !== 'all')
+  const validKinds = searchCategories.map((cat) => cat.value)
 
   await loadResults()
   await searchStore.fetchCategories(validKinds)
@@ -42,7 +43,7 @@ onMounted(async () => {
 // Watch for route param changes to reload results.
 watch([kind, term], async () => {
   searchInput.value = term.value
-  searchCategory.value = kind.value || 'all'
+  searchCategory.value = kind.value || 'citation_id'
 
   await loadResults()
 })
@@ -79,9 +80,31 @@ const loadResults = async () => {
   }
 }
 
+const filteredTerms = computed(() => {
+  const categoryObj = searchStore.categories.find(
+    (cat) => cat.kind === searchCategory.value,
+  )
+  if (categoryObj?.kindInfo) {
+    return searchStore.categories.find((cat) => cat.kind === categoryObj.kind)?.kindInfo?.terms
+  }
+  return []
+})
+
+const currentCategoryLabel = computed(() => {
+  return (
+    searchCategories.find((cat) => cat.value === searchCategory.value)?.label.toLowerCase() ||
+    'options'
+  )
+})
+
+const filteredSearchTerms = computed(() => {
+  return filteredTerms.value?.filter((t) =>
+    t.toLowerCase().includes(searchInput.value.toLowerCase()),
+  )
+})
+
 const handleSearch = () => {
-  const selectedKind = searchCategory.value
-  const searchKind = selectedKind === 'all' ? '' : selectedKind
+  const searchKind = searchCategory.value
   let termMatch = null
   let searchTerm = searchInput.value.trim()
   if (searchTerm === '') return
@@ -90,20 +113,31 @@ const handleSearch = () => {
 
   if (searchCategoryObj) {
     termMatch = searchCategoryObj.kindInfo?.terms.find((term) =>
-      term.toLowerCase().includes(searchTerm.toLowerCase())
+      term.toLowerCase().includes(searchTerm.toLowerCase()),
     )
     if (termMatch) {
       searchTerm = termMatch
     }
   }
 
+  pushSearchQuery(searchKind, searchTerm)
+}
+
+const handleSearchTermClick = (term: string) => {
+  const searchKind = searchCategory.value
+  // Blur the input to close the dropdown.
+  searchInputRef.value?.blur()
+  pushSearchQuery(searchKind, term)
+}
+
+const pushSearchQuery = (searchKind: string, searchTerm: string) => {
   router.push({ path: '/search', query: { kind: searchKind, term: searchTerm } })
 }
 </script>
 
 <template>
   <div
-    class="border rounded-lg overflow-hidden transition-all"
+    class="border rounded-lg transition-all relative"
     :class="isSearchFocused ? 'ring-2 ring-primary border-transparent' : 'border-gray-200 dark:border-gray-700'"
   >
     <div class="flex items-center justify-between w-full">
@@ -122,16 +156,49 @@ const handleSearch = () => {
       </div>
       <input
         type="search"
+        ref="searchInputRef"
         v-model="searchInput"
         placeholder="Search..."
         class="flex-1 px-4 py-2 border-0 focus:ring-0 outline-none"
         @focus="isSearchFocused = true"
         @blur="isSearchFocused = false"
       />
-      <button class="px-4 py-2 cursor-pointer" @click="handleSearch">
+      <button class="px-4 py-2" @click="handleSearch">
         <SearchIcon class="w-5 h-5" />
         <span class="sr-only">Search</span>
       </button>
+    </div>
+    <div
+      class="absolute top-full left-0 w-full z-200"
+      v-if="isSearchFocused && searchInput.trim().length > 0"
+      @mousedown.prevent
+    >
+      <div
+        class="mt-2 box box-small flex flex-row gap-6"
+      >
+        <div class="basis-2/12 h-64 border-r border-gray-200 dark:border-gray-700 pr-4 text-gray-600 dark:text-gray-400">
+          <div class="text-sm leading-relaxed">
+            Click on the available {{ currentCategoryLabel }} on the right to search.
+          </div>
+        </div>
+        <div
+          class="basis-10/12 h-auto max-h-64 overflow-y-auto scrollbar-thin"
+        >
+          <div v-if="!filteredSearchTerms?.length">
+            <p class="text-gray-500 dark:text-gray-400">
+              No matching {{ currentCategoryLabel }} found for {{ searchInput }}.
+            </p>
+          </div>
+          <div v-else class="flex flex-row items-start justify-start flex-wrap gap-2">
+            <TermButton
+              v-for="filteredTerm in filteredSearchTerms"
+              :key="filteredTerm"
+              :term="filteredTerm"
+              @click="handleSearchTermClick(filteredTerm)"
+            />
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <div class="flex flex-col lg:flex-row gap-6 lg:mt-8">
@@ -169,3 +236,7 @@ const handleSearch = () => {
     </main>
   </div>
 </template>
+
+<style scoped>
+@import '@/assets/box.css';
+</style>

@@ -15,7 +15,7 @@ const router = useRouter()
 const categoryFilters = ref<Map<string, string>>(new Map())
 const cellmlKeywordKind = 'cellml_keyword'
 const cellmlKeywordCategory = computed(() =>
-  searchStore.categories.filter((cat) => cat.kind === cellmlKeywordKind)
+  searchStore.categories.filter((cat) => cat.kind === cellmlKeywordKind),
 )
 
 onMounted(async () => {

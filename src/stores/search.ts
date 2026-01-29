@@ -32,7 +32,10 @@ export const useSearchStore = defineStore('search', () => {
     return now - lastFetchTime.value < CACHE_TTL
   }
 
-  const fetchCategories = async (categoryIndexes: string[] = [], forceRefresh = false): Promise<void> => {
+  const fetchCategories = async (
+    categoryIndexes: string[] = [],
+    forceRefresh = false,
+  ): Promise<void> => {
     // Use cache if valid and not forcing refresh.
     if (!forceRefresh && isCacheValid() && categories.value.length > 0) {
       return
