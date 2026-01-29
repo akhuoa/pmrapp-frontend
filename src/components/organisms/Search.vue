@@ -9,6 +9,7 @@ import KeywordBrowser from '@/components/molecules/KeywordBrowser.vue'
 import SearchResults from '@/components/molecules/SearchResults.vue'
 import { useSearchStore } from '@/stores/search'
 import type { SearchResult } from '@/types/search'
+import SearchIcon from '../icons/SearchIcon.vue'
 
 const route = useRoute()
 const searchStore = useSearchStore()
@@ -65,7 +66,27 @@ const loadResults = async () => {
 </script>
 
 <template>
-  <div class="flex flex-col lg:flex-row gap-6 lg:mt-12">
+  <div class="border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent overflow-hidden">
+    <div class="flex items-center justify-between w-full">
+      <input
+        type="search"
+        placeholder="Search..."
+        class="flex-1 px-4 py-2 border-0 focus:ring-0 outline-none"
+      />
+      <div class="border-l border-gray-200 dark:border-gray-700">
+        <select class="px-4 py-2 outline-none">
+          <option value="all">All</option>
+          <option value="publications">Publications</option>
+          <option value="authors">Authors</option>
+        </select>
+      </div>
+      <button class="px-4 py-2 cursor-pointer">
+        <SearchIcon class="w-5 h-5" />
+        <span class="sr-only">Search</span>
+      </button>
+    </div>
+  </div>
+  <div class="flex flex-col lg:flex-row gap-6 lg:mt-8">
     <aside class="w-full lg:w-80 flex-shrink-0 relative">
       <div class="lg:hidden">
         <ActionButton
