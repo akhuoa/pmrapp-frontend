@@ -15,8 +15,7 @@ import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { getArchiveDownloadUrls, getCombineArchiveUrl } from '@/services/downloadUrlService'
 import { useExposureStore } from '@/stores/exposure'
-import type { Citation } from '@/types/citation'
-import type { ExposureInfo } from '@/types/exposure'
+import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
 import { formatCitation, formatCitationAuthors } from '@/utils/citation'
 import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
 import { formatFileCount } from '@/utils/format'
@@ -28,24 +27,6 @@ const props = defineProps<{
   file: string
   view: string
 }>()
-
-interface ViewEntry {
-  name: string
-  view_key: string
-}
-
-interface Metadata {
-  model_title?: string
-  model_author?: string
-  model_author_org?: string
-  keywords?: string[][]
-  citations?: Citation[]
-  citation_title?: string
-  citation_issued?: string
-  citation_id?: string
-  citation_bibliographicCitation?: string
-  citation_authors?: string[][]
-}
 
 const DEFAULT_LICENSE = 'https://creativecommons.org/licenses/by/3.0/'
 const AVAILABLE_VIEWS = [
@@ -268,7 +249,9 @@ const handleKeywordClick = (kind: string, keyword: string) => {
 const filteredKeywords = computed(() => {
   const originalKeywords = metadataJSON.value.keywords || []
   return originalKeywords
-    .filter((keywordTuple) => Array.isArray(keywordTuple) && keywordTuple.length >= 2 && keywordTuple[1])
+    .filter(
+      (keywordTuple) => Array.isArray(keywordTuple) && keywordTuple.length >= 2 && keywordTuple[1],
+    )
     .map((keywordTuple) => keywordTuple[1] || '')
 })
 
@@ -624,7 +607,7 @@ onMounted(async () => {
           </ul>
         </nav>
       </section>
-      <section v-if="metadataJSON.citation_title" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+      <section v-if="metadataJSON.citations" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">References</h4>
         <ul class="space-y-4 text-sm mb-4" v-if="metadataJSON.citations && metadataJSON.citations.length > 0">
           <li v-for="citation in metadataJSON.citations" :key="citation.id">
