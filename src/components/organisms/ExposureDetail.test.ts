@@ -119,14 +119,14 @@ describe('ExposureDetail', () => {
   it('renders "Source" section with correct content', async () => {
     const wrapper = await mountComponent()
 
-    const sourceHeading = wrapper
+    const sectionHeading = wrapper
       .findAll('h4')
       .find((heading) => heading.text().trim() === 'Source')
 
-    expect(sourceHeading?.exists()).toBe(true)
-    expect(sourceHeading?.text()).toBe('Source')
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('Source')
 
-    const sourceContent = sourceHeading?.element.nextElementSibling?.textContent
+    const sourceContent = sectionHeading?.element.nextElementSibling?.textContent
     expect(sourceContent).toContain('Baylor, Hollingworth, Chandler, 2002')
     expect(sourceContent).toContain('29a94f9c5718')
   })
@@ -134,44 +134,44 @@ describe('ExposureDetail', () => {
   it('renders h4 with "Views Available" text', async () => {
     const wrapper = await mountComponent()
 
-    const sourceHeading = wrapper
+    const sectionHeading = wrapper
       .findAll('h4')
       .find((heading) => heading.text().trim() === 'Views Available')
 
-    expect(sourceHeading?.exists()).toBe(true)
-    expect(sourceHeading?.text()).toBe('Views Available')
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('Views Available')
   })
 
   it('renders h4 with "Navigation" text', async () => {
     const wrapper = await mountComponent()
 
-    const sourceHeading = wrapper
+    const sectionHeading = wrapper
       .findAll('h4')
       .find((heading) => heading.text().trim() === 'Navigation')
 
-    expect(sourceHeading?.exists()).toBe(true)
-    expect(sourceHeading?.text()).toBe('Navigation')
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('Navigation')
   })
 
   it('renders h4 with "Downloads" text', async () => {
     const wrapper = await mountComponent()
 
-    const sourceHeading = wrapper
+    const sectionHeading = wrapper
       .findAll('h4')
       .find((heading) => heading.text().trim() === 'Downloads')
 
-    expect(sourceHeading?.exists()).toBe(true)
-    expect(sourceHeading?.text()).toBe('Downloads')
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('Downloads')
   })
 
   it('renders h4 with "License" text', async () => {
     const wrapper = await mountComponent()
 
-    const sourceHeading = wrapper
+    const sectionHeading = wrapper
       .findAll('h4')
       .find((heading) => heading.text().trim() === 'License')
 
-    expect(sourceHeading?.exists()).toBe(true)
-    expect(sourceHeading?.text()).toBe('License')
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('License')
   })
 })
