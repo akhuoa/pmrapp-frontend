@@ -15,8 +15,7 @@ import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { getArchiveDownloadUrls, getCombineArchiveUrl } from '@/services/downloadUrlService'
 import { useExposureStore } from '@/stores/exposure'
-import type { Citation } from '@/types/citation'
-import type { ExposureInfo } from '@/types/exposure'
+import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
 import { formatCitation, formatCitationAuthors } from '@/utils/citation'
 import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
 import { formatFileCount } from '@/utils/format'
@@ -28,24 +27,6 @@ const props = defineProps<{
   file: string
   view: string
 }>()
-
-interface ViewEntry {
-  name: string
-  view_key: string
-}
-
-interface Metadata {
-  model_title?: string
-  model_author?: string
-  model_author_org?: string
-  keywords?: string[][]
-  citations?: Citation[]
-  citation_title?: string
-  citation_issued?: string
-  citation_id?: string
-  citation_bibliographicCitation?: string
-  citation_authors?: string[][]
-}
 
 const DEFAULT_LICENSE = 'https://creativecommons.org/licenses/by/3.0/'
 const AVAILABLE_VIEWS = [
