@@ -23,6 +23,7 @@ const error = ref<string | null>(null)
 const showSearchTools = ref(false)
 const searchInput = ref('')
 const searchCategory = ref('all')
+const isSearchFocused = ref(false)
 const searchCategories = [
   { value: 'all', label: 'All' },
   { value: 'citation_id', label: 'Publications' },
@@ -103,16 +104,27 @@ const handleSearch = () => {
 </script>
 
 <template>
-  <div class="border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent overflow-hidden">
+  <div
+    class="border rounded-lg overflow-hidden transition-colors"
+    :class="isSearchFocused ? 'ring-2 ring-primary border-transparent' : 'border-gray-200 dark:border-gray-700'"
+  >
     <div class="flex items-center justify-between w-full">
       <input
         type="search"
         v-model="searchInput"
         placeholder="Search..."
         class="flex-1 px-4 py-2 border-0 focus:ring-0 outline-none"
+        @focus="isSearchFocused = true"
+        @blur="isSearchFocused = false"
       />
-      <div class="border-l border-gray-200 dark:border-gray-700">
-        <select class="px-4 py-2 outline-none" v-model="searchCategory">
+      <div class="border-x border-gray-200 dark:border-gray-700 relative">
+        <ChevronDownIcon
+          class="w-4 h-4 mx-4 absolute right-0 top-1/2 transform -translate-y-1/2 pointer-events-none"
+        />
+        <select
+          class="px-4 pr-12 py-2 outline-none appearance-none bg-transparent relative cursor-pointer"
+          v-model="searchCategory"
+        >
           <option v-for="category in searchCategories" :key="category.value" :value="category.value">
             {{ category.label }}
           </option>
