@@ -3,8 +3,8 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import ExposureDetail from '@/components/organisms/ExposureDetail.vue'
+import { mockExposureInfo, mockMetadata } from '@/mocks/exposureInfo'
 import { useExposureStore } from '@/stores/exposure'
-import { mockMetadata, mockExposureInfo } from '@/mocks/exposureInfo'
 
 // Mock Vue Router.
 vi.mock('vue-router', () => ({
