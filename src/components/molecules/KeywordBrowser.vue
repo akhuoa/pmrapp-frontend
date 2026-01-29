@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import TermButton from '@/components/atoms/TermButton.vue'
 import { useSearchStore } from '@/stores/search'
@@ -13,9 +13,15 @@ defineProps<Props>()
 const searchStore = useSearchStore()
 const router = useRouter()
 const categoryFilters = ref<Map<string, string>>(new Map())
+const cellmlKeywordKind = 'cellml_keyword'
+const cellmlKeywordCategory = computed(() =>
+  searchStore.categories.filter((cat) => cat.kind === cellmlKeywordKind)
+)
 
 onMounted(async () => {
-  await searchStore.fetchCategories()
+  if (searchStore.categories.length === 0) {
+    await searchStore.fetchCategories([cellmlKeywordKind])
+  }
 })
 
 const handleTermClick = async (kind: string, term: string) => {
@@ -53,7 +59,7 @@ const getFilteredTerms = (terms: string[] | null | undefined, kind: string): str
     <div v-else class="space-y-4">
       <h3 v-if="inSidebar" class="font-semibold">Keywords</h3>
       <div
-        v-for="category in searchStore.categories"
+        v-for="category in cellmlKeywordCategory"
         :key="category.kind"
         :class="{ 'box p-6': !inSidebar }"
       >
