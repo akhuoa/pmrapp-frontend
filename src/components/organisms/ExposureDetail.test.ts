@@ -90,6 +90,20 @@ describe('ExposureDetail', () => {
     expect(modelStatusHeading.text()).toBe('Model Status')
   })
 
+  it('renders files list with 7 items', async () => {
+    const wrapper = await mountComponent()
+
+    const filesList = wrapper.find('ul.divide-y')
+    expect(filesList.exists()).toBe(true)
+
+    const listItems = filesList.findAll('li')
+    expect(listItems).toHaveLength(7)
+
+    const fileCountText = wrapper.find('.text-gray-600')
+    expect(fileCountText.exists()).toBe(true)
+    expect(fileCountText.text()).toContain('7 items')
+  })
+
   it('renders "Open in OpenCOR\'s Web app" link that opens in new tab', async () => {
     const wrapper = await mountComponent()
 
