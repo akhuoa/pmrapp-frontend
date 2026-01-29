@@ -104,8 +104,7 @@ const filteredSearchTerms = computed(() => {
 })
 
 const handleSearch = () => {
-  const selectedKind = searchCategory.value
-  const searchKind = selectedKind
+  const searchKind = searchCategory.value
   let termMatch = null
   let searchTerm = searchInput.value.trim()
   if (searchTerm === '') return
@@ -121,15 +120,18 @@ const handleSearch = () => {
     }
   }
 
-  router.push({ path: '/search', query: { kind: searchKind, term: searchTerm } })
+  pushSearchQuery(searchKind, searchTerm)
 }
 
 const handleSearchTermClick = (term: string) => {
-  const selectedKind = searchCategory.value
-  const searchKind = selectedKind
+  const searchKind = searchCategory.value
   // Blur the input to close the dropdown.
   searchInputRef.value?.blur()
-  router.push({ path: '/search', query: { kind: searchKind, term } })
+  pushSearchQuery(searchKind, term)
+}
+
+const pushSearchQuery = (searchKind: string, searchTerm: string) => {
+  router.push({ path: '/search', query: { kind: searchKind, term: searchTerm } })
 }
 </script>
 
