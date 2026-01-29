@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import ExposureDetail from '@/components/organisms/ExposureDetail.vue'
 import { useExposureStore } from '@/stores/exposure'
-import { mockExposureInfo } from '@/mocks/exposureInfo'
+import { mockMetadata, mockExposureInfo } from '@/mocks/exposureInfo'
 
 // Mock Vue Router.
 vi.mock('vue-router', () => ({
@@ -31,7 +31,7 @@ describe('ExposureDetail', () => {
       return ''
     })
     vi.spyOn(exposureStore, 'getExposureRawContent').mockImplementation(async (_id, _fileId, _view, filename) => {
-      if (filename === 'cmeta.json') return '{}'
+      if (filename === 'cmeta.json') return JSON.stringify(mockMetadata)
       if (filename === 'math.json') return '[]'
       return ''
     })
@@ -50,7 +50,7 @@ describe('ExposureDetail', () => {
           CopyButton: true,
           LoadingBox: true,
           ErrorBlock: true,
-          TermButton: true,
+          TermButton: { template: '<button><slot /></button>' },
           ChevronDownIcon: true,
           DownloadIcon: true,
           FileIcon: true,
@@ -119,6 +119,39 @@ describe('ExposureDetail', () => {
     expect(sectionContent).toContain('29a94f9c5718')
   })
 
+  it('renders "About" section with correct content', async () => {
+    const wrapper = await mountComponent()
+
+    const sectionHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'About')
+
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('About')
+
+    const sectionContent = sectionHeading?.element.nextElementSibling?.textContent
+    expect(sectionContent).toContain('Comparison of Simulated and Measured Calcium Sparks')
+    expect(sectionContent).toContain('in Intact Skeletal Muscle Fibers of the Frog')
+    expect(sectionContent).toContain('Catherine Lloyd')
+    expect(sectionContent).toContain('Auckland Bioengineering Institute')
+    expect(sectionContent).toContain('The University of Auckland')
+  })
+
+  it('renders "Keywords" section with correct content', async () => {
+    const wrapper = await mountComponent()
+
+    const sectionHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'Keywords')
+
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('Keywords')
+
+    const sectionContent = sectionHeading?.element.nextElementSibling
+    const keywordButtons = sectionContent?.querySelectorAll('button')
+    expect(keywordButtons).toHaveLength(2)
+  })
+
   it('renders "Views Available" section', async () => {
     const wrapper = await mountComponent()
 
@@ -174,6 +207,42 @@ describe('ExposureDetail', () => {
     const sectionContent = sectionHeading?.element.nextElementSibling
     const viewItems = sectionContent?.querySelectorAll('li')
     expect(viewItems).toHaveLength(3)
+  })
+
+  it('renders "References" section with citations', async () => {
+    const wrapper = await mountComponent()
+
+    const sectionHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'References')
+
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('References')
+
+    const citationList = sectionHeading?.element.nextElementSibling
+    const citationItems = citationList?.querySelectorAll('li')
+    expect(citationItems?.length).toBeGreaterThan(0)
+    expect(citationList?.textContent).toContain('Baylor, S. M., Hollingworth, S., & Chandler, W. K. (2002)')
+    expect(citationList?.textContent).toContain('Comparison of Simulated and Measured Calcium Sparks')
+    expect(citationList?.textContent).toContain('in Intact Skeletal Muscle Fibers of the Frog.')
+    expect(citationList?.textContent).toContain('Journal of General Physiology, 120, 349-368.')
+
+    const citationDetails = citationList?.nextElementSibling
+    expect(citationDetails).toBeDefined()
+    const citationDetailsButton = citationDetails?.querySelector('button')
+    expect(citationDetailsButton?.textContent).toBe('Details')
+
+    citationDetailsButton?.dispatchEvent(new Event('click'))
+    return nextTick().then(() => {
+      const citationModal = wrapper.find('#citation-details')
+      expect(citationModal.exists()).toBe(true)
+      expect(citationModal.text()).toContain('S M. Baylor, S Hollingworth, W K. Chandler')
+      expect(citationModal.text()).toContain('Comparison of Simulated and Measured Calcium Sparks')
+      expect(citationModal.text()).toContain('in Intact Skeletal Muscle Fibers of the Frog')
+      expect(citationModal.text()).toContain('urn:miriam:pubmed:12198091')
+      expect(citationModal.text()).toContain('2002-09-01')
+      expect(citationModal.text()).toContain('Journal of General Physiology')
+    })
   })
 
   it('renders "License" section', async () => {
