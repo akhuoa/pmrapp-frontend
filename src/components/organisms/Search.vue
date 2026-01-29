@@ -21,8 +21,8 @@ const searchResults = ref<SearchResult[]>([])
 const isLoading = ref(false)
 const error = ref<string | null>(null)
 const showSearchTools = ref(false)
-const searchInput = ref('')
-const searchCategory = ref('all')
+const searchInput = ref(<string>term.value)
+const searchCategory = ref(<string>(kind.value || 'all'))
 const isSearchFocused = ref(false)
 const searchCategories = [
   { value: 'all', label: 'All' },
@@ -32,18 +32,11 @@ const searchCategories = [
 ]
 
 onMounted(async () => {
-  await loadResults()
-  // Load categories if not already loaded.
-  if (searchStore.categories.length === 0) {
-    const validKinds = searchCategories.map((cat) => cat.value).filter((k) => k !== 'all')
-    validKinds.push('cellml_keyword')
+  const validKinds = searchCategories.map((cat) => cat.value).filter((k) => k !== 'all')
+  validKinds.push('cellml_keyword')
 
-    if (kind.value && validKinds.includes(kind.value)) {
-      await searchStore.fetchCategories([kind.value])
-    } else {
-      await searchStore.fetchCategories(validKinds)
-    }
-  }
+  await loadResults()
+  await searchStore.fetchCategories(validKinds)
 })
 
 // Watch for route param changes to reload results.
