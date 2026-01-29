@@ -609,7 +609,7 @@ onMounted(async () => {
       </section>
       <section v-if="metadataJSON.citations" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">References</h4>
-        <ul class="space-y-4 text-sm mb-4" v-if="metadataJSON.citations && metadataJSON.citations.length > 0">
+        <ul class="space-y-4 text-sm mb-2" v-if="metadataJSON.citations && metadataJSON.citations.length > 0">
           <li v-for="citation in metadataJSON.citations" :key="citation.id">
             <div class="group p-4 pr-8 bg-gray-50 dark:bg-gray-800 rounded-md relative">
               {{ formatCitation(citation) }}
@@ -622,6 +622,15 @@ onMounted(async () => {
             </div>
           </li>
         </ul>
+        <div v-if="metadataJSON.citation_id" class="mb-4">
+          <RouterLink
+            :to="`/search?kind=citation_id&term=${metadataJSON.citation_id}`"
+            class="text-link text-sm inline-flex items-center gap-2 break-all"
+          >
+            <span class="text-foreground">›</span>
+            See other models using this reference
+          </RouterLink>
+        </div>
         <div>
           <button
             @click="isCitationDetailsOpen = !isCitationDetailsOpen"
