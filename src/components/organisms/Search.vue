@@ -103,19 +103,11 @@ const handleSearch = () => {
 
 <template>
   <div
-    class="border rounded-lg overflow-hidden transition-colors"
+    class="border rounded-lg overflow-hidden transition-all"
     :class="isSearchFocused ? 'ring-2 ring-primary border-transparent' : 'border-gray-200 dark:border-gray-700'"
   >
     <div class="flex items-center justify-between w-full">
-      <input
-        type="search"
-        v-model="searchInput"
-        placeholder="Search..."
-        class="flex-1 px-4 py-2 border-0 focus:ring-0 outline-none"
-        @focus="isSearchFocused = true"
-        @blur="isSearchFocused = false"
-      />
-      <div class="border-x border-gray-200 dark:border-gray-700 relative">
+      <div class="border-r border-gray-200 dark:border-gray-700 relative">
         <ChevronDownIcon
           class="w-4 h-4 mx-4 absolute right-0 top-1/2 transform -translate-y-1/2 pointer-events-none"
         />
@@ -128,6 +120,14 @@ const handleSearch = () => {
           </option>
         </select>
       </div>
+      <input
+        type="search"
+        v-model="searchInput"
+        placeholder="Search..."
+        class="flex-1 px-4 py-2 border-0 focus:ring-0 outline-none"
+        @focus="isSearchFocused = true"
+        @blur="isSearchFocused = false"
+      />
       <button class="px-4 py-2 cursor-pointer" @click="handleSearch">
         <SearchIcon class="w-5 h-5" />
         <span class="sr-only">Search</span>
