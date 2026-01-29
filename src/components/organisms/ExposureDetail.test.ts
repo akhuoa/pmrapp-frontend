@@ -44,7 +44,7 @@ describe('ExposureDetail', () => {
       },
       global: {
         stubs: {
-          RouterLink: true,
+          RouterLink: { template: '<a><slot /></a>' },
           BackButton: true,
           CodeBlock: true,
           CopyButton: true,
@@ -116,7 +116,7 @@ describe('ExposureDetail', () => {
     expect(openCorLink?.attributes('rel')).toBe('noopener noreferrer')
   })
 
-  it('renders h4 with "Source" text', async () => {
+  it('renders "Source" section with correct content', async () => {
     const wrapper = await mountComponent()
 
     const sourceHeading = wrapper
@@ -125,6 +125,10 @@ describe('ExposureDetail', () => {
 
     expect(sourceHeading?.exists()).toBe(true)
     expect(sourceHeading?.text()).toBe('Source')
+
+    const sourceContent = sourceHeading?.element.nextElementSibling?.textContent
+    expect(sourceContent).toContain('Baylor, Hollingworth, Chandler, 2002')
+    expect(sourceContent).toContain('29a94f9c5718')
   })
 
   it('renders h4 with "Views Available" text', async () => {
