@@ -371,70 +371,51 @@ export const mockExposureInfo: ExposureInfo = {
 }
 
 export const mockMetadata = {
-  "citation_bibliographicCitation": "Journal of General Physiology",
-  "citation_authors": [
-      [
-          "Baylor",
-          "S",
-          "M"
-      ],
-      [
-          "Hollingworth",
-          "S",
-          ""
-      ],
-      [
-          "Chandler",
-          "W",
-          "K"
-      ]
+  citation_bibliographicCitation: 'Journal of General Physiology',
+  citation_authors: [
+    ['Baylor', 'S', 'M'],
+    ['Hollingworth', 'S', ''],
+    ['Chandler', 'W', 'K'],
   ],
-  "citation_title": "Comparison of Simulated and Measured Calcium Sparks in Intact Skeletal Muscle Fibers of the Frog",
-  "citation_id": "urn:miriam:pubmed:12198091",
-  "citation_issued": "2002-09-01",
-  "model_author": "Catherine Lloyd",
-  "model_author_org": "Auckland Bioengineering Institute, The University of Auckland",
-  "model_title": "Comparison of Simulated and Measured Calcium Sparks in Intact Skeletal Muscle Fibers of the Frog (Reaction A)",
-  "keywords": [
-      [
-          "#baylor_2002a",
-          "calcium dynamics"
-      ],
-      [
-          "#baylor_2002a",
-          "skeletal muscle"
-      ]
+  citation_title:
+    'Comparison of Simulated and Measured Calcium Sparks in Intact Skeletal Muscle Fibers of the Frog',
+  citation_id: 'urn:miriam:pubmed:12198091',
+  citation_issued: '2002-09-01',
+  model_author: 'Catherine Lloyd',
+  model_author_org: 'Auckland Bioengineering Institute, The University of Auckland',
+  model_title:
+    'Comparison of Simulated and Measured Calcium Sparks in Intact Skeletal Muscle Fibers of the Frog (Reaction A)',
+  keywords: [
+    ['#baylor_2002a', 'calcium dynamics'],
+    ['#baylor_2002a', 'skeletal muscle'],
   ],
-  "citations": [
-      {
-          "id": "urn:miriam:pubmed:12198091",
-          "authors": [
-              {
-                  "family": "Baylor",
-                  "given": "S",
-                  "other": [
-                      "M"
-                  ]
-              },
-              {
-                  "family": "Hollingworth",
-                  "given": "S",
-                  "other": []
-              },
-              {
-                  "family": "Chandler",
-                  "given": "W",
-                  "other": [
-                      "K"
-                  ]
-              }
-          ],
-          "title": "Comparison of Simulated and Measured Calcium Sparks in Intact Skeletal Muscle Fibers of the Frog",
-          "journal": "Journal of General Physiology",
-          "volume": "120",
-          "first_page": "349",
-          "last_page": "368",
-          "issued": "2002-09-01"
-      }
-  ]
+  citations: [
+    {
+      id: 'urn:miriam:pubmed:12198091',
+      authors: [
+        {
+          family: 'Baylor',
+          given: 'S',
+          other: ['M'],
+        },
+        {
+          family: 'Hollingworth',
+          given: 'S',
+          other: [],
+        },
+        {
+          family: 'Chandler',
+          given: 'W',
+          other: ['K'],
+        },
+      ],
+      title:
+        'Comparison of Simulated and Measured Calcium Sparks in Intact Skeletal Muscle Fibers of the Frog',
+      journal: 'Journal of General Physiology',
+      volume: '120',
+      first_page: '349',
+      last_page: '368',
+      issued: '2002-09-01',
+    },
+  ],
 }

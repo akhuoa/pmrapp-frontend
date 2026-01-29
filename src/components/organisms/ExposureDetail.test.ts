@@ -25,16 +25,20 @@ describe('ExposureDetail', () => {
 
   const mountComponent = async () => {
     vi.spyOn(exposureStore, 'getExposureInfo').mockResolvedValue(mockExposureInfo)
-    vi.spyOn(exposureStore, 'getExposureSafeHTML').mockImplementation(async (_id, _fileId, _view, filename) => {
-      if (filename === 'index.html') return '<h4>Model Status</h4>'
-      if (filename === 'license.txt') return 'https://creativecommons.org/licenses/by/3.0/'
-      return ''
-    })
-    vi.spyOn(exposureStore, 'getExposureRawContent').mockImplementation(async (_id, _fileId, _view, filename) => {
-      if (filename === 'cmeta.json') return JSON.stringify(mockMetadata)
-      if (filename === 'math.json') return '[]'
-      return ''
-    })
+    vi.spyOn(exposureStore, 'getExposureSafeHTML').mockImplementation(
+      async (_id, _fileId, _view, filename) => {
+        if (filename === 'index.html') return '<h4>Model Status</h4>'
+        if (filename === 'license.txt') return 'https://creativecommons.org/licenses/by/3.0/'
+        return ''
+      },
+    )
+    vi.spyOn(exposureStore, 'getExposureRawContent').mockImplementation(
+      async (_id, _fileId, _view, filename) => {
+        if (filename === 'cmeta.json') return JSON.stringify(mockMetadata)
+        if (filename === 'math.json') return '[]'
+        return ''
+      },
+    )
 
     const wrapper = mount(ExposureDetail, {
       props: {
@@ -222,8 +226,12 @@ describe('ExposureDetail', () => {
     const citationList = sectionHeading?.element.nextElementSibling
     const citationItems = citationList?.querySelectorAll('li')
     expect(citationItems?.length).toBeGreaterThan(0)
-    expect(citationList?.textContent).toContain('Baylor, S. M., Hollingworth, S., & Chandler, W. K. (2002)')
-    expect(citationList?.textContent).toContain('Comparison of Simulated and Measured Calcium Sparks')
+    expect(citationList?.textContent).toContain(
+      'Baylor, S. M., Hollingworth, S., & Chandler, W. K. (2002)',
+    )
+    expect(citationList?.textContent).toContain(
+      'Comparison of Simulated and Measured Calcium Sparks',
+    )
     expect(citationList?.textContent).toContain('in Intact Skeletal Muscle Fibers of the Frog.')
     expect(citationList?.textContent).toContain('Journal of General Physiology, 120, 349-368.')
 

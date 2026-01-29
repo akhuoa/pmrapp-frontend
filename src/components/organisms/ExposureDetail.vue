@@ -268,7 +268,9 @@ const handleKeywordClick = (kind: string, keyword: string) => {
 const filteredKeywords = computed(() => {
   const originalKeywords = metadataJSON.value.keywords || []
   return originalKeywords
-    .filter((keywordTuple) => Array.isArray(keywordTuple) && keywordTuple.length >= 2 && keywordTuple[1])
+    .filter(
+      (keywordTuple) => Array.isArray(keywordTuple) && keywordTuple.length >= 2 && keywordTuple[1],
+    )
     .map((keywordTuple) => keywordTuple[1] || '')
 })
 
