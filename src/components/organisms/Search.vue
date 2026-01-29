@@ -24,10 +24,9 @@ const error = ref<string | null>(null)
 const showSearchTools = ref(false)
 const searchInput = ref<string>(term.value)
 const searchInputRef = ref<HTMLInputElement | null>(null)
-const searchCategory = ref<string>(kind.value || 'all')
+const searchCategory = ref<string>(kind.value || 'citation_id')
 const isSearchFocused = ref(false)
 const searchCategories = [
-  { value: 'all', label: 'All' },
   { value: 'citation_id', label: 'Publications' },
   { value: 'citation_author_family_name', label: 'Citation Authors' },
   { value: 'model_author', label: 'Model Authors' },
@@ -35,7 +34,7 @@ const searchCategories = [
 ]
 
 onMounted(async () => {
-  const validKinds = searchCategories.map((cat) => cat.value).filter((k) => k !== 'all')
+  const validKinds = searchCategories.map((cat) => cat.value)
 
   await loadResults()
   await searchStore.fetchCategories(validKinds)
@@ -44,7 +43,7 @@ onMounted(async () => {
 // Watch for route param changes to reload results.
 watch([kind, term], async () => {
   searchInput.value = term.value
-  searchCategory.value = kind.value || 'all'
+  searchCategory.value = kind.value || 'citation_id'
 
   await loadResults()
 })
@@ -83,7 +82,7 @@ const loadResults = async () => {
 
 const filteredTerms = computed(() => {
   const categoryObj = searchStore.categories.find(
-    (cat) => cat.kind === (searchCategory.value === 'all' ? '' : searchCategory.value),
+    (cat) => cat.kind === searchCategory.value,
   )
   if (categoryObj?.kindInfo) {
     return searchStore.categories.find((cat) => cat.kind === categoryObj.kind)?.kindInfo?.terms
@@ -92,9 +91,6 @@ const filteredTerms = computed(() => {
 })
 
 const currentCategoryLabel = computed(() => {
-  if (searchCategory.value === 'all') {
-    return 'keywords'
-  }
   return (
     searchCategories.find((cat) => cat.value === searchCategory.value)?.label.toLowerCase() ||
     'options'
@@ -109,7 +105,7 @@ const filteredSearchTerms = computed(() => {
 
 const handleSearch = () => {
   const selectedKind = searchCategory.value
-  const searchKind = selectedKind === 'all' ? '' : selectedKind
+  const searchKind = selectedKind
   let termMatch = null
   let searchTerm = searchInput.value.trim()
   if (searchTerm === '') return
@@ -130,7 +126,7 @@ const handleSearch = () => {
 
 const handleSearchTermClick = (term: string) => {
   const selectedKind = searchCategory.value
-  const searchKind = selectedKind === 'all' ? '' : selectedKind
+  const searchKind = selectedKind
   // Blur the input to close the dropdown.
   searchInputRef.value?.blur()
   router.push({ path: '/search', query: { kind: searchKind, term } })
