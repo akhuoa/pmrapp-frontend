@@ -624,7 +624,7 @@ onMounted(async () => {
           </ul>
         </nav>
       </section>
-      <section v-if="metadataJSON.citation_title" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+      <section v-if="metadataJSON.citations" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">References</h4>
         <ul class="space-y-4 text-sm mb-4" v-if="metadataJSON.citations && metadataJSON.citations.length > 0">
           <li v-for="citation in metadataJSON.citations" :key="citation.id">
