@@ -29,11 +29,11 @@ const searchCategories = [
   { value: 'citation_id', label: 'Publications' },
   { value: 'citation_author_family_name', label: 'Citation Authors' },
   { value: 'model_author', label: 'Model Authors' },
+  { value: 'cellml_keyword', label: 'CellML Keywords' },
 ]
 
 onMounted(async () => {
   const validKinds = searchCategories.map((cat) => cat.value).filter((k) => k !== 'all')
-  validKinds.push('cellml_keyword')
 
   await loadResults()
   await searchStore.fetchCategories(validKinds)
