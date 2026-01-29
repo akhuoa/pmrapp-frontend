@@ -4,13 +4,13 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import CloseButton from '@/components/atoms/CloseButton.vue'
+import TermButton from '@/components/atoms/TermButton.vue'
 import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
+import SearchIcon from '@/components/icons/SearchIcon.vue'
 import KeywordBrowser from '@/components/molecules/KeywordBrowser.vue'
 import SearchResults from '@/components/molecules/SearchResults.vue'
 import { useSearchStore } from '@/stores/search'
 import type { SearchResult } from '@/types/search'
-import SearchIcon from '@/components/icons/SearchIcon.vue'
-import TermButton from '@/components/atoms/TermButton.vue'
 
 const route = useRoute()
 const router = useRouter()
