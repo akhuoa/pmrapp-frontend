@@ -96,6 +96,10 @@ const currentCategoryLabel = computed(() => {
   return searchCategories.find((cat) => cat.value === searchCategory.value)?.label.toLowerCase() || 'options'
 })
 
+const filteredSearchTerms = computed(() => {
+  return filteredTerms.value?.filter((t) => t.toLowerCase().includes(searchInput.value.toLowerCase()))
+})
+
 const handleSearch = () => {
   const selectedKind = searchCategory.value
   const searchKind = selectedKind === 'all' ? '' : selectedKind
@@ -175,8 +179,13 @@ const handleSearchTermClick = (term: string) => {
         <div
           class="basis-10/12 flex flex-row items-start justify-start flex-wrap gap-2 h-auto max-h-64 overflow-y-auto scrollbar-thin"
         >
+          <div v-if="!filteredSearchTerms?.length">
+            <p class="text-gray-500 dark:text-gray-400">
+              No matching {{ currentCategoryLabel }} found for {{ searchInput }}.
+            </p>
+          </div>
           <TermButton
-            v-for="filteredTerm in filteredTerms?.filter((t) => t.toLowerCase().includes(searchInput.toLowerCase()))"
+            v-for="filteredTerm in filteredSearchTerms"
             :key="filteredTerm"
             :term="filteredTerm"
             @click="handleSearchTermClick(filteredTerm)"
