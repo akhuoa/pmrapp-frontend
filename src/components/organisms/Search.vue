@@ -21,8 +21,8 @@ const searchResults = ref<SearchResult[]>([])
 const isLoading = ref(false)
 const error = ref<string | null>(null)
 const showSearchTools = ref(false)
-const searchInput = ref(<string>term.value)
-const searchCategory = ref(<string>(kind.value || 'all'))
+const searchInput = ref<string>(term.value)
+const searchCategory = ref<string>(kind.value || 'all')
 const isSearchFocused = ref(false)
 const searchCategories = [
   { value: 'all', label: 'All' },
@@ -41,6 +41,9 @@ onMounted(async () => {
 
 // Watch for route param changes to reload results.
 watch([kind, term], async () => {
+  searchInput.value = term.value
+  searchCategory.value = kind.value || 'all'
+
   await loadResults()
 })
 
