@@ -89,6 +89,13 @@ const filteredTerms = computed(() => {
   return []
 })
 
+const currentCategoryLabel = computed(() => {
+  if (searchCategory.value === 'all') {
+    return 'keywords'
+  }
+  return searchCategories.find((cat) => cat.value === searchCategory.value)?.label.toLowerCase() || 'options'
+})
+
 const handleSearch = () => {
   const selectedKind = searchCategory.value
   const searchKind = selectedKind === 'all' ? '' : selectedKind
@@ -161,7 +168,9 @@ const handleSearchTermClick = (term: string) => {
         class="mt-2 box box-small flex flex-row gap-6"
       >
         <div class="basis-2/12 h-64 border-r border-gray-200 dark:border-gray-700 pr-4 text-gray-600 dark:text-gray-400">
-          Available {{ searchCategory === 'all' ? 'keywords' : searchCategories.find((cat) => cat.value === searchCategory)?.label.toLowerCase() }}
+          <div class="text-sm leading-relaxed">
+            Click on the available {{ currentCategoryLabel }} on the right to search.
+          </div>
         </div>
         <div
           class="basis-10/12 flex flex-row items-start justify-start flex-wrap gap-2 h-auto max-h-64 overflow-y-auto scrollbar-thin"
