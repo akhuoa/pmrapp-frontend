@@ -235,7 +235,11 @@ describe('ExposureDetail', () => {
     expect(citationList?.textContent).toContain('in Intact Skeletal Muscle Fibers of the Frog.')
     expect(citationList?.textContent).toContain('Journal of General Physiology, 120, 349-368.')
 
-    const citationDetails = citationList?.nextElementSibling
+    const citationReferenceLink = citationList?.nextElementSibling
+    expect(citationReferenceLink).toBeDefined()
+    expect(citationReferenceLink?.textContent).toContain('See other models using this reference')
+
+    const citationDetails = citationReferenceLink?.nextElementSibling
     expect(citationDetails).toBeDefined()
     const citationDetailsButton = citationDetails?.querySelector('button')
     expect(citationDetailsButton?.textContent).toBe('Details')
