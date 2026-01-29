@@ -12,6 +12,7 @@ import type { SearchResult } from '@/types/search'
 import SearchIcon from '../icons/SearchIcon.vue'
 
 const route = useRoute()
+const router = useRouter()
 const searchStore = useSearchStore()
 
 const kind = computed(() => (route.query.kind as string) || '')
@@ -20,11 +21,28 @@ const searchResults = ref<SearchResult[]>([])
 const isLoading = ref(false)
 const error = ref<string | null>(null)
 const showSearchTools = ref(false)
+const searchInput = ref('')
+const searchCategory = ref('all')
+const searchCategories = [
+  { value: 'all', label: 'All' },
+  { value: 'citation_id', label: 'Publications' },
+  { value: 'citation_author_family_name', label: 'Citation Authors' },
+  { value: 'model_author', label: 'Model Authors' },
+]
 
 onMounted(async () => {
   await loadResults()
-  // Ensure categories are loaded for the sidebar.
-  await searchStore.fetchCategories()
+  // Load categories if not already loaded.
+  if (searchStore.categories.length === 0) {
+    const validKinds = searchCategories.map((cat) => cat.value).filter((k) => k !== 'all')
+    validKinds.push('cellml_keyword')
+
+    if (kind.value && validKinds.includes(kind.value)) {
+      await searchStore.fetchCategories([kind.value])
+    } else {
+      await searchStore.fetchCategories(validKinds)
+    }
+  }
 })
 
 // Watch for route param changes to reload results.
@@ -63,6 +81,28 @@ const loadResults = async () => {
     isLoading.value = false
   }
 }
+
+const handleSearch = () => {
+  const selectedKind = searchCategory.value
+  const searchKind = selectedKind === 'all' ? '' : selectedKind
+  let searchTerm = searchInput.value.trim()
+  if (searchTerm === '') {
+    return
+  }
+  let termMatch = null
+
+  const searchCategoryObj = searchStore.categories.find((cat) => cat.kind === searchKind)
+
+  if (searchCategoryObj) {
+    termMatch = searchCategoryObj.kindInfo?.terms.find((term) => term.includes(searchTerm))
+
+    if (termMatch) {
+      searchTerm = termMatch
+    }
+  }
+
+  router.push({ path: '/search', query: { kind: searchKind, term: searchTerm } })
+}
 </script>
 
 <template>
@@ -70,17 +110,18 @@ const loadResults = async () => {
     <div class="flex items-center justify-between w-full">
       <input
         type="search"
+        v-model="searchInput"
         placeholder="Search..."
         class="flex-1 px-4 py-2 border-0 focus:ring-0 outline-none"
       />
       <div class="border-l border-gray-200 dark:border-gray-700">
-        <select class="px-4 py-2 outline-none">
-          <option value="all">All</option>
-          <option value="publications">Publications</option>
-          <option value="authors">Authors</option>
+        <select class="px-4 py-2 outline-none" v-model="searchCategory">
+          <option v-for="category in searchCategories" :key="category.value" :value="category.value">
+            {{ category.label }}
+          </option>
         </select>
       </div>
-      <button class="px-4 py-2 cursor-pointer">
+      <button class="px-4 py-2 cursor-pointer" @click="handleSearch">
         <SearchIcon class="w-5 h-5" />
         <span class="sr-only">Search</span>
       </button>
