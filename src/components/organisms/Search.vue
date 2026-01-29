@@ -85,17 +85,14 @@ const loadResults = async () => {
 const handleSearch = () => {
   const selectedKind = searchCategory.value
   const searchKind = selectedKind === 'all' ? '' : selectedKind
-  let searchTerm = searchInput.value.trim()
-  if (searchTerm === '') {
-    return
-  }
   let termMatch = null
+  let searchTerm = searchInput.value.trim()
+  if (searchTerm === '') return
 
   const searchCategoryObj = searchStore.categories.find((cat) => cat.kind === searchKind)
 
   if (searchCategoryObj) {
     termMatch = searchCategoryObj.kindInfo?.terms.find((term) => term.includes(searchTerm))
-
     if (termMatch) {
       searchTerm = termMatch
     }
