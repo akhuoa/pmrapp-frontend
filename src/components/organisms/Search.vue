@@ -9,8 +9,10 @@ import KeywordBrowser from '@/components/molecules/KeywordBrowser.vue'
 import SearchResults from '@/components/molecules/SearchResults.vue'
 import { useSearchStore } from '@/stores/search'
 import type { SearchResult } from '@/types/search'
+import SearchIcon from '../icons/SearchIcon.vue'
 
 const route = useRoute()
+const router = useRouter()
 const searchStore = useSearchStore()
 
 const kind = computed(() => (route.query.kind as string) || '')
@@ -19,11 +21,22 @@ const searchResults = ref<SearchResult[]>([])
 const isLoading = ref(false)
 const error = ref<string | null>(null)
 const showSearchTools = ref(false)
+const searchInput = ref(<string>term.value)
+const searchCategory = ref(<string>(kind.value || 'all'))
+const isSearchFocused = ref(false)
+const searchCategories = [
+  { value: 'all', label: 'All' },
+  { value: 'citation_id', label: 'Publications' },
+  { value: 'citation_author_family_name', label: 'Citation Authors' },
+  { value: 'model_author', label: 'Model Authors' },
+  { value: 'cellml_keyword', label: 'CellML Keywords' },
+]
 
 onMounted(async () => {
+  const validKinds = searchCategories.map((cat) => cat.value).filter((k) => k !== 'all')
+
   await loadResults()
-  // Ensure categories are loaded for the sidebar.
-  await searchStore.fetchCategories()
+  await searchStore.fetchCategories(validKinds)
 })
 
 // Watch for route param changes to reload results.
@@ -62,10 +75,63 @@ const loadResults = async () => {
     isLoading.value = false
   }
 }
+
+const handleSearch = () => {
+  const selectedKind = searchCategory.value
+  const searchKind = selectedKind === 'all' ? '' : selectedKind
+  let termMatch = null
+  let searchTerm = searchInput.value.trim()
+  if (searchTerm === '') return
+
+  const searchCategoryObj = searchStore.categories.find((cat) => cat.kind === searchKind)
+
+  if (searchCategoryObj) {
+    termMatch = searchCategoryObj.kindInfo?.terms.find((term) =>
+      term.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    if (termMatch) {
+      searchTerm = termMatch
+    }
+  }
+
+  router.push({ path: '/search', query: { kind: searchKind, term: searchTerm } })
+}
 </script>
 
 <template>
-  <div class="flex flex-col lg:flex-row gap-6 lg:mt-12">
+  <div
+    class="border rounded-lg overflow-hidden transition-colors"
+    :class="isSearchFocused ? 'ring-2 ring-primary border-transparent' : 'border-gray-200 dark:border-gray-700'"
+  >
+    <div class="flex items-center justify-between w-full">
+      <input
+        type="search"
+        v-model="searchInput"
+        placeholder="Search..."
+        class="flex-1 px-4 py-2 border-0 focus:ring-0 outline-none"
+        @focus="isSearchFocused = true"
+        @blur="isSearchFocused = false"
+      />
+      <div class="border-x border-gray-200 dark:border-gray-700 relative">
+        <ChevronDownIcon
+          class="w-4 h-4 mx-4 absolute right-0 top-1/2 transform -translate-y-1/2 pointer-events-none"
+        />
+        <select
+          class="px-4 pr-12 py-2 outline-none appearance-none bg-transparent relative cursor-pointer"
+          v-model="searchCategory"
+        >
+          <option v-for="category in searchCategories" :key="category.value" :value="category.value">
+            {{ category.label }}
+          </option>
+        </select>
+      </div>
+      <button class="px-4 py-2 cursor-pointer" @click="handleSearch">
+        <SearchIcon class="w-5 h-5" />
+        <span class="sr-only">Search</span>
+      </button>
+    </div>
+  </div>
+  <div class="flex flex-col lg:flex-row gap-6 lg:mt-8">
     <aside class="w-full lg:w-80 flex-shrink-0 relative">
       <div class="lg:hidden">
         <ActionButton

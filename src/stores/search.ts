@@ -32,7 +32,7 @@ export const useSearchStore = defineStore('search', () => {
     return now - lastFetchTime.value < CACHE_TTL
   }
 
-  const fetchCategories = async (forceRefresh = false): Promise<void> => {
+  const fetchCategories = async (categoryIndexes: string[] = [], forceRefresh = false): Promise<void> => {
     // Use cache if valid and not forcing refresh.
     if (!forceRefresh && isCacheValid() && categories.value.length > 0) {
       return
@@ -45,9 +45,8 @@ export const useSearchStore = defineStore('search', () => {
       const searchService = getSearchService()
       const response = await searchService.getIndexes()
 
-      // Filter to only 'cellml_keyword'.
       categories.value = response.indexes
-        .filter((kind) => kind.trim() === 'cellml_keyword')
+        .filter((kind) => (categoryIndexes.length > 0 ? categoryIndexes.includes(kind) : true))
         .map((kind) => ({
           kind,
           kindInfo: null,
@@ -76,10 +75,6 @@ export const useSearchStore = defineStore('search', () => {
     } finally {
       isLoading.value = false
     }
-  }
-
-  const refreshCategories = async (): Promise<void> => {
-    await fetchCategories(true)
   }
 
   const searchIndexTerm = async (kind: string, term: string): Promise<SearchResult[]> => {
@@ -127,7 +122,6 @@ export const useSearchStore = defineStore('search', () => {
     isLoading,
     error,
     fetchCategories,
-    refreshCategories,
     searchIndexTerm,
     getCachedResults,
   }
