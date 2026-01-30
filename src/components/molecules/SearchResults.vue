@@ -50,7 +50,7 @@ const resultsText = computed(() => {
 
 <template>
   <div>
-    <p class="font-bold mb-4" v-if="!isLoading">
+    <p class="font-bold mb-4" v-if="!isLoading && !error">
       {{ resultsText }}
     </p>
 

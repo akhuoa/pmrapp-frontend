@@ -32,8 +32,13 @@ const searchCategories = [
 onMounted(async () => {
   const validKinds = searchCategories.map((cat) => cat.value)
 
-  await loadResults()
-  await searchStore.fetchCategories(validKinds)
+  try {
+    await loadResults()
+    await searchStore.fetchCategories(validKinds)
+  } catch (err) {
+    error.value = 'Failed to fetch search categories.'
+    console.error('Failed to fetch search categories:', err)
+  }
 })
 
 // Watch for route param changes to reload results.
