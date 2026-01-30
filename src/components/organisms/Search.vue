@@ -169,13 +169,13 @@ const pushSearchQuery = (searchKind: string, searchTerm: string) => {
       <div
         class="mt-2 box box-small flex flex-row gap-6"
       >
-        <div class="basis-2/12 h-64 border-r border-gray-200 dark:border-gray-700 pr-4 text-gray-600 dark:text-gray-400">
+        <div class="hidden lg:block basis-3/12 xl:basis-2/12 h-64 border-r border-gray-200 dark:border-gray-700 pr-4 text-gray-600 dark:text-gray-400">
           <div class="text-sm leading-relaxed">
             Click on the available {{ currentCategoryLabel }} on the right to search.
           </div>
         </div>
         <div
-          class="basis-10/12 h-auto max-h-64 overflow-y-auto scrollbar-thin"
+          class="lg:basis-9/12 xl:basis-10/12 h-auto max-h-64 overflow-y-auto scrollbar-thin"
         >
           <div v-if="!filteredSearchTerms?.length">
             <p class="text-gray-500 dark:text-gray-400">
