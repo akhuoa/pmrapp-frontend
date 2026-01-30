@@ -2,12 +2,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import ActionButton from '@/components/atoms/ActionButton.vue'
-import CloseButton from '@/components/atoms/CloseButton.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
 import SearchIcon from '@/components/icons/SearchIcon.vue'
-import KeywordBrowser from '@/components/molecules/KeywordBrowser.vue'
 import SearchResults from '@/components/molecules/SearchResults.vue'
 import { useSearchStore } from '@/stores/search'
 import type { SearchResult } from '@/types/search'
@@ -21,7 +18,6 @@ const term = computed(() => (route.query.term as string) || '')
 const searchResults = ref<SearchResult[]>([])
 const isLoading = ref(false)
 const error = ref<string | null>(null)
-const showSearchTools = ref(false)
 const searchInput = ref<string>(term.value)
 const searchInputRef = ref<HTMLInputElement | null>(null)
 const searchCategory = ref<string>(kind.value || 'citation_id')
@@ -54,9 +50,6 @@ const loadResults = async () => {
     // Simply return without loading results to avoid confusing UX.
     return
   }
-
-  // Reset search tools visibility.
-  showSearchTools.value = false
 
   // Try to get cached results first.
   const cached = searchStore.getCachedResults(kind.value, term.value)
@@ -137,11 +130,13 @@ const pushSearchQuery = (searchKind: string, searchTerm: string) => {
 
 <template>
   <div
-    class="border rounded-lg transition-all relative"
-    :class="isSearchFocused ? 'ring-2 ring-primary border-transparent' : 'border-gray-200 dark:border-gray-700'"
+    class="lg:border lg:rounded-lg lg:transition-all relative"
+    :class="isSearchFocused ? 'lg:ring-2 lg:ring-primary border-transparent' : 'lg:border-gray-200 lg:dark:border-gray-700'"
   >
-    <div class="flex items-center justify-between w-full">
-      <div class="border-r border-gray-200 dark:border-gray-700 relative">
+    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2 lg:gap-0 w-full">
+      <div
+        class="border lg:border-l-0 lg:border-t-0 lg:border-b-0 rounded-lg lg:rounded-none border-gray-200 dark:border-gray-700 relative"
+      >
         <ChevronDownIcon
           class="w-4 h-4 mx-4 absolute right-0 top-1/2 transform -translate-y-1/2 pointer-events-none"
         />
@@ -154,19 +149,24 @@ const pushSearchQuery = (searchKind: string, searchTerm: string) => {
           </option>
         </select>
       </div>
-      <input
-        type="search"
-        ref="searchInputRef"
-        v-model="searchInput"
-        placeholder="Search..."
-        class="flex-1 px-4 py-2 border-0 focus:ring-0 outline-none"
-        @focus="isSearchFocused = true"
-        @blur="isSearchFocused = false"
-      />
-      <button class="px-4 py-2" @click="handleSearch">
-        <SearchIcon class="w-5 h-5" />
-        <span class="sr-only">Search</span>
-      </button>
+      <div
+        class="border lg:border-0 rounded-lg transition-all relative flex items-center justify-between w-full"
+        :class="isSearchFocused ? 'ring-2 lg:ring-0 ring-primary border-transparent' : 'border-gray-200 dark:border-gray-700'"
+      >
+        <input
+          type="search"
+          ref="searchInputRef"
+          v-model="searchInput"
+          placeholder="Search..."
+          class="flex-1 px-4 py-2 border-0 focus:ring-0 outline-none"
+          @focus="isSearchFocused = true"
+          @blur="isSearchFocused = false"
+        />
+        <button class="px-4 py-2" @click="handleSearch">
+          <SearchIcon class="w-5 h-5" />
+          <span class="sr-only">Search</span>
+        </button>
+      </div>
     </div>
     <div
       class="absolute top-full left-0 w-full z-200"
@@ -176,13 +176,13 @@ const pushSearchQuery = (searchKind: string, searchTerm: string) => {
       <div
         class="mt-2 box box-small flex flex-row gap-6"
       >
-        <div class="basis-2/12 h-64 border-r border-gray-200 dark:border-gray-700 pr-4 text-gray-600 dark:text-gray-400">
+        <div class="hidden lg:block basis-3/12 xl:basis-2/12 h-64 border-r border-gray-200 dark:border-gray-700 pr-4 text-gray-600 dark:text-gray-400">
           <div class="text-sm leading-relaxed">
             Click on the available {{ currentCategoryLabel }} on the right to search.
           </div>
         </div>
         <div
-          class="basis-10/12 h-auto max-h-64 overflow-y-auto scrollbar-thin"
+          class="lg:basis-9/12 xl:basis-10/12 h-auto max-h-64 overflow-y-auto scrollbar-thin"
         >
           <div v-if="!filteredSearchTerms?.length">
             <p class="text-gray-500 dark:text-gray-400">
@@ -201,31 +201,9 @@ const pushSearchQuery = (searchKind: string, searchTerm: string) => {
       </div>
     </div>
   </div>
-  <div class="flex flex-col lg:flex-row gap-6 lg:mt-8">
-    <aside class="w-full lg:w-80 flex-shrink-0 relative">
-      <div class="lg:hidden">
-        <ActionButton
-          variant="secondary"
-          size="md"
-          content-section="Search Page - Show Search Tools Button"
-          @click="showSearchTools = true"
-        >
-          Search Tools
-          <ChevronDownIcon class="w-4 h-4 ml-2" />
-        </ActionButton>
-      </div>
-      <div
-        class="hidden absolute top-0 left-0 w-full lg:block lg:sticky lg:top-[97px] z-100"
-        :class="{ 'block!': showSearchTools }"
-      >
-        <KeywordBrowser :in-sidebar="true" />
-        <CloseButton @click="showSearchTools = false" class="lg:hidden absolute top-4 right-4" />
-      </div>
-    </aside>
-
+  <div class="mt-8">
     <main
-      class="flex-1 min-w-0 relative lg:opacity-100 lg:pointer-events-auto"
-      :class="{ 'opacity-10 pointer-events-none' : showSearchTools }"
+      class="flex-1 min-w-0 relative"
     >
       <SearchResults
         :results="searchResults"
