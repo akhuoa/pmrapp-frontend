@@ -130,11 +130,13 @@ const pushSearchQuery = (searchKind: string, searchTerm: string) => {
 
 <template>
   <div
-    class="border rounded-lg transition-all relative"
-    :class="isSearchFocused ? 'ring-2 ring-primary border-transparent' : 'border-gray-200 dark:border-gray-700'"
+    class="lg:border lg:rounded-lg lg:transition-all relative"
+    :class="isSearchFocused ? 'lg:ring-2 lg:ring-primary border-transparent' : 'lg:border-gray-200 lg:dark:border-gray-700'"
   >
-    <div class="flex items-center justify-between w-full">
-      <div class="border-r border-gray-200 dark:border-gray-700 relative">
+    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2 lg:gap-0 w-full">
+      <div
+        class="border lg:border-l-0 lg:border-t-0 lg:border-b-0 rounded-lg lg:rounded-none border-gray-200 dark:border-gray-700 relative"
+      >
         <ChevronDownIcon
           class="w-4 h-4 mx-4 absolute right-0 top-1/2 transform -translate-y-1/2 pointer-events-none"
         />
@@ -147,19 +149,24 @@ const pushSearchQuery = (searchKind: string, searchTerm: string) => {
           </option>
         </select>
       </div>
-      <input
-        type="search"
-        ref="searchInputRef"
-        v-model="searchInput"
-        placeholder="Search..."
-        class="flex-1 px-4 py-2 border-0 focus:ring-0 outline-none"
-        @focus="isSearchFocused = true"
-        @blur="isSearchFocused = false"
-      />
-      <button class="px-4 py-2" @click="handleSearch">
-        <SearchIcon class="w-5 h-5" />
-        <span class="sr-only">Search</span>
-      </button>
+      <div
+        class="border lg:border-0 rounded-lg transition-all relative flex items-center justify-between w-full"
+        :class="isSearchFocused ? 'ring-2 lg:ring-0 ring-primary border-transparent' : 'border-gray-200 dark:border-gray-700'"
+      >
+        <input
+          type="search"
+          ref="searchInputRef"
+          v-model="searchInput"
+          placeholder="Search..."
+          class="flex-1 px-4 py-2 border-0 focus:ring-0 outline-none"
+          @focus="isSearchFocused = true"
+          @blur="isSearchFocused = false"
+        />
+        <button class="px-4 py-2" @click="handleSearch">
+          <SearchIcon class="w-5 h-5" />
+          <span class="sr-only">Search</span>
+        </button>
+      </div>
     </div>
     <div
       class="absolute top-full left-0 w-full z-200"
