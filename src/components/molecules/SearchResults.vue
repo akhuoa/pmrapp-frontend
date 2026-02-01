@@ -50,7 +50,7 @@ const resultsText = computed(() => {
 
 <template>
   <div>
-    <p class="text-xl font-bold mb-4" v-if="!isLoading">
+    <p class="font-bold mb-4" v-if="!isLoading && !error">
       {{ resultsText }}
     </p>
 
@@ -79,7 +79,7 @@ const resultsText = computed(() => {
           </p>
           <div v-if="item.data.cellml_keyword?.length" class="flex flex-wrap gap-2 mt-2">
             <TermButton
-              v-for="keyword in item.data.cellml_keyword"
+              v-for="keyword in item.data.cellml_keyword.filter(k => k.trim())"
               :key="keyword"
               :term="keyword"
               @click="handleKeywordClick('cellml_keyword', keyword)"
