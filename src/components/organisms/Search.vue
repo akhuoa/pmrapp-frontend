@@ -79,9 +79,7 @@ const loadResults = async () => {
 }
 
 const filteredTerms = computed(() => {
-  const categoryObj = searchStore.categories.find(
-    (cat) => cat.kind === searchCategory.value,
-  )
+  const categoryObj = searchStore.categories.find((cat) => cat.kind === searchCategory.value)
   if (categoryObj?.kindInfo) {
     return searchStore.categories.find((cat) => cat.kind === categoryObj.kind)?.kindInfo?.terms
   }
