@@ -142,6 +142,7 @@ const pushSearchQuery = (searchKind: string, searchTerm: string) => {
         <select
           class="px-4 pr-12 py-2 outline-none appearance-none bg-transparent relative cursor-pointer"
           v-model="searchCategory"
+          aria-label="Search category"
         >
           <option v-for="category in searchCategories" :key="category.value" :value="category.value">
             {{ category.label }}
@@ -157,6 +158,7 @@ const pushSearchQuery = (searchKind: string, searchTerm: string) => {
           ref="searchInputRef"
           v-model="searchInput"
           placeholder="Search..."
+          aria-label="Search term"
           class="flex-1 px-4 py-2 border-0 focus:ring-0 outline-none"
           @focus="isSearchFocused = true"
           @blur="isSearchFocused = false"
