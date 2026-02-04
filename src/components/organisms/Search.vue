@@ -87,6 +87,13 @@ const categoryTerms = computed(() => {
   return []
 })
 
+const categoryTermsWithLowercase = computed(() => {
+  return categoryTerms.value?.map((term) => ({
+    original: term,
+    lowercase: term.toLowerCase(),
+  })) || []
+})
+
 const currentCategoryLabel = computed(() => {
   return (
     searchCategories.find((cat) => cat.value === searchCategory.value)?.label.toLowerCase() ||
@@ -98,9 +105,9 @@ const filteredSearchTerms = computed(() => {
   const searchTermValue = searchInput.value.trim().toLowerCase()
   if (!searchTermValue) return categoryTerms.value
 
-  return categoryTerms.value?.filter((t) =>
-    t.toLowerCase().includes(searchTermValue),
-  )
+  return categoryTermsWithLowercase.value
+    .filter((term) => term.lowercase.includes(searchTermValue))
+    .map((term) => term.original)
 })
 
 const handleSearch = () => {
