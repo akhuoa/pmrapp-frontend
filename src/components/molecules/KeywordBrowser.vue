@@ -19,7 +19,7 @@ const cellmlKeywordCategory = computed(() =>
 )
 
 onMounted(async () => {
-  if (searchStore.categories.length === 0) {
+  if (!searchStore.isLoading && searchStore.categories.length === 0) {
     await searchStore.fetchCategories([cellmlKeywordKind])
   }
 })
