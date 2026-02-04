@@ -17,7 +17,8 @@ const kind = computed(() => (route.query.kind as string) || '')
 const term = computed(() => (route.query.term as string) || '')
 const searchResults = ref<SearchResult[]>([])
 const isLoading = ref(false)
-const error = ref<string | null>(null)
+const categoriesError = ref<string | null>(null)
+const resultsError = ref<string | null>(null)
 const searchInput = ref<string>(term.value)
 const searchInputRef = ref<HTMLInputElement | null>(null)
 const searchCategory = ref<string>(kind.value || 'citation_id')
@@ -36,7 +37,7 @@ onMounted(async () => {
     await loadResults()
     await searchStore.fetchCategories(validKinds)
   } catch (err) {
-    error.value = 'Failed to fetch search categories.'
+    categoriesError.value = 'Failed to fetch search categories.'
     console.error('Failed to fetch search categories:', err)
   }
 })
@@ -65,13 +66,13 @@ const loadResults = async () => {
 
   // Otherwise fetch new results.
   isLoading.value = true
-  error.value = null
+  resultsError.value = null
   searchResults.value = []
 
   try {
     searchResults.value = await searchStore.searchIndexTerm(kind.value, term.value)
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to load search results'
+    resultsError.value = err instanceof Error ? err.message : 'Failed to load search results'
     console.error('Failed to load search results:', err)
   } finally {
     isLoading.value = false
@@ -211,7 +212,7 @@ const pushSearchQuery = (searchKind: string, searchTerm: string) => {
       <SearchResults
         :results="searchResults"
         :is-loading="isLoading"
-        :error="error"
+        :error="resultsError"
         :term="term"
       />
     </main>
