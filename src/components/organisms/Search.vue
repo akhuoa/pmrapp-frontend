@@ -188,7 +188,12 @@ const pushSearchQuery = (searchKind: string, searchTerm: string) => {
         <div
           class="lg:basis-9/12 xl:basis-10/12 h-auto max-h-64 overflow-y-auto scrollbar-thin"
         >
-          <div v-if="!filteredSearchTerms?.length">
+          <div v-if="categoriesError" class="error-box">
+            <p class="text-sm">
+              {{ categoriesError }}
+            </p>
+          </div>
+          <div v-else-if="!filteredSearchTerms?.length">
             <p class="text-gray-500 dark:text-gray-400">
               No matching {{ currentCategoryLabel }} found for {{ searchInput }}.
             </p>
@@ -221,4 +226,5 @@ const pushSearchQuery = (searchKind: string, searchTerm: string) => {
 
 <style scoped>
 @import '@/assets/box.css';
+@import '@/assets/error-box.css';
 </style>
