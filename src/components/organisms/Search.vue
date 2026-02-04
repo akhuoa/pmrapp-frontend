@@ -112,6 +112,8 @@ const handleSearch = () => {
   const searchTerm = searchInput.value.trim()
   if (searchTerm === '') return
 
+  // Blur the input to close the dropdown.
+  searchInputRef.value?.blur()
   pushSearchQuery(searchKind, searchTerm)
 }
 
@@ -162,6 +164,7 @@ const pushSearchQuery = (searchKind: string, searchTerm: string) => {
           class="flex-1 px-4 py-2 border-0 focus:ring-0 outline-none"
           @focus="isSearchFocused = true"
           @blur="isSearchFocused = false"
+          @keyup.enter="handleSearch"
         />
         <button
           type="button"
