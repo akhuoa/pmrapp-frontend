@@ -33,9 +33,22 @@ export const useSearchStore = defineStore('search', () => {
   }
 
   const fetchCategories = async (
-    categoryIndexes: string[] = [],
-    forceRefresh = false,
+    categoryIndexesOrForceRefresh?: string[] | boolean,
+    forceRefreshParam?: boolean,
   ): Promise<void> => {
+    // Normalise arguments to support both:
+    // - fetchCategories(forceRefresh?: boolean)
+    // - fetchCategories(categoryIndexes?: string[], forceRefresh?: boolean)
+    let categoryIndexes: string[] = []
+    let forceRefresh = false
+
+    if (Array.isArray(categoryIndexesOrForceRefresh)) {
+      categoryIndexes = categoryIndexesOrForceRefresh
+      forceRefresh = !!forceRefreshParam
+    } else if (typeof categoryIndexesOrForceRefresh === 'boolean') {
+      forceRefresh = categoryIndexesOrForceRefresh
+    }
+
     // Use cache if valid and not forcing refresh.
     if (!forceRefresh && isCacheValid() && categories.value.length > 0) {
       return
