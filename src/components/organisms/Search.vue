@@ -79,7 +79,7 @@ const loadResults = async () => {
   }
 }
 
-const filteredTerms = computed(() => {
+const categoryTerms = computed(() => {
   const categoryObj = searchStore.categories.find((cat) => cat.kind === searchCategory.value)
   if (categoryObj?.kindInfo) {
     return searchStore.categories.find((cat) => cat.kind === categoryObj.kind)?.kindInfo?.terms
@@ -95,8 +95,11 @@ const currentCategoryLabel = computed(() => {
 })
 
 const filteredSearchTerms = computed(() => {
-  return filteredTerms.value?.filter((t) =>
-    t.toLowerCase().includes(searchInput.value.toLowerCase()),
+  const searchTermValue = searchInput.value.trim().toLowerCase()
+  if (!searchTermValue) return categoryTerms.value
+
+  return categoryTerms.value?.filter((t) =>
+    t.toLowerCase().includes(searchTermValue),
   )
 })
 
