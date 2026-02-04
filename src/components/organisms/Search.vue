@@ -81,10 +81,7 @@ const loadResults = async () => {
 
 const categoryTerms = computed(() => {
   const categoryObj = searchStore.categories.find((cat) => cat.kind === searchCategory.value)
-  if (categoryObj?.kindInfo) {
-    return searchStore.categories.find((cat) => cat.kind === categoryObj.kind)?.kindInfo?.terms
-  }
-  return []
+  return categoryObj?.kindInfo?.terms || []
 })
 
 const categoryTermsWithLowercase = computed(() => {
