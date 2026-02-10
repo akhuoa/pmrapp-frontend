@@ -733,7 +733,7 @@ onMounted(async () => {
   }
 
   & :deep(img) {
-    @apply max-w-full h-auto;
+    @apply max-w-full h-auto mx-auto;
   }
 
   & :deep(table) {
