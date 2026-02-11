@@ -257,15 +257,15 @@ describe('ExposureDetail', () => {
     })
   })
 
-  it('renders "License" section', async () => {
+  it('renders "Licence" section', async () => {
     const wrapper = await mountComponent()
 
     const sectionHeading = wrapper
       .findAll('h4')
-      .find((heading) => heading.text().trim() === 'License')
+      .find((heading) => heading.text().trim() === 'Licence')
 
     expect(sectionHeading?.exists()).toBe(true)
-    expect(sectionHeading?.text()).toBe('License')
+    expect(sectionHeading?.text()).toBe('Licence')
 
     const sectionContent = sectionHeading?.element.nextElementSibling?.textContent
     expect(sectionContent).toContain('CC BY 3.0')

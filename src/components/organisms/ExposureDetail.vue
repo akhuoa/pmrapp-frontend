@@ -495,7 +495,7 @@ onMounted(async () => {
             <dd>{{ metadataJSON.model_author }}</dd>
           </div>
           <div v-if="metadataJSON.model_author_org">
-            <dt class="font-semibold mb-1">Authoring Organization</dt>
+            <dt class="font-semibold mb-1">Authoring Organisation</dt>
             <dd>{{ metadataJSON.model_author_org }}</dd>
           </div>
         </dl>
@@ -675,7 +675,7 @@ onMounted(async () => {
         </div>
       </section>
       <section v-if="licenseInfo" class="pt-6 border-t border-gray-200 dark:border-gray-700">
-        <h4 class="text-lg font-semibold mb-3">License</h4>
+        <h4 class="text-lg font-semibold mb-3">Licence</h4>
         <nav>
           <ul class="space-y-2">
             <li class="text-sm">

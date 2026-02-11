@@ -1,5 +1,5 @@
 /**
- * License URL formatting utilities.
+ * Licence URL formatting utilities.
  */
 
 interface LicenseMap {
@@ -31,14 +31,14 @@ const LICENSE_NAMES: LicenseMap = {
 }
 
 /**
- * Format a license URL to a human-readable name.
- * @param licenseUrl The license URL.
- * @returns Human-readable license name or the original URL if not recognised.
+ * Format a licence URL to a human-readable name.
+ * @param licenseUrl The licence URL.
+ * @returns Human-readable licence name or the original URL if not recognised.
  */
 export const formatLicenseUrl = (licenseUrl: string): string => {
   if (!licenseUrl) return ''
 
-  // Try to find a matching license in the map.
+  // Try to find a matching licence in the map.
   for (const [key, name] of Object.entries(LICENSE_NAMES)) {
     if (licenseUrl.includes(key)) {
       return name
