@@ -5,6 +5,7 @@ import { nextTick } from 'vue'
 import ExposureDetail from '@/components/organisms/ExposureDetail.vue'
 import { mockExposureInfo, mockMetadata } from '@/mocks/exposureInfo'
 import { useExposureStore } from '@/stores/exposure'
+import { useSearchStore } from '@/stores/search'
 
 // Mock Vue Router.
 vi.mock('vue-router', () => ({
@@ -22,6 +23,7 @@ vi.mock('@/utils/analytics', () => ({
 
 describe('ExposureDetail', () => {
   let exposureStore: ReturnType<typeof useExposureStore>
+  let searchStore: ReturnType<typeof useSearchStore>
 
   const mountComponent = async () => {
     vi.spyOn(exposureStore, 'getExposureInfo').mockResolvedValue(mockExposureInfo)
@@ -39,6 +41,7 @@ describe('ExposureDetail', () => {
         return ''
       },
     )
+    vi.spyOn(searchStore, 'searchIndexTerm').mockResolvedValue([])
 
     const wrapper = mount(ExposureDetail, {
       props: {
@@ -71,6 +74,7 @@ describe('ExposureDetail', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     exposureStore = useExposureStore()
+    searchStore = useSearchStore()
     vi.clearAllMocks()
   })
 
