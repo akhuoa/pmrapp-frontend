@@ -156,27 +156,27 @@ describe('ExposureDetail', () => {
     expect(keywordButtons).toHaveLength(2)
   })
 
-  it('renders "Views Available" section', async () => {
+  it('renders "Views available" section', async () => {
     const wrapper = await mountComponent()
 
     const sectionHeading = wrapper
       .findAll('h4')
-      .find((heading) => heading.text().trim() === 'Views Available')
+      .find((heading) => heading.text().trim() === 'Views available')
 
     expect(sectionHeading?.exists()).toBe(true)
-    expect(sectionHeading?.text()).toBe('Views Available')
+    expect(sectionHeading?.text()).toBe('Views available')
 
     const sectionContent = sectionHeading?.element.nextElementSibling
     const viewItems = sectionContent?.querySelectorAll('li')
     expect(viewItems).toHaveLength(3)
   })
 
-  it('renders "Open in OpenCOR\'s Web app" link that opens in new tab', async () => {
+  it('renders "Open in OpenCOR\'s web app" link that opens in new tab', async () => {
     const wrapper = await mountComponent()
 
     const openCorLink = wrapper
       .findAll('a')
-      .find((link) => link.text().trim() === "Open in OpenCOR's Web app")
+      .find((link) => link.text().trim() === "Open in OpenCOR's web app")
 
     expect(openCorLink?.exists()).toBe(true)
     expect(openCorLink?.attributes('target')).toBe('_blank')
