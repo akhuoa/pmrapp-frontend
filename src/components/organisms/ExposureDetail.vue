@@ -21,6 +21,7 @@ import { formatCitation, formatCitationAuthors } from '@/utils/citation'
 import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
 import { formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
+import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import TermButton from '../atoms/TermButton.vue'
 
 const props = defineProps<{
@@ -79,7 +80,7 @@ const htmlViewRef = ref<HTMLElement | null>(null)
 const licenseInfo = ref<string>(DEFAULT_LICENSE)
 const availableViews = ref<ViewEntry[]>([])
 const isCitationDetailsOpen = ref(false)
-const hasRelatedModels = ref(false)
+const hasOtherRelatedModels = ref(false)
 const { goBack } = useBackNavigation('/exposures')
 
 const router = useRouter()
@@ -258,17 +259,22 @@ const filteredKeywords = computed(() => {
     .map((keywordTuple) => keywordTuple[1] || '')
 })
 
-const checkRelatedModels = async () => {
+const checkOtherRelatedModels = async () => {
   const term = metadataJSON.value.citation_id
   const kind = 'citation_id'
 
   if (!term) {
-    hasRelatedModels.value = false
+    hasOtherRelatedModels.value = false
     return
   }
 
   const searchResults = await searchStore.searchIndexTerm(kind, term)
-  hasRelatedModels.value = searchResults.length > 0
+  const otherRelatedModels = searchResults.filter((result) => {
+    const _exposureId = getExposureIdFromResourcePath(result.resource_path)
+    return Number(_exposureId) !== exposureId.value
+  })
+
+  hasOtherRelatedModels.value = otherRelatedModels.length > 0
 }
 
 const loadInitialView = async () => {
@@ -296,7 +302,7 @@ const loadInitialView = async () => {
 
     // Show metadata onload.
     await generateMetadata()
-    await checkRelatedModels()
+    await checkOtherRelatedModels()
 
     if (viewEntry) {
       detailHTML.value = await exposureStore.getExposureSafeHTML(
@@ -639,7 +645,7 @@ onMounted(async () => {
             </div>
           </li>
         </ul>
-        <div v-if="hasRelatedModels" class="mb-4">
+        <div v-if="hasOtherRelatedModels" class="mb-4">
           <RouterLink
             :to="`/search?kind=citation_id&term=${metadataJSON.citation_id}`"
             class="text-link text-sm inline-flex items-center gap-2 break-all"
