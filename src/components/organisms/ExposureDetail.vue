@@ -268,13 +268,24 @@ const checkOtherRelatedModels = async () => {
     return
   }
 
-  const searchResults = await searchStore.searchIndexTerm(kind, term)
-  const otherRelatedModels = searchResults.filter((result) => {
-    const _exposureId = getExposureIdFromResourcePath(result.resource_path)
-    return Number(_exposureId) !== exposureId.value
-  })
+  try {
+    const searchResults = await searchStore.searchIndexTerm(kind, term)
 
-  hasOtherRelatedModels.value = otherRelatedModels.length > 0
+    if (!Array.isArray(searchResults)) {
+      hasOtherRelatedModels.value = false
+      return
+    }
+
+    const otherRelatedModels = searchResults.filter((result) => {
+      const _exposureId = getExposureIdFromResourcePath(result.resource_path)
+      return Number(_exposureId) !== exposureId.value
+    })
+
+    hasOtherRelatedModels.value = otherRelatedModels.length > 0
+  } catch (err) {
+    console.error('Error checking related models:', err)
+    hasOtherRelatedModels.value = false
+  }
 }
 
 const loadInitialView = async () => {
