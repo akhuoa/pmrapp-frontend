@@ -15,6 +15,7 @@ import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { getArchiveDownloadUrls, getCombineArchiveUrl } from '@/services/downloadUrlService'
 import { useExposureStore } from '@/stores/exposure'
+import { useSearchStore } from '@/stores/search'
 import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
 import { formatCitation, formatCitationAuthors } from '@/utils/citation'
 import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
@@ -78,9 +79,11 @@ const htmlViewRef = ref<HTMLElement | null>(null)
 const licenseInfo = ref<string>(DEFAULT_LICENSE)
 const availableViews = ref<ViewEntry[]>([])
 const isCitationDetailsOpen = ref(false)
+const hasRelatedModels = ref(false)
 const { goBack } = useBackNavigation('/exposures')
 
 const router = useRouter()
+const searchStore = useSearchStore()
 
 // This route path is used to fix relative paths in the HTML content.
 // It is not a part of the API request parameters.
@@ -255,6 +258,19 @@ const filteredKeywords = computed(() => {
     .map((keywordTuple) => keywordTuple[1] || '')
 })
 
+const checkRelatedModels = async () => {
+  const term = metadataJSON.value.citation_id
+  const kind = 'citation_id'
+
+  if (!term) {
+    hasRelatedModels.value = false
+    return
+  }
+
+  const searchResults = await searchStore.searchIndexTerm(kind, term)
+  hasRelatedModels.value = searchResults.length > 0
+}
+
 const loadInitialView = async () => {
   if (!exposureInfo.value) return
 
@@ -280,6 +296,7 @@ const loadInitialView = async () => {
 
     // Show metadata onload.
     await generateMetadata()
+    await checkRelatedModels()
 
     if (viewEntry) {
       detailHTML.value = await exposureStore.getExposureSafeHTML(
@@ -622,7 +639,7 @@ onMounted(async () => {
             </div>
           </li>
         </ul>
-        <div v-if="metadataJSON.citation_id" class="mb-4">
+        <div v-if="hasRelatedModels" class="mb-4">
           <RouterLink
             :to="`/search?kind=citation_id&term=${metadataJSON.citation_id}`"
             class="text-link text-sm inline-flex items-center gap-2 break-all"
