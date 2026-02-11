@@ -31,7 +31,7 @@ const props = defineProps<{
 const DEFAULT_LICENSE = 'https://creativecommons.org/licenses/by/3.0/'
 const AVAILABLE_VIEWS = [
   {
-    name: 'Generate Code',
+    name: 'Generate code',
     view_key: 'cellml_codegen',
   },
   {
@@ -487,15 +487,15 @@ onMounted(async () => {
         <h4 class="text-lg font-semibold mb-3">About</h4>
         <dl class="text-sm leading-relaxed space-y-4">
           <div v-if="metadataJSON.model_title">
-            <dt class="font-semibold mb-1">Model Title</dt>
+            <dt class="font-semibold mb-1">Model title</dt>
             <dd>{{ metadataJSON.model_title }}</dd>
           </div>
           <div v-if="metadataJSON.model_author">
-            <dt class="font-semibold mb-1">Model Authors</dt>
+            <dt class="font-semibold mb-1">Model authors</dt>
             <dd>{{ metadataJSON.model_author }}</dd>
           </div>
           <div v-if="metadataJSON.model_author_org">
-            <dt class="font-semibold mb-1">Authoring Organisation</dt>
+            <dt class="font-semibold mb-1">Authoring organisation</dt>
             <dd>{{ metadataJSON.model_author_org }}</dd>
           </div>
         </dl>
@@ -512,7 +512,7 @@ onMounted(async () => {
         </div>
       </section>
       <section v-if="openCORFiles.length > 0" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
-        <h4 class="text-lg font-semibold mb-3">Views Available</h4>
+        <h4 class="text-lg font-semibold mb-3">Views available</h4>
         <nav>
           <ul class="space-y-2">
             <li class="text-sm">
@@ -524,7 +524,7 @@ onMounted(async () => {
                 rel="noopener noreferrer"
                 :content-section="`Exposure Detail - ${pageTitle}`"
               >
-                Open in OpenCOR's Web app
+                Open in OpenCOR's web app
               </ActionButton>
             </li>
             <li
@@ -668,7 +668,7 @@ onMounted(async () => {
               <dd>{{ metadataJSON.citation_issued }}</dd>
             </div>
             <div v-if="metadataJSON.citation_bibliographicCitation">
-              <dt class="font-semibold mb-1">Bibliographic Citation</dt>
+              <dt class="font-semibold mb-1">Bibliographic citation</dt>
               <dd>{{ metadataJSON.citation_bibliographicCitation }}</dd>
             </div>
           </dl>
