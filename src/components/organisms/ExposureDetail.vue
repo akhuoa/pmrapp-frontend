@@ -45,22 +45,27 @@ const CODEGEN_LANGUAGES = [
   {
     name: 'C',
     path: 'code.C.c',
+    fileName: 'code.c',
   },
   {
-    name: 'C_IDA',
+    name: 'C (IDA solver)',
     path: 'code.C_IDA.c',
+    fileName: 'code.ida.c',
   },
   {
-    name: 'Fortran 77',
+    name: 'FORTRAN 77',
     path: 'code.F77.f77',
+    fileName: 'code.f77',
   },
   {
     name: 'MATLAB',
     path: 'code.MATLAB.m',
+    fileName: 'code.m',
   },
   {
     name: 'Python',
     path: 'code.Python.py',
+    fileName: 'code.py',
   },
 ]
 
@@ -185,7 +190,7 @@ const fileCountText = computed(() => {
   return formatFileCount(count)
 })
 
-const generateCode = async (langPath: string) => {
+const generateCode = async (langPath: string, fileName: string) => {
   const code = await exposureStore.getExposureRawContent(
     exposureId.value,
     exposureFileId.value,
@@ -193,7 +198,7 @@ const generateCode = async (langPath: string) => {
     langPath,
   )
   generatedCode.value = code
-  generatedCodeFilename.value = langPath
+  generatedCodeFilename.value = fileName
 }
 
 const downloadCode = () => {
@@ -243,7 +248,10 @@ const loadDefaultView = async () => {
 const loadCodegenView = async () => {
   if (!exposureInfo.value) return
   // Load code generation view with the first language as default.
-  await generateCode(CODEGEN_LANGUAGES[0]?.path || 'code.C.c')
+  await generateCode(
+    CODEGEN_LANGUAGES[0]?.path || 'code.C.c',
+    CODEGEN_LANGUAGES[0]?.fileName || 'code.c'
+  )
 }
 
 const handleKeywordClick = (kind: string, keyword: string) => {
@@ -416,9 +424,9 @@ onMounted(async () => {
               :key="lang.name"
             >
               <ActionButton
-                :variant="generatedCodeFilename === lang.path ? 'primary' : 'secondary'"
+                :variant="generatedCodeFilename === lang.fileName ? 'primary' : 'secondary'"
                 size="sm"
-                @click="generateCode(lang.path)"
+                @click="generateCode(lang.path, lang.fileName)"
               >
                 {{ lang.name }}
               </ActionButton>
