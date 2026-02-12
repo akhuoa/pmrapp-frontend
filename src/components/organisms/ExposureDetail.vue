@@ -19,9 +19,9 @@ import { useSearchStore } from '@/stores/search'
 import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
 import { formatCitation, formatCitationAuthors } from '@/utils/citation'
 import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
+import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
-import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import TermButton from '../atoms/TermButton.vue'
 
 const props = defineProps<{
@@ -126,10 +126,12 @@ const navigationFiles = computed(() => {
 })
 
 const handleDownloadWorkspaceArchive = (format: 'zip' | 'tgz') => {
+  if (!exposureInfo.value) return
+
   downloadWorkspaceArchive(
-    exposureInfo.value!.workspace_alias,
-    exposureInfo.value!.exposure.commit_id,
-    format
+    exposureInfo.value.workspace_alias,
+    exposureInfo.value.exposure.commit_id,
+    format,
   )
 }
 
@@ -255,7 +257,7 @@ const loadCodegenView = async () => {
   // Load code generation view with the first language as default.
   await generateCode(
     CODEGEN_LANGUAGES[0]?.path || 'code.C.c',
-    CODEGEN_LANGUAGES[0]?.fileName || 'code.c'
+    CODEGEN_LANGUAGES[0]?.fileName || 'code.c',
   )
 }
 

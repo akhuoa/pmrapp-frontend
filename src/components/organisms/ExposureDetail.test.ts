@@ -51,7 +51,7 @@ describe('ExposureDetail', () => {
           cellml_keyword: [],
           commit_authored_ts: [],
           created_ts: [],
-          exposure_alias: []
+          exposure_alias: [],
         },
       },
     ])

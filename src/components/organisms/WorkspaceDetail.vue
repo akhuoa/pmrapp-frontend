@@ -107,11 +107,9 @@ const downloadFile = async (filename: string) => {
 }
 
 const handleDownloadWorkspaceArchive = (format: 'zip' | 'tgz') => {
-  downloadWorkspaceArchive(
-    props.alias,
-    workspaceInfo.value!.commit.commit_id,
-    format
-  )
+  if (!workspaceInfo.value) return
+
+  downloadWorkspaceArchive(props.alias, workspaceInfo.value.commit.commit_id, format)
 }
 
 const loadWorkspaceInfo = async () => {
