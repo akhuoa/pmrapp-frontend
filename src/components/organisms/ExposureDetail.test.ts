@@ -5,6 +5,7 @@ import { nextTick } from 'vue'
 import ExposureDetail from '@/components/organisms/ExposureDetail.vue'
 import { mockExposureInfo, mockMetadata } from '@/mocks/exposureInfo'
 import { useExposureStore } from '@/stores/exposure'
+import { useSearchStore } from '@/stores/search'
 
 // Mock Vue Router.
 vi.mock('vue-router', () => ({
@@ -22,6 +23,7 @@ vi.mock('@/utils/analytics', () => ({
 
 describe('ExposureDetail', () => {
   let exposureStore: ReturnType<typeof useExposureStore>
+  let searchStore: ReturnType<typeof useSearchStore>
 
   const mountComponent = async () => {
     vi.spyOn(exposureStore, 'getExposureInfo').mockResolvedValue(mockExposureInfo)
@@ -39,6 +41,20 @@ describe('ExposureDetail', () => {
         return ''
       },
     )
+    // Mock search results for other related models.
+    vi.spyOn(searchStore, 'searchIndexTerm').mockResolvedValue([
+      {
+        resource_path: '/exposure/999/file.cellml',
+        data: {
+          aliased_uri: [],
+          description: [],
+          cellml_keyword: [],
+          commit_authored_ts: [],
+          created_ts: [],
+          exposure_alias: []
+        },
+      },
+    ])
 
     const wrapper = mount(ExposureDetail, {
       props: {
@@ -71,6 +87,7 @@ describe('ExposureDetail', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     exposureStore = useExposureStore()
+    searchStore = useSearchStore()
     vi.clearAllMocks()
   })
 
@@ -156,27 +173,27 @@ describe('ExposureDetail', () => {
     expect(keywordButtons).toHaveLength(2)
   })
 
-  it('renders "Views Available" section', async () => {
+  it('renders "Views available" section', async () => {
     const wrapper = await mountComponent()
 
     const sectionHeading = wrapper
       .findAll('h4')
-      .find((heading) => heading.text().trim() === 'Views Available')
+      .find((heading) => heading.text().trim() === 'Views available')
 
     expect(sectionHeading?.exists()).toBe(true)
-    expect(sectionHeading?.text()).toBe('Views Available')
+    expect(sectionHeading?.text()).toBe('Views available')
 
     const sectionContent = sectionHeading?.element.nextElementSibling
     const viewItems = sectionContent?.querySelectorAll('li')
     expect(viewItems).toHaveLength(3)
   })
 
-  it('renders "Open in OpenCOR\'s Web app" link that opens in new tab', async () => {
+  it('renders "Open in OpenCOR\'s web app" link that opens in new tab', async () => {
     const wrapper = await mountComponent()
 
     const openCorLink = wrapper
       .findAll('a')
-      .find((link) => link.text().trim() === "Open in OpenCOR's Web app")
+      .find((link) => link.text().trim() === "Open in OpenCOR's web app")
 
     expect(openCorLink?.exists()).toBe(true)
     expect(openCorLink?.attributes('target')).toBe('_blank')
@@ -257,15 +274,15 @@ describe('ExposureDetail', () => {
     })
   })
 
-  it('renders "License" section', async () => {
+  it('renders "Licence" section', async () => {
     const wrapper = await mountComponent()
 
     const sectionHeading = wrapper
       .findAll('h4')
-      .find((heading) => heading.text().trim() === 'License')
+      .find((heading) => heading.text().trim() === 'Licence')
 
     expect(sectionHeading?.exists()).toBe(true)
-    expect(sectionHeading?.text()).toBe('License')
+    expect(sectionHeading?.text()).toBe('Licence')
 
     const sectionContent = sectionHeading?.element.nextElementSibling?.textContent
     expect(sectionContent).toContain('CC BY 3.0')

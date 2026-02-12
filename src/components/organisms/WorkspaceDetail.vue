@@ -10,7 +10,7 @@ import FileIcon from '@/components/icons/FileIcon.vue'
 import FolderIcon from '@/components/icons/FolderIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
-import { getArchiveDownloadUrls } from '@/services/downloadUrlService'
+import { downloadWorkspaceArchive } from '@/services/downloadUrlService'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { WorkspaceInfo } from '@/types/workspace'
 import { downloadWorkspaceFile } from '@/utils/download'
@@ -106,10 +106,13 @@ const downloadFile = async (filename: string) => {
   await downloadWorkspaceFile(alias, commitId, fullFilename)
 }
 
-const archiveDownloadUrls = computed(() => {
-  if (!workspaceInfo.value) return { zip: '', tgz: '' }
-  return getArchiveDownloadUrls(props.alias, workspaceInfo.value.commit.commit_id)
-})
+const handleDownloadWorkspaceArchive = (format: 'zip' | 'tgz') => {
+  downloadWorkspaceArchive(
+    props.alias,
+    workspaceInfo.value!.commit.commit_id,
+    format
+  )
+}
 
 const loadWorkspaceInfo = async () => {
   isLoading.value = true
@@ -188,8 +191,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
           <ActionButton
             variant="secondary"
             size="sm"
-            :href="archiveDownloadUrls.zip"
-            :download="true"
+            @click="handleDownloadWorkspaceArchive('zip')"
             content-section="Workspace Detail"
           >
             <DownloadIcon class="w-4 h-4" />
@@ -198,8 +200,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
           <ActionButton
             variant="secondary"
             size="sm"
-            :href="archiveDownloadUrls.tgz"
-            :download="true"
+            @click="handleDownloadWorkspaceArchive('tgz')"
             content-section="Workspace Detail"
           >
             <DownloadIcon class="w-4 h-4" />

@@ -51,14 +51,6 @@ const loadResults = async () => {
     return
   }
 
-  // Try to get cached results first.
-  const cached = searchStore.getCachedResults(kind.value, term.value)
-  if (cached) {
-    searchResults.value = cached
-    return
-  }
-
-  // Otherwise fetch new results.
   isLoading.value = true
   error.value = null
   searchResults.value = []

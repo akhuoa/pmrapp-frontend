@@ -13,13 +13,15 @@ import FileIcon from '@/components/icons/FileIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
-import { getArchiveDownloadUrls, getCombineArchiveUrl } from '@/services/downloadUrlService'
+import { downloadCOMBINEArchive, downloadWorkspaceArchive } from '@/services/downloadUrlService'
 import { useExposureStore } from '@/stores/exposure'
+import { useSearchStore } from '@/stores/search'
 import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
 import { formatCitation, formatCitationAuthors } from '@/utils/citation'
 import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
 import { formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
+import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import TermButton from '../atoms/TermButton.vue'
 
 const props = defineProps<{
@@ -31,7 +33,7 @@ const props = defineProps<{
 const DEFAULT_LICENSE = 'https://creativecommons.org/licenses/by/3.0/'
 const AVAILABLE_VIEWS = [
   {
-    name: 'Generate Code',
+    name: 'Generate code',
     view_key: 'cellml_codegen',
   },
   {
@@ -43,22 +45,27 @@ const CODEGEN_LANGUAGES = [
   {
     name: 'C',
     path: 'code.C.c',
+    fileName: 'code.c',
   },
   {
-    name: 'C_IDA',
+    name: 'C (IDA solver)',
     path: 'code.C_IDA.c',
+    fileName: 'code.ida.c',
   },
   {
-    name: 'Fortran 77',
+    name: 'FORTRAN 77',
     path: 'code.F77.f77',
+    fileName: 'code.f77',
   },
   {
     name: 'MATLAB',
     path: 'code.MATLAB.m',
+    fileName: 'code.m',
   },
   {
     name: 'Python',
     path: 'code.Python.py',
+    fileName: 'code.py',
   },
 ]
 
@@ -78,9 +85,11 @@ const htmlViewRef = ref<HTMLElement | null>(null)
 const licenseInfo = ref<string>(DEFAULT_LICENSE)
 const availableViews = ref<ViewEntry[]>([])
 const isCitationDetailsOpen = ref(false)
+const hasOtherRelatedModels = ref(false)
 const { goBack } = useBackNavigation('/exposures')
 
 const router = useRouter()
+const searchStore = useSearchStore()
 
 // This route path is used to fix relative paths in the HTML content.
 // It is not a part of the API request parameters.
@@ -116,17 +125,22 @@ const navigationFiles = computed(() => {
   return exposureInfo.value.files.filter((entry) => entry[1] === true)
 })
 
-const archiveDownloadUrls = computed(() => {
-  if (!exposureInfo.value) return { zip: '', tgz: '' }
-  return getArchiveDownloadUrls(
-    exposureInfo.value.workspace_alias,
-    exposureInfo.value.exposure.commit_id,
+const handleDownloadWorkspaceArchive = (format: 'zip' | 'tgz') => {
+  downloadWorkspaceArchive(
+    exposureInfo.value!.workspace_alias,
+    exposureInfo.value!.exposure.commit_id,
+    format
   )
-})
+}
 
-const combineArchiveUrl = computed(() => {
-  return getCombineArchiveUrl(props.alias)
-})
+const handleDownloadCOMBINEArchive = () => {
+  const exposureAlias = props.alias
+  const fileName = exposureInfo.value
+    ? `${exposureInfo.value.exposure.description}.omex`
+    : `${exposureAlias}.omex`
+
+  downloadCOMBINEArchive(exposureAlias, fileName)
+}
 
 const buildOpenCORURL = (option?: string) => {
   if (!exposureInfo.value || openCORFiles.value.length === 0) return ''
@@ -181,7 +195,7 @@ const fileCountText = computed(() => {
   return formatFileCount(count)
 })
 
-const generateCode = async (langPath: string) => {
+const generateCode = async (langPath: string, fileName: string) => {
   const code = await exposureStore.getExposureRawContent(
     exposureId.value,
     exposureFileId.value,
@@ -189,7 +203,7 @@ const generateCode = async (langPath: string) => {
     langPath,
   )
   generatedCode.value = code
-  generatedCodeFilename.value = langPath
+  generatedCodeFilename.value = fileName
 }
 
 const downloadCode = () => {
@@ -239,7 +253,10 @@ const loadDefaultView = async () => {
 const loadCodegenView = async () => {
   if (!exposureInfo.value) return
   // Load code generation view with the first language as default.
-  await generateCode(CODEGEN_LANGUAGES[0]?.path || 'code.C.c')
+  await generateCode(
+    CODEGEN_LANGUAGES[0]?.path || 'code.C.c',
+    CODEGEN_LANGUAGES[0]?.fileName || 'code.c'
+  )
 }
 
 const handleKeywordClick = (kind: string, keyword: string) => {
@@ -254,6 +271,35 @@ const filteredKeywords = computed(() => {
     )
     .map((keywordTuple) => keywordTuple[1] || '')
 })
+
+const checkOtherRelatedModels = async () => {
+  const term = metadataJSON.value.citation_id
+  const kind = 'citation_id'
+
+  if (!term) {
+    hasOtherRelatedModels.value = false
+    return
+  }
+
+  try {
+    const searchResults = await searchStore.searchIndexTerm(kind, term)
+
+    if (!Array.isArray(searchResults)) {
+      hasOtherRelatedModels.value = false
+      return
+    }
+
+    const otherRelatedModels = searchResults.filter((result) => {
+      const _exposureId = getExposureIdFromResourcePath(result.resource_path)
+      return Number(_exposureId) !== exposureId.value
+    })
+
+    hasOtherRelatedModels.value = otherRelatedModels.length > 0
+  } catch (err) {
+    console.error('Error checking related models:', err)
+    hasOtherRelatedModels.value = false
+  }
+}
 
 const loadInitialView = async () => {
   if (!exposureInfo.value) return
@@ -280,6 +326,7 @@ const loadInitialView = async () => {
 
     // Show metadata onload.
     await generateMetadata()
+    await checkOtherRelatedModels()
 
     if (viewEntry) {
       detailHTML.value = await exposureStore.getExposureSafeHTML(
@@ -382,9 +429,9 @@ onMounted(async () => {
               :key="lang.name"
             >
               <ActionButton
-                :variant="generatedCodeFilename === lang.path ? 'primary' : 'secondary'"
+                :variant="generatedCodeFilename === lang.fileName ? 'primary' : 'secondary'"
                 size="sm"
-                @click="generateCode(lang.path)"
+                @click="generateCode(lang.path, lang.fileName)"
               >
                 {{ lang.name }}
               </ActionButton>
@@ -487,15 +534,15 @@ onMounted(async () => {
         <h4 class="text-lg font-semibold mb-3">About</h4>
         <dl class="text-sm leading-relaxed space-y-4">
           <div v-if="metadataJSON.model_title">
-            <dt class="font-semibold mb-1">Model Title</dt>
+            <dt class="font-semibold mb-1">Model title</dt>
             <dd>{{ metadataJSON.model_title }}</dd>
           </div>
           <div v-if="metadataJSON.model_author">
-            <dt class="font-semibold mb-1">Model Authors</dt>
+            <dt class="font-semibold mb-1">Model authors</dt>
             <dd>{{ metadataJSON.model_author }}</dd>
           </div>
           <div v-if="metadataJSON.model_author_org">
-            <dt class="font-semibold mb-1">Authoring Organization</dt>
+            <dt class="font-semibold mb-1">Authoring organisation</dt>
             <dd>{{ metadataJSON.model_author_org }}</dd>
           </div>
         </dl>
@@ -512,7 +559,7 @@ onMounted(async () => {
         </div>
       </section>
       <section v-if="openCORFiles.length > 0" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
-        <h4 class="text-lg font-semibold mb-3">Views Available</h4>
+        <h4 class="text-lg font-semibold mb-3">Views available</h4>
         <nav>
           <ul class="space-y-2">
             <li class="text-sm">
@@ -524,7 +571,7 @@ onMounted(async () => {
                 rel="noopener noreferrer"
                 :content-section="`Exposure Detail - ${pageTitle}`"
               >
-                Open in OpenCOR's Web app
+                Open in OpenCOR's web app
               </ActionButton>
             </li>
             <li
@@ -572,8 +619,7 @@ onMounted(async () => {
               <ActionButton
                 variant="secondary"
                 size="sm"
-                :href="archiveDownloadUrls.zip"
-                :download="true"
+                @click="handleDownloadWorkspaceArchive('zip')"
                 content-section="Exposure Detail"
               >
                 <DownloadIcon class="w-4 h-4" />
@@ -584,8 +630,7 @@ onMounted(async () => {
               <ActionButton
                 variant="secondary"
                 size="sm"
-                :href="archiveDownloadUrls.tgz"
-                :download="true"
+                @click="handleDownloadWorkspaceArchive('tgz')"
                 content-section="Exposure Detail"
               >
                 <DownloadIcon class="w-4 h-4" />
@@ -596,8 +641,7 @@ onMounted(async () => {
               <ActionButton
                 variant="secondary"
                 size="sm"
-                :href="combineArchiveUrl"
-                :download="true"
+                @click="handleDownloadCOMBINEArchive"
                 content-section="Exposure Detail"
               >
                 <DownloadIcon class="w-4 h-4" />
@@ -622,7 +666,7 @@ onMounted(async () => {
             </div>
           </li>
         </ul>
-        <div v-if="metadataJSON.citation_id" class="mb-4">
+        <div v-if="hasOtherRelatedModels" class="mb-4">
           <RouterLink
             :to="`/search?kind=citation_id&term=${metadataJSON.citation_id}`"
             class="text-link text-sm inline-flex items-center gap-2 break-all"
@@ -668,14 +712,14 @@ onMounted(async () => {
               <dd>{{ metadataJSON.citation_issued }}</dd>
             </div>
             <div v-if="metadataJSON.citation_bibliographicCitation">
-              <dt class="font-semibold mb-1">Bibliographic Citation</dt>
+              <dt class="font-semibold mb-1">Bibliographic citation</dt>
               <dd>{{ metadataJSON.citation_bibliographicCitation }}</dd>
             </div>
           </dl>
         </div>
       </section>
       <section v-if="licenseInfo" class="pt-6 border-t border-gray-200 dark:border-gray-700">
-        <h4 class="text-lg font-semibold mb-3">License</h4>
+        <h4 class="text-lg font-semibold mb-3">Licence</h4>
         <nav>
           <ul class="space-y-2">
             <li class="text-sm">

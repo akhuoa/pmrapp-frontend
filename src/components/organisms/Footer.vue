@@ -8,7 +8,7 @@ const repositories = [
     url: 'https://github.com/Physiome/pmrplatform',
   },
   {
-    name: 'Web App',
+    name: 'Web app',
     url: 'https://github.com/Physiome/pmrapp-frontend',
   },
 ]

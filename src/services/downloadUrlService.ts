@@ -1,31 +1,45 @@
-const MODELS_URL = import.meta.env.VITE_MODELS_URL
+import { downloadFileFromBlob } from '@/utils/download'
 
-export interface ArchiveUrls {
-  zip: string
-  tgz: string
-}
+const DOWNLOAD_API = import.meta.env.VITE_DOWNLOAD_API
 
-/**
- * Generate archive download URLs for a workspace.
- */
-export const getArchiveDownloadUrls = (alias: string, commitId: string): ArchiveUrls => {
+export const downloadWorkspaceArchive = async (alias: string, commitId: string, format: 'zip' | 'tgz'): Promise<void> => {
   if (!alias || !commitId) {
-    return { zip: '', tgz: '' }
+    console.error('Alias and commit ID are required to download workspace archive.')
+    return
   }
 
-  const base = `${MODELS_URL}/workspace/${alias}/@@archive/${commitId}`
-  return {
-    zip: `${base}/zip`,
-    tgz: `${base}/tgz`,
+  try {
+    const response = await fetch(`${DOWNLOAD_API}?workspaceAlias=${alias}&commitId=${commitId}&format=${format}`)
+
+    if (!response.ok) {
+      throw new Error(`Failed to download workspace archive: ${response.statusText}`)
+    }
+
+    const blob = await response.blob()
+    downloadFileFromBlob(blob, `${alias}.${format === 'tgz' ? 'tar.gz' : format}`)
+  } catch (error) {
+    console.error('Error downloading workspace archive:', error)
+    throw error
   }
 }
 
-/**
- * Generate COMBINE archive download URL for an exposure.
- */
-export const getCombineArchiveUrl = (exposureAlias: string): string => {
+export const downloadCOMBINEArchive = async (exposureAlias: string, fileName: string): Promise<void> => {
   if (!exposureAlias) {
-    return ''
+    console.error('Exposure alias is required to download COMBINE archive.')
+    return
   }
-  return `${MODELS_URL}/e/${exposureAlias}/download_generated_omex`
+
+  try {
+    const response = await fetch(`${DOWNLOAD_API}?exposureAlias=${exposureAlias}`)
+
+    if (!response.ok) {
+      throw new Error(`Failed to download COMBINE archive: ${response.statusText}`)
+    }
+
+    const blob = await response.blob()
+    downloadFileFromBlob(blob, fileName)
+  } catch (error) {
+    console.error('Error downloading COMBINE archive:', error)
+    throw error
+  }
 }

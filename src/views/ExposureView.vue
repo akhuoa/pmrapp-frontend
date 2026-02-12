@@ -42,7 +42,7 @@ const description = computed(() => {
 
 <template>
   <PageHeader
-    title="Exposure Listing"
+    title="Exposure listing"
     :description="description"
   />
 

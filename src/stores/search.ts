@@ -109,23 +109,11 @@ export const useSearchStore = defineStore('search', () => {
     }
   }
 
-  const getCachedResults = (kind: string, term: string): SearchResult[] | null => {
-    const cacheKey = `${kind}:${term}`
-    const cached = searchResultsCache.value.get(cacheKey)
-
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-      return cached.results
-    }
-
-    return null
-  }
-
   return {
     categories,
     isLoading,
     error,
     fetchCategories,
     searchIndexTerm,
-    getCachedResults,
   }
 })
