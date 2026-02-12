@@ -41,7 +41,20 @@ describe('ExposureDetail', () => {
         return ''
       },
     )
-    vi.spyOn(searchStore, 'searchIndexTerm').mockResolvedValue([])
+    // Mock search results for other related models.
+    vi.spyOn(searchStore, 'searchIndexTerm').mockResolvedValue([
+      {
+        resource_path: '/exposure/999/file.cellml',
+        data: {
+          aliased_uri: [],
+          description: [],
+          cellml_keyword: [],
+          commit_authored_ts: [],
+          created_ts: [],
+          exposure_alias: []
+        },
+      },
+    ])
 
     const wrapper = mount(ExposureDetail, {
       props: {
