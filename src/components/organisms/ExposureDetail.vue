@@ -13,7 +13,7 @@ import FileIcon from '@/components/icons/FileIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
-import { downloadCOMBINEArchive, getArchiveDownloadUrls } from '@/services/downloadUrlService'
+import { downloadCOMBINEArchive, downloadWorkspaceArchive } from '@/services/downloadUrlService'
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
 import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
@@ -125,13 +125,13 @@ const navigationFiles = computed(() => {
   return exposureInfo.value.files.filter((entry) => entry[1] === true)
 })
 
-const archiveDownloadUrls = computed(() => {
-  if (!exposureInfo.value) return { zip: '', tgz: '' }
-  return getArchiveDownloadUrls(
-    exposureInfo.value.workspace_alias,
-    exposureInfo.value.exposure.commit_id,
+const handleDownloadWorkspaceArchive = (format: 'zip' | 'tgz') => {
+  downloadWorkspaceArchive(
+    exposureInfo.value!.workspace_alias,
+    exposureInfo.value!.exposure.commit_id,
+    format
   )
-})
+}
 
 const handleDownloadCOMBINEArchive = () => {
   const exposureAlias = props.alias
@@ -619,8 +619,7 @@ onMounted(async () => {
               <ActionButton
                 variant="secondary"
                 size="sm"
-                :href="archiveDownloadUrls.zip"
-                :download="true"
+                @click="handleDownloadWorkspaceArchive('zip')"
                 content-section="Exposure Detail"
               >
                 <DownloadIcon class="w-4 h-4" />
@@ -631,8 +630,7 @@ onMounted(async () => {
               <ActionButton
                 variant="secondary"
                 size="sm"
-                :href="archiveDownloadUrls.tgz"
-                :download="true"
+                @click="handleDownloadWorkspaceArchive('tgz')"
                 content-section="Exposure Detail"
               >
                 <DownloadIcon class="w-4 h-4" />
