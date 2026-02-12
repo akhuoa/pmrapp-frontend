@@ -1,4 +1,7 @@
+import { downloadFileFromBlob } from '@/utils/download'
+
 const MODELS_URL = import.meta.env.VITE_MODELS_URL
+const DOWNLOAD_API = import.meta.env.VITE_DOWNLOAD_API
 
 export interface ArchiveUrls {
   zip: string
@@ -28,4 +31,25 @@ export const getCombineArchiveUrl = (exposureAlias: string): string => {
     return ''
   }
   return `${MODELS_URL}/e/${exposureAlias}/download_generated_omex`
+}
+
+export const downloadCOMBINEArchive = async (exposureAlias: string, fileName: string): Promise<void> => {
+  if (!exposureAlias) {
+    console.error('Exposure alias is required to download COMBINE archive.')
+    return
+  }
+
+  try {
+    const response = await fetch(`${DOWNLOAD_API}?exposureAlias=${exposureAlias}`)
+
+    if (!response.ok) {
+      throw new Error(`Failed to download COMBINE archive: ${response.statusText}`)
+    }
+
+    const blob = await response.blob()
+    downloadFileFromBlob(blob, fileName)
+  } catch (error) {
+    console.error('Error downloading COMBINE archive:', error)
+    throw error
+  }
 }

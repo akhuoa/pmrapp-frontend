@@ -13,7 +13,7 @@ import FileIcon from '@/components/icons/FileIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
-import { getArchiveDownloadUrls, getCombineArchiveUrl } from '@/services/downloadUrlService'
+import { downloadCOMBINEArchive, getArchiveDownloadUrls, getCombineArchiveUrl } from '@/services/downloadUrlService'
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
 import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
@@ -133,9 +133,14 @@ const archiveDownloadUrls = computed(() => {
   )
 })
 
-const combineArchiveUrl = computed(() => {
-  return getCombineArchiveUrl(props.alias)
-})
+const handleDownloadCOMBINEArchive = () => {
+  const exposureAlias = props.alias
+  const fileName = exposureInfo.value
+    ? `${exposureInfo.value.exposure.description}.omex`
+    : `${exposureAlias}.omex`
+
+  downloadCOMBINEArchive(exposureAlias, fileName)
+}
 
 const buildOpenCORURL = (option?: string) => {
   if (!exposureInfo.value || openCORFiles.value.length === 0) return ''
@@ -638,8 +643,7 @@ onMounted(async () => {
               <ActionButton
                 variant="secondary"
                 size="sm"
-                :href="combineArchiveUrl"
-                :download="true"
+                @click="handleDownloadCOMBINEArchive"
                 content-section="Exposure Detail"
               >
                 <DownloadIcon class="w-4 h-4" />
