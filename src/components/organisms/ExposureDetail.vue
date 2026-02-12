@@ -19,9 +19,9 @@ import { useSearchStore } from '@/stores/search'
 import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
 import { formatCitation, formatCitationAuthors } from '@/utils/citation'
 import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
+import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
-import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import TermButton from '../atoms/TermButton.vue'
 
 const props = defineProps<{

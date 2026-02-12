@@ -1,5 +1,5 @@
-import type { WorkspaceEntity } from './workspace'
 import type { Citation } from './citation'
+import type { WorkspaceEntity } from './workspace'
 
 export interface ViewEntry {
   name: string
