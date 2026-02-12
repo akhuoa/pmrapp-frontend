@@ -126,9 +126,11 @@ const navigationFiles = computed(() => {
 })
 
 const handleDownloadWorkspaceArchive = (format: 'zip' | 'tgz') => {
+  if (!exposureInfo.value) return
+
   downloadWorkspaceArchive(
-    exposureInfo.value!.workspace_alias,
-    exposureInfo.value!.exposure.commit_id,
+    exposureInfo.value.workspace_alias,
+    exposureInfo.value.exposure.commit_id,
     format
   )
 }
