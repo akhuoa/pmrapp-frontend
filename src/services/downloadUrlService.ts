@@ -2,14 +2,20 @@ import { downloadFileFromBlob } from '@/utils/download'
 
 const DOWNLOAD_API = import.meta.env.VITE_DOWNLOAD_API
 
-export const downloadWorkspaceArchive = async (alias: string, commitId: string, format: 'zip' | 'tgz'): Promise<void> => {
+export const downloadWorkspaceArchive = async (
+  alias: string,
+  commitId: string,
+  format: 'zip' | 'tgz',
+): Promise<void> => {
   if (!alias || !commitId) {
     console.error('Alias and commit ID are required to download workspace archive.')
     return
   }
 
   try {
-    const response = await fetch(`${DOWNLOAD_API}?workspaceAlias=${alias}&commitId=${commitId}&format=${format}`)
+    const response = await fetch(
+      `${DOWNLOAD_API}?workspaceAlias=${alias}&commitId=${commitId}&format=${format}`,
+    )
 
     if (!response.ok) {
       throw new Error(`Failed to download workspace archive: ${response.statusText}`)
@@ -23,7 +29,10 @@ export const downloadWorkspaceArchive = async (alias: string, commitId: string, 
   }
 }
 
-export const downloadCOMBINEArchive = async (exposureAlias: string, fileName: string): Promise<void> => {
+export const downloadCOMBINEArchive = async (
+  exposureAlias: string,
+  fileName: string,
+): Promise<void> => {
   if (!exposureAlias) {
     console.error('Exposure alias is required to download COMBINE archive.')
     return

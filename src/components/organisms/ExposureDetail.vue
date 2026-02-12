@@ -131,7 +131,7 @@ const handleDownloadWorkspaceArchive = (format: 'zip' | 'tgz') => {
   downloadWorkspaceArchive(
     exposureInfo.value.workspace_alias,
     exposureInfo.value.exposure.commit_id,
-    format
+    format,
   )
 }
 
@@ -257,7 +257,7 @@ const loadCodegenView = async () => {
   // Load code generation view with the first language as default.
   await generateCode(
     CODEGEN_LANGUAGES[0]?.path || 'code.C.c',
-    CODEGEN_LANGUAGES[0]?.fileName || 'code.c'
+    CODEGEN_LANGUAGES[0]?.fileName || 'code.c',
   )
 }
 
