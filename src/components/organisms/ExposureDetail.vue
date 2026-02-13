@@ -138,8 +138,8 @@ const handleDownloadWorkspaceArchive = (format: 'zip' | 'tgz') => {
 const handleDownloadCOMBINEArchive = () => {
   const exposureAlias = props.alias
   const fileName = exposureInfo.value
-    ? `${exposureInfo.value.exposure.description}.omex`
-    : `${exposureAlias}.omex`
+    ? `${exposureInfo.value.exposure.description}`
+    : `${exposureAlias}`
 
   downloadCOMBINEArchive(exposureAlias, fileName)
 }
