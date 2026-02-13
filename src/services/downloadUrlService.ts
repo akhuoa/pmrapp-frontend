@@ -14,7 +14,7 @@ export const downloadWorkspaceArchive = async (
 
   try {
     const response = await fetch(
-      `${DOWNLOAD_API}?workspaceAlias=${alias}&commitId=${commitId}&format=${format}`,
+      `${DOWNLOAD_API}/download/workspace?alias=${alias}&commitId=${commitId}&format=${format}`,
     )
 
     if (!response.ok) {
@@ -39,7 +39,7 @@ export const downloadCOMBINEArchive = async (
   }
 
   try {
-    const response = await fetch(`${DOWNLOAD_API}?exposureAlias=${exposureAlias}`)
+    const response = await fetch(`${DOWNLOAD_API}/download/exposure?alias=${exposureAlias}`)
 
     if (!response.ok) {
       throw new Error(`Failed to download COMBINE archive: ${response.statusText}`)
