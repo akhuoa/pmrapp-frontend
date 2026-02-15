@@ -85,10 +85,12 @@ const categoryTerms = computed(() => {
 })
 
 const categoryTermsWithLowercase = computed(() => {
-  return categoryTerms.value?.map((term) => ({
-    original: term,
-    lowercase: term.toLowerCase(),
-  })) || []
+  return (
+    categoryTerms.value?.map((term) => ({
+      original: term,
+      lowercase: term.toLowerCase(),
+    })) || []
+  )
 })
 
 const currentCategoryLabel = computed(() => {
