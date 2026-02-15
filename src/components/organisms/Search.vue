@@ -159,7 +159,7 @@ const pushSearchQuery = (searchKind: string, searchTerm: string) => {
           type="search"
           ref="searchInputRef"
           v-model="searchInput"
-          placeholder="Search..."
+          placeholder="Start typing to search..."
           aria-label="Search term"
           class="flex-1 px-4 py-2 border-0 focus:ring-0 outline-none"
           @focus="isSearchFocused = true"
