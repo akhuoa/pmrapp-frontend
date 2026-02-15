@@ -37,7 +37,7 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
 <template>
   <div
     v-if="show"
-    class="fixed inset-0 bg-gray-800 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75 z-50 flex justify-center items-start pt-20"
+    class="fixed inset-0 bg-gray-800/75 dark:bg-gray-900/75 z-50 flex justify-center items-start pt-20"
     @click.self="emit('close')"
   >
     <div class="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
