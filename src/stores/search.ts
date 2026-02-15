@@ -50,8 +50,12 @@ export const useSearchStore = defineStore('search', () => {
       forceRefresh = categoryIndexesOrForceRefresh
     }
 
+    const areAllRequestedCategoriesCached =
+      existingCategoryKinds.length > 0 &&
+      (categoryIndexes.length === 0 || categoryIndexes.every((idx) => existingCategoryKinds.includes(idx)))
+
     // Use cache if valid and not forcing refresh, and if existing categories cover requested indexes.
-    if (!forceRefresh && isCacheValid() && existingCategoryKinds.length > 0 && (categoryIndexes.length === 0 || categoryIndexes.every((idx) => existingCategoryKinds.includes(idx)))) {
+    if (!forceRefresh && isCacheValid() && areAllRequestedCategoriesCached) {
       return
     }
 
