@@ -41,6 +41,7 @@ export const useSearchStore = defineStore('search', () => {
     // - fetchCategories(categoryIndexes?: string[], forceRefresh?: boolean)
     let categoryIndexes: string[] = []
     let forceRefresh = false
+    const existingCategoryKinds = categories.value.map((c) => c.kind)
 
     if (Array.isArray(categoryIndexesOrForceRefresh)) {
       categoryIndexes = categoryIndexesOrForceRefresh
@@ -49,8 +50,8 @@ export const useSearchStore = defineStore('search', () => {
       forceRefresh = categoryIndexesOrForceRefresh
     }
 
-    // Use cache if valid and not forcing refresh.
-    if (!forceRefresh && isCacheValid() && categories.value.length > 0) {
+    // Use cache if valid and not forcing refresh, and if existing categories cover requested indexes.
+    if (!forceRefresh && isCacheValid() && existingCategoryKinds.length > 0 && (categoryIndexes.length === 0 || categoryIndexes.every((idx) => existingCategoryKinds.includes(idx)))) {
       return
     }
 
