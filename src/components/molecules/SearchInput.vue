@@ -73,6 +73,10 @@ const handleSearchTermClick = (term: string) => {
   searchInputRef.value?.blur()
   emit('search', searchKind, term)
 }
+
+defineExpose({
+  searchInputRef,
+})
 </script>
 
 <template>

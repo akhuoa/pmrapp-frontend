@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import CloseButton from '@/components/atoms/CloseButton.vue'
 import SearchInput from '@/components/molecules/SearchInput.vue'
@@ -19,11 +19,9 @@ watch(
   () => props.show,
   (newVal) => {
     if (newVal) {
-      // Focus the input when the overlay is shown
-      // Use nextTick to ensure the element is visible
-      // and the ref is available
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ;(searchInputRef.value?.$refs.searchInputRef as any)?.focus()
+      nextTick(() => {
+        searchInputRef.value?.searchInputRef?.focus()
+      })
     }
   },
 )
