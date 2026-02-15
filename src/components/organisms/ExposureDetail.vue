@@ -258,7 +258,6 @@ const generateMetadata = async () => {
     )
     metadataJSON.value = JSON.parse(metadata)
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to parse metadata'
     console.error('Error parsing metadata JSON:', err)
   }
 }
