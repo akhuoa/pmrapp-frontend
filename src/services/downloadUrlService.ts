@@ -13,16 +13,16 @@ export const downloadWorkspaceArchive = async (
   }
 
   try {
-    const response = await fetch(
-      `${DOWNLOAD_API}?workspaceAlias=${alias}&commitId=${commitId}&format=${format}`,
-    )
+    const params = new URLSearchParams({ alias, commitId, format })
+    const response = await fetch(`${DOWNLOAD_API}/download/workspace?${params}`)
 
     if (!response.ok) {
       throw new Error(`Failed to download workspace archive: ${response.statusText}`)
     }
 
     const blob = await response.blob()
-    downloadFileFromBlob(blob, `${alias}.${format === 'tgz' ? 'tar.gz' : format}`)
+    const fileName = `${alias}.${format === 'tgz' ? 'tar.gz' : format}`
+    downloadFileFromBlob(blob, fileName)
   } catch (error) {
     console.error('Error downloading workspace archive:', error)
     throw error
@@ -30,22 +30,24 @@ export const downloadWorkspaceArchive = async (
 }
 
 export const downloadCOMBINEArchive = async (
-  exposureAlias: string,
-  fileName: string,
+  alias: string,
+  _fileName: string,
 ): Promise<void> => {
-  if (!exposureAlias) {
+  if (!alias) {
     console.error('Exposure alias is required to download COMBINE archive.')
     return
   }
 
   try {
-    const response = await fetch(`${DOWNLOAD_API}?exposureAlias=${exposureAlias}`)
+    const params = new URLSearchParams({ alias: alias })
+    const response = await fetch(`${DOWNLOAD_API}/download/exposure?${params}`)
 
     if (!response.ok) {
       throw new Error(`Failed to download COMBINE archive: ${response.statusText}`)
     }
 
     const blob = await response.blob()
+    const fileName = `${_fileName || alias}.omex`
     downloadFileFromBlob(blob, fileName)
   } catch (error) {
     console.error('Error downloading COMBINE archive:', error)

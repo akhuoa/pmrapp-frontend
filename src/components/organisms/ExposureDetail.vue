@@ -138,8 +138,8 @@ const handleDownloadWorkspaceArchive = (format: 'zip' | 'tgz') => {
 const handleDownloadCOMBINEArchive = () => {
   const exposureAlias = props.alias
   const fileName = exposureInfo.value
-    ? `${exposureInfo.value.exposure.description}.omex`
-    : `${exposureAlias}.omex`
+    ? `${exposureInfo.value.exposure.description}`
+    : `${exposureAlias}`
 
   downloadCOMBINEArchive(exposureAlias, fileName)
 }
@@ -653,7 +653,7 @@ onMounted(async () => {
           </ul>
         </nav>
       </section>
-      <section v-if="metadataJSON.citations" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+      <section v-if="metadataJSON.citations?.length" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">References</h4>
         <ul class="space-y-4 text-sm mb-2" v-if="metadataJSON.citations && metadataJSON.citations.length > 0">
           <li v-for="citation in metadataJSON.citations" :key="citation.id">
