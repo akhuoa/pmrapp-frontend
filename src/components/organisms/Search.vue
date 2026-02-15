@@ -2,9 +2,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import TermButton from '@/components/atoms/TermButton.vue'
-import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
-import SearchIcon from '@/components/icons/SearchIcon.vue'
+import SearchInput from '@/components/molecules/SearchInput.vue'
 import SearchResults from '@/components/molecules/SearchResults.vue'
 import { useSearchStore } from '@/stores/search'
 import type { SearchResult } from '@/types/search'
@@ -19,18 +17,14 @@ const searchResults = ref<SearchResult[]>([])
 const isLoading = ref(false)
 const categoriesError = ref<string | null>(null)
 const resultsError = ref<string | null>(null)
-const searchInput = ref<string>(term.value)
-const searchInputRef = ref<HTMLInputElement | null>(null)
-const searchCategory = ref<string>(kind.value || 'citation_id')
-const isSearchFocused = ref(false)
-const searchCategories = [
-  { value: 'citation_id', label: 'Publication references' },
-  { value: 'citation_author_family_name', label: 'Publication Authors' },
-  { value: 'model_author', label: 'Model Authors' },
-  { value: 'cellml_keyword', label: 'CellML Keywords' },
-]
 
 onMounted(async () => {
+  const searchCategories = [
+    { value: 'citation_id', label: 'Publication references' },
+    { value: 'citation_author_family_name', label: 'Publication Authors' },
+    { value: 'model_author', label: 'Model Authors' },
+    { value: 'cellml_keyword', label: 'CellML Keywords' },
+  ]
   const validKinds = searchCategories.map((cat) => cat.value)
 
   try {
@@ -44,9 +38,6 @@ onMounted(async () => {
 
 // Watch for route param changes to reload results.
 watch([kind, term], async () => {
-  searchInput.value = term.value
-  searchCategory.value = kind.value || 'citation_id'
-
   await loadResults()
 })
 
@@ -79,148 +70,15 @@ const loadResults = async () => {
   }
 }
 
-const categoryTerms = computed(() => {
-  const categoryObj = searchStore.categories.find((cat) => cat.kind === searchCategory.value)
-  return categoryObj?.kindInfo?.terms || []
-})
-
-const categoryTermsWithLowercase = computed(() => {
-  return (
-    categoryTerms.value?.map((term) => ({
-      original: term,
-      lowercase: term.toLowerCase(),
-    })) || []
-  )
-})
-
-const currentCategoryLabel = computed(() => {
-  return (
-    searchCategories.find((cat) => cat.value === searchCategory.value)?.label.toLowerCase() ||
-    'options'
-  )
-})
-
-const filteredSearchTerms = computed(() => {
-  const searchTermValue = searchInput.value.trim().toLowerCase()
-  if (!searchTermValue) return categoryTerms.value
-
-  return categoryTermsWithLowercase.value
-    .filter((term) => term.lowercase.includes(searchTermValue))
-    .map((term) => term.original)
-})
-
-const handleSearch = () => {
-  const searchKind = searchCategory.value
-  const searchTerm = searchInput.value.trim()
-  if (searchTerm === '') return
-
-  // Blur the input to close the dropdown.
-  searchInputRef.value?.blur()
-  pushSearchQuery(searchKind, searchTerm)
-}
-
-const handleSearchTermClick = (term: string) => {
-  const searchKind = searchCategory.value
-  // Blur the input to close the dropdown.
-  searchInputRef.value?.blur()
-  pushSearchQuery(searchKind, term)
-}
-
-const pushSearchQuery = (searchKind: string, searchTerm: string) => {
+const handleSearch = (searchKind: string, searchTerm: string) => {
   router.push({ path: '/search', query: { kind: searchKind, term: searchTerm } })
 }
 </script>
 
 <template>
-  <div
-    class="lg:border lg:rounded-lg lg:transition-all relative"
-    :class="isSearchFocused ? 'lg:ring-2 lg:ring-primary border-transparent' : 'lg:border-gray-200 lg:dark:border-gray-700'"
-  >
-    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2 lg:gap-0 w-full">
-      <div
-        class="border lg:border-l-0 lg:border-t-0 lg:border-b-0 rounded-lg lg:rounded-none border-gray-200 dark:border-gray-700 relative"
-      >
-        <ChevronDownIcon
-          class="w-4 h-4 mx-4 absolute right-0 top-1/2 transform -translate-y-1/2 pointer-events-none"
-        />
-        <select
-          class="px-4 pr-12 py-2 outline-none appearance-none bg-transparent relative cursor-pointer"
-          v-model="searchCategory"
-          aria-label="Search category"
-        >
-          <option v-for="category in searchCategories" :key="category.value" :value="category.value">
-            {{ category.label }}
-          </option>
-        </select>
-      </div>
-      <div
-        class="border lg:border-0 rounded-lg transition-all relative flex items-center justify-between w-full"
-        :class="isSearchFocused ? 'ring-2 lg:ring-0 ring-primary border-transparent' : 'border-gray-200 dark:border-gray-700'"
-      >
-        <input
-          type="search"
-          ref="searchInputRef"
-          v-model="searchInput"
-          placeholder="Start typing to search..."
-          aria-label="Search term"
-          class="flex-1 px-4 py-2 border-0 focus:ring-0 outline-none"
-          @focus="isSearchFocused = true"
-          @blur="isSearchFocused = false"
-          @keyup.enter="handleSearch"
-        />
-        <button
-          type="button"
-          class="px-4 py-2"
-          aria-label="Search"
-          @click="handleSearch"
-        >
-          <SearchIcon class="w-5 h-5" />
-          <span class="sr-only">Search</span>
-        </button>
-      </div>
-    </div>
-    <div
-      class="absolute top-full left-0 w-full z-200"
-      v-if="isSearchFocused && searchInput.trim().length > 0"
-      @mousedown.prevent
-    >
-      <div
-        class="mt-2 box box-small flex flex-row gap-6"
-      >
-        <div class="hidden lg:block basis-3/12 xl:basis-2/12 h-64 border-r border-gray-200 dark:border-gray-700 pr-4 text-gray-600 dark:text-gray-400">
-          <div class="text-sm leading-relaxed">
-            Click on the available {{ currentCategoryLabel }} on the right to search.
-          </div>
-        </div>
-        <div
-          class="lg:basis-9/12 xl:basis-10/12 h-auto max-h-64 overflow-y-auto scrollbar-thin"
-        >
-          <div v-if="categoriesError" class="error-box">
-            <p class="text-sm">
-              {{ categoriesError }}
-            </p>
-          </div>
-          <div v-else-if="!filteredSearchTerms?.length">
-            <p class="text-gray-500 dark:text-gray-400">
-              No matching {{ currentCategoryLabel }} found for {{ searchInput }}.
-            </p>
-          </div>
-          <div v-else class="flex flex-row items-start justify-start flex-wrap gap-2">
-            <TermButton
-              v-for="filteredTerm in filteredSearchTerms"
-              :key="filteredTerm"
-              :term="filteredTerm"
-              @click="handleSearchTermClick(filteredTerm)"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <SearchInput :initial-kind="kind" :initial-term="term" @search="handleSearch" />
   <div class="mt-8">
-    <main
-      class="flex-1 min-w-0 relative"
-    >
+    <main class="flex-1 min-w-0 relative">
       <SearchResults
         :results="searchResults"
         :is-loading="isLoading"
@@ -230,8 +88,3 @@ const pushSearchQuery = (searchKind: string, searchTerm: string) => {
     </main>
   </div>
 </template>
-
-<style scoped>
-@import '@/assets/box.css';
-@import '@/assets/error-box.css';
-</style>
