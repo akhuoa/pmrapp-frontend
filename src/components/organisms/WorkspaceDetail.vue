@@ -8,6 +8,7 @@ import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import FolderIcon from '@/components/icons/FolderIcon.vue'
+import LoadingIcon from '@/components/icons/LoadingIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { downloadWorkspaceArchive } from '@/services/downloadUrlService'
@@ -27,6 +28,8 @@ const workspaceStore = useWorkspaceStore()
 const workspaceInfo = ref<WorkspaceInfo | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
+const isDownloadingWorkspaceZip = ref(false)
+const isDownloadingWorkspaceTgz = ref(false)
 const requestCounter = ref(0)
 
 const backPath = computed(() => {
@@ -106,10 +109,19 @@ const downloadFile = async (filename: string) => {
   await downloadWorkspaceFile(alias, commitId, fullFilename)
 }
 
-const handleDownloadWorkspaceArchive = (format: 'zip' | 'tgz') => {
+const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
   if (!workspaceInfo.value) return
 
-  downloadWorkspaceArchive(props.alias, workspaceInfo.value.commit.commit_id, format)
+  const loadingRef = format === 'zip' ? isDownloadingWorkspaceZip : isDownloadingWorkspaceTgz
+  loadingRef.value = true
+
+  try {
+    await downloadWorkspaceArchive(props.alias, workspaceInfo.value.commit.commit_id, format)
+  } catch (err) {
+    console.error('Error downloading workspace archive:', err)
+  } finally {
+    loadingRef.value = false
+  }
 }
 
 const loadWorkspaceInfo = async () => {
@@ -189,19 +201,23 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
           <ActionButton
             variant="secondary"
             size="sm"
+            :disabled="isDownloadingWorkspaceZip"
             @click="handleDownloadWorkspaceArchive('zip')"
             content-section="Workspace Detail"
           >
-            <DownloadIcon class="w-4 h-4" />
+            <LoadingIcon v-if="isDownloadingWorkspaceZip" class="w-4 h-4" />
+            <DownloadIcon v-else class="w-4 h-4" />
             <span>Complete archive (as a <code class="code-inline bg-gray-100 dark:bg-gray-700">.zip</code> file)</span>
           </ActionButton>
           <ActionButton
             variant="secondary"
             size="sm"
+            :disabled="isDownloadingWorkspaceTgz"
             @click="handleDownloadWorkspaceArchive('tgz')"
             content-section="Workspace Detail"
           >
-            <DownloadIcon class="w-4 h-4" />
+            <LoadingIcon v-if="isDownloadingWorkspaceTgz" class="w-4 h-4" />
+            <DownloadIcon v-else class="w-4 h-4" />
             <span>Complete archive (as a <code class="code-inline bg-gray-100 dark:bg-gray-700">.tgz</code> file)</span>
           </ActionButton>
         </div>

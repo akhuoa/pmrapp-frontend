@@ -10,6 +10,7 @@ import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
+import LoadingIcon from '@/components/icons/LoadingIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
@@ -86,6 +87,9 @@ const licenseInfo = ref<string>(DEFAULT_LICENSE)
 const availableViews = ref<ViewEntry[]>([])
 const isCitationDetailsOpen = ref(false)
 const hasOtherRelatedModels = ref(false)
+const isDownloadingWorkspaceZip = ref(false)
+const isDownloadingWorkspaceTgz = ref(false)
+const isDownloadingCOMBINE = ref(false)
 const { goBack } = useBackNavigation('/exposures')
 
 const router = useRouter()
@@ -125,23 +129,40 @@ const navigationFiles = computed(() => {
   return exposureInfo.value.files.filter((entry) => entry[1] === true)
 })
 
-const handleDownloadWorkspaceArchive = (format: 'zip' | 'tgz') => {
+const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
   if (!exposureInfo.value) return
 
-  downloadWorkspaceArchive(
-    exposureInfo.value.workspace_alias,
-    exposureInfo.value.exposure.commit_id,
-    format,
-  )
+  const loadingRef = format === 'zip' ? isDownloadingWorkspaceZip : isDownloadingWorkspaceTgz
+  loadingRef.value = true
+
+  try {
+    await downloadWorkspaceArchive(
+      exposureInfo.value.workspace_alias,
+      exposureInfo.value.exposure.commit_id,
+      format,
+    )
+  } catch (err) {
+    console.error('Error downloading workspace archive:', err)
+  } finally {
+    loadingRef.value = false
+  }
 }
 
-const handleDownloadCOMBINEArchive = () => {
+const handleDownloadCOMBINEArchive = async () => {
   const exposureAlias = props.alias
   const fileName = exposureInfo.value
     ? `${exposureInfo.value.exposure.description}`
     : `${exposureAlias}`
 
-  downloadCOMBINEArchive(exposureAlias, fileName)
+  isDownloadingCOMBINE.value = true
+
+  try {
+    await downloadCOMBINEArchive(exposureAlias, fileName)
+  } catch (err) {
+    console.error('Error downloading COMBINE archive:', err)
+  } finally {
+    isDownloadingCOMBINE.value = false
+  }
 }
 
 const buildOpenCORURL = (option?: string) => {
@@ -621,10 +642,12 @@ onMounted(async () => {
               <ActionButton
                 variant="secondary"
                 size="sm"
+                :disabled="isDownloadingWorkspaceZip"
                 @click="handleDownloadWorkspaceArchive('zip')"
                 content-section="Exposure Detail"
               >
-                <DownloadIcon class="w-4 h-4" />
+                <LoadingIcon v-if="isDownloadingWorkspaceZip" class="w-4 h-4" />
+                <DownloadIcon v-else class="w-4 h-4" />
                 <span>Complete archive (as a <code class="code-inline bg-gray-100 dark:bg-gray-700">.zip</code> file)</span>
               </ActionButton>
             </li>
@@ -632,10 +655,12 @@ onMounted(async () => {
               <ActionButton
                 variant="secondary"
                 size="sm"
+                :disabled="isDownloadingWorkspaceTgz"
                 @click="handleDownloadWorkspaceArchive('tgz')"
                 content-section="Exposure Detail"
               >
-                <DownloadIcon class="w-4 h-4" />
+                <LoadingIcon v-if="isDownloadingWorkspaceTgz" class="w-4 h-4" />
+                <DownloadIcon v-else class="w-4 h-4" />
                 <span>Complete archive (as a <code class="code-inline bg-gray-100 dark:bg-gray-700">.tgz</code> file)</span>
               </ActionButton>
             </li>
@@ -643,10 +668,12 @@ onMounted(async () => {
               <ActionButton
                 variant="secondary"
                 size="sm"
+                :disabled="isDownloadingCOMBINE"
                 @click="handleDownloadCOMBINEArchive"
                 content-section="Exposure Detail"
               >
-                <DownloadIcon class="w-4 h-4" />
+                <LoadingIcon v-if="isDownloadingCOMBINE" class="w-4 h-4" />
+                <DownloadIcon v-else class="w-4 h-4" />
                 COMBINE archive
               </ActionButton>
             </li>
