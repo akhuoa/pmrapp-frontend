@@ -15,25 +15,10 @@ const kind = computed(() => (route.query.kind as string) || '')
 const term = computed(() => (route.query.term as string) || '')
 const searchResults = ref<SearchResult[]>([])
 const isLoading = ref(false)
-const categoriesError = ref<string | null>(null)
 const resultsError = ref<string | null>(null)
 
 onMounted(async () => {
-  const searchCategories = [
-    { value: 'citation_id', label: 'Publication references' },
-    { value: 'citation_author_family_name', label: 'Publication Authors' },
-    { value: 'model_author', label: 'Model Authors' },
-    { value: 'cellml_keyword', label: 'CellML Keywords' },
-  ]
-  const validKinds = searchCategories.map((cat) => cat.value)
-
-  try {
-    await loadResults()
-    await searchStore.fetchCategories(validKinds)
-  } catch (err) {
-    categoriesError.value = 'Failed to fetch search categories.'
-    console.error('Failed to fetch search categories:', err)
-  }
+  await loadResults()
 })
 
 // Watch for route param changes to reload results.

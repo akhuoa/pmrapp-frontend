@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
 import SearchIcon from '@/components/icons/SearchIcon.vue'
@@ -26,6 +26,18 @@ const searchCategories = [
   { value: 'model_author', label: 'Model Authors' },
   { value: 'cellml_keyword', label: 'CellML Keywords' },
 ]
+const categoriesError = ref<string | null>(null)
+
+onMounted(async () => {
+  const validKinds = searchCategories.map((cat) => cat.value)
+
+  try {
+    await searchStore.fetchCategories(validKinds)
+  } catch (err) {
+    categoriesError.value = 'Failed to fetch search categories.'
+    console.error('Failed to fetch search categories:', err)
+  }
+})
 
 const categoryTerms = computed(() => {
   const categoryObj = searchStore.categories.find((cat) => cat.kind === searchCategory.value)
@@ -143,9 +155,9 @@ defineExpose({
         <div
           class="lg:basis-9/12 xl:basis-10/12 h-auto max-h-64 overflow-y-auto scrollbar-thin"
         >
-          <div v-if="searchStore.error" class="error-box">
+          <div v-if="categoriesError" class="error-box">
             <p class="text-sm">
-              {{ searchStore.error }}
+              {{ categoriesError }}
             </p>
           </div>
           <div v-else-if="!filteredSearchTerms?.length">
