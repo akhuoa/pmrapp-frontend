@@ -20,6 +20,7 @@ const searchInput = ref<string>(props.initialTerm)
 const searchInputRef = ref<HTMLInputElement | null>(null)
 const searchCategory = ref<string>(props.initialKind || 'citation_id')
 const isSearchFocused = ref(false)
+const wasSearchFocused = ref(false)
 const searchCategories = [
   { value: 'citation_id', label: 'Publication references' },
   { value: 'citation_author_family_name', label: 'Publication Authors' },
@@ -39,9 +40,16 @@ onMounted(async () => {
   }
 })
 
+const currentCategoryData = computed(() => {
+  return searchStore.categories.find((cat) => cat.kind === searchCategory.value)
+})
+
+const isCategoryLoading = computed(() => {
+  return currentCategoryData.value ? currentCategoryData.value.loading : searchStore.isLoading
+})
+
 const categoryTerms = computed(() => {
-  const categoryObj = searchStore.categories.find((cat) => cat.kind === searchCategory.value)
-  return categoryObj?.kindInfo?.terms || []
+  return currentCategoryData.value?.kindInfo?.terms || []
 })
 
 const categoryTermsWithLowercase = computed(() => {
@@ -86,6 +94,12 @@ const handleSearchTermClick = (term: string) => {
   emit('search', searchKind, term)
 }
 
+const handleCategoryChange = () => {
+  if (wasSearchFocused.value) {
+    searchInputRef.value?.focus()
+  }
+}
+
 defineExpose({
   searchInputRef,
 })
@@ -107,6 +121,7 @@ defineExpose({
           class="px-4 pr-12 py-2 outline-none appearance-none bg-transparent relative cursor-pointer"
           v-model="searchCategory"
           aria-label="Search category"
+          @change="handleCategoryChange"
         >
           <option v-for="category in searchCategories" :key="category.value" :value="category.value">
             {{ category.label }}
@@ -124,7 +139,7 @@ defineExpose({
           placeholder="Start typing to search..."
           aria-label="Search term"
           class="flex-1 px-4 py-2 border-0 focus:ring-0 outline-none"
-          @focus="isSearchFocused = true"
+          @focus="isSearchFocused = true; wasSearchFocused = true"
           @blur="isSearchFocused = false"
           @keyup.enter="handleSearch"
         />
@@ -140,7 +155,7 @@ defineExpose({
       </div>
     </div>
     <div
-      class="absolute top-full left-0 w-full z-200"
+      class="absolute top-full left-0 w-full z-40"
       v-if="isSearchFocused && searchInput.trim().length > 0"
       @mousedown.prevent
     >
@@ -159,6 +174,9 @@ defineExpose({
             <p class="text-sm">
               {{ categoriesError }}
             </p>
+          </div>
+          <div v-else-if="isCategoryLoading">
+            <p class="text-gray-500 dark:text-gray-400">Loading...</p>
           </div>
           <div v-else-if="!filteredSearchTerms?.length">
             <p class="text-gray-500 dark:text-gray-400">
