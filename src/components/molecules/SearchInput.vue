@@ -20,6 +20,7 @@ const searchInput = ref<string>(props.initialTerm)
 const searchInputRef = ref<HTMLInputElement | null>(null)
 const searchCategory = ref<string>(props.initialKind || 'citation_id')
 const isSearchFocused = ref(false)
+const wasSearchFocused = ref(false)
 const searchCategories = [
   { value: 'citation_id', label: 'Publication references' },
   { value: 'citation_author_family_name', label: 'Publication Authors' },
@@ -93,6 +94,12 @@ const handleSearchTermClick = (term: string) => {
   emit('search', searchKind, term)
 }
 
+const handleCategoryChange = () => {
+  if (wasSearchFocused.value) {
+    searchInputRef.value?.focus()
+  }
+}
+
 defineExpose({
   searchInputRef,
 })
@@ -114,6 +121,7 @@ defineExpose({
           class="px-4 pr-12 py-2 outline-none appearance-none bg-transparent relative cursor-pointer"
           v-model="searchCategory"
           aria-label="Search category"
+          @change="handleCategoryChange"
         >
           <option v-for="category in searchCategories" :key="category.value" :value="category.value">
             {{ category.label }}
@@ -131,7 +139,7 @@ defineExpose({
           placeholder="Start typing to search..."
           aria-label="Search term"
           class="flex-1 px-4 py-2 border-0 focus:ring-0 outline-none"
-          @focus="isSearchFocused = true"
+          @focus="isSearchFocused = true; wasSearchFocused = true"
           @blur="isSearchFocused = false"
           @keyup.enter="handleSearch"
         />
