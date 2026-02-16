@@ -39,9 +39,16 @@ onMounted(async () => {
   }
 })
 
+const currentCategoryData = computed(() => {
+  return searchStore.categories.find((cat) => cat.kind === searchCategory.value)
+})
+
+const isCategoryLoading = computed(() => {
+  return currentCategoryData.value ? currentCategoryData.value.loading : searchStore.isLoading
+})
+
 const categoryTerms = computed(() => {
-  const categoryObj = searchStore.categories.find((cat) => cat.kind === searchCategory.value)
-  return categoryObj?.kindInfo?.terms || []
+  return currentCategoryData.value?.kindInfo?.terms || []
 })
 
 const categoryTermsWithLowercase = computed(() => {
@@ -159,6 +166,9 @@ defineExpose({
             <p class="text-sm">
               {{ categoriesError }}
             </p>
+          </div>
+          <div v-else-if="isCategoryLoading">
+            <p class="text-gray-500 dark:text-gray-400">Loading...</p>
           </div>
           <div v-else-if="!filteredSearchTerms?.length">
             <p class="text-gray-500 dark:text-gray-400">
