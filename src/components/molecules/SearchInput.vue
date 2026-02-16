@@ -23,9 +23,9 @@ const isSearchFocused = ref(false)
 const wasSearchFocused = ref(false)
 const searchCategories = [
   { value: 'citation_id', label: 'Publication references' },
-  { value: 'citation_author_family_name', label: 'Publication Authors' },
-  { value: 'model_author', label: 'Model Authors' },
-  { value: 'cellml_keyword', label: 'CellML Keywords' },
+  { value: 'citation_author_family_name', label: 'Publication authors' },
+  { value: 'model_author', label: 'Model authors' },
+  { value: 'cellml_keyword', label: 'CellML keywords' },
 ]
 const categoriesError = ref<string | null>(null)
 
