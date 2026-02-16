@@ -6,16 +6,29 @@ import SearchInput from '@/components/molecules/SearchInput.vue'
 import SearchResults from '@/components/molecules/SearchResults.vue'
 import { useSearchStore } from '@/stores/search'
 import type { SearchResult } from '@/types/search'
+import { useGlobalStateStore } from '@/stores/globalState'
 
 const route = useRoute()
 const router = useRouter()
 const searchStore = useSearchStore()
+const globalState = useGlobalStateStore()
 
 const kind = computed(() => (route.query.kind as string) || '')
 const term = computed(() => (route.query.term as string) || '')
 const searchResults = ref<SearchResult[]>([])
 const isLoading = ref(false)
 const resultsError = ref<string | null>(null)
+const searchInputRef = ref<InstanceType<typeof SearchInput> | null>(null)
+
+watch(
+  () => globalState.isSearchFocusRequested,
+  (isRequested) => {
+    if (isRequested) {
+      searchInputRef.value?.searchInputRef?.focus()
+      globalState.consumeSearchFocus()
+    }
+  },
+)
 
 onMounted(async () => {
   await loadResults()
@@ -61,7 +74,7 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
 </script>
 
 <template>
-  <SearchInput :initial-kind="kind" :initial-term="term" @search="handleSearch" />
+  <SearchInput ref="searchInputRef" :initial-kind="kind" :initial-term="term" @search="handleSearch" />
   <div class="mt-8">
     <main class="flex-1 min-w-0 relative">
       <SearchResults

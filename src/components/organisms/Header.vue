@@ -6,9 +6,19 @@ import UserDropdown from '@/components/molecules/UserDropdown.vue'
 import SearchIcon from '@/components/icons/SearchIcon.vue'
 import SearchOverlay from '@/components/organisms/SearchOverlay.vue'
 import ActionButton from '../atoms/ActionButton.vue'
+import { useGlobalStateStore } from '@/stores/globalState'
 
 const route = useRoute()
 const isSearchOverlayVisible = ref(false)
+const globalState = useGlobalStateStore()
+
+const handleSearchClick = () => {
+  if (route.name === 'search-results') {
+    globalState.requestSearchFocus()
+  } else {
+    isSearchOverlayVisible.value = true
+  }
+}
 
 const navLinks = [
   { path: '/workspaces', label: 'Workspaces' },
@@ -33,7 +43,7 @@ const isActive = (path: string) => computed(() => route.path.startsWith(path))
               variant="icon"
               size="sm"
               aria-label="Open search"
-              @click="isSearchOverlayVisible = true"
+              @click="handleSearchClick"
               content-section="Header navigation"
             >
               <span class="sr-only">Open search</span>
