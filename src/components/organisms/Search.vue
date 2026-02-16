@@ -17,7 +17,8 @@ const kind = computed(() => (route.query.kind as string) || '')
 const term = computed(() => (route.query.term as string) || '')
 const searchResults = ref<SearchResult[]>([])
 const isLoading = ref(false)
-const error = ref<string | null>(null)
+const categoriesError = ref<string | null>(null)
+const resultsError = ref<string | null>(null)
 const searchInput = ref<string>(term.value)
 const searchInputRef = ref<HTMLInputElement | null>(null)
 const searchCategory = ref<string>(kind.value || 'citation_id')
@@ -32,8 +33,13 @@ const searchCategories = [
 onMounted(async () => {
   const validKinds = searchCategories.map((cat) => cat.value)
 
-  await loadResults()
-  await searchStore.fetchCategories(validKinds)
+  try {
+    await loadResults()
+    await searchStore.fetchCategories(validKinds)
+  } catch (err) {
+    categoriesError.value = 'Failed to fetch search categories.'
+    console.error('Failed to fetch search categories:', err)
+  }
 })
 
 // Watch for route param changes to reload results.
@@ -52,27 +58,31 @@ const loadResults = async () => {
   }
 
   isLoading.value = true
-  error.value = null
+  resultsError.value = null
   searchResults.value = []
 
   try {
     searchResults.value = await searchStore.searchIndexTerm(kind.value, term.value)
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to load search results'
+    resultsError.value = err instanceof Error ? err.message : 'Failed to load search results'
     console.error('Failed to load search results:', err)
   } finally {
     isLoading.value = false
   }
 }
 
-const filteredTerms = computed(() => {
-  const categoryObj = searchStore.categories.find(
-    (cat) => cat.kind === searchCategory.value,
+const categoryTerms = computed(() => {
+  const categoryObj = searchStore.categories.find((cat) => cat.kind === searchCategory.value)
+  return categoryObj?.kindInfo?.terms || []
+})
+
+const categoryTermsWithLowercase = computed(() => {
+  return (
+    categoryTerms.value?.map((term) => ({
+      original: term,
+      lowercase: term.toLowerCase(),
+    })) || []
   )
-  if (categoryObj?.kindInfo) {
-    return searchStore.categories.find((cat) => cat.kind === categoryObj.kind)?.kindInfo?.terms
-  }
-  return []
 })
 
 const currentCategoryLabel = computed(() => {
@@ -83,28 +93,21 @@ const currentCategoryLabel = computed(() => {
 })
 
 const filteredSearchTerms = computed(() => {
-  return filteredTerms.value?.filter((t) =>
-    t.toLowerCase().includes(searchInput.value.toLowerCase()),
-  )
+  const searchTermValue = searchInput.value.trim().toLowerCase()
+  if (!searchTermValue) return categoryTerms.value
+
+  return categoryTermsWithLowercase.value
+    .filter((term) => term.lowercase.includes(searchTermValue))
+    .map((term) => term.original)
 })
 
 const handleSearch = () => {
   const searchKind = searchCategory.value
-  let termMatch = null
-  let searchTerm = searchInput.value.trim()
+  const searchTerm = searchInput.value.trim()
   if (searchTerm === '') return
 
-  const searchCategoryObj = searchStore.categories.find((cat) => cat.kind === searchKind)
-
-  if (searchCategoryObj) {
-    termMatch = searchCategoryObj.kindInfo?.terms.find((term) =>
-      term.toLowerCase().includes(searchTerm.toLowerCase()),
-    )
-    if (termMatch) {
-      searchTerm = termMatch
-    }
-  }
-
+  // Blur the input to close the dropdown.
+  searchInputRef.value?.blur()
   pushSearchQuery(searchKind, searchTerm)
 }
 
@@ -135,6 +138,7 @@ const pushSearchQuery = (searchKind: string, searchTerm: string) => {
         <select
           class="px-4 pr-12 py-2 outline-none appearance-none bg-transparent relative cursor-pointer"
           v-model="searchCategory"
+          aria-label="Search category"
         >
           <option v-for="category in searchCategories" :key="category.value" :value="category.value">
             {{ category.label }}
@@ -149,12 +153,19 @@ const pushSearchQuery = (searchKind: string, searchTerm: string) => {
           type="search"
           ref="searchInputRef"
           v-model="searchInput"
-          placeholder="Search..."
+          placeholder="Start typing to search..."
+          aria-label="Search term"
           class="flex-1 px-4 py-2 border-0 focus:ring-0 outline-none"
           @focus="isSearchFocused = true"
           @blur="isSearchFocused = false"
+          @keyup.enter="handleSearch"
         />
-        <button class="px-4 py-2" @click="handleSearch">
+        <button
+          type="button"
+          class="px-4 py-2"
+          aria-label="Search"
+          @click="handleSearch"
+        >
           <SearchIcon class="w-5 h-5" />
           <span class="sr-only">Search</span>
         </button>
@@ -176,7 +187,12 @@ const pushSearchQuery = (searchKind: string, searchTerm: string) => {
         <div
           class="lg:basis-9/12 xl:basis-10/12 h-auto max-h-64 overflow-y-auto scrollbar-thin"
         >
-          <div v-if="!filteredSearchTerms?.length">
+          <div v-if="categoriesError" class="error-box">
+            <p class="text-sm">
+              {{ categoriesError }}
+            </p>
+          </div>
+          <div v-else-if="!filteredSearchTerms?.length">
             <p class="text-gray-500 dark:text-gray-400">
               No matching {{ currentCategoryLabel }} found for {{ searchInput }}.
             </p>
@@ -200,7 +216,7 @@ const pushSearchQuery = (searchKind: string, searchTerm: string) => {
       <SearchResults
         :results="searchResults"
         :is-loading="isLoading"
-        :error="error"
+        :error="resultsError"
         :term="term"
       />
     </main>
@@ -209,4 +225,5 @@ const pushSearchQuery = (searchKind: string, searchTerm: string) => {
 
 <style scoped>
 @import '@/assets/box.css';
+@import '@/assets/error-box.css';
 </style>
