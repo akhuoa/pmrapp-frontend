@@ -140,7 +140,7 @@ defineExpose({
       </div>
     </div>
     <div
-      class="absolute top-full left-0 w-full z-200"
+      class="absolute top-full left-0 w-full z-40"
       v-if="isSearchFocused && searchInput.trim().length > 0"
       @mousedown.prevent
     >
