@@ -38,8 +38,8 @@ describe('download', () => {
     vi.spyOn(document.body, 'appendChild').mockImplementation(mockAppendChild)
     vi.spyOn(document.body, 'removeChild').mockImplementation(mockRemoveChild)
 
-    global.URL.createObjectURL = mockCreateObjectURL
-    global.URL.revokeObjectURL = mockRevokeObjectURL
+    globalThis.URL.createObjectURL = mockCreateObjectURL
+    globalThis.URL.revokeObjectURL = mockRevokeObjectURL
 
     vi.clearAllMocks()
   })
