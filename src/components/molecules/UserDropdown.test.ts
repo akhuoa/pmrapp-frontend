@@ -79,11 +79,11 @@ describe('UserDropdown', () => {
       },
     })
 
-    expect(wrapper.vm.isOpen).toBe(false)
+    expect((wrapper.vm as any).isOpen).toBe(false)
 
     await wrapper.find('button[aria-label="User menu"]').trigger('click')
 
-    expect(wrapper.vm.isOpen).toBe(true)
+    expect((wrapper.vm as any).isOpen).toBe(true)
   })
 
   it('shows logout button when dropdown is open', async () => {
