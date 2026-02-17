@@ -74,6 +74,7 @@ describe('BackButton', () => {
       global: {
         stubs: {
           ActionButton: {
+            name: 'ActionButton',
             template: '<button :content-section="contentSection"><slot /></button>',
             props: ['contentSection'],
           },
