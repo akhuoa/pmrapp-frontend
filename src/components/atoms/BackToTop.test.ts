@@ -36,7 +36,7 @@ describe('BackToTop', () => {
     window.dispatchEvent(new Event('scroll'))
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.vm.isVisible).toBe(true)
+    expect((wrapper.vm as any).isVisible).toBe(true)
   })
 
   it('hides button when scrolled less than 300px', async () => {
@@ -53,7 +53,7 @@ describe('BackToTop', () => {
     window.dispatchEvent(new Event('scroll'))
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.vm.isVisible).toBe(false)
+    expect((wrapper.vm as any).isVisible).toBe(false)
   })
 
   it('scrolls to top when button is clicked', async () => {
