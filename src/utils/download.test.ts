@@ -1,15 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { downloadFileFromBlob, downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
 
-// Mock services
+// Create stable mock functions.
+const mockGetRawFile = vi.fn()
+const mockGetRawFileBlob = vi.fn()
+
+// Mock services.
 vi.mock('@/services', () => ({
   getWorkspaceService: vi.fn(() => ({
-    getRawFile: vi.fn(),
-    getRawFileBlob: vi.fn(),
+    getRawFile: mockGetRawFile,
+    getRawFileBlob: mockGetRawFileBlob,
   })),
 }))
 
-// Mock file utility
+// Mock file utility.
 vi.mock('./file', () => ({
   isBinaryFile: vi.fn(),
 }))
@@ -74,40 +78,37 @@ describe('download', () => {
 
   describe('downloadWorkspaceFile', () => {
     it('downloads binary file as blob', async () => {
-      const { getWorkspaceService } = await import('@/services')
       const { isBinaryFile } = await import('./file')
 
       const mockBlob = new Blob(['binary content'])
       vi.mocked(isBinaryFile).mockReturnValue(true)
-      vi.mocked(getWorkspaceService)().getRawFileBlob = vi.fn().mockResolvedValue(mockBlob)
+      mockGetRawFileBlob.mockResolvedValue(mockBlob)
 
       await downloadWorkspaceFile('test-alias', 'commit123', 'image.png')
 
       expect(isBinaryFile).toHaveBeenCalledWith('image.png')
-      expect(getWorkspaceService().getRawFileBlob).toHaveBeenCalledWith('test-alias', 'commit123', 'image.png')
+      expect(mockGetRawFileBlob).toHaveBeenCalledWith('test-alias', 'commit123', 'image.png')
       expect(mockCreateObjectURL).toHaveBeenCalledWith(mockBlob)
     })
 
     it('downloads text file as content', async () => {
-      const { getWorkspaceService } = await import('@/services')
       const { isBinaryFile } = await import('./file')
 
       vi.mocked(isBinaryFile).mockReturnValue(false)
-      vi.mocked(getWorkspaceService)().getRawFile = vi.fn().mockResolvedValue('text content')
+      mockGetRawFile.mockResolvedValue('text content')
 
       await downloadWorkspaceFile('test-alias', 'commit123', 'file.txt')
 
       expect(isBinaryFile).toHaveBeenCalledWith('file.txt')
-      expect(getWorkspaceService().getRawFile).toHaveBeenCalledWith('test-alias', 'commit123', 'file.txt')
+      expect(mockGetRawFile).toHaveBeenCalledWith('test-alias', 'commit123', 'file.txt')
     })
 
     it('handles download errors', async () => {
-      const { getWorkspaceService } = await import('@/services')
       const { isBinaryFile } = await import('./file')
 
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
       vi.mocked(isBinaryFile).mockReturnValue(false)
-      vi.mocked(getWorkspaceService)().getRawFile = vi.fn().mockRejectedValue(new Error('Download failed'))
+      mockGetRawFile.mockRejectedValue(new Error('Download failed'))
 
       await expect(downloadWorkspaceFile('test-alias', 'commit123', 'file.txt')).rejects.toThrow('Download failed')
 
