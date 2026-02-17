@@ -9,7 +9,7 @@ describe('BackToTop', () => {
     vi.clearAllMocks()
   })
 
-  it('renders button when not visible initially', () => {
+  it('does not render button when not visible initially', () => {
     const wrapper = mount(BackToTop, {
       global: {
         stubs: {
@@ -19,7 +19,7 @@ describe('BackToTop', () => {
     })
 
     const button = wrapper.find('button')
-    expect(button.exists()).toBe(true)
+    expect(button.exists()).toBe(false)
   })
 
   it('shows button when scrolled down more than 300px', async () => {
@@ -34,7 +34,6 @@ describe('BackToTop', () => {
     // Simulate scroll
     Object.defineProperty(window, 'scrollY', { value: 400, writable: true })
     window.dispatchEvent(new Event('scroll'))
-
     await wrapper.vm.$nextTick()
 
     expect(wrapper.vm.isVisible).toBe(true)
@@ -52,7 +51,6 @@ describe('BackToTop', () => {
     // Simulate scroll
     Object.defineProperty(window, 'scrollY', { value: 200, writable: true })
     window.dispatchEvent(new Event('scroll'))
-
     await wrapper.vm.$nextTick()
 
     expect(wrapper.vm.isVisible).toBe(false)
@@ -83,7 +81,7 @@ describe('BackToTop', () => {
     })
   })
 
-  it('has proper aria-label', () => {
+  it('has proper aria-label', async () => {
     const wrapper = mount(BackToTop, {
       global: {
         stubs: {
@@ -91,6 +89,11 @@ describe('BackToTop', () => {
         },
       },
     })
+
+    // Make button visible
+    Object.defineProperty(window, 'scrollY', { value: 400, writable: true })
+    window.dispatchEvent(new Event('scroll'))
+    await wrapper.vm.$nextTick()
 
     const button = wrapper.find('button')
     expect(button.attributes('aria-label')).toBe('Back to top')
