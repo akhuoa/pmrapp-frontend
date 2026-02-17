@@ -3,6 +3,7 @@ import { downloadFileFromBlob } from '@/utils/download'
 const DOWNLOAD_API = import.meta.env.VITE_DOWNLOAD_API
 
 export const downloadWorkspaceArchive = async (
+  url: string,
   alias: string,
   commitId: string,
   format: 'zip' | 'tgz',
@@ -13,7 +14,7 @@ export const downloadWorkspaceArchive = async (
   }
 
   try {
-    const params = new URLSearchParams({ alias, commitId, format })
+    const params = new URLSearchParams({ workspaceURL: url, alias, commitId, format })
     const response = await fetch(`${DOWNLOAD_API}/download/workspace?${params}`)
 
     if (!response.ok) {

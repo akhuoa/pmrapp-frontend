@@ -116,7 +116,12 @@ const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
   loadingRef.value = true
 
   try {
-    await downloadWorkspaceArchive(props.alias, workspaceInfo.value.commit.commit_id, format)
+    await downloadWorkspaceArchive(
+      workspaceInfo.value.workspace.url,
+      props.alias,
+      workspaceInfo.value.commit.commit_id,
+      format
+    )
   } catch (err) {
     console.error('Error downloading workspace archive:', err)
   } finally {
