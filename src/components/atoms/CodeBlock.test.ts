@@ -47,7 +47,7 @@ describe('CodeBlock', () => {
       },
     })
 
-    expect(wrapper.vm.detectedLanguage).toBe('javascript')
+    expect((wrapper.vm as any).detectedLanguage).toBe('javascript')
   })
 
   it('detects Python language from .py extension', () => {
@@ -63,7 +63,7 @@ describe('CodeBlock', () => {
       },
     })
 
-    expect(wrapper.vm.detectedLanguage).toBe('python')
+    expect((wrapper.vm as any).detectedLanguage).toBe('python')
   })
 
   it('detects markup language from .html extension', () => {
@@ -79,7 +79,7 @@ describe('CodeBlock', () => {
       },
     })
 
-    expect(wrapper.vm.detectedLanguage).toBe('markup')
+    expect((wrapper.vm as any).detectedLanguage).toBe('markup')
   })
 
   it('detects CSS language from .css extension', () => {
@@ -95,7 +95,7 @@ describe('CodeBlock', () => {
       },
     })
 
-    expect(wrapper.vm.detectedLanguage).toBe('css')
+    expect((wrapper.vm as any).detectedLanguage).toBe('css')
   })
 
   it('returns none for unknown extensions', () => {
@@ -111,7 +111,7 @@ describe('CodeBlock', () => {
       },
     })
 
-    expect(wrapper.vm.detectedLanguage).toBe('none')
+    expect((wrapper.vm as any).detectedLanguage).toBe('none')
   })
 
   it('displays the code content', () => {
