@@ -79,6 +79,7 @@ const hasResults = computed(() => resultsCount.value > 0)
               v-for="keyword in item.data.cellml_keyword.filter(k => k.trim())"
               :key="keyword"
               :term="keyword"
+              :active="kind === 'cellml_keyword' && term === keyword"
               @click="handleKeywordClick('cellml_keyword', keyword)"
             />
           </div>
