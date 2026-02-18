@@ -23,6 +23,8 @@ const props = defineProps<Props>()
 
 const router = useRouter()
 
+const textHighlightClass = 'text-gray-900 bg-amber-100 dark:bg-amber-900 dark:text-gray-100 font-semibold'
+
 const handleKeywordClick = (kind: string, keyword: string) => {
   router.push({ path: '/search', query: { kind, term: keyword } })
 }
@@ -34,6 +36,11 @@ const kindLabel = computed(() => {
 const resultsCount = computed(() => props.results.length)
 
 const hasResults = computed(() => resultsCount.value > 0)
+
+const isIdActive = (ids: string[] | undefined) => {
+  if (!ids || props.kind !== 'citation_id') return false
+  return ids.some(id => id.toLowerCase() === props.term.toLowerCase())
+}
 </script>
 
 <template>
@@ -83,19 +90,44 @@ const hasResults = computed(() => resultsCount.value > 0)
             class="mt-1 flex items-center gap-1 text-gray-600 dark:text-gray-400"
           >
             <UserIcon class="w-3.5 h-3.5 flex-shrink-0" />
-            <small>{{ item.data.model_author.join(', ') }}</small>
+            <small>
+              <template v-for="(author, index) in item.data.model_author" :key="index">
+                <span
+                  :class="kind === 'model_author' && term.toLowerCase() === author.toLowerCase()
+                    ? textHighlightClass
+                    : ''"
+                >
+                  {{ author }}
+                </span>
+                <span v-if="index < item.data.model_author.length - 1">, </span>
+              </template>
+            </small>
           </div>
           <div
             v-if="item.data.citation_author_family_name?.length || item.data.citation_id?.length"
-            class="mt-1 text-gray-600 dark:text-gray-400 flex items-center gap-1"
+            class="mt-1 flex items-center gap-1 text-gray-600 dark:text-gray-400"
           >
             <FileIcon class="w-3.5 h-3.5 flex-shrink-0" />
             <small>
-              <span v-if="item.data.citation_author_family_name?.length">
-                {{ item.data.citation_author_family_name.join(', ') }}
-              </span>
+              <template v-if="item.data.citation_author_family_name?.length">
+                <template v-for="(author, index) in item.data.citation_author_family_name" :key="index">
+                  <span
+                    :class="kind === 'citation_author_family_name' && term.toLowerCase() === author.toLowerCase()
+                      ? textHighlightClass
+                      : ''"
+                  >
+                    {{ author }}
+                  </span>
+                  <span v-if="index < item.data.citation_author_family_name.length - 1">, </span>
+                </template>
+              </template>
               <span v-if="item.data.citation_author_family_name?.length && item.data.citation_id?.length"> · </span>
-              <span v-if="item.data.citation_id?.length">
+              <span
+                v-if="item.data.citation_id?.length"
+                :class="isIdActive(item.data.citation_id)
+                  ? textHighlightClass
+                  : ''"
+              >
                 {{ item.data.citation_id.join(', ') }}
               </span>
             </small>
