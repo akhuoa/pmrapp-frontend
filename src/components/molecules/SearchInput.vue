@@ -139,13 +139,13 @@ defineExpose({
             No matching results found for "{{ searchInput }}".
           </p>
         </div>
-        <div v-else class="max-h-96 overflow-y-auto scrollbar-thin space-y-2">
+        <div v-else class="max-h-96 overflow-y-auto scrollbar-thin space-y-2 group/results">
           <div
             v-for="categoryGroup in filteredSearchTermsByCategory"
             :key="categoryGroup.kind"
-            class="hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md p-3 transition-colors"
+            class="hover:bg-gray-50 dark:hover:bg-gray-900 rounded-md p-3 transition-all group-hover/results:opacity-75 hover:!opacity-100"
           >
-            <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+            <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
               {{ categoryGroup.label }}
             </h4>
             <div class="flex flex-row items-start justify-start flex-wrap gap-2">
