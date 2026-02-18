@@ -20,6 +20,9 @@ export interface SearchResult {
     created_ts: string[]
     description: string[]
     exposure_alias: string[]
+    citation_author_family_name: string[]
+    citation_id: string[]
+    model_author: string[]
   }
   resource_path: string
 }
