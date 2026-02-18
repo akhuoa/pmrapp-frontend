@@ -119,29 +119,29 @@ defineExpose({
       </button>
     </div>
     <div
+      v-if="isSearchFocused && searchInput.trim().length > 0"
       :class="`top-full left-0 w-full z-40 ${props.inOverlay ? '' : 'absolute'}`"
-      v-if="searchInput.trim().length > 0"
       @mousedown.prevent
     >
-      <div class="mt-2 box box-small !shadow-none">
+      <div class="mt-2 box box-small !shadow-none !p-0">
         <div v-if="categoriesError" class="error-box">
           <p class="text-sm">
             {{ categoriesError }}
           </p>
         </div>
-        <div v-else-if="isLoading">
+        <div v-else-if="isLoading" class="p-4">
           <p class="text-gray-500 dark:text-gray-400">Loading...</p>
         </div>
-        <div v-else-if="!hasResults">
+        <div v-else-if="!hasResults" class="p-4">
           <p class="text-gray-500 dark:text-gray-400">
             No matching results found for "{{ searchInput }}".
           </p>
         </div>
-        <div v-else class="max-h-96 overflow-y-auto scrollbar-thin space-y-2 group/results">
+        <div v-else class="max-h-96 overflow-y-auto scrollbar-thin group/results">
           <div
             v-for="categoryGroup in filteredSearchTermsByCategory"
             :key="categoryGroup.kind"
-            class="hover:bg-gray-50 dark:hover:bg-gray-900 rounded-md p-3 transition-all group-hover/results:opacity-75 hover:!opacity-100"
+            class="hover:bg-gray-50 dark:hover:bg-gray-900 border-b last:border-0 border-gray-200 dark:border-gray-700 p-4 transition-all group-hover/results:opacity-75 hover:!opacity-100"
           >
             <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
               {{ categoryGroup.label }}
