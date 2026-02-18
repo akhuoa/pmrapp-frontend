@@ -11,9 +11,7 @@ const props = defineProps<{
   inOverlay?: boolean
 }>()
 
-const emit = defineEmits<{
-  (e: 'search', searchKind: string, searchTerm: string): void
-}>()
+const emit = defineEmits<(e: 'search', searchKind: string, searchTerm: string) => void>()
 
 const searchStore = useSearchStore()
 

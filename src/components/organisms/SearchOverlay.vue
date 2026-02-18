@@ -8,9 +8,7 @@ const props = defineProps<{
   show: boolean
 }>()
 
-const emit = defineEmits<{
-  (e: 'close'): void
-}>()
+const emit = defineEmits<(e: 'close') => void>()
 
 const router = useRouter()
 const searchInputRef = ref<InstanceType<typeof SearchInput> | null>(null)
