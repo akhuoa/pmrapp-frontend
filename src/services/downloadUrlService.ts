@@ -32,7 +32,7 @@ export const downloadWorkspaceArchive = async (
 
 export const downloadCOMBINEArchive = async (
   alias: string,
-  _fileName: string,
+  fileName: string,
 ): Promise<void> => {
   if (!alias) {
     console.error('Exposure alias is required to download COMBINE archive.')
@@ -48,8 +48,8 @@ export const downloadCOMBINEArchive = async (
     }
 
     const blob = await response.blob()
-    const fileName = `${_fileName || alias}.omex`
-    downloadFileFromBlob(blob, fileName)
+    const fileNameWithExtension = `${fileName || alias}.omex`
+    downloadFileFromBlob(blob, fileNameWithExtension)
   } catch (error) {
     console.error('Error downloading COMBINE archive:', error)
     throw error
