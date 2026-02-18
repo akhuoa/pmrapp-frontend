@@ -86,15 +86,26 @@ const handleSearchTermClick = (kind: string, term: string) => {
   emit('search', kind, term)
 }
 
+const handleBackdropClick = () => {
+  // Blur the input to close the dropdown.
+  searchInputRef.value?.inputRef?.blur()
+}
+
 defineExpose({
   searchInputRef,
 })
 </script>
 
 <template>
-  <div class="relative">
+  <div class="relative z-100">
+    <!-- Backdrop overlay (only when not in SearchOverlay). -->
     <div
-      class="flex items-center justify-between w-full border rounded-lg transition-all"
+      v-if="isSearchFocused && searchInput.trim().length > 0 && !props.inOverlay"
+      class="fixed inset-0 bg-gray-800/75 dark:bg-gray-900/75 z-30"
+      @click="handleBackdropClick"
+    ></div>
+    <div
+      class="flex items-center justify-between w-full border rounded-lg transition-all relative z-40"
       :class="isSearchFocused ? 'ring-2 ring-primary border-transparent' : 'border-gray-200 dark:border-gray-700'"
     >
       <SearchField
@@ -123,7 +134,7 @@ defineExpose({
       :class="`top-full left-0 w-full z-40 ${props.inOverlay ? '' : 'absolute'}`"
       @mousedown.prevent
     >
-      <div class="mt-2 box box-small !shadow-none !p-0">
+      <div class="mt-2 box box-small overflow-hidden !shadow-none !p-0">
         <div v-if="categoriesError" class="error-box">
           <p class="text-sm">
             {{ categoriesError }}
