@@ -146,7 +146,7 @@ defineExpose({
         />
         <button
           type="button"
-          class="px-4 py-2"
+          class="p-2 cursor-pointer hover:opacity-70 transition-opacity"
           aria-label="Search"
           @click="handleSearch"
         >
