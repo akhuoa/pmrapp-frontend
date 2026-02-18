@@ -58,13 +58,12 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
       </div>
       <div class="my-4 text-sm text-gray-500 dark:text-gray-400">
         <p class="lg:w-3/4">
-          Search for models by selecting a category from the dropdown on the left,
-          <br />
-          such as publication references, authors, or CellML keywords. Start typing to see available terms.
+          Search for models across authors, CellML keywords, and publication references.
+          Start typing to see available terms grouped by category.
         </p>
       </div>
-      <div class="pt-4 pb-8">
-        <SearchInput ref="searchInputRef" initial-kind="" initial-term="" @search="handleSearch" />
+      <div class="py-4">
+        <SearchInput ref="searchInputRef" :inOverlay="true" initial-kind="" initial-term="" @search="handleSearch" />
       </div>
     </div>
   </div>

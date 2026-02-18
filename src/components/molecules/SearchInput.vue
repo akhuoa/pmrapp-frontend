@@ -8,6 +8,7 @@ import { useSearchStore } from '@/stores/search'
 const props = defineProps<{
   initialTerm: string
   initialKind: string
+  inOverlay?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -93,11 +94,11 @@ defineExpose({
 </script>
 
 <template>
-  <div
-    class="border rounded-lg transition-all relative"
-    :class="isSearchFocused ? 'ring-2 ring-primary border-transparent' : 'border-gray-200 dark:border-gray-700'"
-  >
-    <div class="flex items-center justify-between w-full">
+  <div class="relative">
+    <div
+      class="flex items-center justify-between w-full border rounded-lg transition-all"
+      :class="isSearchFocused ? 'ring-2 ring-primary border-transparent' : 'border-gray-200 dark:border-gray-700'"
+    >
       <SearchField
         ref="searchInputRef"
         v-model="searchInput"
@@ -120,11 +121,11 @@ defineExpose({
       </button>
     </div>
     <div
-      class="absolute top-full left-0 w-full z-40"
+      :class="`top-full left-0 w-full z-40 ${props.inOverlay ? '' : 'absolute'}`"
       v-if="searchInput.trim().length > 0"
       @mousedown.prevent
     >
-      <div class="mt-2 box box-small">
+      <div class="mt-2 box box-small !shadow-none">
         <div v-if="categoriesError" class="error-box">
           <p class="text-sm">
             {{ categoriesError }}
