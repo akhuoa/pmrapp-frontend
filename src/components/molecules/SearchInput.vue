@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
 import SearchIcon from '@/components/icons/SearchIcon.vue'
@@ -17,7 +18,7 @@ const emit = defineEmits<{
 const searchStore = useSearchStore()
 
 const searchInput = ref<string>(props.initialTerm)
-const searchInputRef = ref<HTMLInputElement | null>(null)
+const searchInputRef = ref<InstanceType<typeof SearchField> | null>(null)
 const searchCategory = ref<string>(props.initialKind || 'citation_id')
 const isSearchFocused = ref(false)
 const wasSearchFocused = ref(false)
@@ -83,14 +84,14 @@ const handleSearch = () => {
   if (searchTerm === '') return
 
   // Blur the input to close the dropdown.
-  searchInputRef.value?.blur()
+  searchInputRef.value?.inputRef?.blur()
   emit('search', searchKind, searchTerm)
 }
 
 const handleSearchTermClick = (term: string) => {
   const searchKind = searchCategory.value
   // Blur the input to close the dropdown.
-  searchInputRef.value?.blur()
+  searchInputRef.value?.inputRef?.blur()
   emit('search', searchKind, term)
 }
 
@@ -132,16 +133,14 @@ defineExpose({
         class="border lg:border-0 rounded-lg transition-all relative flex items-center justify-between w-full"
         :class="isSearchFocused ? 'ring-2 lg:ring-0 ring-primary border-transparent' : 'border-gray-200 dark:border-gray-700'"
       >
-        <input
-          type="search"
+        <SearchField
           ref="searchInputRef"
           v-model="searchInput"
           placeholder="Start typing to search..."
           aria-label="Search term"
-          class="flex-1 px-4 py-2 border-0 focus:ring-0 outline-none"
           @focus="isSearchFocused = true; wasSearchFocused = true"
           @blur="isSearchFocused = false"
-          @keyup.enter="handleSearch"
+          @search="handleSearch"
         />
         <button
           type="button"
