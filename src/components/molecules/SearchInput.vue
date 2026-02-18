@@ -138,6 +138,8 @@ defineExpose({
           v-model="searchInput"
           placeholder="Start typing to search..."
           aria-label="Search term"
+          class="flex-1"
+          input-class="flex-1 min-w-0 outline-none focus:ring-0 px-4 py-2"
           @focus="isSearchFocused = true; wasSearchFocused = true"
           @blur="isSearchFocused = false"
           @search="handleSearch"

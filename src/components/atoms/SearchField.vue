@@ -6,11 +6,13 @@ interface Props {
   modelValue: string
   placeholder?: string
   ariaLabel?: string
+  inputClass?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   placeholder: 'Search...',
   ariaLabel: 'Search',
+  inputClass: '',
 })
 
 const emit = defineEmits<{
@@ -55,14 +57,14 @@ defineExpose({
 </script>
 
 <template>
-  <div class="relative flex flex-1 items-center px-4 py-2">
+  <div class="relative flex items-center">
     <input
       ref="inputRef"
       type="text"
       :value="modelValue"
       :placeholder="placeholder"
       :aria-label="ariaLabel"
-      class="flex-1 min-w-0 outline-none focus:ring-0"
+      :class="inputClass"
       @input="handleInput"
       @keyup="handleKeyup"
       @focus="handleFocus"
@@ -81,7 +83,10 @@ defineExpose({
 </template>
 
 <style scoped>
+@import '@/assets/input.css';
+
+/* Space for clear button */
 input {
-  padding-right: 2.5rem;
+  padding-right: 2.5rem !important;
 }
 </style>
