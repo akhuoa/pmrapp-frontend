@@ -19,7 +19,7 @@ const goBack = () => {
 <template>
   <div class="max-w-2xl mx-auto text-center">
     <h1 class="text-6xl font-bold mb-4">404</h1>
-    <h2 class="text-3xl font-semibold mb-4">Page Not Found</h2>
+    <h2 class="text-3xl font-semibold mb-4">Page not found</h2>
     <p class="text-lg mb-8">
       The page you are looking for doesn't exist or has been moved.
     </p>
@@ -32,7 +32,7 @@ const goBack = () => {
       class="inline-block"
       contentSection="not_found_view"
     >
-      Go Back
+      Go back
     </ActionButton>
 
     <ActionButton
@@ -43,7 +43,7 @@ const goBack = () => {
       class="inline-block"
       contentSection="not_found_view"
     >
-      Go to Home
+      Go to home
     </ActionButton>
   </div>
 </template>
