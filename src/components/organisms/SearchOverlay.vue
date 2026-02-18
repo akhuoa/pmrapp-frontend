@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import CloseButton from '@/components/atoms/CloseButton.vue'
 import SearchInput from '@/components/molecules/SearchInput.vue'
@@ -15,6 +15,12 @@ const emit = defineEmits<{
 const router = useRouter()
 const searchInputRef = ref<InstanceType<typeof SearchInput> | null>(null)
 
+const handleKeyDown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape') {
+    emit('close')
+  }
+}
+
 watch(
   () => props.show,
   (newVal) => {
@@ -22,9 +28,16 @@ watch(
       nextTick(() => {
         searchInputRef.value?.searchInputRef?.focus()
       })
+      document.addEventListener('keydown', handleKeyDown)
+    } else {
+      document.removeEventListener('keydown', handleKeyDown)
     }
   },
 )
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeyDown)
+})
 
 const handleSearch = (searchKind: string, searchTerm: string) => {
   router.push({ path: '/search', query: { kind: searchKind, term: searchTerm } })
