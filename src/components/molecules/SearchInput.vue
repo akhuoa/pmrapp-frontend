@@ -4,6 +4,7 @@ import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import SearchIcon from '@/components/icons/SearchIcon.vue'
 import { useSearchStore } from '@/stores/search'
+import { SEARCH_CATEGORIES } from '@/constants/search'
 
 const props = defineProps<{
   initialTerm: string
@@ -18,16 +19,10 @@ const searchStore = useSearchStore()
 const searchInput = ref<string>(props.initialTerm)
 const searchInputRef = ref<InstanceType<typeof SearchField> | null>(null)
 const isSearchFocused = ref(false)
-const searchCategories = [
-  { value: 'model_author', label: 'Model authors' },
-  { value: 'citation_author_family_name', label: 'Publication authors' },
-  { value: 'cellml_keyword', label: 'CellML keywords' },
-  { value: 'citation_id', label: 'Publication references' },
-]
 const categoriesError = ref<string | null>(null)
 
 onMounted(async () => {
-  const validKinds = searchCategories.map((cat) => cat.value)
+  const validKinds = SEARCH_CATEGORIES.map((cat) => cat.value)
 
   try {
     await searchStore.fetchCategories(validKinds)
@@ -45,7 +40,7 @@ const filteredSearchTermsByCategory = computed(() => {
   const searchTermValue = searchInput.value.trim().toLowerCase()
   if (!searchTermValue) return []
 
-  return searchCategories
+  return SEARCH_CATEGORIES
     .map((category) => {
       const categoryData = searchStore.categories.find((cat) => cat.kind === category.value)
       const terms = categoryData?.kindInfo?.terms || []

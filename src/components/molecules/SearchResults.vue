@@ -7,12 +7,14 @@ import ListItem from '@/components/molecules/ListItem.vue'
 import type { SearchResult } from '@/types/search'
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { formatDate, formatNumber } from '@/utils/format'
+import { SEARCH_KIND_LABEL_MAP } from '@/constants/search'
 
 interface Props {
   results: SearchResult[]
   isLoading: boolean
   error: string | null
   term: string
+  kind: string
 }
 
 const props = defineProps<Props>()
@@ -23,28 +25,30 @@ const handleKeywordClick = (kind: string, keyword: string) => {
   router.push({ path: '/search', query: { kind, term: keyword } })
 }
 
-const resultsText = computed(() => {
-  const resultsCount = props.results.length
-
-  if (resultsCount === 0) {
-    if (props.term.trim() === '') {
-      return 'Perform a search to see results.'
-    }
-    return `No results for "${props.term}"`
-  }
-
-  if (resultsCount === 1) {
-    return `1 result for "${props.term}"`
-  }
-
-  return `${formatNumber(resultsCount)} results for "${props.term}"`
+const kindLabel = computed(() => {
+  return SEARCH_KIND_LABEL_MAP[props.kind] || props.kind
 })
+
+const resultsCount = computed(() => props.results.length)
+
+const hasResults = computed(() => resultsCount.value > 0)
 </script>
 
 <template>
   <div>
-    <p class="font-bold mb-4" v-if="!isLoading && !error">
-      {{ resultsText }}
+    <p class="mb-4" v-if="!isLoading && !error">
+      <template v-if="!hasResults && term.trim() === ''">
+        Perform a search to see results.
+      </template>
+      <template v-else-if="!hasResults">
+        No results for <strong>"{{ term }}"</strong> in <strong>{{ kindLabel }}</strong>
+      </template>
+      <template v-else-if="resultsCount === 1">
+        <strong>1 result</strong> for <strong>"{{ term }}"</strong> in <strong>{{ kindLabel }}</strong>
+      </template>
+      <template v-else>
+        <strong>{{ formatNumber(resultsCount) }} results</strong> for <strong>"{{ term }}"</strong> in <strong>{{ kindLabel }}</strong>
+      </template>
     </p>
 
     <ListContent

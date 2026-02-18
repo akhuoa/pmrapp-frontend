@@ -74,6 +74,7 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
         :is-loading="isLoading"
         :error="resultsError"
         :term="term"
+        :kind="kind"
       />
     </main>
   </div>
