@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import CloseButton from '@/components/atoms/CloseButton.vue'
 import SearchInput from '@/components/molecules/SearchInput.vue'
@@ -8,12 +8,16 @@ const props = defineProps<{
   show: boolean
 }>()
 
-const emit = defineEmits<{
-  (e: 'close'): void
-}>()
+const emit = defineEmits<(e: 'close') => void>()
 
 const router = useRouter()
 const searchInputRef = ref<InstanceType<typeof SearchInput> | null>(null)
+
+const handleKeyDown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape') {
+    emit('close')
+  }
+}
 
 watch(
   () => props.show,
@@ -22,9 +26,16 @@ watch(
       nextTick(() => {
         searchInputRef.value?.searchInputRef?.focus()
       })
+      document.addEventListener('keydown', handleKeyDown)
+    } else {
+      document.removeEventListener('keydown', handleKeyDown)
     }
   },
 )
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeyDown)
+})
 
 const handleSearch = (searchKind: string, searchTerm: string) => {
   router.push({ path: '/search', query: { kind: searchKind, term: searchTerm } })
@@ -45,13 +56,12 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
       </div>
       <div class="my-4 text-sm text-gray-500 dark:text-gray-400">
         <p class="lg:w-3/4">
-          Search for models by selecting a category from the dropdown on the left,
-          <br />
-          such as publication references, authors, or CellML keywords. Start typing to see available terms.
+          Search for models across authors, CellML keywords, and publication references.
+          Start typing to see available terms grouped by category.
         </p>
       </div>
-      <div class="pt-4 pb-8">
-        <SearchInput ref="searchInputRef" initial-kind="" initial-term="" @search="handleSearch" />
+      <div class="py-4">
+        <SearchInput ref="searchInputRef" :inOverlay="true" initial-kind="" initial-term="" @search="handleSearch" />
       </div>
     </div>
   </div>
