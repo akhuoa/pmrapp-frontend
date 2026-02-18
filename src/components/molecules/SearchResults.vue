@@ -5,6 +5,7 @@ import TermButton from '@/components/atoms/TermButton.vue'
 import ListContent from '@/components/molecules/ListContent.vue'
 import ListItem from '@/components/molecules/ListItem.vue'
 import type { SearchResult } from '@/types/search'
+import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { formatDate, formatNumber } from '@/utils/format'
 
 interface Props {
@@ -20,14 +21,6 @@ const router = useRouter()
 
 const handleKeywordClick = (kind: string, keyword: string) => {
   router.push({ path: '/search', query: { kind, term: keyword } })
-}
-
-const getExposureIdFromResourcePath = (resourcePath: string): string => {
-  const match = resourcePath.match(/\/exposure\/(\d+)\//)
-  if (match?.[1]) {
-    return `#${match[1]}`
-  }
-  return ''
 }
 
 const resultsText = computed(() => {
@@ -70,7 +63,7 @@ const resultsText = computed(() => {
         >
           <p>
             <small>
-              {{ getExposureIdFromResourcePath(item.resource_path) }}
+              #{{ getExposureIdFromResourcePath(item.resource_path) }}
               <span v-if="item.data.created_ts?.[0]">
                 ·
                 Created on {{ formatDate(Number(item.data.created_ts[0])) }}

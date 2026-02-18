@@ -14,7 +14,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  filterPlaceholder: 'Filter by description...',
+  filterPlaceholder: 'Filter by description or ID...',
   sortBy: DEFAULT_SORT_OPTION,
 })
 

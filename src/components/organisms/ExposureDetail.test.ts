@@ -3,8 +3,9 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import ExposureDetail from '@/components/organisms/ExposureDetail.vue'
+import { mockExposureInfo, mockMetadata } from '@/mocks/exposureInfo'
 import { useExposureStore } from '@/stores/exposure'
-import type { ExposureInfo } from '@/types/exposure'
+import { useSearchStore } from '@/stores/search'
 
 // Mock Vue Router.
 vi.mock('vue-router', () => ({
@@ -20,188 +21,270 @@ vi.mock('@/utils/analytics', () => ({
   trackButtonClick: vi.fn(),
 }))
 
-const mockExposureInfo: ExposureInfo = {
-  exposure: {
-    id: 1,
-    description: 'NCE protein knowledge page',
-    workspace_id: 2,
-    workspace_tag_id: null,
-    commit_id: '536fb3ace66e523b5ad41b5333faf90f1251df51',
-    created_ts: 1765425335,
-    default_file_id: null,
-    files: [
-      {
-        id: 1,
-        exposure_id: 1,
-        workspace_file_path: 'exposure/alphafold_NCE2.png',
-        default_view_id: null,
-        views: [],
-      },
-      {
-        id: 2,
-        exposure_id: 1,
-        workspace_file_path: 'BG_NCE.cellml',
-        default_view_id: null,
-        views: [
-          {
-            id: 1,
-            exposure_file_id: 2,
-            view_task_template_id: 2,
-            exposure_file_view_task_id: 1,
-            view_key: 'view',
-            updated_ts: 1765425335,
-          },
-          {
-            id: 2,
-            exposure_file_id: 2,
-            view_task_template_id: 3,
-            exposure_file_view_task_id: 2,
-            view_key: 'cellml_codegen',
-            updated_ts: 1765425335,
-          },
-          {
-            id: 3,
-            exposure_file_id: 2,
-            view_task_template_id: 4,
-            exposure_file_view_task_id: 3,
-            view_key: 'cellml_math',
-            updated_ts: 1765425335,
-          },
-          {
-            id: 4,
-            exposure_file_id: 2,
-            view_task_template_id: 5,
-            exposure_file_view_task_id: 4,
-            view_key: 'cellml_metadata',
-            updated_ts: 1765425335,
-          },
-          {
-            id: 5,
-            exposure_file_id: 2,
-            view_task_template_id: 6,
-            exposure_file_view_task_id: 5,
-            view_key: 'license_citation',
-            updated_ts: 1765425335,
-          },
-          {
-            id: 6,
-            exposure_file_id: 2,
-            view_task_template_id: 7,
-            exposure_file_view_task_id: 6,
-            view_key: 'references',
-            updated_ts: 1765425335,
-          },
-        ],
-      },
-    ],
-  },
-  exposure_alias: 'ce8',
-  files: [
-    ['BG_NCE.cellml', true],
-    ['NCE_annotations.rdf', false],
-    ['exposure/alphafold_NCE2.png', true],
-    ['exposure/exposure_frontpage.rst', false],
-    ['units_and_constants/constants_BG.cellml', false],
-    ['units_and_constants/ion_valency.cellml', false],
-    ['units_and_constants/units_BG.cellml', false],
-  ],
-  workspace: {
-    id: 2,
-    url: 'https://models.physiomeproject.org/workspace/bd6/',
-    superceded_by_id: null,
-    description: 'NCE protein knowledge page',
-    long_description: null,
-    created_ts: 1765425314,
-    exposures: null,
-  },
-  workspace_alias: 'bd6',
-}
-
 describe('ExposureDetail', () => {
   let exposureStore: ReturnType<typeof useExposureStore>
+  let searchStore: ReturnType<typeof useSearchStore>
+
+  const mountComponent = async () => {
+    vi.spyOn(exposureStore, 'getExposureInfo').mockResolvedValue(mockExposureInfo)
+    vi.spyOn(exposureStore, 'getExposureSafeHTML').mockImplementation(
+      async (_id, _fileId, _view, filename) => {
+        if (filename === 'index.html') return '<h4>Model Status</h4>'
+        if (filename === 'license.txt') return 'https://creativecommons.org/licenses/by/3.0/'
+        return ''
+      },
+    )
+    vi.spyOn(exposureStore, 'getExposureRawContent').mockImplementation(
+      async (_id, _fileId, _view, filename) => {
+        if (filename === 'cmeta.json') return JSON.stringify(mockMetadata)
+        if (filename === 'math.json') return '[]'
+        return ''
+      },
+    )
+    // Mock search results for other related models.
+    vi.spyOn(searchStore, 'searchIndexTerm').mockResolvedValue([
+      {
+        resource_path: '/exposure/999/file.cellml',
+        data: {
+          aliased_uri: [],
+          description: [],
+          cellml_keyword: [],
+          commit_authored_ts: [],
+          created_ts: [],
+          exposure_alias: [],
+        },
+      },
+    ])
+
+    const wrapper = mount(ExposureDetail, {
+      props: {
+        alias: mockExposureInfo.exposure_alias,
+        file: '',
+        view: '',
+      },
+      global: {
+        stubs: {
+          RouterLink: { template: '<a><slot /></a>' },
+          BackButton: true,
+          CodeBlock: true,
+          CopyButton: true,
+          LoadingBox: true,
+          ErrorBlock: true,
+          TermButton: { template: '<button><slot /></button>' },
+          ChevronDownIcon: true,
+          DownloadIcon: true,
+          FileIcon: true,
+        },
+      },
+    })
+
+    await flushPromises()
+    await nextTick()
+
+    return wrapper
+  }
 
   beforeEach(() => {
     setActivePinia(createPinia())
     exposureStore = useExposureStore()
+    searchStore = useSearchStore()
     vi.clearAllMocks()
   })
 
-  it('renders "Open in OpenCOR\'s Web app" link that opens in new tab', async () => {
-    vi.spyOn(exposureStore, 'getExposureInfo').mockResolvedValue(mockExposureInfo)
-    vi.spyOn(exposureStore, 'getExposureSafeHTML').mockResolvedValue('<div>Test HTML</div>')
+  it('renders title with correct description', async () => {
+    const wrapper = await mountComponent()
+    const titleText = mockExposureInfo.exposure.description
 
-    const wrapper = mount(ExposureDetail, {
-      props: {
-        alias: 'test-alias',
-      },
-      global: {
-        stubs: {
-          RouterLink: {
-            template: '<a :to="to"><slot /></a>',
-            props: ['to'],
-          },
-          ActionButton: {
-            template: '<button @click="$emit(\'click\')"><slot /></button>',
-          },
-          PageHeader: true,
-          ErrorBlock: true,
-          FileIcon: true,
-        },
-      },
-    })
-
-    // Wait for all promises to resolve.
-    await flushPromises()
-    await nextTick()
-
-    // Find the "Open in OpenCOR's Web app" link.
-    const openCORLink = wrapper.find('a[target="_blank"][rel="noopener noreferrer"]')
-
-    expect(openCORLink.exists()).toBe(true)
-    expect(openCORLink.text()).toContain("Open in OpenCOR's Web app")
-    expect(openCORLink.attributes('target')).toBe('_blank')
-    expect(openCORLink.attributes('rel')).toBe('noopener noreferrer')
-    expect(openCORLink.attributes('href')).toContain('opencor.ws/app')
+    const title = wrapper.find('h1')
+    expect(title.exists()).toBe(true)
+    expect(title.text()).toBe(titleText)
   })
 
-  it('calls trackButtonClick when "Open in OpenCOR\'s Web app" is clicked', async () => {
-    const { trackButtonClick } = await import('@/utils/analytics')
+  it('renders html-view with content', async () => {
+    const wrapper = await mountComponent()
 
-    vi.spyOn(exposureStore, 'getExposureInfo').mockResolvedValue(mockExposureInfo)
-    vi.spyOn(exposureStore, 'getExposureSafeHTML').mockResolvedValue('<div>Test HTML</div>')
+    const htmlView = wrapper.find('.html-view')
+    expect(htmlView.exists()).toBe(true)
 
-    const wrapper = mount(ExposureDetail, {
-      props: {
-        alias: 'test-alias',
-      },
-      global: {
-        stubs: {
-          RouterLink: {
-            template: '<a :to="to"><slot /></a>',
-            props: ['to'],
-          },
-          ActionButton: {
-            template: '<button @click="$emit(\'click\')"><slot /></button>',
-          },
-          PageHeader: true,
-          ErrorBlock: true,
-          FileIcon: true,
-        },
-      },
+    const modelStatusHeading = htmlView.find('h4')
+    expect(modelStatusHeading.exists()).toBe(true)
+    expect(modelStatusHeading.text()).toBe('Model Status')
+  })
+
+  it('renders files list with 7 items', async () => {
+    const wrapper = await mountComponent()
+
+    const filesList = wrapper.find('ul.divide-y')
+    expect(filesList.exists()).toBe(true)
+
+    const listItems = filesList.findAll('li')
+    expect(listItems).toHaveLength(7)
+
+    const fileCountText = wrapper.find('.text-gray-600')
+    expect(fileCountText.exists()).toBe(true)
+    expect(fileCountText.text()).toContain('7 items')
+  })
+
+  it('renders "Source" section with correct content', async () => {
+    const wrapper = await mountComponent()
+
+    const sectionHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'Source')
+
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('Source')
+
+    const sectionContent = sectionHeading?.element.nextElementSibling?.textContent
+    expect(sectionContent).toContain('Baylor, Hollingworth, Chandler, 2002')
+    expect(sectionContent).toContain('29a94f9c5718')
+  })
+
+  it('renders "About" section with correct content', async () => {
+    const wrapper = await mountComponent()
+
+    const sectionHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'About')
+
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('About')
+
+    const sectionContent = sectionHeading?.element.nextElementSibling?.textContent
+    expect(sectionContent).toContain('Comparison of Simulated and Measured Calcium Sparks')
+    expect(sectionContent).toContain('in Intact Skeletal Muscle Fibers of the Frog')
+    expect(sectionContent).toContain('Catherine Lloyd')
+    expect(sectionContent).toContain('Auckland Bioengineering Institute')
+    expect(sectionContent).toContain('The University of Auckland')
+  })
+
+  it('renders "Keywords" section with correct content', async () => {
+    const wrapper = await mountComponent()
+
+    const sectionHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'Keywords')
+
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('Keywords')
+
+    const sectionContent = sectionHeading?.element.nextElementSibling
+    const keywordButtons = sectionContent?.querySelectorAll('button')
+    expect(keywordButtons).toHaveLength(2)
+  })
+
+  it('renders "Views available" section', async () => {
+    const wrapper = await mountComponent()
+
+    const sectionHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'Views available')
+
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('Views available')
+
+    const sectionContent = sectionHeading?.element.nextElementSibling
+    const viewItems = sectionContent?.querySelectorAll('li')
+    expect(viewItems).toHaveLength(3)
+  })
+
+  it('renders "Open in OpenCOR\'s web app" link that opens in new tab', async () => {
+    const wrapper = await mountComponent()
+
+    const openCorLink = wrapper
+      .findAll('a')
+      .find((link) => link.text().trim() === "Open in OpenCOR's web app")
+
+    expect(openCorLink?.exists()).toBe(true)
+    expect(openCorLink?.attributes('target')).toBe('_blank')
+    expect(openCorLink?.attributes('rel')).toBe('noopener noreferrer')
+  })
+
+  it('renders "Navigation" section', async () => {
+    const wrapper = await mountComponent()
+
+    const sectionHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'Navigation')
+
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('Navigation')
+
+    const sectionContent = sectionHeading?.element.nextElementSibling
+    const viewItems = sectionContent?.querySelectorAll('li')
+    expect(viewItems).toHaveLength(6)
+  })
+
+  it('renders "Downloads" section', async () => {
+    const wrapper = await mountComponent()
+
+    const sectionHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'Downloads')
+
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('Downloads')
+
+    const sectionContent = sectionHeading?.element.nextElementSibling
+    const viewItems = sectionContent?.querySelectorAll('li')
+    expect(viewItems).toHaveLength(3)
+  })
+
+  it('renders "References" section with citations', async () => {
+    const wrapper = await mountComponent()
+
+    const sectionHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'References')
+
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('References')
+
+    const citationList = sectionHeading?.element.nextElementSibling
+    const citationItems = citationList?.querySelectorAll('li')
+    expect(citationItems?.length).toBeGreaterThan(0)
+    expect(citationList?.textContent).toContain(
+      'Baylor, S. M., Hollingworth, S., & Chandler, W. K. (2002)',
+    )
+    expect(citationList?.textContent).toContain(
+      'Comparison of Simulated and Measured Calcium Sparks',
+    )
+    expect(citationList?.textContent).toContain('in Intact Skeletal Muscle Fibers of the Frog.')
+    expect(citationList?.textContent).toContain('Journal of General Physiology, 120, 349-368.')
+
+    const citationReferenceLink = citationList?.nextElementSibling
+    expect(citationReferenceLink).toBeDefined()
+    expect(citationReferenceLink?.textContent).toContain('See other models using this reference')
+
+    const citationDetails = citationReferenceLink?.nextElementSibling
+    expect(citationDetails).toBeDefined()
+    const citationDetailsButton = citationDetails?.querySelector('button')
+    expect(citationDetailsButton?.textContent).toBe('Details')
+
+    citationDetailsButton?.dispatchEvent(new Event('click'))
+    return nextTick().then(() => {
+      const citationModal = wrapper.find('#citation-details')
+      expect(citationModal.exists()).toBe(true)
+      expect(citationModal.text()).toContain('S M. Baylor, S Hollingworth, W K. Chandler')
+      expect(citationModal.text()).toContain('Comparison of Simulated and Measured Calcium Sparks')
+      expect(citationModal.text()).toContain('in Intact Skeletal Muscle Fibers of the Frog')
+      expect(citationModal.text()).toContain('urn:miriam:pubmed:12198091')
+      expect(citationModal.text()).toContain('2002-09-01')
+      expect(citationModal.text()).toContain('Journal of General Physiology')
     })
+  })
 
-    // Wait for all promises to resolve.
-    await flushPromises()
-    await nextTick()
+  it('renders "Licence" section', async () => {
+    const wrapper = await mountComponent()
 
-    // Find and click the "Open in OpenCOR's Web app" link.
-    const openCORLink = wrapper.find('a[target="_blank"][rel="noopener noreferrer"]')
-    await openCORLink.trigger('click')
+    const sectionHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'Licence')
 
-    expect(trackButtonClick).toHaveBeenCalledWith({
-      button_name: expect.stringContaining("Open in OpenCOR's Web app"),
-      content_section: 'Exposure Detail - NCE protein knowledge page',
-      link_category: expect.stringContaining('opencor'),
-    })
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('Licence')
+
+    const sectionContent = sectionHeading?.element.nextElementSibling?.textContent
+    expect(sectionContent).toContain('CC BY 3.0')
   })
 })
