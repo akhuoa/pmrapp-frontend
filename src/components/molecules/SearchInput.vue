@@ -96,11 +96,11 @@ defineExpose({
     <!-- Backdrop overlay (only when not in SearchOverlay). -->
     <div
       v-if="isSearchFocused && searchInput.trim().length > 0 && !props.inOverlay"
-      class="fixed inset-0 bg-gray-800/75 dark:bg-gray-900/75 z-30"
+      class="fixed inset-0 bg-gray-400/75 dark:bg-gray-900/75 z-30"
       @click="handleBackdropClick"
     ></div>
     <div
-      class="flex items-center justify-between w-full border rounded-lg transition-all relative z-40"
+      class="flex items-center bg-background justify-between w-full border rounded-lg transition-all relative z-40"
       :class="isSearchFocused ? 'ring-2 ring-primary border-transparent' : 'border-gray-200 dark:border-gray-700'"
     >
       <SearchField
