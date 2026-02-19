@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import { useSearchStore } from '@/stores/search'
@@ -87,6 +87,24 @@ const handleBackdropClick = () => {
   // Blur the input to close the dropdown.
   searchInputRef.value?.inputRef?.blur()
 }
+
+const handleKeyDown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape' && isSearchFocused.value) {
+    handleBackdropClick()
+  }
+}
+
+watch(isSearchFocused, (newVal) => {
+  if (newVal) {
+    document.addEventListener('keydown', handleKeyDown)
+  } else {
+    document.removeEventListener('keydown', handleKeyDown)
+  }
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeyDown)
+})
 
 defineExpose({
   searchInputRef,
