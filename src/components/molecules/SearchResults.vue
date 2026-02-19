@@ -83,26 +83,27 @@ const isIdActive = (ids: string[] | undefined) => {
                   Created on {{ formatDate(Number(item.data.created_ts[0])) }}
                 </span>
               </span>
-            </small>
-          </div>
-          <div
-            v-if="item.data.model_author?.length"
-            class="mt-1 flex items-center gap-1 text-gray-600 dark:text-gray-400"
-          >
-            <UserIcon class="w-3.5 h-3.5 flex-shrink-0" />
-            <small>
-              <template v-for="(author, index) in item.data.model_author" :key="index">
-                <span
-                  :class="kind === 'model_author' && term.toLowerCase() === author.toLowerCase()
-                    ? textHighlightClass
-                    : ''"
-                >
-                  {{ author }}
+              <div
+                v-if="item.data.model_author?.length"
+                class="flex items-center gap-1"
+              >
+                <span class="text-gray-600 dark:text-gray-400">
+                  by
                 </span>
-                <span v-if="index < item.data.model_author.length - 1">, </span>
-              </template>
+                <template v-for="(author, index) in item.data.model_author" :key="index">
+                  <span
+                    :class="kind === 'model_author' && term.toLowerCase() === author.toLowerCase()
+                      ? textHighlightClass
+                      : ''"
+                  >
+                    {{ author }}
+                  </span>
+                  <span v-if="index < item.data.model_author.length - 1">, </span>
+                </template>
+              </div>
             </small>
           </div>
+
           <div
             v-if="item.data.citation_author_family_name?.length || item.data.citation_id?.length"
             class="mt-1 flex items-center gap-1 text-gray-600 dark:text-gray-400"
