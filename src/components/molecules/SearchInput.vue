@@ -21,6 +21,22 @@ const searchInputRef = ref<InstanceType<typeof SearchField> | null>(null)
 const isSearchFocused = ref(false)
 const categoriesError = ref<string | null>(null)
 
+const searchButtonClass = [
+  'px-3',
+  'self-stretch',
+  'cursor-pointer',
+  'hover:bg-gray-200 dark:hover:bg-gray-700',
+  'disabled:cursor-default',
+  'transition-all',
+  'border-l border-gray-200 dark:border-gray-700',
+  'flex items-center'
+].join(' ')
+
+const searchButtonFocusedClass = [
+  ...searchButtonClass.split(' '),
+  'rounded-e-lg hover:ring-1 ring-gray-200 dark:ring-gray-700',
+].join(' ')
+
 onMounted(async () => {
   const validKinds = SEARCH_CATEGORIES.map((cat) => cat.value)
 
@@ -64,7 +80,10 @@ const hasResults = computed(() => {
 
 const handleSearch = () => {
   const searchTerm = searchInput.value.trim()
-  if (searchTerm === '') return
+  if (searchTerm === '') {
+    searchInputRef?.value?.inputRef?.focus()
+    return
+  }
 
   // Use the first category kind that has matching results, or default to citation_id
   const firstCategoryWithResults = filteredSearchTermsByCategory.value[0]
@@ -101,7 +120,7 @@ defineExpose({
     ></div>
     <div
       class="flex items-center bg-background justify-between w-full border rounded-lg transition-all relative z-40"
-      :class="isSearchFocused ? 'ring-2 ring-primary border-transparent' : 'border-gray-200 dark:border-gray-700'"
+      :class="isSearchFocused ? 'ring-2 ring-primary border-transparent' : 'border-gray-200 dark:border-gray-700 overflow-hidden'"
     >
       <SearchField
         ref="searchInputRef"
@@ -116,9 +135,8 @@ defineExpose({
       />
       <button
         type="button"
-        class="px-3 self-stretch cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-all disabled:opacity-75 disabled:cursor-default border-l border-gray-200 dark:border-gray-700 flex items-center"
+        :class="isSearchFocused ? searchButtonFocusedClass : searchButtonClass"
         aria-label="Search"
-        :disabled="searchInput.trim() === ''"
         @click="handleSearch"
       >
         <SearchIcon class="w-5 h-5" />
