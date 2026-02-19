@@ -72,7 +72,7 @@ defineExpose({
     />
     <div
       v-if="modelValue"
-      class="absolute right-2 flex items-center"
+      class="absolute right-2 flex items-center hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full cursor-pointer p-1"
     >
       <CloseButton
         @click="handleClear"
