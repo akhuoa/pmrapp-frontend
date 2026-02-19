@@ -1,6 +1,6 @@
 export const SEARCH_CATEGORIES = [
-  { value: 'model_author', label: 'Model authors' },
   { value: 'citation_author_family_name', label: 'Publication authors' },
+  { value: 'model_author', label: 'Model authors' },
   { value: 'cellml_keyword', label: 'CellML keywords' },
   { value: 'citation_id', label: 'Publication references' },
 ] as const
