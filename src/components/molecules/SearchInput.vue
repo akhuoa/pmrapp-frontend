@@ -116,8 +116,9 @@ defineExpose({
       />
       <button
         type="button"
-        class="p-2 cursor-pointer hover:opacity-70 transition-opacity"
+        class="px-3 self-stretch cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-all disabled:opacity-75 disabled:cursor-default border-l border-gray-200 dark:border-gray-700 flex items-center"
         aria-label="Search"
+        :disabled="searchInput.trim() === ''"
         @click="handleSearch"
       >
         <SearchIcon class="w-5 h-5" />

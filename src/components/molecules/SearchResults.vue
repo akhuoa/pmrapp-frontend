@@ -23,7 +23,7 @@ const props = defineProps<Props>()
 
 const router = useRouter()
 
-const textHighlightClass = 'text-gray-900 bg-amber-100 dark:bg-amber-900 dark:text-gray-100 font-semibold'
+const textHighlightClass = 'text-gray-900 bg-amber-100/75 dark:bg-amber-500/50 dark:text-gray-100 font-semibold'
 
 const handleKeywordClick = (kind: string, keyword: string) => {
   router.push({ path: '/search', query: { kind, term: keyword } })
