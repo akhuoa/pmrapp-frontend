@@ -2,7 +2,6 @@
 import { computed, onMounted, ref } from 'vue'
 import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
-import SearchIcon from '@/components/icons/SearchIcon.vue'
 import { useSearchStore } from '@/stores/search'
 import { SEARCH_CATEGORIES } from '@/constants/search'
 
@@ -20,22 +19,6 @@ const searchInput = ref<string>(props.initialTerm)
 const searchInputRef = ref<InstanceType<typeof SearchField> | null>(null)
 const isSearchFocused = ref(false)
 const categoriesError = ref<string | null>(null)
-
-const searchButtonClass = [
-  'px-3',
-  'self-stretch',
-  'cursor-pointer',
-  'hover:bg-gray-200 dark:hover:bg-gray-700',
-  'disabled:cursor-default',
-  'transition-all',
-  'border-l border-gray-200 dark:border-gray-700',
-  'flex items-center'
-].join(' ')
-
-const searchButtonFocusedClass = [
-  ...searchButtonClass.split(' '),
-  'rounded-e-lg hover:ring-1 ring-gray-200 dark:ring-gray-700',
-].join(' ')
 
 onMounted(async () => {
   const validKinds = SEARCH_CATEGORIES.map((cat) => cat.value)
@@ -133,15 +116,6 @@ defineExpose({
         @blur="isSearchFocused = false"
         @search="handleSearch"
       />
-      <button
-        type="button"
-        :class="isSearchFocused ? searchButtonFocusedClass : searchButtonClass"
-        aria-label="Search"
-        @click="handleSearch"
-      >
-        <SearchIcon class="w-5 h-5" />
-        <span class="sr-only">Search</span>
-      </button>
     </div>
     <div
       v-if="isSearchFocused && searchInput.trim().length > 0"
