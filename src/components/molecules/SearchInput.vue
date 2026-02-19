@@ -116,7 +116,7 @@ defineExpose({
       />
       <button
         type="button"
-        class="py-2 px-3 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-all disabled:opacity-75 disabled:cursor-default border-l border-gray-200 dark:border-gray-700"
+        class="px-3 self-stretch cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-all disabled:opacity-75 disabled:cursor-default border-l border-gray-200 dark:border-gray-700 flex items-center"
         aria-label="Search"
         :disabled="searchInput.trim() === ''"
         @click="handleSearch"
