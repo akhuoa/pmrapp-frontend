@@ -19,9 +19,9 @@ const searchInput = ref<string>(props.initialTerm)
 const searchInputRef = ref<InstanceType<typeof SearchField> | null>(null)
 const isSearchFocused = ref(false)
 const categoriesError = ref<string | null>(null)
-const termButtonRefs = ref<any[]>([])
+const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
 
-const setTermButtonRef = (el: any, index: number) => {
+const setTermButtonRef = (el: InstanceType<typeof TermButton> | null, index: number) => {
   if (el) {
     termButtonRefs.value[index] = el
   }
