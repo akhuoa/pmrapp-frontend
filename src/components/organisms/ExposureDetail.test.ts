@@ -52,6 +52,9 @@ describe('ExposureDetail', () => {
           commit_authored_ts: [],
           created_ts: [],
           exposure_alias: [],
+          citation_author_family_name: [],
+          citation_id: [],
+          model_author: [],
         },
       },
     ])

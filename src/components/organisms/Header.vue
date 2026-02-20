@@ -1,10 +1,24 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import UserDropdown from '@/components/molecules/UserDropdown.vue'
+import SearchIcon from '@/components/icons/SearchIcon.vue'
+import SearchOverlay from '@/components/organisms/SearchOverlay.vue'
+import ActionButton from '../atoms/ActionButton.vue'
+import { useGlobalStateStore } from '@/stores/globalState'
 
 const route = useRoute()
+const isSearchOverlayVisible = ref(false)
+const globalState = useGlobalStateStore()
+
+const handleSearchClick = () => {
+  if (route.name === 'search-results') {
+    globalState.requestSearchFocus()
+  } else {
+    isSearchOverlayVisible.value = true
+  }
+}
 
 const navLinks = [
   { path: '/workspaces', label: 'Workspaces' },
@@ -23,6 +37,19 @@ const isActive = (path: string) => computed(() => route.path.startsWith(path))
 
       <nav>
         <ul class="flex items-center gap-4">
+          <li>
+            <ActionButton
+              type="button"
+              variant="icon"
+              size="sm"
+              aria-label="Open search"
+              @click="handleSearchClick"
+              content-section="Header navigation"
+            >
+              <span class="sr-only">Open search</span>
+              <SearchIcon class="w-5 h-5" />
+            </ActionButton>
+          </li>
           <li v-for="link in navLinks" :key="link.path">
             <RouterLink
               :to="link.path"
@@ -39,6 +66,7 @@ const isActive = (path: string) => computed(() => route.path.startsWith(path))
         </ul>
       </nav>
     </div>
+    <SearchOverlay :show="isSearchOverlayVisible" @close="isSearchOverlayVisible = false" />
   </header>
 </template>
 
