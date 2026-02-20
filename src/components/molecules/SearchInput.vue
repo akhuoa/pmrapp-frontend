@@ -94,10 +94,11 @@ const handleSearchTermClick = (kind: string, term: string) => {
 const handleBackdropClick = () => {
   // Blur the input to close the dropdown.
   searchInputRef.value?.inputRef?.blur()
+  isSearchFocused.value = false
 }
 
 const handleKeyDown = (event: KeyboardEvent) => {
-  if (event.key === 'Escape' && isSearchFocused.value) {
+  if (event.key === 'Escape' && searchInput.value.trim().length > 0) {
     handleBackdropClick()
   }
 }
