@@ -139,7 +139,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="relative z-100">
+  <div :class="`relative ${isSearchFocused ? 'z-100' : ''}`">
     <!-- Backdrop overlay (only when not in SearchOverlay). -->
     <div
       v-if="isSearchFocused && searchInput.trim().length > 0 && !props.inOverlay"
