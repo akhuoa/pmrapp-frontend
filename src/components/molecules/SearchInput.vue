@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch, type ComponentPublicInstance } from 'vue'
 import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
-import SearchIcon from '@/components/icons/SearchIcon.vue'
 import { useSearchStore } from '@/stores/search'
 import { SEARCH_CATEGORIES } from '@/constants/search'
 
@@ -20,22 +19,13 @@ const searchInput = ref<string>(props.initialTerm)
 const searchInputRef = ref<InstanceType<typeof SearchField> | null>(null)
 const isSearchFocused = ref(false)
 const categoriesError = ref<string | null>(null)
+const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
 
-const searchButtonClass = [
-  'px-3',
-  'self-stretch',
-  'cursor-pointer',
-  'hover:bg-gray-200 dark:hover:bg-gray-700',
-  'disabled:cursor-default',
-  'transition-all',
-  'border-l border-gray-200 dark:border-gray-700',
-  'flex items-center'
-].join(' ')
-
-const searchButtonFocusedClass = [
-  ...searchButtonClass.split(' '),
-  'rounded-e-lg hover:ring-1 ring-gray-200 dark:ring-gray-700',
-].join(' ')
+const setTermButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
+  if (el) {
+    termButtonRefs.value[index] = el as InstanceType<typeof TermButton>
+  }
+}
 
 onMounted(async () => {
   const validKinds = SEARCH_CATEGORIES.map((cat) => cat.value)
@@ -97,13 +87,51 @@ const handleSearch = () => {
 const handleSearchTermClick = (kind: string, term: string) => {
   // Blur the input to close the dropdown.
   searchInputRef.value?.inputRef?.blur()
+  isSearchFocused.value = false
   emit('search', kind, term)
 }
 
 const handleBackdropClick = () => {
   // Blur the input to close the dropdown.
   searchInputRef.value?.inputRef?.blur()
+  isSearchFocused.value = false
 }
+
+const handleKeyDown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape' && searchInput.value.trim().length > 0) {
+    handleBackdropClick()
+  }
+}
+
+// Handle Tab key to move focus from search input to first term button.
+const handleSearchInputKeyDown = async (event: KeyboardEvent) => {
+  if (event.key === 'Tab' && !event.shiftKey && hasResults.value) {
+    event.preventDefault()
+    await nextTick()
+    const firstButton = termButtonRefs.value[0]
+    if (firstButton) {
+      const buttonEl = firstButton.$el || firstButton
+      buttonEl?.focus()
+      isSearchFocused.value = true
+    }
+  }
+}
+
+watch(isSearchFocused, (newVal) => {
+  if (newVal) {
+    document.addEventListener('keydown', handleKeyDown)
+  } else {
+    document.removeEventListener('keydown', handleKeyDown)
+  }
+})
+
+watch(filteredSearchTermsByCategory, () => {
+  termButtonRefs.value = []
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeyDown)
+})
 
 defineExpose({
   searchInputRef,
@@ -132,16 +160,8 @@ defineExpose({
         @focus="isSearchFocused = true"
         @blur="isSearchFocused = false"
         @search="handleSearch"
+        @keydown="handleSearchInputKeyDown"
       />
-      <button
-        type="button"
-        :class="isSearchFocused ? searchButtonFocusedClass : searchButtonClass"
-        aria-label="Search"
-        @click="handleSearch"
-      >
-        <SearchIcon class="w-5 h-5" />
-        <span class="sr-only">Search</span>
-      </button>
     </div>
     <div
       v-if="isSearchFocused && searchInput.trim().length > 0"
@@ -164,7 +184,7 @@ defineExpose({
         </div>
         <div v-else class="max-h-96 overflow-y-auto scrollbar-thin group/results">
           <div
-            v-for="categoryGroup in filteredSearchTermsByCategory"
+            v-for="(categoryGroup, groupIndex) in filteredSearchTermsByCategory"
             :key="categoryGroup.kind"
             class="hover:bg-gray-50 dark:hover:bg-gray-900 border-b last:border-0 border-gray-200 dark:border-gray-700 p-4 transition-all group-hover/results:opacity-75 hover:!opacity-100"
           >
@@ -173,8 +193,9 @@ defineExpose({
             </h4>
             <div class="flex flex-row items-start justify-start flex-wrap gap-2">
               <TermButton
-                v-for="term in categoryGroup.terms"
+                v-for="(term, termIndex) in categoryGroup.terms"
                 :key="term"
+                :ref="(el) => setTermButtonRef(el, filteredSearchTermsByCategory.slice(0, groupIndex).reduce((acc, g) => acc + g.terms.length, 0) + termIndex)"
                 :term="term"
                 @click="handleSearchTermClick(categoryGroup.kind, term)"
               />
