@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch, type ComponentPublicInstance } from 'vue'
 import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import { useSearchStore } from '@/stores/search'
@@ -21,9 +21,9 @@ const isSearchFocused = ref(false)
 const categoriesError = ref<string | null>(null)
 const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
 
-const setTermButtonRef = (el: InstanceType<typeof TermButton> | null, index: number) => {
+const setTermButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
   if (el) {
-    termButtonRefs.value[index] = el
+    termButtonRefs.value[index] = el as InstanceType<typeof TermButton>
   }
 }
 
