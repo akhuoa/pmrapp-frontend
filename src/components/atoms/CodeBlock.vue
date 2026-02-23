@@ -8,6 +8,7 @@ import 'prismjs/components/prism-c'
 import 'prismjs/components/prism-cpp'
 import 'prismjs/components/prism-fortran'
 import 'prismjs/components/prism-javascript'
+import 'prismjs/components/prism-json'
 import 'prismjs/components/prism-python'
 import 'prismjs/components/prism-markdown'
 import 'prismjs/components/prism-matlab'
@@ -32,6 +33,7 @@ const detectedLanguage = computed(() => {
     jsx: 'javascript',
     ts: 'javascript',
     tsx: 'javascript',
+    json: 'json',
     py: 'python',
     python: 'python',
     css: 'css',
