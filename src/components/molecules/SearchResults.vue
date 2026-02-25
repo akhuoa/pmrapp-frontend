@@ -88,13 +88,13 @@ const isIdActive = (ids: string[] | undefined) => {
                 </span>
               </span>
               <div
-                v-if="item.data.model_author?.length"
+                v-if="item.data.model_author?.filter(isValidTerm).length"
                 class="flex items-center gap-1"
               >
                 <span class="text-gray-600 dark:text-gray-400">
                   by
                 </span>
-                <template v-for="(author, index) in item.data.model_author" :key="index">
+                <template v-for="(author, index) in item.data.model_author.filter(isValidTerm)" :key="index">
                   <button
                     class="cursor-pointer hover:text-primary-hover transition-colors"
                     :class="kind === 'model_author' && term.toLowerCase() === author.toLowerCase()
@@ -104,7 +104,7 @@ const isIdActive = (ids: string[] | undefined) => {
                   >
                     {{ author }}
                   </button>
-                  <span v-if="index < item.data.model_author.length - 1">, </span>
+                  <span v-if="index < item.data.model_author.filter(isValidTerm).length - 1">, </span>
                 </template>
               </div>
             </small>
