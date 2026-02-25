@@ -3,12 +3,12 @@
  * Filters out:
  * - Empty or whitespace-only strings.
  * - Incomplete URN-style terms ending with 'pubmed:' (e.g. "urn:miriam:pubmed:").
- * - Unknown author placeholders (e.g. "unknown unknown").
+ * - Unknown author placeholders (e.g. "unknown", "unknown unknown", or "unknown, unknown").
  */
 export const isValidTerm = (term: string): boolean => {
   const trimmed = term.trim()
   if (!trimmed) return false
   if (trimmed.endsWith('pubmed:')) return false
-  if (trimmed.toLowerCase() === 'unknown unknown') return false
+  if (/^unknown([, ]+unknown)?$/i.test(trimmed)) return false
   return true
 }
