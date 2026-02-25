@@ -112,18 +112,19 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 
   if (event.key === 'Tab' && hasResults.value) {
-    const totalButtons = termButtonRefs.value.length
-    if (totalButtons === 0) return
+    const buttonEls = termButtonRefs.value.map((ref) => ref?.$el ?? ref)
+    if (buttonEls.length === 0) return
 
-    const firstButtonEl = termButtonRefs.value[0]?.$el ?? termButtonRefs.value[0]
-    const lastButtonEl = termButtonRefs.value[totalButtons - 1]?.$el ?? termButtonRefs.value[totalButtons - 1]
+    const activeIndex = buttonEls.indexOf(event.target as HTMLElement)
+    if (activeIndex === -1) return
+
     const searchInputEl = searchInputRef.value?.inputRef
 
-    if (event.shiftKey && document.activeElement === firstButtonEl) {
+    if (event.shiftKey && activeIndex === 0) {
       // Shift+Tab on first term button → go back to search input.
       event.preventDefault()
       searchInputEl?.focus()
-    } else if (!event.shiftKey && document.activeElement === lastButtonEl) {
+    } else if (!event.shiftKey && activeIndex === buttonEls.length - 1) {
       // Tab on last term button → cycle back to search input.
       event.preventDefault()
       searchInputEl?.focus()
