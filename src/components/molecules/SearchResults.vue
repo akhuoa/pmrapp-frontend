@@ -9,6 +9,7 @@ import type { SearchResult } from '@/types/search'
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { formatDate, formatNumber } from '@/utils/format'
 import { SEARCH_KIND_LABEL_MAP } from '@/constants/search'
+import { isValidTerm } from '@/utils/search'
 
 interface Props {
   results: SearchResult[]
@@ -104,7 +105,7 @@ const isIdActive = (ids: string[] | undefined) => {
           </div>
 
           <div
-            v-if="item.data.citation_author_family_name?.length || item.data.citation_id?.length"
+            v-if="item.data.citation_author_family_name?.length || item.data.citation_id?.filter(isValidTerm).length"
             class="mt-1 flex items-center gap-1 text-gray-600 dark:text-gray-400"
           >
             <FileIcon class="w-3.5 h-3.5 flex-shrink-0" />
@@ -121,14 +122,14 @@ const isIdActive = (ids: string[] | undefined) => {
                   <span v-if="index < item.data.citation_author_family_name.length - 1">, </span>
                 </template>
               </template>
-              <span v-if="item.data.citation_author_family_name?.length && item.data.citation_id?.length"> · </span>
+              <span v-if="item.data.citation_author_family_name?.length && item.data.citation_id?.filter(isValidTerm).length"> · </span>
               <span
-                v-if="item.data.citation_id?.length"
-                :class="isIdActive(item.data.citation_id)
+                v-if="item.data.citation_id?.filter(isValidTerm).length"
+                :class="isIdActive(item.data.citation_id?.filter(isValidTerm))
                   ? textHighlightClass
                   : ''"
               >
-                {{ item.data.citation_id.join(', ') }}
+                {{ item.data.citation_id.filter(isValidTerm).join(', ') }}
               </span>
             </small>
           </div>
