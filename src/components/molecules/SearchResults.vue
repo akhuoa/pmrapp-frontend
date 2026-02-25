@@ -29,6 +29,10 @@ const handleKeywordClick = (kind: string, keyword: string) => {
   router.push({ path: '/search', query: { kind, term: keyword } })
 }
 
+const handleAuthorClick = (kind: string, author: string) => {
+  router.push({ path: '/search', query: { kind, term: author } })
+}
+
 const kindLabel = computed(() => {
   return SEARCH_KIND_LABEL_MAP[props.kind] || props.kind
 })
@@ -91,13 +95,15 @@ const isIdActive = (ids: string[] | undefined) => {
                   by
                 </span>
                 <template v-for="(author, index) in item.data.model_author" :key="index">
-                  <span
+                  <button
+                    class="cursor-pointer hover:text-primary-hover transition-colors"
                     :class="kind === 'model_author' && term.toLowerCase() === author.toLowerCase()
                       ? textHighlightClass
                       : ''"
+                    @click="handleAuthorClick('model_author', author)"
                   >
                     {{ author }}
-                  </span>
+                  </button>
                   <span v-if="index < item.data.model_author.length - 1">, </span>
                 </template>
               </div>
@@ -112,13 +118,15 @@ const isIdActive = (ids: string[] | undefined) => {
             <small>
               <template v-if="item.data.citation_author_family_name?.length">
                 <template v-for="(author, index) in item.data.citation_author_family_name" :key="index">
-                  <span
+                  <button
+                    class="cursor-pointer hover:text-primary-hover transition-colors"
                     :class="kind === 'citation_author_family_name' && term.toLowerCase() === author.toLowerCase()
                       ? textHighlightClass
                       : ''"
+                    @click="handleAuthorClick('citation_author_family_name', author)"
                   >
                     {{ author }}
-                  </span>
+                  </button>
                   <span v-if="index < item.data.citation_author_family_name.length - 1">, </span>
                 </template>
               </template>
