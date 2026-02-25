@@ -2,7 +2,7 @@
 import { type RouteLocationRaw, useRoute } from 'vue-router'
 import { trackButtonClick } from '@/utils/analytics'
 
-type ButtonVariant = 'primary' | 'secondary' | 'link'
+type ButtonVariant = 'primary' | 'secondary' | 'link' | 'icon'
 type ButtonSize = 'sm' | 'md' | 'lg'
 
 interface Props {
@@ -42,16 +42,18 @@ const handleClick = (event: Event) => {
 
 const disabledClasses = {
   primary: 'disabled:opacity-60 disabled:cursor-not-allowed',
-  secondary: 'disabled:opacity-60 disabled:cursor-not-allowed hover:bg-transparent',
+  secondary: 'disabled:opacity-60 disabled:cursor-not-allowed',
   link: 'disabled:opacity-60 disabled:cursor-not-allowed',
+  icon: 'disabled:opacity-60 disabled:cursor-not-allowed',
 }
 
 const variantClasses = {
   primary:
     'px-3 py-1 rounded border border-primary bg-primary text-white hover:opacity-90 transition-opacity',
   secondary:
-    'px-3 py-1 rounded border border-primary text-primary hover:bg-primary/10 transition-colors',
+    'px-3 py-1 rounded border border-primary text-primary hover:text-primary-hover hover:shadow transition-all',
   link: 'text-primary hover:text-primary-hover transition-colors',
+  icon: 'p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors',
 }
 
 const sizeClasses = {
