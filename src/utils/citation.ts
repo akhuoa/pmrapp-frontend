@@ -1,23 +1,19 @@
 import type { Author, Citation } from '@/types/citation'
 
 /**
- * Format an array of author name arrays to a readable string.
- * Each author should be an array of name parts, typically [lastName, firstName, middleInitial].
- * @param authors Array of author name arrays.
- * @returns Formatted author string.
+ * Format an author name array to a readable string.
+ * Author parts should be [lastName, firstName?, middleInitial?].
+ * @param authorParts Array of name parts for one author.
+ * @returns Formatted author name string.
  */
-export const formatCitationAuthors = (authors: string[][]): string => {
-  return authors
-    .map((authorParts) => {
-      if (authorParts.length === 3) {
-        const [lastName, firstName, middleInitial] = authorParts
-        return middleInitial
-          ? `${firstName} ${middleInitial}. ${lastName}`
-          : `${firstName} ${lastName}`
-      }
-      return authorParts.join(' ')
-    })
-    .join(', ')
+export const formatCitationAuthor = (authorParts: string[]): string => {
+  if (authorParts.length >= 2) {
+    const [lastName, firstName, middleInitial] = authorParts
+    return middleInitial
+      ? `${firstName} ${middleInitial}. ${lastName}`
+      : `${firstName} ${lastName}`
+  }
+  return authorParts.join(' ')
 }
 
 /**

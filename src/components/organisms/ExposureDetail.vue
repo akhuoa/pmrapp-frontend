@@ -18,7 +18,7 @@ import { downloadCOMBINEArchive, downloadWorkspaceArchive } from '@/services/dow
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
 import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
-import { formatCitation, formatCitationAuthors } from '@/utils/citation'
+import { formatCitation, formatCitationAuthor } from '@/utils/citation'
 import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { formatFileCount } from '@/utils/format'
@@ -285,6 +285,13 @@ const loadCodegenView = async () => {
 
 const handleKeywordClick = (kind: string, keyword: string) => {
   router.push({ path: '/search', query: { kind, term: keyword } })
+}
+
+const handleCitationAuthorClick = (authorParts: string[]) => {
+  const familyName = authorParts[0]
+  if (familyName) {
+    handleKeywordClick('citation_author_family_name', familyName)
+  }
 }
 
 const filteredKeywords = computed(() => {
@@ -563,7 +570,14 @@ onMounted(async () => {
           </div>
           <div v-if="metadataJSON.model_author">
             <dt class="font-semibold mb-1">Model authors</dt>
-            <dd>{{ metadataJSON.model_author }}</dd>
+            <dd>
+              <button
+                class="cursor-pointer hover:text-primary-hover transition-colors"
+                @click="handleKeywordClick('model_author', metadataJSON.model_author!)"
+              >
+                {{ metadataJSON.model_author }}
+              </button>
+            </dd>
           </div>
           <div v-if="metadataJSON.model_author_org">
             <dt class="font-semibold mb-1">Authoring organisation</dt>
@@ -727,7 +741,17 @@ onMounted(async () => {
           >
             <div v-if="metadataJSON.citation_authors">
               <dt class="font-semibold mb-1">Authors</dt>
-              <dd>{{ formatCitationAuthors(metadataJSON.citation_authors) }}</dd>
+              <dd>
+                <template v-for="(authorParts, index) in metadataJSON.citation_authors" :key="index">
+                  <button
+                    class="cursor-pointer hover:text-primary-hover transition-colors"
+                    @click="handleCitationAuthorClick(authorParts)"
+                  >
+                    {{ formatCitationAuthor(authorParts) }}
+                  </button>
+                  <span v-if="index < metadataJSON.citation_authors.length - 1">, </span>
+                </template>
+              </dd>
             </div>
             <div v-if="metadataJSON.citation_title">
               <dt class="font-semibold mb-1">Title</dt>
