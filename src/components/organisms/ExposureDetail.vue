@@ -23,6 +23,7 @@ import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
+import { isValidTerm } from '@/utils/search'
 import TermButton from '../atoms/TermButton.vue'
 
 const props = defineProps<{
@@ -299,7 +300,7 @@ const checkOtherRelatedModels = async () => {
   const term = metadataJSON.value.citation_id
   const kind = 'citation_id'
 
-  if (!term) {
+  if (!term || !isValidTerm(term)) {
     hasOtherRelatedModels.value = false
     return
   }
@@ -732,7 +733,7 @@ onMounted(async () => {
               <dt class="font-semibold mb-1">Title</dt>
               <dd>{{ metadataJSON.citation_title }}</dd>
             </div>
-            <div v-if="metadataJSON.citation_id">
+            <div v-if="metadataJSON.citation_id && isValidTerm(metadataJSON.citation_id)">
               <dt class="font-semibold mb-1">ID</dt>
               <dd>{{ metadataJSON.citation_id }}</dd>
             </div>
