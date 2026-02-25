@@ -131,14 +131,18 @@ const isIdActive = (ids: string[] | undefined) => {
                 </template>
               </template>
               <span v-if="item.data.citation_author_family_name?.length && item.data.citation_id?.filter(isValidTerm).length"> · </span>
-              <span
-                v-if="item.data.citation_id?.filter(isValidTerm).length"
-                :class="isIdActive(item.data.citation_id?.filter(isValidTerm))
-                  ? textHighlightClass
-                  : ''"
-              >
-                {{ item.data.citation_id.filter(isValidTerm).join(', ') }}
-              </span>
+              <template v-if="item.data.citation_id?.filter(isValidTerm).length">
+                <template v-for="(id, index) in item.data.citation_id.filter(isValidTerm)" :key="id">
+                  <button
+                    class="cursor-pointer hover:text-primary-hover transition-colors"
+                    :class="isIdActive([id]) ? textHighlightClass : ''"
+                    @click="handleKeywordClick('citation_id', id)"
+                  >
+                    {{ id }}
+                  </button>
+                  <span v-if="index < item.data.citation_id.filter(isValidTerm).length - 1">, </span>
+                </template>
+              </template>
             </small>
           </div>
           <div v-if="item.data.cellml_keyword?.length" class="flex flex-wrap gap-2 mt-2">
