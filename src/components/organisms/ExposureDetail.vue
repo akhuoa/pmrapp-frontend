@@ -759,7 +759,14 @@ onMounted(async () => {
             </div>
             <div v-if="metadataJSON.citation_id && isValidTerm(metadataJSON.citation_id)">
               <dt class="font-semibold mb-1">ID</dt>
-              <dd>{{ metadataJSON.citation_id }}</dd>
+              <dd>
+                <button
+                  class="cursor-pointer hover:text-primary-hover transition-colors"
+                  @click="handleKeywordClick('citation_id', metadataJSON.citation_id!)"
+                >
+                  {{ metadataJSON.citation_id }}
+                </button>
+              </dd>
             </div>
             <div v-if="metadataJSON.citation_issued">
               <dt class="font-semibold mb-1">Issued</dt>
