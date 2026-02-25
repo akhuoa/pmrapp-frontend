@@ -17,6 +17,13 @@ const emit = defineEmits<(e: 'search', searchKind: string, searchTerm: string) =
 const searchStore = useSearchStore()
 
 const searchInput = ref<string>(props.initialTerm)
+
+watch(
+  () => props.initialTerm,
+  (newTerm) => {
+    searchInput.value = newTerm
+  },
+)
 const searchInputRef = ref<InstanceType<typeof SearchField> | null>(null)
 const isSearchFocused = ref(false)
 const categoriesError = ref<string | null>(null)
