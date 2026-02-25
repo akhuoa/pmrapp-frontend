@@ -4,6 +4,7 @@ import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import { useSearchStore } from '@/stores/search'
 import { SEARCH_CATEGORIES } from '@/constants/search'
+import { isValidTerm } from '@/utils/search'
 
 const props = defineProps<{
   initialTerm: string
@@ -51,8 +52,8 @@ const filteredSearchTermsByCategory = computed(() => {
       const categoryData = searchStore.categories.find((cat) => cat.kind === category.value)
       const terms = categoryData?.kindInfo?.terms || []
 
-      const filteredTerms = terms.filter((term) =>
-        term.toLowerCase().includes(searchTermValue)
+      const filteredTerms = terms.filter(
+        (term) => isValidTerm(term) && term.toLowerCase().includes(searchTermValue),
       )
 
       return {
