@@ -2,7 +2,15 @@
 @reference "./main.css";
 
 .input-field {
-  @apply px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all;
+  @apply border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all;
+
+  &:not(.input-field-sm) {
+    @apply px-4 py-2 rounded-lg;
+  }
+
+  &.input-field-sm {
+    @apply px-3 py-1.5 rounded-md text-sm;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
