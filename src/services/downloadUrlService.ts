@@ -1,31 +1,57 @@
-const MODELS_URL = import.meta.env.VITE_MODELS_URL
+import { downloadFileFromBlob } from '@/utils/download'
 
-export interface ArchiveUrls {
-  zip: string
-  tgz: string
-}
+const DOWNLOAD_API = import.meta.env.VITE_DOWNLOAD_API
 
-/**
- * Generate archive download URLs for a workspace.
- */
-export const getArchiveDownloadUrls = (alias: string, commitId: string): ArchiveUrls => {
+export const downloadWorkspaceArchive = async (
+  url: string,
+  alias: string,
+  commitId: string,
+  format: 'zip' | 'tgz',
+): Promise<void> => {
   if (!alias || !commitId) {
-    return { zip: '', tgz: '' }
+    console.error('Alias and commit ID are required to download workspace archive.')
+    return
   }
 
-  const base = `${MODELS_URL}/workspace/${alias}/@@archive/${commitId}`
-  return {
-    zip: `${base}/zip`,
-    tgz: `${base}/tgz`,
+  try {
+    const params = new URLSearchParams({ workspaceURL: url, alias, commitId, format })
+    const response = await fetch(`${DOWNLOAD_API}/download/workspace?${params}`)
+
+    if (!response.ok) {
+      throw new Error(`Failed to download workspace archive: ${response.statusText}`)
+    }
+
+    const blob = await response.blob()
+    const fileName = `${alias}.${format === 'tgz' ? 'tar.gz' : format}`
+    downloadFileFromBlob(blob, fileName)
+  } catch (error) {
+    console.error('Error downloading workspace archive:', error)
+    throw error
   }
 }
 
-/**
- * Generate COMBINE archive download URL for an exposure.
- */
-export const getCombineArchiveUrl = (exposureAlias: string): string => {
-  if (!exposureAlias) {
-    return ''
+export const downloadCOMBINEArchive = async (
+  alias: string,
+  fileName: string,
+): Promise<void> => {
+  if (!alias) {
+    console.error('Exposure alias is required to download COMBINE archive.')
+    return
   }
-  return `${MODELS_URL}/e/${exposureAlias}/download_generated_omex`
+
+  try {
+    const params = new URLSearchParams({ alias: alias })
+    const response = await fetch(`${DOWNLOAD_API}/download/exposure?${params}`)
+
+    if (!response.ok) {
+      throw new Error(`Failed to download COMBINE archive: ${response.statusText}`)
+    }
+
+    const blob = await response.blob()
+    const fileNameWithExtension = `${fileName || alias}.omex`
+    downloadFileFromBlob(blob, fileNameWithExtension)
+  } catch (error) {
+    console.error('Error downloading COMBINE archive:', error)
+    throw error
+  }
 }

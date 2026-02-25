@@ -50,7 +50,8 @@ const filteredItems = computed(() => {
 
     result = result.filter((item: T) => {
       const description = item.entity.description?.toLowerCase() || ''
-      return description.includes(query)
+      const id = item.entity.id.toString()
+      return description.includes(query) || id.includes(query)
     })
   }
 

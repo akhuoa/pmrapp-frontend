@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ActionButton from '@/components/atoms/ActionButton.vue'
+import SearchField from '@/components/atoms/SearchField.vue'
 import RefreshIcon from '@/components/icons/RefreshIcon.vue'
 import SortDropdown from '@/components/molecules/SortDropdown.vue'
 import type { SortOption } from '@/types/common'
@@ -14,7 +15,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  filterPlaceholder: 'Filter by description...',
+  filterPlaceholder: 'Filter by description or ID...',
   sortBy: DEFAULT_SORT_OPTION,
 })
 
@@ -24,11 +25,6 @@ const emit = defineEmits<{
   refresh: []
 }>()
 
-const handleFilterInput = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  emit('update:filterQuery', target.value)
-}
-
 const handleRefresh = () => {
   emit('refresh')
 }
@@ -37,12 +33,12 @@ const handleRefresh = () => {
 <template>
   <div class="mb-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
     <div class="flex-1 w-full sm:w-auto flex flex-col sm:flex-row gap-4">
-      <input
-        :value="filterQuery"
-        type="search"
+      <SearchField
+        class="flex-1"
+        :model-value="filterQuery"
         :placeholder="filterPlaceholder"
-        class="input-field w-full sm:flex-1"
-        @input="handleFilterInput"
+        input-class="input-field w-full sm:flex-1"
+        @update:model-value="(value) => emit('update:filterQuery', value)"
       />
       <div class="flex items-center gap-2">
         <SortDropdown
@@ -64,7 +60,3 @@ const handleRefresh = () => {
     </ActionButton>
   </div>
 </template>
-
-<style scoped>
-@import '@/assets/input.css';
-</style>
