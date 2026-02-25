@@ -33,11 +33,30 @@ export const useSearchStore = defineStore('search', () => {
   }
 
   const fetchCategories = async (
-    categoryIndexes: string[] = [],
-    forceRefresh = false,
+    categoryIndexesOrForceRefresh?: string[] | boolean,
+    forceRefreshParam?: boolean,
   ): Promise<void> => {
-    // Use cache if valid and not forcing refresh.
-    if (!forceRefresh && isCacheValid() && categories.value.length > 0) {
+    // Normalise arguments to support both:
+    // - fetchCategories(forceRefresh?: boolean)
+    // - fetchCategories(categoryIndexes?: string[], forceRefresh?: boolean)
+    let categoryIndexes: string[] = []
+    let forceRefresh = false
+    const existingCategoryKinds = categories.value.map((c) => c.kind)
+
+    if (Array.isArray(categoryIndexesOrForceRefresh)) {
+      categoryIndexes = categoryIndexesOrForceRefresh
+      forceRefresh = !!forceRefreshParam
+    } else if (typeof categoryIndexesOrForceRefresh === 'boolean') {
+      forceRefresh = categoryIndexesOrForceRefresh
+    }
+
+    const areAllRequestedCategoriesCached =
+      existingCategoryKinds.length > 0 &&
+      (categoryIndexes.length === 0 ||
+        categoryIndexes.every((idx) => existingCategoryKinds.includes(idx)))
+
+    // Use cache if valid and not forcing refresh, and if existing categories cover requested indexes.
+    if (!forceRefresh && isCacheValid() && areAllRequestedCategoriesCached) {
       return
     }
 
@@ -109,23 +128,11 @@ export const useSearchStore = defineStore('search', () => {
     }
   }
 
-  const getCachedResults = (kind: string, term: string): SearchResult[] | null => {
-    const cacheKey = `${kind}:${term}`
-    const cached = searchResultsCache.value.get(cacheKey)
-
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-      return cached.results
-    }
-
-    return null
-  }
-
   return {
     categories,
     isLoading,
     error,
     fetchCategories,
     searchIndexTerm,
-    getCachedResults,
   }
 })

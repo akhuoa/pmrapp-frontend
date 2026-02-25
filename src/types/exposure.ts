@@ -1,4 +1,23 @@
+import type { Citation } from './citation'
 import type { WorkspaceEntity } from './workspace'
+
+export interface ViewEntry {
+  name: string
+  view_key: string
+}
+
+export interface Metadata {
+  model_title?: string
+  model_author?: string
+  model_author_org?: string
+  keywords?: string[][]
+  citations?: Citation[]
+  citation_title?: string
+  citation_issued?: string
+  citation_id?: string
+  citation_bibliographicCitation?: string
+  citation_authors?: string[][]
+}
 
 export interface ExposureFileView {
   id: number

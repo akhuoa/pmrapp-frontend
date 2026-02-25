@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import { useSearchStore } from '@/stores/search'
+import { isValidTerm } from '@/utils/search'
 
 interface Props {
   inSidebar: boolean
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
 
 const searchStore = useSearchStore()
 const router = useRouter()
@@ -19,7 +21,7 @@ const cellmlKeywordCategory = computed(() =>
 )
 
 onMounted(async () => {
-  if (searchStore.categories.length === 0) {
+  if (!searchStore.isLoading && searchStore.categories.length === 0) {
     await searchStore.fetchCategories([cellmlKeywordKind])
   }
 })
@@ -38,8 +40,22 @@ const handleTermClick = async (kind: string, term: string) => {
 const getFilteredTerms = (terms: string[] | null | undefined, kind: string): string[] => {
   const filter = categoryFilters.value.get(kind)?.toLowerCase() || ''
   const safeTerms = terms ?? []
-  return safeTerms.filter((t) => t.trim() && (filter === '' || t.toLowerCase().includes(filter)))
+  return safeTerms.filter(
+    (t) => isValidTerm(t) && (filter === '' || t.toLowerCase().includes(filter)),
+  )
 }
+
+const updateFilter = (kind: string, value: string) => {
+  categoryFilters.value.set(kind, value)
+}
+
+const searchFieldInputClass = computed(() => {
+  const baseClass = 'input-field input-field-sm'
+  if (props.inSidebar) {
+    return `${baseClass} w-full`
+  }
+  return baseClass
+})
 </script>
 
 <template>
@@ -67,15 +83,13 @@ const getFilteredTerms = (terms: string[] | null | undefined, kind: string): str
           class="flex items-center mb-4 gap-4"
           :class="{ 'justify-end mb-6': !inSidebar }"
         >
-          <input
+          <SearchField
             v-if="category.kindInfo"
-            type="search"
+            :model-value="categoryFilters.get(category.kind) || ''"
             placeholder="Filter keywords..."
             aria-label="Filter keywords"
-            class="px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-md text-sm bg-white dark:bg-background focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-            :class="{ 'w-full' : inSidebar }"
-            :value="categoryFilters.get(category.kind) || ''"
-            @input="categoryFilters.set(category.kind, ($event.target as HTMLInputElement).value)"
+            :input-class="searchFieldInputClass"
+            @update:model-value="(value) => updateFilter(category.kind, value)"
           />
         </div>
 
