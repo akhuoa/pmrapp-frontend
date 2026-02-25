@@ -108,6 +108,26 @@ const handleBackdropClick = () => {
 const handleKeyDown = (event: KeyboardEvent) => {
   if (event.key === 'Escape' && searchInput.value.trim().length > 0) {
     handleBackdropClick()
+    return
+  }
+
+  if (event.key === 'Tab' && hasResults.value) {
+    const totalButtons = termButtonRefs.value.length
+    if (totalButtons === 0) return
+
+    const firstButtonEl = termButtonRefs.value[0]?.$el ?? termButtonRefs.value[0]
+    const lastButtonEl = termButtonRefs.value[totalButtons - 1]?.$el ?? termButtonRefs.value[totalButtons - 1]
+    const searchInputEl = searchInputRef.value?.inputRef
+
+    if (event.shiftKey && document.activeElement === firstButtonEl) {
+      // Shift+Tab on first term button → go back to search input.
+      event.preventDefault()
+      searchInputEl?.focus()
+    } else if (!event.shiftKey && document.activeElement === lastButtonEl) {
+      // Tab on last term button → cycle back to search input.
+      event.preventDefault()
+      searchInputEl?.focus()
+    }
   }
 }
 
