@@ -568,7 +568,7 @@ onMounted(async () => {
             <dt class="font-semibold mb-1">Model title</dt>
             <dd>{{ metadataJSON.model_title }}</dd>
           </div>
-          <div v-if="metadataJSON.model_author">
+          <div v-if="metadataJSON.model_author && isValidTerm(metadataJSON.model_author)">
             <dt class="font-semibold mb-1">Model authors</dt>
             <dd>
               <button
@@ -579,7 +579,7 @@ onMounted(async () => {
               </button>
             </dd>
           </div>
-          <div v-if="metadataJSON.model_author_org">
+          <div v-if="metadataJSON.model_author_org && isValidTerm(metadataJSON.model_author_org)">
             <dt class="font-semibold mb-1">Authoring organisation</dt>
             <dd>{{ metadataJSON.model_author_org }}</dd>
           </div>
