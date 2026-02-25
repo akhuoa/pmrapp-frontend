@@ -132,16 +132,27 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 }
 
-// Handle Tab key to move focus from search input to first term button.
+// Handle Tab/Shift+Tab key to cycle focus between search input and term buttons.
 const handleSearchInputKeyDown = async (event: KeyboardEvent) => {
-  if (event.key === 'Tab' && !event.shiftKey && hasResults.value) {
+  if (event.key === 'Tab' && hasResults.value) {
     event.preventDefault()
     await nextTick()
-    const firstButton = termButtonRefs.value[0]
-    if (firstButton) {
-      const buttonEl = firstButton.$el || firstButton
-      buttonEl?.focus()
-      isSearchFocused.value = true
+    if (event.shiftKey) {
+      // Shift+Tab on search input → go to last term button.
+      const lastButton = termButtonRefs.value[termButtonRefs.value.length - 1]
+      if (lastButton) {
+        const buttonEl = lastButton.$el || lastButton
+        buttonEl?.focus()
+        isSearchFocused.value = true
+      }
+    } else {
+      // Tab on search input → go to first term button.
+      const firstButton = termButtonRefs.value[0]
+      if (firstButton) {
+        const buttonEl = firstButton.$el || firstButton
+        buttonEl?.focus()
+        isSearchFocused.value = true
+      }
     }
   }
 }
