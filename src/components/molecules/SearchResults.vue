@@ -9,6 +9,7 @@ import type { SearchResult } from '@/types/search'
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { formatDate, formatNumber } from '@/utils/format'
 import { SEARCH_KIND_LABEL_MAP } from '@/constants/search'
+import { isValidTerm } from '@/utils/search'
 
 interface Props {
   results: SearchResult[]
@@ -26,6 +27,10 @@ const textHighlightClass = 'text-gray-900 bg-amber-100/75 dark:bg-amber-500/50 d
 
 const handleKeywordClick = (kind: string, keyword: string) => {
   router.push({ path: '/search', query: { kind, term: keyword } })
+}
+
+const handleAuthorClick = (kind: string, author: string) => {
+  router.push({ path: '/search', query: { kind, term: author } })
 }
 
 const kindLabel = computed(() => {
@@ -90,13 +95,15 @@ const isIdActive = (ids: string[] | undefined) => {
                   by
                 </span>
                 <template v-for="(author, index) in item.data.model_author" :key="index">
-                  <span
+                  <button
+                    class="cursor-pointer hover:text-primary-hover transition-colors"
                     :class="kind === 'model_author' && term.toLowerCase() === author.toLowerCase()
                       ? textHighlightClass
                       : ''"
+                    @click="handleAuthorClick('model_author', author)"
                   >
                     {{ author }}
-                  </span>
+                  </button>
                   <span v-if="index < item.data.model_author.length - 1">, </span>
                 </template>
               </div>
@@ -104,31 +111,33 @@ const isIdActive = (ids: string[] | undefined) => {
           </div>
 
           <div
-            v-if="item.data.citation_author_family_name?.length || item.data.citation_id?.length"
+            v-if="item.data.citation_author_family_name?.length || item.data.citation_id?.filter(isValidTerm).length"
             class="mt-1 flex items-center gap-1 text-gray-600 dark:text-gray-400"
           >
             <FileIcon class="w-3.5 h-3.5 flex-shrink-0" />
             <small>
               <template v-if="item.data.citation_author_family_name?.length">
                 <template v-for="(author, index) in item.data.citation_author_family_name" :key="index">
-                  <span
+                  <button
+                    class="cursor-pointer hover:text-primary-hover transition-colors"
                     :class="kind === 'citation_author_family_name' && term.toLowerCase() === author.toLowerCase()
                       ? textHighlightClass
                       : ''"
+                    @click="handleAuthorClick('citation_author_family_name', author)"
                   >
                     {{ author }}
-                  </span>
+                  </button>
                   <span v-if="index < item.data.citation_author_family_name.length - 1">, </span>
                 </template>
               </template>
-              <span v-if="item.data.citation_author_family_name?.length && item.data.citation_id?.length"> · </span>
+              <span v-if="item.data.citation_author_family_name?.length && item.data.citation_id?.filter(isValidTerm).length"> · </span>
               <span
-                v-if="item.data.citation_id?.length"
-                :class="isIdActive(item.data.citation_id)
+                v-if="item.data.citation_id?.filter(isValidTerm).length"
+                :class="isIdActive(item.data.citation_id?.filter(isValidTerm))
                   ? textHighlightClass
                   : ''"
               >
-                {{ item.data.citation_id.join(', ') }}
+                {{ item.data.citation_id.filter(isValidTerm).join(', ') }}
               </span>
             </small>
           </div>

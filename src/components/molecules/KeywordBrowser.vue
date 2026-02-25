@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import { useSearchStore } from '@/stores/search'
+import { isValidTerm } from '@/utils/search'
 
 interface Props {
   inSidebar: boolean
@@ -39,7 +40,9 @@ const handleTermClick = async (kind: string, term: string) => {
 const getFilteredTerms = (terms: string[] | null | undefined, kind: string): string[] => {
   const filter = categoryFilters.value.get(kind)?.toLowerCase() || ''
   const safeTerms = terms ?? []
-  return safeTerms.filter((t) => t.trim() && (filter === '' || t.toLowerCase().includes(filter)))
+  return safeTerms.filter(
+    (t) => isValidTerm(t) && (filter === '' || t.toLowerCase().includes(filter)),
+  )
 }
 
 const updateFilter = (kind: string, value: string) => {

@@ -18,11 +18,12 @@ import { downloadCOMBINEArchive, downloadWorkspaceArchive } from '@/services/dow
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
 import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
-import { formatCitation, formatCitationAuthors } from '@/utils/citation'
+import { formatCitation, formatCitationAuthor } from '@/utils/citation'
 import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
+import { isValidTerm } from '@/utils/search'
 import TermButton from '../atoms/TermButton.vue'
 
 const props = defineProps<{
@@ -286,6 +287,13 @@ const handleKeywordClick = (kind: string, keyword: string) => {
   router.push({ path: '/search', query: { kind, term: keyword } })
 }
 
+const handleCitationAuthorClick = (authorParts: string[]) => {
+  const familyName = authorParts[0]
+  if (familyName) {
+    handleKeywordClick('citation_author_family_name', familyName)
+  }
+}
+
 const filteredKeywords = computed(() => {
   const originalKeywords = metadataJSON.value.keywords || []
   return originalKeywords
@@ -299,7 +307,7 @@ const checkOtherRelatedModels = async () => {
   const term = metadataJSON.value.citation_id
   const kind = 'citation_id'
 
-  if (!term) {
+  if (!term || !isValidTerm(term)) {
     hasOtherRelatedModels.value = false
     return
   }
@@ -562,7 +570,14 @@ onMounted(async () => {
           </div>
           <div v-if="metadataJSON.model_author">
             <dt class="font-semibold mb-1">Model authors</dt>
-            <dd>{{ metadataJSON.model_author }}</dd>
+            <dd>
+              <button
+                class="cursor-pointer hover:text-primary-hover transition-colors"
+                @click="handleKeywordClick('model_author', metadataJSON.model_author!)"
+              >
+                {{ metadataJSON.model_author }}
+              </button>
+            </dd>
           </div>
           <div v-if="metadataJSON.model_author_org">
             <dt class="font-semibold mb-1">Authoring organisation</dt>
@@ -726,13 +741,23 @@ onMounted(async () => {
           >
             <div v-if="metadataJSON.citation_authors">
               <dt class="font-semibold mb-1">Authors</dt>
-              <dd>{{ formatCitationAuthors(metadataJSON.citation_authors) }}</dd>
+              <dd>
+                <template v-for="(authorParts, index) in metadataJSON.citation_authors" :key="index">
+                  <button
+                    class="cursor-pointer hover:text-primary-hover transition-colors"
+                    @click="handleCitationAuthorClick(authorParts)"
+                  >
+                    {{ formatCitationAuthor(authorParts) }}
+                  </button>
+                  <span v-if="index < metadataJSON.citation_authors.length - 1">, </span>
+                </template>
+              </dd>
             </div>
             <div v-if="metadataJSON.citation_title">
               <dt class="font-semibold mb-1">Title</dt>
               <dd>{{ metadataJSON.citation_title }}</dd>
             </div>
-            <div v-if="metadataJSON.citation_id">
+            <div v-if="metadataJSON.citation_id && isValidTerm(metadataJSON.citation_id)">
               <dt class="font-semibold mb-1">ID</dt>
               <dd>{{ metadataJSON.citation_id }}</dd>
             </div>

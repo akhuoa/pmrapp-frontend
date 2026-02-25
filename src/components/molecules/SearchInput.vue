@@ -4,6 +4,7 @@ import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import { useSearchStore } from '@/stores/search'
 import { SEARCH_CATEGORIES } from '@/constants/search'
+import { isValidTerm } from '@/utils/search'
 
 const props = defineProps<{
   initialTerm: string
@@ -16,6 +17,13 @@ const emit = defineEmits<(e: 'search', searchKind: string, searchTerm: string) =
 const searchStore = useSearchStore()
 
 const searchInput = ref<string>(props.initialTerm)
+
+watch(
+  () => props.initialTerm,
+  (newTerm) => {
+    searchInput.value = newTerm
+  },
+)
 const searchInputRef = ref<InstanceType<typeof SearchField> | null>(null)
 const isSearchFocused = ref(false)
 const categoriesError = ref<string | null>(null)
@@ -51,8 +59,8 @@ const filteredSearchTermsByCategory = computed(() => {
       const categoryData = searchStore.categories.find((cat) => cat.kind === category.value)
       const terms = categoryData?.kindInfo?.terms || []
 
-      const filteredTerms = terms.filter((term) =>
-        term.toLowerCase().includes(searchTermValue)
+      const filteredTerms = terms.filter(
+        (term) => isValidTerm(term) && term.toLowerCase().includes(searchTermValue),
       )
 
       return {
@@ -100,19 +108,51 @@ const handleBackdropClick = () => {
 const handleKeyDown = (event: KeyboardEvent) => {
   if (event.key === 'Escape' && searchInput.value.trim().length > 0) {
     handleBackdropClick()
+    return
+  }
+
+  if (event.key === 'Tab' && hasResults.value) {
+    const buttonEls = termButtonRefs.value.map((ref) => ref?.$el ?? ref)
+    if (buttonEls.length === 0) return
+
+    const activeIndex = buttonEls.indexOf(event.target as HTMLElement)
+    if (activeIndex === -1) return
+
+    const searchInputEl = searchInputRef.value?.inputRef
+
+    if (event.shiftKey && activeIndex === 0) {
+      // Shift+Tab on first term button → go back to search input.
+      event.preventDefault()
+      searchInputEl?.focus()
+    } else if (!event.shiftKey && activeIndex === buttonEls.length - 1) {
+      // Tab on last term button → cycle back to search input.
+      event.preventDefault()
+      searchInputEl?.focus()
+    }
   }
 }
 
-// Handle Tab key to move focus from search input to first term button.
+// Handle Tab/Shift+Tab key to cycle focus between search input and term buttons.
 const handleSearchInputKeyDown = async (event: KeyboardEvent) => {
-  if (event.key === 'Tab' && !event.shiftKey && hasResults.value) {
+  if (event.key === 'Tab' && hasResults.value) {
     event.preventDefault()
     await nextTick()
-    const firstButton = termButtonRefs.value[0]
-    if (firstButton) {
-      const buttonEl = firstButton.$el || firstButton
-      buttonEl?.focus()
-      isSearchFocused.value = true
+    if (event.shiftKey) {
+      // Shift+Tab on search input → go to last term button.
+      const lastButton = termButtonRefs.value[termButtonRefs.value.length - 1]
+      if (lastButton) {
+        const buttonEl = lastButton.$el || lastButton
+        buttonEl?.focus()
+        isSearchFocused.value = true
+      }
+    } else {
+      // Tab on search input → go to first term button.
+      const firstButton = termButtonRefs.value[0]
+      if (firstButton) {
+        const buttonEl = firstButton.$el || firstButton
+        buttonEl?.focus()
+        isSearchFocused.value = true
+      }
     }
   }
 }
