@@ -253,15 +253,17 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
                 {{ entry.name }}
               </RouterLink>
             </div>
-            <button
+            <ActionButton
               v-if="entry.kind !== 'tree'"
-              @click.prevent="downloadFile(entry.name)"
-              class="ml-4 p-2 text-gray-500 cursor-pointer hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+              variant="icon"
+              content-section="Workspace Detail"
+              @click="downloadFile(entry.name)"
               :title="`Download ${entry.name}`"
               :aria-label="`Download ${entry.name}`"
             >
               <DownloadIcon class="w-4 h-4" />
-            </button>
+              <span class="sr-only">Download</span>
+            </ActionButton>
           </div>
         </li>
       </ul>
