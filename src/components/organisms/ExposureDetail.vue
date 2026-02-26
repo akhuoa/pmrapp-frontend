@@ -479,7 +479,7 @@ onMounted(async () => {
               aria-label="Download"
             >
               <DownloadIcon class="w-4 h-4" />
-              Download
+              <span class="sr-only">Download</span>
             </button>
           </div>
           <CodeBlock
@@ -534,6 +534,7 @@ onMounted(async () => {
                   :aria-label="`Download ${entry[0]}`"
                 >
                   <DownloadIcon class="w-4 h-4" />
+                  <span class="sr-only">Download</span>
                 </button>
               </div>
             </div>

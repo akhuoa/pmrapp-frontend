@@ -163,7 +163,7 @@ onBeforeUnmount(() => {
             :aria-label="'Download'"
           >
             <DownloadIcon class="w-4 h-4" />
-            Download
+            <span class="sr-only">Download</span>
           </button>
         </div>
       </div>
@@ -206,7 +206,7 @@ onBeforeUnmount(() => {
           content-section="Workspace File Detail"
         >
           <DownloadIcon class="w-4 h-4" />
-          Download
+          <span class="sr-only">Download</span>
         </ActionButton>
       </div>
     </div>

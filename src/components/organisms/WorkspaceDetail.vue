@@ -261,6 +261,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
               :aria-label="`Download ${entry.name}`"
             >
               <DownloadIcon class="w-4 h-4" />
+              <span class="sr-only">Download</span>
             </button>
           </div>
         </li>
