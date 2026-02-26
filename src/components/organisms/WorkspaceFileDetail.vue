@@ -184,8 +184,8 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- PDF View -->
-      <div v-else-if="isPDF" class="flex justify-center">
-        <embed :src="fileBlobUrl" type="application/pdf" width="100%" height="800px" />
+      <div v-else-if="isPDF">
+        <embed :src="fileBlobUrl" type="application/pdf" :title="path" width="100%" height="800px" />
       </div>
 
       <!-- Code/Text View -->
