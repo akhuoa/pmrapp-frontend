@@ -609,7 +609,7 @@ onMounted(async () => {
                 rel="noopener noreferrer"
                 :content-section="`Exposure Detail - ${pageTitle}`"
               >
-                Open in OpenCOR's web app
+                Open with OpenCOR's Web app
               </ActionButton>
             </li>
             <li
