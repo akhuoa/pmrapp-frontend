@@ -169,22 +169,22 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- SVG Rendered View -->
-      <div v-if="isSvg && shouldShowPreview" class="flex justify-center p-8 bg-gray-50 dark:bg-gray-900 rounded">
+      <div v-if="isSvg && shouldShowPreview" class="flex justify-center p-4 bg-gray-50 dark:bg-gray-900 rounded">
         <img :src="fileBlobUrl" :alt="path" class="max-w-full h-auto" />
       </div>
 
       <!-- Markdown Preview -->
-      <div v-else-if="isMarkdown && shouldShowPreview" class="p-8">
+      <div v-else-if="isMarkdown && shouldShowPreview" class="p-4">
         <div class="max-w-none" v-html="renderedMarkdown"></div>
       </div>
 
       <!-- Image View -->
-      <div v-else-if="isImage && imageDataUrl" class="flex justify-center p-8 bg-gray-50 dark:bg-gray-900 rounded">
+      <div v-else-if="isImage && imageDataUrl" class="flex justify-center p-4 bg-gray-50 dark:bg-gray-900 rounded">
         <img :src="imageDataUrl" :alt="path" class="max-w-full h-auto" />
       </div>
 
       <!-- PDF View -->
-      <div v-else-if="isPDF" class="flex justify-center p-8 bg-gray-50 dark:bg-gray-900 rounded">
+      <div v-else-if="isPDF" class="flex justify-center">
         <embed :src="fileBlobUrl" type="application/pdf" width="100%" height="800px" />
       </div>
 
