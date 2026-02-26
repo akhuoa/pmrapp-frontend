@@ -473,7 +473,7 @@ onMounted(async () => {
           <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
             <span>{{ generatedCodeFilename }}</span>
             <button
-              @click.prevent="downloadCode"
+              @click="downloadCode"
               class="flex items-center cursor-pointer gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
               title="Download"
               aria-label="Download"
@@ -528,7 +528,7 @@ onMounted(async () => {
               </div>
               <div class="flex items-center gap-2 ml-4 flex-shrink-0">
                 <button
-                  @click.prevent="downloadFile(entry[0])"
+                  @click="downloadFile(entry[0])"
                   class="ml-4 p-2 text-gray-500 cursor-pointer hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
                   :title="`Download ${entry[0]}`"
                   :aria-label="`Download ${entry[0]}`"
