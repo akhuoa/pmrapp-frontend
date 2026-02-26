@@ -206,7 +206,7 @@ onBeforeUnmount(() => {
           content-section="Workspace File Detail"
         >
           <DownloadIcon class="w-4 h-4" />
-          <span class="sr-only">Download</span>
+          Download
         </ActionButton>
       </div>
     </div>
