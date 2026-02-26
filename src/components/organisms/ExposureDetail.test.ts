@@ -191,12 +191,12 @@ describe('ExposureDetail', () => {
     expect(viewItems).toHaveLength(3)
   })
 
-  it('renders "Open in OpenCOR\'s web app" link that opens in new tab', async () => {
+  it('renders "Open with OpenCOR\'s Web app" link that opens in new tab', async () => {
     const wrapper = await mountComponent()
 
     const openCorLink = wrapper
       .findAll('a')
-      .find((link) => link.text().trim() === "Open in OpenCOR's web app")
+      .find((link) => link.text().trim() === "Open with OpenCOR's Web app")
 
     expect(openCorLink?.exists()).toBe(true)
     expect(openCorLink?.attributes('target')).toBe('_blank')
