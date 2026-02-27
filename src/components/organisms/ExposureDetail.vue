@@ -133,6 +133,7 @@ const navigationFiles = computed(() => {
 const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
   if (!exposureInfo.value) return
 
+  const fileName = exposureInfo.value.exposure.description || ''
   const loadingRef = format === 'zip' ? isDownloadingWorkspaceZip : isDownloadingWorkspaceTgz
   loadingRef.value = true
 
@@ -142,6 +143,7 @@ const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
       exposureInfo.value.workspace_alias,
       exposureInfo.value.exposure.commit_id,
       format,
+      fileName,
     )
   } catch (err) {
     console.error('Error downloading workspace archive:', err)
