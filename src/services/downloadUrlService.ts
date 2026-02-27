@@ -7,6 +7,7 @@ export const downloadWorkspaceArchive = async (
   alias: string,
   commitId: string,
   format: 'zip' | 'tgz',
+  fileName?: string,
 ): Promise<void> => {
   if (!alias || !commitId) {
     console.error('Alias and commit ID are required to download workspace archive.')
@@ -22,8 +23,8 @@ export const downloadWorkspaceArchive = async (
     }
 
     const blob = await response.blob()
-    const fileName = `${alias}.${format === 'tgz' ? 'tar.gz' : format}`
-    downloadFileFromBlob(blob, fileName)
+    const fileNameWithExtension = `${fileName || alias}.${format === 'tgz' ? 'tar.gz' : format}`
+    downloadFileFromBlob(blob, fileNameWithExtension)
   } catch (error) {
     console.error('Error downloading workspace archive:', error)
     throw error

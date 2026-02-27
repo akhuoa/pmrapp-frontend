@@ -112,6 +112,7 @@ const downloadFile = async (filename: string) => {
 const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
   if (!workspaceInfo.value) return
 
+  const fileName = workspaceInfo.value.workspace.description || ''
   const loadingRef = format === 'zip' ? isDownloadingWorkspaceZip : isDownloadingWorkspaceTgz
   loadingRef.value = true
 
@@ -120,7 +121,8 @@ const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
       workspaceInfo.value.workspace.url,
       props.alias,
       workspaceInfo.value.commit.commit_id,
-      format
+      format,
+      fileName,
     )
   } catch (err) {
     console.error('Error downloading workspace archive:', err)
