@@ -55,10 +55,10 @@ onUnmounted(() => {
       <h2 class="text-xl font-semibold mb-4">{{ title }}</h2>
       <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">{{ message }}</p>
       <div class="flex justify-end gap-2">
-        <ActionButton variant="secondary" @click="emit('cancel')" content-section='Confirm dialog'>
+        <ActionButton variant="secondary" @click="emit('cancel')" content-section="Confirm dialog">
           {{ cancelLabel }}
         </ActionButton>
-        <ActionButton variant="primary" @click="emit('confirm')" content-section='Confirm dialog'>
+        <ActionButton variant="primary" @click="emit('confirm')" content-section="Confirm dialog">
           {{ confirmLabel }}
         </ActionButton>
       </div>
