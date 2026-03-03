@@ -37,7 +37,8 @@ describe('ConfirmDialog', () => {
     const wrapper = mount(ConfirmDialog, { props: { show: true } })
     const buttons = wrapper.findAll('button')
     const confirmButton = buttons.find((b) => b.text() === 'Confirm')
-    await confirmButton?.trigger('click')
+    expect(confirmButton).toBeDefined()
+    await confirmButton!.trigger('click')
     expect(wrapper.emitted('confirm')).toBeTruthy()
   })
 
@@ -45,7 +46,8 @@ describe('ConfirmDialog', () => {
     const wrapper = mount(ConfirmDialog, { props: { show: true } })
     const buttons = wrapper.findAll('button')
     const cancelButton = buttons.find((b) => b.text() === 'Cancel')
-    await cancelButton?.trigger('click')
+    expect(cancelButton).toBeDefined()
+    await cancelButton!.trigger('click')
     expect(wrapper.emitted('cancel')).toBeTruthy()
   })
 
