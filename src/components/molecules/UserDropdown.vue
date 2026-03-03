@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import ConfirmDialog from '@/components/atoms/ConfirmDialog.vue'
 import UserIcon from '@/components/icons/UserIcon.vue'
 import { getAuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth'
@@ -11,6 +12,7 @@ const authService = getAuthService()
 
 const isOpen = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
+const showLogoutConfirm = ref(false)
 
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value
@@ -20,15 +22,24 @@ const closeDropdown = () => {
   isOpen.value = false
 }
 
+const confirmLogout = () => {
+  closeDropdown()
+  showLogoutConfirm.value = true
+}
+
 const handleLogout = async () => {
+  showLogoutConfirm.value = false
   try {
     await authService.logout()
     authStore.clearAuth()
-    closeDropdown()
     router.push('/')
   } catch (error) {
     console.error('Logout failed:', error)
   }
+}
+
+const cancelLogout = () => {
+  showLogoutConfirm.value = false
 }
 
 const handleClickOutside = (event: MouseEvent) => {
@@ -61,7 +72,7 @@ onUnmounted(() => {
       class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50"
     >
       <button
-        @click="handleLogout"
+        @click="confirmLogout"
         class="w-full cursor-pointer text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
       >
         Log out
@@ -76,6 +87,16 @@ onUnmounted(() => {
   >
     Log in
   </RouterLink>
+
+  <ConfirmDialog
+    :show="showLogoutConfirm"
+    title="Log out"
+    message="Are you sure you want to log out?"
+    confirm-label="Log out"
+    cancel-label="Cancel"
+    @confirm="handleLogout"
+    @cancel="cancelLogout"
+  />
 </template>
 
 <style scoped>
