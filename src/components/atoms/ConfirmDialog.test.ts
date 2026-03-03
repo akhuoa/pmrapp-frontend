@@ -62,5 +62,6 @@ describe('ConfirmDialog', () => {
     await wrapper.setProps({ show: true })
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
     expect(wrapper.emitted('cancel')).toBeTruthy()
+    wrapper.unmount()
   })
 })
