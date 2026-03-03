@@ -38,7 +38,7 @@ describe('ConfirmDialog', () => {
     const buttons = wrapper.findAll('button')
     const confirmButton = buttons.find((b) => b.text() === 'Confirm')
     expect(confirmButton).toBeDefined()
-    await confirmButton!.trigger('click')
+    await confirmButton?.trigger('click')
     expect(wrapper.emitted('confirm')).toBeTruthy()
   })
 
@@ -47,7 +47,7 @@ describe('ConfirmDialog', () => {
     const buttons = wrapper.findAll('button')
     const cancelButton = buttons.find((b) => b.text() === 'Cancel')
     expect(cancelButton).toBeDefined()
-    await cancelButton!.trigger('click')
+    await cancelButton?.trigger('click')
     expect(wrapper.emitted('cancel')).toBeTruthy()
   })
 
