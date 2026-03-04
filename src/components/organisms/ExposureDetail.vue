@@ -18,6 +18,7 @@ import { downloadCOMBINEArchive, downloadWorkspaceArchive } from '@/services/dow
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
 import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
+import type { Error } from '@/types/error'
 import { formatCitation, formatCitationAuthor } from '@/utils/citation'
 import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
@@ -31,11 +32,6 @@ const props = defineProps<{
   file: string
   view: string
 }>()
-
-interface Error {
-  title: string
-  message: string
-}
 
 const DEFAULT_LICENSE = 'https://creativecommons.org/licenses/by/3.0/'
 const AVAILABLE_VIEWS = [

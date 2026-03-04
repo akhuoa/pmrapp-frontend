@@ -14,6 +14,7 @@ import PageHeader from '@/components/molecules/PageHeader.vue'
 import { downloadWorkspaceArchive } from '@/services/downloadUrlService'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { WorkspaceInfo } from '@/types/workspace'
+import type { Error } from '@/types/error'
 import { downloadWorkspaceFile } from '@/utils/download'
 import { formatFileCount } from '@/utils/format'
 
@@ -22,11 +23,6 @@ const props = defineProps<{
   commitId?: string
   path?: string
 }>()
-
-interface Error {
-  title: string
-  message: string
-}
 
 const router = useRouter()
 const workspaceStore = useWorkspaceStore()
