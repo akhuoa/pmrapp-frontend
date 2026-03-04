@@ -31,11 +31,16 @@ export const exposureService = {
       }),
     })
 
+    const payload = await response.json()
+
     if (!response.ok) {
+      // Check if the error is "NotFound".
+      if (payload && typeof payload === 'string' && payload.includes('NotFound')) {
+        throw new Error('Exposure not found')
+      }
       throw new Error(`Request failed: ${response.status}`)
     }
 
-    const payload = await response.json()
     return payload.inner
   },
 
