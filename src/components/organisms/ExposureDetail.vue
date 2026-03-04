@@ -32,6 +32,11 @@ const props = defineProps<{
   view: string
 }>()
 
+interface Error {
+  title: string
+  message: string
+}
+
 const DEFAULT_LICENSE = 'https://creativecommons.org/licenses/by/3.0/'
 const AVAILABLE_VIEWS = [
   {
@@ -73,7 +78,7 @@ const CODEGEN_LANGUAGES = [
 
 const exposureStore = useExposureStore()
 const exposureInfo = ref<ExposureInfo | null>(null)
-const error = ref<string | null>(null)
+const error = ref<Error | null>(null)
 const isLoading = ref(true)
 const exposureId = ref<number>(NaN)
 const exposureFilePath = ref<string>(props.file)
@@ -238,6 +243,8 @@ const downloadCode = () => {
 }
 
 const generateMath = async () => {
+  error.value = null
+
   try {
     const response = await exposureStore.getExposureRawContent(
       exposureId.value,
@@ -247,12 +254,18 @@ const generateMath = async () => {
     )
     mathsJSON.value = JSON.parse(response)
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to parse mathematics data'
+    const errorMessage = err instanceof Error ? err.message : 'Failed to parse mathematics data'
+    error.value = {
+      title: 'Error parsing mathematics',
+      message: errorMessage
+    }
     console.error('Error parsing mathematics JSON:', err)
   }
 }
 
 const generateMetadata = async () => {
+  error.value = null
+
   try {
     const metadata = await exposureStore.getExposureRawContent(
       exposureId.value,
@@ -262,6 +275,11 @@ const generateMetadata = async () => {
     )
     metadataJSON.value = JSON.parse(metadata)
   } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Failed to parse metadata JSON'
+    error.value = {
+      title: 'Error parsing metadata',
+      message: errorMessage
+    }
     console.error('Error parsing metadata JSON:', err)
   }
 }
@@ -421,11 +439,24 @@ watch(
 )
 
 onMounted(async () => {
+  error.value = null
+
   try {
     exposureInfo.value = await exposureStore.getExposureInfo(props.alias)
     await loadInitialView()
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to load exposure'
+    const errorMessage = err instanceof Error ? err.message : 'Failed to load exposure'
+    if (errorMessage.toLowerCase().includes('not found')) {
+      error.value = {
+        title: 'Exposure not found',
+        message: 'The exposure you are looking for does not exist or has been removed.'
+      }
+    } else {
+      error.value = {
+        title: 'Error loading exposure',
+        message: errorMessage
+      }
+    }
     console.error('Error loading exposure:', err)
   } finally {
     isLoading.value = false
@@ -442,8 +473,8 @@ onMounted(async () => {
 
   <ErrorBlock
     v-if="error"
-    title="Error loading exposure"
-    :error="error"
+    :title="error.title"
+    :error="error.message"
   />
 
   <LoadingBox v-else-if="isLoading" message="Loading exposure..." />
