@@ -14,7 +14,7 @@ import PageHeader from '@/components/molecules/PageHeader.vue'
 import { downloadWorkspaceArchive } from '@/services/downloadUrlService'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { WorkspaceInfo } from '@/types/workspace'
-import type { Error } from '@/types/error'
+import type { ErrorInfo } from '@/types/error'
 import { downloadWorkspaceFile } from '@/utils/download'
 import { formatFileCount } from '@/utils/format'
 
@@ -27,7 +27,7 @@ const props = defineProps<{
 const router = useRouter()
 const workspaceStore = useWorkspaceStore()
 const workspaceInfo = ref<WorkspaceInfo | null>(null)
-const error = ref<Error | null>(null)
+const error = ref<ErrorInfo | null>(null)
 const isLoading = ref(true)
 const isDownloadingWorkspaceZip = ref(false)
 const isDownloadingWorkspaceTgz = ref(false)

@@ -18,7 +18,7 @@ import { downloadCOMBINEArchive, downloadWorkspaceArchive } from '@/services/dow
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
 import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
-import type { Error } from '@/types/error'
+import type { ErrorInfo } from '@/types/error'
 import { formatCitation, formatCitationAuthor } from '@/utils/citation'
 import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
@@ -74,7 +74,7 @@ const CODEGEN_LANGUAGES = [
 
 const exposureStore = useExposureStore()
 const exposureInfo = ref<ExposureInfo | null>(null)
-const error = ref<Error | null>(null)
+const error = ref<ErrorInfo | null>(null)
 const isLoading = ref(true)
 const exposureId = ref<number>(NaN)
 const exposureFilePath = ref<string>(props.file)

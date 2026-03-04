@@ -1,4 +1,4 @@
-export interface Error {
+export interface ErrorInfo {
   title: string
   message: string
 }
