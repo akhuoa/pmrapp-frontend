@@ -250,7 +250,7 @@ const generateMath = async () => {
     )
     mathsJSON.value = JSON.parse(response)
   } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Failed to parse mathematics data'
+    const errorMessage = err instanceof Error ? err.message : 'Failed to parse mathematics data.'
     error.value = {
       title: 'Error parsing mathematics',
       message: errorMessage
@@ -271,7 +271,7 @@ const generateMetadata = async () => {
     )
     metadataJSON.value = JSON.parse(metadata)
   } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Failed to parse metadata JSON'
+    const errorMessage = err instanceof Error ? err.message : 'Failed to parse metadata JSON.'
     error.value = {
       title: 'Error parsing metadata',
       message: errorMessage
@@ -441,7 +441,7 @@ onMounted(async () => {
     exposureInfo.value = await exposureStore.getExposureInfo(props.alias)
     await loadInitialView()
   } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Failed to load exposure'
+    const errorMessage = err instanceof Error ? err.message : 'Failed to load exposure.'
     if (errorMessage.toLowerCase().includes('not found')) {
       error.value = {
         title: 'Exposure not found',
