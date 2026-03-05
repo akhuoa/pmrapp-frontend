@@ -1,23 +1,29 @@
-import { mount } from '@vue/test-utils'
+import { mount, type VueWrapper } from '@vue/test-utils'
 import { afterEach, describe, expect, it } from 'vitest'
 import BackToTop from '@/components/atoms/BackToTop.vue'
 
 describe('BackToTop', () => {
   const originalScrollY = Object.getOwnPropertyDescriptor(window, 'scrollY')
+  let wrapper: VueWrapper<any> | null = null
 
   afterEach(() => {
+    if (wrapper) {
+      wrapper.unmount()
+      wrapper = null
+    }
+
     if (originalScrollY) {
       Object.defineProperty(window, 'scrollY', originalScrollY)
     }
   })
 
   it('does not render the button when not scrolled down', () => {
-    const wrapper = mount(BackToTop)
+    wrapper = mount(BackToTop)
     expect(wrapper.find('button').exists()).toBe(false)
   })
 
   it('button has cursor-pointer class when visible', async () => {
-    const wrapper = mount(BackToTop)
+    wrapper = mount(BackToTop)
     // Simulate scrolling down more than 300px
     Object.defineProperty(window, 'scrollY', { value: 400, writable: true, configurable: true })
     window.dispatchEvent(new Event('scroll'))
