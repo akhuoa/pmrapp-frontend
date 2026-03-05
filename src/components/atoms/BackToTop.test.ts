@@ -14,6 +14,8 @@ describe('BackToTop', () => {
 
     if (originalScrollY) {
       Object.defineProperty(window, 'scrollY', originalScrollY)
+    } else {
+      delete (window as any).scrollY
     }
   })
 
