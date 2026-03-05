@@ -94,6 +94,57 @@ describe('ExposureDetail', () => {
     vi.clearAllMocks()
   })
 
+  const mountWithError = async (errorMessage: string) => {
+    vi.spyOn(exposureStore, 'getExposureInfo').mockRejectedValue(new Error(errorMessage))
+
+    const wrapper = mount(ExposureDetail, {
+      props: {
+        alias: 'test-alias',
+        file: '',
+        view: '',
+      },
+      global: {
+        stubs: {
+          RouterLink: { template: '<a><slot /></a>' },
+          BackButton: true,
+          CodeBlock: true,
+          CopyButton: true,
+          LoadingBox: true,
+          ErrorBlock: true,
+          TermButton: { template: '<button><slot /></button>' },
+          ChevronDownIcon: true,
+          DownloadIcon: true,
+          FileIcon: true,
+        },
+      },
+    })
+
+    await flushPromises()
+    await nextTick()
+
+    return wrapper
+  }
+
+  it('shows "Exposure not found" error when getExposureInfo rejects with a not-found message', async () => {
+    const wrapper = await mountWithError('Exposure not found')
+
+    const errorBlock = wrapper.findComponent({ name: 'ErrorBlock' })
+    expect(errorBlock.exists()).toBe(true)
+    expect(errorBlock.attributes('title')).toBe('Exposure not found')
+    expect(errorBlock.attributes('error')).toBe(
+      'The exposure you are looking for does not exist or has been removed.',
+    )
+  })
+
+  it('shows generic load error when getExposureInfo rejects with an unexpected error', async () => {
+    const wrapper = await mountWithError('Network timeout')
+
+    const errorBlock = wrapper.findComponent({ name: 'ErrorBlock' })
+    expect(errorBlock.exists()).toBe(true)
+    expect(errorBlock.attributes('title')).toBe('Error loading exposure')
+    expect(errorBlock.attributes('error')).toBe('Network timeout')
+  })
+
   it('renders title with correct description', async () => {
     const wrapper = await mountComponent()
     const titleText = mockExposureInfo.exposure.description
