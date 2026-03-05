@@ -19,6 +19,7 @@ const scrollToTop = () => {
 
 onMounted(() => {
   window.addEventListener('scroll', checkScroll)
+  checkScroll()
 })
 
 onUnmounted(() => {

@@ -26,4 +26,11 @@ describe('BackToTop', () => {
     expect(button.exists()).toBe(true)
     expect(button.classes()).toContain('cursor-pointer')
   })
+
+  it('shows button on mount when page is already scrolled past 300px', async () => {
+    Object.defineProperty(window, 'scrollY', { value: 400, writable: true, configurable: true })
+    const wrapper = mount(BackToTop)
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('button').exists()).toBe(true)
+  })
 })
