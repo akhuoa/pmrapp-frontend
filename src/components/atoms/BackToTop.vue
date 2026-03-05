@@ -18,6 +18,7 @@ const scrollToTop = () => {
 }
 
 onMounted(() => {
+  checkScroll() // Check initial scroll position.
   window.addEventListener('scroll', checkScroll)
 })
 
