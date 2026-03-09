@@ -14,6 +14,7 @@ import PageHeader from '@/components/molecules/PageHeader.vue'
 import { downloadWorkspaceArchive } from '@/services/downloadUrlService'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { WorkspaceInfo } from '@/types/workspace'
+import type { ErrorInfo } from '@/types/error'
 import { downloadWorkspaceFile } from '@/utils/download'
 import { formatFileCount } from '@/utils/format'
 
@@ -26,7 +27,7 @@ const props = defineProps<{
 const router = useRouter()
 const workspaceStore = useWorkspaceStore()
 const workspaceInfo = ref<WorkspaceInfo | null>(null)
-const error = ref<string | null>(null)
+const error = ref<ErrorInfo | null>(null)
 const isLoading = ref(true)
 const isDownloadingWorkspaceZip = ref(false)
 const isDownloadingWorkspaceTgz = ref(false)
@@ -148,7 +149,19 @@ const loadWorkspaceInfo = async () => {
     }
   } catch (err) {
     if (currentRequest === requestCounter.value) {
-      error.value = err instanceof Error ? err.message : 'Failed to load workspace.'
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load workspace.'
+
+      if (errorMessage.toLowerCase().includes('not found')) {
+        error.value = {
+          title: 'Workspace not found',
+          message: 'The workspace you are looking for does not exist or has been removed.',
+        }
+      } else {
+        error.value = {
+          title: 'Error loading workspace',
+          message: errorMessage
+        }
+      }
       console.error('Error loading workspace:', err)
     }
   } finally {
@@ -173,8 +186,8 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
 
   <ErrorBlock
     v-if="error"
-    title="Error loading workspace"
-    :error="error"
+    :title="error.title"
+    :error="error.message"
   />
 
   <LoadingBox v-else-if="isLoading" message="Loading workspace..." />
