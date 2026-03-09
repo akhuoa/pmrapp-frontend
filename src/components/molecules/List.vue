@@ -39,7 +39,8 @@ const sortBy = ref<SortOption>(initialSort)
 // Sync filter and sort with URL query parameters.
 watch([filterQuery, sortBy], ([newFilter, newSort]) => {
   const query: Record<string, string> = {}
-  if (newFilter.trim()) query.filter = newFilter
+  const trimmedFilter = newFilter.trim()
+  if (trimmedFilter) query.filter = trimmedFilter
   if (newSort !== DEFAULT_SORT_OPTION) query.sort = newSort
   router.replace({ query })
 })
