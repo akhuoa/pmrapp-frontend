@@ -4,11 +4,18 @@ import BackToTop from '@/components/atoms/BackToTop.vue'
 
 describe('BackToTop', () => {
   let wrapper: VueWrapper<InstanceType<typeof BackToTop>> | null = null
+  let originalScrollYDescriptor: PropertyDescriptor | undefined
 
   afterEach(() => {
     if (wrapper) {
       wrapper.unmount()
       wrapper = null
+    }
+
+    // Restore original scrollY descriptor if it was captured.
+    if (originalScrollYDescriptor !== undefined) {
+      Object.defineProperty(window, 'scrollY', originalScrollYDescriptor)
+      originalScrollYDescriptor = undefined
     }
   })
 
@@ -19,7 +26,12 @@ describe('BackToTop', () => {
 
   it('button has cursor-pointer class when visible', async () => {
     wrapper = mount(BackToTop)
-    // Simulate scrolling down more than 300px
+
+    // Capture original descriptor before modifying.
+    originalScrollYDescriptor = Object.getOwnPropertyDescriptor(window, 'scrollY')
+      || Object.getOwnPropertyDescriptor(Object.getPrototypeOf(window), 'scrollY')
+
+    // Simulate scrolling down more than 300px.
     Object.defineProperty(window, 'scrollY', { value: 400, writable: true, configurable: true })
     window.dispatchEvent(new Event('scroll'))
     await wrapper.vm.$nextTick()
