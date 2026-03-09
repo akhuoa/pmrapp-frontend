@@ -3,17 +3,12 @@ import { afterEach, describe, expect, it } from 'vitest'
 import BackToTop from '@/components/atoms/BackToTop.vue'
 
 describe('BackToTop', () => {
-  const originalScrollY = Object.getOwnPropertyDescriptor(window, 'scrollY')
   let wrapper: VueWrapper<any> | null = null
 
   afterEach(() => {
     if (wrapper) {
       wrapper.unmount()
       wrapper = null
-    }
-
-    if (originalScrollY) {
-      Object.defineProperty(window, 'scrollY', originalScrollY)
     }
   })
 
