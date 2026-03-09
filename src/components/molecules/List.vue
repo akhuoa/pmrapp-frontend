@@ -30,8 +30,8 @@ const route = useRoute()
 const router = useRouter()
 const filterQuery = ref((route.query.filter as string) || '')
 const sortBy = ref<SortOption>(
-  isValidSortOption(route.query.sort as string)
-    ? (route.query.sort as SortOption)
+  isValidSortOption(route.query.sort)
+    ? route.query.sort
     : DEFAULT_SORT_OPTION,
 )
 

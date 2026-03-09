@@ -29,9 +29,13 @@ export const SORT_OPTIONS_GROUPED: SortOptionGroup[] = [
 export const DEFAULT_SORT_OPTION: SortOption = 'description-asc'
 
 /**
- * Returns true if the given string is a valid SortOption.
+ * Returns true if the given runtime value is a valid SortOption.
  */
-export const isValidSortOption = (value: string): value is SortOption => {
+export const isValidSortOption = (value: unknown): value is SortOption => {
+  if (typeof value !== 'string') {
+    return false
+  }
+
   const fields =
     SORT_OPTIONS_GROUPED.find((g) => g.group === 'Fields')?.options.map((o) => o.value) ?? []
   const directions =
