@@ -24,6 +24,24 @@ describe('BackToTop', () => {
     expect(wrapper.find('button').exists()).toBe(false)
   })
 
+  it('renders button immediately when mounted with scrollY > 300', async () => {
+    // Capture original descriptor before modifying.
+    originalScrollYDescriptor = Object.getOwnPropertyDescriptor(window, 'scrollY')
+      || Object.getOwnPropertyDescriptor(Object.getPrototypeOf(window), 'scrollY')
+
+    // Set scrollY before mounting to simulate deep link or scroll restoration.
+    Object.defineProperty(window, 'scrollY', { value: 400, writable: true, configurable: true })
+    window.dispatchEvent(new Event('scroll'))
+
+    wrapper = mount(BackToTop)
+    await wrapper.vm.$nextTick()
+
+    // Button should be visible immediately without needing a scroll event.
+    const button = wrapper.find('button')
+    expect(button.exists()).toBe(true)
+    expect(button.classes()).toContain('cursor-pointer')
+  })
+
   it('button has cursor-pointer class when visible', async () => {
     wrapper = mount(BackToTop)
 
