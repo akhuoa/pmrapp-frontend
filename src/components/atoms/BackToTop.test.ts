@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import BackToTop from '@/components/atoms/BackToTop.vue'
 
 describe('BackToTop', () => {
-  let wrapper: VueWrapper<any> | null = null
+  let wrapper: VueWrapper<InstanceType<typeof BackToTop>> | null = null
 
   afterEach(() => {
     if (wrapper) {
