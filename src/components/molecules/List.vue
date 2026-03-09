@@ -29,16 +29,18 @@ const emit = defineEmits<{
 const route = useRoute()
 const router = useRouter()
 const filterQuery = ref((route.query.filter as string) || '')
-const sortBy = ref<SortOption>(
-  isValidSortOption(route.query.sort)
-    ? route.query.sort
-    : DEFAULT_SORT_OPTION,
-)
+const sortQuery = route.query.sort
+const initialSort: SortOption =
+  typeof sortQuery === 'string' && isValidSortOption(sortQuery)
+    ? sortQuery
+    : DEFAULT_SORT_OPTION
+const sortBy = ref<SortOption>(initialSort)
 
 // Sync filter and sort with URL query parameters.
 watch([filterQuery, sortBy], ([newFilter, newSort]) => {
   const query: Record<string, string> = {}
-  if (newFilter.trim()) query.filter = newFilter
+  const trimmedFilter = newFilter.trim()
+  if (trimmedFilter) query.filter = trimmedFilter
   if (newSort !== DEFAULT_SORT_OPTION) query.sort = newSort
   router.replace({ query })
 })
