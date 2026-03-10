@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isValidTerm, normaliseSearchText } from '@/utils/search'
+import { highlightTokens, isValidTerm, normaliseSearchText } from '@/utils/search'
 
 describe('isValidTerm', () => {
   it('returns false for empty string', () => {
@@ -122,5 +122,24 @@ describe('filter matching with normaliseSearchText', () => {
 
   it('does not match when not all tokens present', () => {
     expect(matches('Rudy Noble')).toBe(false)
+  })
+})
+
+describe('highlightTokens', () => {
+  it('highlights exact matched substring without index drift', () => {
+    const segments = highlightTokens('Yasuhara', ['hara'])
+    const highlightedText = segments.filter((s) => s.highlighted).map((s) => s.text)
+    expect(highlightedText).toEqual(['hara'])
+  })
+
+  it('highlights expected substring in longer word', () => {
+    const segments = highlightTokens('Vetharaniam', ['hara'])
+    const highlightedText = segments.filter((s) => s.highlighted).map((s) => s.text)
+    expect(highlightedText).toEqual(['hara'])
+  })
+
+  it('returns non-highlighted whole text when no token matches', () => {
+    const segments = highlightTokens('Yasuhara', ['noble'])
+    expect(segments).toEqual([{ text: 'Yasuhara', highlighted: false }])
   })
 })

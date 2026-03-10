@@ -6,7 +6,7 @@ import ListItem from '@/components/molecules/ListItem.vue'
 import ListToolbar from '@/components/molecules/ListToolbar.vue'
 import type { SortOption } from '@/types/common'
 import { formatDate } from '@/utils/format'
-import { normaliseSearchText } from '@/utils/search'
+import { highlightTokens, normaliseSearchText } from '@/utils/search'
 import { DEFAULT_SORT_OPTION, isValidSortOption, sortEntities } from '@/utils/sort'
 
 interface Props<T> {
@@ -30,6 +30,14 @@ const emit = defineEmits<{
 const route = useRoute()
 const router = useRouter()
 const filterQuery = ref((route.query.filter as string) || '')
+
+const activeQueryTokens = computed<string[]>(() => {
+  if (!filterQuery.value.trim()) return []
+  return normaliseSearchText(filterQuery.value.toLowerCase())
+    .split(' ')
+    .filter((t) => t.length > 0)
+})
+
 const sortQuery = route.query.sort
 const initialSort: SortOption =
   typeof sortQuery === 'string' && isValidSortOption(sortQuery)
@@ -71,6 +79,10 @@ const filteredItems = computed(() => {
   return sortEntities(result, sortBy.value)
 })
 
+const filteredItemSegments = computed(() =>
+  filteredItems.value.map((item) => highlightTokens(props.getTitle(item), activeQueryTokens.value)),
+)
+
 watch(
   [filteredItems, () => props.items.length],
   () => {
@@ -103,11 +115,17 @@ watch(
   >
     <template #item>
       <ListItem
-        v-for="item in filteredItems"
+        v-for="(item, index) in filteredItems"
         :key="item.alias"
         :title="props.getTitle(item)"
         :link="`${props.routeBase}/${item.alias}`"
       >
+        <template #title>
+          <template v-for="(segment, si) in filteredItemSegments[index]" :key="si">
+            <mark v-if="segment.highlighted" class="bg-yellow-200 dark:bg-yellow-600 text-inherit rounded-sm">{{ segment.text }}</mark>
+            <span v-else>{{ segment.text }}</span>
+          </template>
+        </template>
         <p>
           <small>
             #{{ item.entity.id }} ·
