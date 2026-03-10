@@ -6,7 +6,7 @@ import ListItem from '@/components/molecules/ListItem.vue'
 import ListToolbar from '@/components/molecules/ListToolbar.vue'
 import type { SortOption } from '@/types/common'
 import { formatDate } from '@/utils/format'
-import { normalizeSearchText } from '@/utils/search'
+import { normaliseSearchText } from '@/utils/search'
 import { DEFAULT_SORT_OPTION, sortEntities } from '@/utils/sort'
 
 interface Props<T> {
@@ -47,11 +47,11 @@ const filteredItems = computed(() => {
 
   // Filter by search query.
   if (filterQuery.value.trim()) {
-    const normalizedQuery = normalizeSearchText(filterQuery.value.toLowerCase())
-    const queryTokens = normalizedQuery.split(' ').filter((t) => t.length > 0)
+    const normalisedQuery = normaliseSearchText(filterQuery.value.toLowerCase())
+    const queryTokens = normalisedQuery.split(' ').filter((t) => t.length > 0)
 
     result = result.filter((item: T) => {
-      const description = normalizeSearchText(item.entity.description?.toLowerCase() || '')
+      const description = normaliseSearchText(item.entity.description?.toLowerCase() || '')
       const id = item.entity.id.toString()
       const matchesDescription = queryTokens.every((token) => description.includes(token))
       const matchesId = queryTokens.some((token) => id.includes(token))
