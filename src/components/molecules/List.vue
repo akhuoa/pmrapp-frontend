@@ -74,15 +74,23 @@ const filteredItems = computed(() => {
   return sortEntities(result, sortBy.value)
 })
 
-const filteredItemSegments = computed(() =>
-  filteredItems.value.map((item) => highlightTokens(props.getTitle(item), activeQueryTokens.value)),
-)
+const filteredItemSegments = computed(() => {
+  if (activeQueryTokens.value.length === 0) {
+    return []
+  }
+  return filteredItems.value.map((item) =>
+    highlightTokens(props.getTitle(item), activeQueryTokens.value),
+  )
+})
 
-const filteredItemIdSegments = computed(() =>
-  filteredItems.value.map((item) =>
+const filteredItemIdSegments = computed(() => {
+  if (activeQueryTokens.value.length === 0) {
+    return []
+  }
+  return filteredItems.value.map((item) =>
     highlightTokens(item.entity.id.toString(), activeQueryTokens.value),
-  ),
-)
+  )
+})
 
 watch(
   [filteredItems, () => props.items.length],
