@@ -26,8 +26,9 @@ describe('BackToTop', () => {
 
   it('renders button immediately when mounted with scrollY > 300', async () => {
     // Capture original descriptor before modifying.
-    originalScrollYDescriptor = Object.getOwnPropertyDescriptor(window, 'scrollY')
-      || Object.getOwnPropertyDescriptor(Object.getPrototypeOf(window), 'scrollY')
+    originalScrollYDescriptor =
+      Object.getOwnPropertyDescriptor(window, 'scrollY') ||
+      Object.getOwnPropertyDescriptor(Object.getPrototypeOf(window), 'scrollY')
 
     // Set scrollY before mounting to simulate deep link or scroll restoration.
     Object.defineProperty(window, 'scrollY', { value: 400, writable: true, configurable: true })
@@ -46,8 +47,9 @@ describe('BackToTop', () => {
     wrapper = mount(BackToTop)
 
     // Capture original descriptor before modifying.
-    originalScrollYDescriptor = Object.getOwnPropertyDescriptor(window, 'scrollY')
-      || Object.getOwnPropertyDescriptor(Object.getPrototypeOf(window), 'scrollY')
+    originalScrollYDescriptor =
+      Object.getOwnPropertyDescriptor(window, 'scrollY') ||
+      Object.getOwnPropertyDescriptor(Object.getPrototypeOf(window), 'scrollY')
 
     // Simulate scrolling down more than 300px.
     Object.defineProperty(window, 'scrollY', { value: 400, writable: true, configurable: true })

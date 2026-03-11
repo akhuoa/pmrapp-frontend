@@ -21,7 +21,7 @@ describe('isValidTerm', () => {
   })
 
   it('returns true for valid search term', () => {
-    expect(isValidTerm('O\'Hara-Rudy')).toBe(true)
+    expect(isValidTerm("O'Hara-Rudy")).toBe(true)
     expect(isValidTerm('CiPA')).toBe(true)
     expect(isValidTerm('2017')).toBe(true)
   })
@@ -29,7 +29,7 @@ describe('isValidTerm', () => {
 
 describe('normaliseSearchText', () => {
   it('replaces hyphens with spaces', () => {
-    expect(normaliseSearchText('O\'Hara-Rudy-CiPA')).toBe('O Hara Rudy CiPA')
+    expect(normaliseSearchText("O'Hara-Rudy-CiPA")).toBe('O Hara Rudy CiPA')
   })
 
   it('replaces single quotes with spaces', () => {

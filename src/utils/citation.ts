@@ -9,9 +9,7 @@ import type { Author, Citation } from '@/types/citation'
 export const formatCitationAuthor = (authorParts: string[]): string => {
   if (authorParts.length >= 2) {
     const [lastName, firstName, middleInitial] = authorParts
-    return middleInitial
-      ? `${firstName} ${middleInitial}. ${lastName}`
-      : `${firstName} ${lastName}`
+    return middleInitial ? `${firstName} ${middleInitial}. ${lastName}` : `${firstName} ${lastName}`
   }
   return authorParts.join(' ')
 }

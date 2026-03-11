@@ -40,9 +40,7 @@ const activeQueryTokens = computed<string[]>(() => {
 
 const sortQuery = route.query.sort
 const initialSort: SortOption =
-  typeof sortQuery === 'string' && isValidSortOption(sortQuery)
-    ? sortQuery
-    : DEFAULT_SORT_OPTION
+  typeof sortQuery === 'string' && isValidSortOption(sortQuery) ? sortQuery : DEFAULT_SORT_OPTION
 const sortBy = ref<SortOption>(initialSort)
 
 // Sync filter and sort with URL query parameters.
@@ -84,7 +82,9 @@ const filteredItemSegments = computed(() =>
 )
 
 const filteredItemIdSegments = computed(() =>
-  filteredItems.value.map((item) => highlightTokens(item.entity.id.toString(), activeQueryTokens.value)),
+  filteredItems.value.map((item) =>
+    highlightTokens(item.entity.id.toString(), activeQueryTokens.value),
+  ),
 )
 
 watch(

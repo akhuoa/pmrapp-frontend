@@ -132,7 +132,9 @@ describe('List.vue – sort URL persistence', () => {
     mockRouterReplace.mockClear()
 
     // Simulate user resetting sort back to description-asc (the default).
-    await wrapper.findComponent({ name: 'ListToolbar' }).vm.$emit('update:sortBy', 'description-asc')
+    await wrapper
+      .findComponent({ name: 'ListToolbar' })
+      .vm.$emit('update:sortBy', 'description-asc')
     await nextTick()
 
     const lastCall = mockRouterReplace.mock.calls.at(-1)?.[0]

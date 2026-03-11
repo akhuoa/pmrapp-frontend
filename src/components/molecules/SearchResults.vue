@@ -43,7 +43,7 @@ const hasResults = computed(() => resultsCount.value > 0)
 
 const isIdActive = (ids: string[] | undefined) => {
   if (!ids || props.kind !== 'citation_id') return false
-  return ids.some(id => id.toLowerCase() === props.term.toLowerCase())
+  return ids.some((id) => id.toLowerCase() === props.term.toLowerCase())
 }
 </script>
 

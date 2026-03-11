@@ -1,4 +1,4 @@
-import type { TextSegment } from "@/types/search"
+import type { TextSegment } from '@/types/search'
 
 /**
  * Returns true if a search term is valid (non-empty and not a broken URN).
@@ -21,7 +21,10 @@ export const isValidTerm = (term: string): boolean => {
  * spaces, then collapsing multiple consecutive spaces and trimming.
  */
 export const normaliseSearchText = (text: string): string => {
-  return text.replace(/[^a-zA-Z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim()
+  return text
+    .replace(/[^a-zA-Z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 /**
@@ -31,10 +34,7 @@ export const normaliseSearchText = (text: string): string => {
  * Matching is case-insensitive and performed directly on the original text so
  * highlighted slices always align with the exact displayed characters.
  */
-export const highlightTokens = (
-  original: string,
-  tokens: string[],
-): TextSegment[] => {
+export const highlightTokens = (original: string, tokens: string[]): TextSegment[] => {
   if (!tokens.length || !original) return [{ text: original, highlighted: false }]
 
   const highlightMask = Array.from({ length: original.length }, () => false)
