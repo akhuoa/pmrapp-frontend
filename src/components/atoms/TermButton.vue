@@ -20,7 +20,8 @@ const buttonBaseClass = [
 ].join(' ')
 
 const buttonActiveClass = 'bg-gray-300 dark:bg-gray-600 cursor-default'
-const buttonInactiveClass = 'bg-gray-200 dark:bg-gray-800 cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700'
+const buttonInactiveClass =
+  'bg-gray-200 dark:bg-gray-800 cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700'
 const buttonClass = `${buttonBaseClass} ${props.active ? buttonActiveClass : buttonInactiveClass}`
 
 const emit = defineEmits<{

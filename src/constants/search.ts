@@ -6,5 +6,5 @@ export const SEARCH_CATEGORIES = [
 ] as const
 
 export const SEARCH_KIND_LABEL_MAP: Record<string, string> = Object.fromEntries(
-  SEARCH_CATEGORIES.map((cat) => [cat.value, cat.label])
+  SEARCH_CATEGORIES.map((cat) => [cat.value, cat.label]),
 )

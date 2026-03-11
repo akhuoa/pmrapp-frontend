@@ -23,7 +23,7 @@ const props = defineProps<Props>()
 
 const router = useRouter()
 
-const textHighlightClass = 'text-gray-900 bg-amber-100/75 dark:bg-amber-500/50 dark:text-gray-100 font-semibold'
+const textHighlightClass = 'text-highlight font-semibold'
 
 const handleKeywordClick = (kind: string, keyword: string) => {
   router.push({ path: '/search', query: { kind, term: keyword } })
@@ -43,7 +43,7 @@ const hasResults = computed(() => resultsCount.value > 0)
 
 const isIdActive = (ids: string[] | undefined) => {
   if (!ids || props.kind !== 'citation_id') return false
-  return ids.some(id => id.toLowerCase() === props.term.toLowerCase())
+  return ids.some((id) => id.toLowerCase() === props.term.toLowerCase())
 }
 </script>
 
@@ -162,4 +162,5 @@ const isIdActive = (ids: string[] | undefined) => {
 
 <style scoped>
 @import '@/assets/box.css';
+@import '@/assets/text-highlight.css';
 </style>

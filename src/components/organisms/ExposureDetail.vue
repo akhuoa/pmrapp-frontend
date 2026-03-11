@@ -253,7 +253,7 @@ const generateMath = async () => {
     const errorMessage = err instanceof Error ? err.message : 'Failed to parse mathematics data.'
     error.value = {
       title: 'Error parsing mathematics',
-      message: errorMessage
+      message: errorMessage,
     }
     console.error('Error parsing mathematics JSON:', err)
   }
@@ -274,7 +274,7 @@ const generateMetadata = async () => {
     const errorMessage = err instanceof Error ? err.message : 'Failed to parse metadata JSON.'
     error.value = {
       title: 'Error parsing metadata',
-      message: errorMessage
+      message: errorMessage,
     }
     console.error('Error parsing metadata JSON:', err)
   }
@@ -445,12 +445,12 @@ onMounted(async () => {
     if (errorMessage.toLowerCase().includes('not found')) {
       error.value = {
         title: 'Exposure not found',
-        message: 'The exposure you are looking for does not exist or has been removed.'
+        message: 'The exposure you are looking for does not exist or has been removed.',
       }
     } else {
       error.value = {
         title: 'Error loading exposure',
-        message: errorMessage
+        message: errorMessage,
       }
     }
     console.error('Error loading exposure:', err)

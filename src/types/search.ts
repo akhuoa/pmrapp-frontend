@@ -35,3 +35,8 @@ export interface IndexSearchResult {
   resource_paths: SearchResult[]
   term: string
 }
+
+export interface TextSegment {
+  text: string
+  highlighted: boolean
+}

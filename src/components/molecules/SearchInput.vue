@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref, watch, type ComponentPublicInstance } from 'vue'
+import {
+  computed,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  ref,
+  watch,
+  type ComponentPublicInstance,
+} from 'vue'
 import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import { useSearchStore } from '@/stores/search'
@@ -54,22 +62,20 @@ const filteredSearchTermsByCategory = computed(() => {
   const searchTermValue = searchInput.value.trim().toLowerCase()
   if (!searchTermValue) return []
 
-  return SEARCH_CATEGORIES
-    .map((category) => {
-      const categoryData = searchStore.categories.find((cat) => cat.kind === category.value)
-      const terms = categoryData?.kindInfo?.terms || []
+  return SEARCH_CATEGORIES.map((category) => {
+    const categoryData = searchStore.categories.find((cat) => cat.kind === category.value)
+    const terms = categoryData?.kindInfo?.terms || []
 
-      const filteredTerms = terms.filter(
-        (term) => isValidTerm(term) && term.toLowerCase().includes(searchTermValue),
-      )
+    const filteredTerms = terms.filter(
+      (term) => isValidTerm(term) && term.toLowerCase().includes(searchTermValue),
+    )
 
-      return {
-        kind: category.value,
-        label: category.label,
-        terms: filteredTerms,
-      }
-    })
-    .filter((group) => group.terms.length > 0)
+    return {
+      kind: category.value,
+      label: category.label,
+      terms: filteredTerms,
+    }
+  }).filter((group) => group.terms.length > 0)
 })
 
 const hasResults = computed(() => {
