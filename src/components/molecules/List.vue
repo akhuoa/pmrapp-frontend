@@ -64,7 +64,9 @@ const filteredItems = computed(() => {
     result = result.filter((item: T) => {
       const description = normaliseSearchText(item.entity.description?.toLowerCase() || '')
       const id = item.entity.id.toString()
-      const matchesDescription = activeQueryTokens.value.every((token) => description.includes(token))
+      const matchesDescription = activeQueryTokens.value.every((token) =>
+        description.includes(token),
+      )
       const matchesId = id.includes(filterQuery.value.trim())
       return matchesDescription || matchesId
     })

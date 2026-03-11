@@ -173,8 +173,14 @@ describe('List.vue – sort URL persistence', () => {
 
 describe('List.vue – filtering behaviour', () => {
   const specialItems: TestItem[] = [
-    { alias: 'ohara', entity: { id: 10, created_ts: 1000, description: "O'Hara-Rudy-CiPA-v1.0 (2017)" } },
-    { alias: 'noble', entity: { id: 11, created_ts: 2000, description: 'Garny, Kohl, Hunter, Boyett, Noble, 2003' } },
+    {
+      alias: 'ohara',
+      entity: { id: 10, created_ts: 1000, description: "O'Hara-Rudy-CiPA-v1.0 (2017)" },
+    },
+    {
+      alias: 'noble',
+      entity: { id: 11, created_ts: 2000, description: 'Garny, Kohl, Hunter, Boyett, Noble, 2003' },
+    },
     { alias: 'plain', entity: { id: 12, created_ts: 3000, description: 'Plain text item' } },
   ]
 
@@ -258,7 +264,10 @@ describe('List.vue – filtering behaviour', () => {
 
 describe('List.vue – highlight rendering', () => {
   const highlightItems: TestItem[] = [
-    { alias: 'ohara', entity: { id: 10, created_ts: 1000, description: "O'Hara-Rudy-CiPA-v1.0 (2017)" } },
+    {
+      alias: 'ohara',
+      entity: { id: 10, created_ts: 1000, description: "O'Hara-Rudy-CiPA-v1.0 (2017)" },
+    },
     { alias: 'plain', entity: { id: 12, created_ts: 3000, description: 'Plain text item' } },
   ]
 
