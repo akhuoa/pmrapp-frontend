@@ -6,7 +6,7 @@ import ListItem from '@/components/molecules/ListItem.vue'
 import ListToolbar from '@/components/molecules/ListToolbar.vue'
 import type { SortOption } from '@/types/common'
 import { formatDate } from '@/utils/format'
-import { DEFAULT_SORT_OPTION, sortEntities } from '@/utils/sort'
+import { DEFAULT_SORT_OPTION, isValidSortOption, sortEntities } from '@/utils/sort'
 
 interface Props<T> {
   items: T[]
@@ -29,11 +29,19 @@ const emit = defineEmits<{
 const route = useRoute()
 const router = useRouter()
 const filterQuery = ref((route.query.filter as string) || '')
-const sortBy = ref<SortOption>(DEFAULT_SORT_OPTION)
+const sortQuery = route.query.sort
+const initialSort: SortOption =
+  typeof sortQuery === 'string' && isValidSortOption(sortQuery)
+    ? sortQuery
+    : DEFAULT_SORT_OPTION
+const sortBy = ref<SortOption>(initialSort)
 
-// Sync filter query with URL query parameter.
-watch(filterQuery, (newValue) => {
-  const query = newValue.trim() ? { filter: newValue } : {}
+// Sync filter and sort with URL query parameters.
+watch([filterQuery, sortBy], ([newFilter, newSort]) => {
+  const query: Record<string, string> = {}
+  const trimmedFilter = newFilter.trim()
+  if (trimmedFilter) query.filter = trimmedFilter
+  if (newSort !== DEFAULT_SORT_OPTION) query.sort = newSort
   router.replace({ query })
 })
 
