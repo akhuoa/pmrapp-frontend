@@ -281,6 +281,11 @@ describe('List.vue – highlight rendering', () => {
     const wrapper = mountListWithHighlightStub('', highlightItems)
     await nextTick()
     expect(wrapper.findAll('mark')).toHaveLength(0)
+
+    // When the filter is empty, the plain title text should still render.
+    const textContent = wrapper.text()
+    expect(textContent).toContain("O'Hara-Rudy-CiPA-v1.0 (2017)")
+    expect(textContent).toContain('Plain text item')
   })
 
   it('renders no <mark> when query does not match any item', async () => {
