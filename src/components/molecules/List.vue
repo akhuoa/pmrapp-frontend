@@ -59,15 +59,12 @@ const handleRefresh = async () => {
 const filteredItems = computed(() => {
   let result = props.items
 
-  // Filter by search query.
-  if (filterQuery.value.trim()) {
-    const normalisedQuery = normaliseSearchText(filterQuery.value.toLowerCase())
-    const queryTokens = normalisedQuery.split(' ').filter((t) => t.length > 0)
-
+  // Filter by search query using the same tokens as highlighting.
+  if (activeQueryTokens.value.length > 0) {
     result = result.filter((item: T) => {
       const description = normaliseSearchText(item.entity.description?.toLowerCase() || '')
       const id = item.entity.id.toString()
-      const matchesDescription = queryTokens.every((token) => description.includes(token))
+      const matchesDescription = activeQueryTokens.value.every((token) => description.includes(token))
       const matchesId = id.includes(filterQuery.value.trim())
       return matchesDescription || matchesId
     })
