@@ -159,7 +159,7 @@ const loadWorkspaceInfo = async () => {
       } else {
         error.value = {
           title: 'Error loading workspace',
-          message: errorMessage
+          message: errorMessage,
         }
       }
       console.error('Error loading workspace:', err)

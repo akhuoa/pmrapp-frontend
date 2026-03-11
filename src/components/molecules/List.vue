@@ -6,6 +6,7 @@ import ListItem from '@/components/molecules/ListItem.vue'
 import ListToolbar from '@/components/molecules/ListToolbar.vue'
 import type { SortOption } from '@/types/common'
 import { formatDate } from '@/utils/format'
+import { highlightTokens, normaliseSearchText } from '@/utils/search'
 import { DEFAULT_SORT_OPTION, isValidSortOption, sortEntities } from '@/utils/sort'
 
 interface Props<T> {
@@ -29,11 +30,17 @@ const emit = defineEmits<{
 const route = useRoute()
 const router = useRouter()
 const filterQuery = ref((route.query.filter as string) || '')
+
+const activeQueryTokens = computed<string[]>(() => {
+  if (!filterQuery.value.trim()) return []
+  return normaliseSearchText(filterQuery.value.toLowerCase())
+    .split(' ')
+    .filter((t) => t.length > 0)
+})
+
 const sortQuery = route.query.sort
 const initialSort: SortOption =
-  typeof sortQuery === 'string' && isValidSortOption(sortQuery)
-    ? sortQuery
-    : DEFAULT_SORT_OPTION
+  typeof sortQuery === 'string' && isValidSortOption(sortQuery) ? sortQuery : DEFAULT_SORT_OPTION
 const sortBy = ref<SortOption>(initialSort)
 
 // Sync filter and sort with URL query parameters.
@@ -52,20 +59,32 @@ const handleRefresh = async () => {
 const filteredItems = computed(() => {
   let result = props.items
 
-  // Filter by search query.
-  if (filterQuery.value.trim()) {
-    const query = filterQuery.value.toLowerCase()
-
+  // Filter by search query using the same tokens as highlighting.
+  if (activeQueryTokens.value.length > 0) {
     result = result.filter((item: T) => {
-      const description = item.entity.description?.toLowerCase() || ''
+      const description = normaliseSearchText(item.entity.description?.toLowerCase() || '')
       const id = item.entity.id.toString()
-      return description.includes(query) || id.includes(query)
+      const matchesDescription = activeQueryTokens.value.every((token) =>
+        description.includes(token),
+      )
+      const matchesId = id.includes(filterQuery.value.trim())
+      return matchesDescription || matchesId
     })
   }
 
   // Sort based on selected option.
   return sortEntities(result, sortBy.value)
 })
+
+const filteredItemSegments = computed(() =>
+  filteredItems.value.map((item) => highlightTokens(props.getTitle(item), activeQueryTokens.value)),
+)
+
+const filteredItemIdSegments = computed(() =>
+  filteredItems.value.map((item) =>
+    highlightTokens(item.entity.id.toString(), activeQueryTokens.value),
+  ),
+)
 
 watch(
   [filteredItems, () => props.items.length],
@@ -99,14 +118,24 @@ watch(
   >
     <template #item>
       <ListItem
-        v-for="item in filteredItems"
+        v-for="(item, index) in filteredItems"
         :key="item.alias"
         :title="props.getTitle(item)"
         :link="`${props.routeBase}/${item.alias}`"
       >
+        <template #title>
+          <template v-for="(segment, si) in filteredItemSegments[index]" :key="si">
+            <mark v-if="segment.highlighted" class="text-highlight">{{ segment.text }}</mark>
+            <span v-else>{{ segment.text }}</span>
+          </template>
+        </template>
         <p>
           <small>
-            #{{ item.entity.id }} ·
+            #<template v-for="(segment, si) in filteredItemIdSegments[index]" :key="`id-${si}`">
+              <mark v-if="segment.highlighted" class="text-highlight">{{ segment.text }}</mark>
+              <span v-else>{{ segment.text }}</span>
+            </template>
+            ·
             Created on {{ formatDate(item.entity.created_ts) }}
           </small>
         </p>
@@ -114,3 +143,7 @@ watch(
     </template>
   </ListContent>
 </template>
+
+<style scoped>
+@import '@/assets/text-highlight.css';
+</style>

@@ -17,10 +17,10 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   'update:modelValue': [value: string]
-  'search': []
-  'focus': [event: FocusEvent]
-  'blur': [event: FocusEvent]
-  'keyup': [event: KeyboardEvent]
+  search: []
+  focus: [event: FocusEvent]
+  blur: [event: FocusEvent]
+  keyup: [event: KeyboardEvent]
 }>()
 
 const inputRef = ref<HTMLInputElement | null>(null)

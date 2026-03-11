@@ -31,10 +31,7 @@ export const downloadWorkspaceArchive = async (
   }
 }
 
-export const downloadCOMBINEArchive = async (
-  alias: string,
-  fileName: string,
-): Promise<void> => {
+export const downloadCOMBINEArchive = async (alias: string, fileName: string): Promise<void> => {
   if (!alias) {
     console.error('Exposure alias is required to download COMBINE archive.')
     return
