@@ -122,7 +122,7 @@ watch(
       >
         <template #title>
           <template v-for="(segment, si) in filteredItemSegments[index]" :key="si">
-            <mark v-if="segment.highlighted" class="bg-yellow-200 dark:bg-yellow-600 text-inherit rounded-sm">{{ segment.text }}</mark>
+            <mark v-if="segment.highlighted" class="text-highlight rounded-sm">{{ segment.text }}</mark>
             <span v-else>{{ segment.text }}</span>
           </template>
         </template>
@@ -136,3 +136,7 @@ watch(
     </template>
   </ListContent>
 </template>
+
+<style scoped>
+@import '@/assets/text-highlight.css';
+</style>
