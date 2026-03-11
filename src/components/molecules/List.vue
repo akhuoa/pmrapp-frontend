@@ -126,14 +126,14 @@ watch(
       >
         <template #title>
           <template v-for="(segment, si) in filteredItemSegments[index]" :key="si">
-            <mark v-if="segment.highlighted" class="text-highlight rounded-sm">{{ segment.text }}</mark>
+            <mark v-if="segment.highlighted" class="text-highlight">{{ segment.text }}</mark>
             <span v-else>{{ segment.text }}</span>
           </template>
         </template>
         <p>
           <small>
             #<template v-for="(segment, si) in filteredItemIdSegments[index]" :key="`id-${si}`">
-              <span v-if="segment.highlighted" class="text-highlight">{{ segment.text }}</span>
+              <mark v-if="segment.highlighted" class="text-highlight">{{ segment.text }}</mark>
               <span v-else>{{ segment.text }}</span>
             </template>
             ·
