@@ -83,6 +83,10 @@ const filteredItemSegments = computed(() =>
   filteredItems.value.map((item) => highlightTokens(props.getTitle(item), activeQueryTokens.value)),
 )
 
+const filteredItemIdSegments = computed(() =>
+  filteredItems.value.map((item) => highlightTokens(item.entity.id.toString(), activeQueryTokens.value)),
+)
+
 watch(
   [filteredItems, () => props.items.length],
   () => {
@@ -128,7 +132,11 @@ watch(
         </template>
         <p>
           <small>
-            #{{ item.entity.id }} ·
+            #<template v-for="(segment, si) in filteredItemIdSegments[index]" :key="`id-${si}`">
+              <span v-if="segment.highlighted" class="text-highlight">{{ segment.text }}</span>
+              <span v-else>{{ segment.text }}</span>
+            </template>
+            ·
             Created on {{ formatDate(item.entity.created_ts) }}
           </small>
         </p>
