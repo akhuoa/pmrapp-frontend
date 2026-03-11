@@ -43,14 +43,15 @@ export const highlightTokens = (
   for (const token of uniqueTokens) {
     const escapedToken = token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     const regex = new RegExp(escapedToken, 'gi')
-    let match: RegExpExecArray | null
+    let match = regex.exec(original)
 
-    while ((match = regex.exec(original)) !== null) {
+    while (match !== null) {
       const start = match.index
       const end = start + match[0].length
       for (let index = start; index < end; index += 1) {
         highlightMask[index] = true
       }
+      match = regex.exec(original)
     }
   }
 
