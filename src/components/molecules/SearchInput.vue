@@ -8,11 +8,14 @@ import {
   watch,
   type ComponentPublicInstance,
 } from 'vue'
+import { useRouter } from 'vue-router'
 import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import { useSearchStore } from '@/stores/search'
+import { useExposureStore } from '@/stores/exposure'
+import { useWorkspaceStore } from '@/stores/workspace'
 import { SEARCH_CATEGORIES } from '@/constants/search'
-import { isValidTerm } from '@/utils/search'
+import { isValidTerm, normaliseSearchText } from '@/utils/search'
 
 const props = defineProps<{
   initialTerm: string
@@ -22,7 +25,10 @@ const props = defineProps<{
 
 const emit = defineEmits<(e: 'search', searchKind: string, searchTerm: string) => void>()
 
+const router = useRouter()
 const searchStore = useSearchStore()
+const exposureStore = useExposureStore()
+const workspaceStore = useWorkspaceStore()
 
 const searchInput = ref<string>(props.initialTerm)
 
@@ -52,6 +58,9 @@ onMounted(async () => {
     categoriesError.value = 'Failed to fetch search categories.'
     console.error('Failed to fetch search categories:', err)
   }
+
+  // Fetch exposures and workspaces silently so they are available for filtering.
+  await Promise.all([exposureStore.fetchExposures(), workspaceStore.fetchWorkspaces()])
 })
 
 const isLoading = computed(() => {
@@ -78,8 +87,42 @@ const filteredSearchTermsByCategory = computed(() => {
   }).filter((group) => group.terms.length > 0)
 })
 
+// Count items in a list whose description or ID matches the search query.
+// Replicates the same normalised AND-token logic used in List.vue.
+interface FilterableItem {
+  alias: string
+  entity: { id: number; description: string | null }
+}
+
+const getMatchingCount = (items: FilterableItem[], query: string): number => {
+  if (!query.trim()) return 0
+  const tokens = normaliseSearchText(query.toLowerCase())
+    .split(' ')
+    .filter((t) => t.length > 0)
+  if (tokens.length === 0) return 0
+  return items.filter((item) => {
+    const description = normaliseSearchText(item.entity.description?.toLowerCase() || '')
+    const id = item.entity.id.toString()
+    const matchesDescription = tokens.every((token) => description.includes(token))
+    const matchesId = id.includes(query.trim())
+    return matchesDescription || matchesId
+  }).length
+}
+
+const exposuresCount = computed(() =>
+  getMatchingCount(exposureStore.exposures, searchInput.value.trim()),
+)
+
+const workspacesCount = computed(() =>
+  getMatchingCount(workspaceStore.workspaces, searchInput.value.trim()),
+)
+
 const hasResults = computed(() => {
-  return filteredSearchTermsByCategory.value.length > 0
+  return (
+    filteredSearchTermsByCategory.value.length > 0 ||
+    exposuresCount.value > 0 ||
+    workspacesCount.value > 0
+  )
 })
 
 const handleSearch = () => {
@@ -103,6 +146,18 @@ const handleSearchTermClick = (kind: string, term: string) => {
   searchInputRef.value?.inputRef?.blur()
   isSearchFocused.value = false
   emit('search', kind, term)
+}
+
+const handleExposuresClick = () => {
+  searchInputRef.value?.inputRef?.blur()
+  isSearchFocused.value = false
+  router.push({ name: 'exposures', query: { filter: searchInput.value.trim() } })
+}
+
+const handleWorkspacesClick = () => {
+  searchInputRef.value?.inputRef?.blur()
+  isSearchFocused.value = false
+  router.push({ name: 'workspaces', query: { filter: searchInput.value.trim() } })
 }
 
 const handleBackdropClick = () => {
@@ -247,6 +302,24 @@ defineExpose({
               />
             </div>
           </div>
+          <button
+            v-if="exposuresCount > 0"
+            class="w-full text-left hover:bg-gray-50 dark:hover:bg-gray-900 border-b last:border-0 border-gray-200 dark:border-gray-700 p-4 transition-all group-hover/results:opacity-75 hover:!opacity-100"
+            @click="handleExposuresClick"
+          >
+            <span class="font-semibold text-gray-700 dark:text-gray-300">
+              {{ exposuresCount }} result{{ exposuresCount !== 1 ? 's' : '' }} in Exposures
+            </span>
+          </button>
+          <button
+            v-if="workspacesCount > 0"
+            class="w-full text-left hover:bg-gray-50 dark:hover:bg-gray-900 border-b last:border-0 border-gray-200 dark:border-gray-700 p-4 transition-all group-hover/results:opacity-75 hover:!opacity-100"
+            @click="handleWorkspacesClick"
+          >
+            <span class="font-semibold text-gray-700 dark:text-gray-300">
+              {{ workspacesCount }} result{{ workspacesCount !== 1 ? 's' : '' }} in Workspaces
+            </span>
+          </button>
         </div>
       </div>
     </div>
