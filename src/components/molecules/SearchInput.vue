@@ -16,6 +16,7 @@ import { useExposureStore } from '@/stores/exposure'
 import { useWorkspaceStore } from '@/stores/workspace'
 import { SEARCH_CATEGORIES } from '@/constants/search'
 import { isValidTerm, normaliseSearchText } from '@/utils/search'
+import { formatNumber } from '@/utils/format'
 
 const props = defineProps<{
   initialTerm: string
@@ -314,7 +315,7 @@ defineExpose({
               @click="handleExposuresClick"
             >
               <span class="cursor-pointer hover:text-primary-hover transition-colors">
-                {{ exposuresCount }} result{{ exposuresCount !== 1 ? 's' : '' }} in exposures
+                {{ formatNumber(exposuresCount) }} result{{ exposuresCount !== 1 ? 's' : '' }} in exposures
               </span>
             </button>
           </div>
@@ -330,7 +331,7 @@ defineExpose({
               @click="handleWorkspacesClick"
             >
               <span class="">
-                {{ workspacesCount }} result{{ workspacesCount !== 1 ? 's' : '' }} in workspaces
+                {{ formatNumber(workspacesCount) }} result{{ workspacesCount !== 1 ? 's' : '' }} in workspaces
               </span>
             </button>
           </div>
