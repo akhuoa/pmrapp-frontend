@@ -287,7 +287,7 @@ defineExpose({
           <div
             v-for="(categoryGroup, groupIndex) in filteredSearchTermsByCategory"
             :key="categoryGroup.kind"
-            class="hover:bg-gray-50 dark:hover:bg-gray-900 border-b last:border-0 border-gray-200 dark:border-gray-700 p-4 transition-all group-hover/results:opacity-75 hover:!opacity-100"
+            class="result-group"
           >
             <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
               {{ categoryGroup.label }}
@@ -302,24 +302,38 @@ defineExpose({
               />
             </div>
           </div>
-          <button
+          <div
             v-if="exposuresCount > 0"
-            class="w-full text-left hover:bg-gray-50 dark:hover:bg-gray-900 border-b last:border-0 border-gray-200 dark:border-gray-700 p-4 transition-all group-hover/results:opacity-75 hover:!opacity-100"
-            @click="handleExposuresClick"
+            class="result-group"
           >
-            <span class="font-semibold text-gray-700 dark:text-gray-300">
-              {{ exposuresCount }} result{{ exposuresCount !== 1 ? 's' : '' }} in Exposures
-            </span>
-          </button>
-          <button
+            <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              Exposures
+            </h4>
+            <button
+              class=""
+              @click="handleExposuresClick"
+            >
+              <span class="cursor-pointer hover:text-primary-hover transition-colors">
+                {{ exposuresCount }} result{{ exposuresCount !== 1 ? 's' : '' }} in exposures
+              </span>
+            </button>
+          </div>
+          <div
             v-if="workspacesCount > 0"
-            class="w-full text-left hover:bg-gray-50 dark:hover:bg-gray-900 border-b last:border-0 border-gray-200 dark:border-gray-700 p-4 transition-all group-hover/results:opacity-75 hover:!opacity-100"
-            @click="handleWorkspacesClick"
+            class="result-group"
           >
-            <span class="font-semibold text-gray-700 dark:text-gray-300">
-              {{ workspacesCount }} result{{ workspacesCount !== 1 ? 's' : '' }} in Workspaces
-            </span>
-          </button>
+            <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              Workspaces
+            </h4>
+            <button
+              class="cursor-pointer hover:text-primary-hover transition-colors"
+              @click="handleWorkspacesClick"
+            >
+              <span class="">
+                {{ workspacesCount }} result{{ workspacesCount !== 1 ? 's' : '' }} in workspaces
+              </span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -329,4 +343,8 @@ defineExpose({
 <style scoped>
 @import '@/assets/box.css';
 @import '@/assets/error-box.css';
+
+.result-group {
+  @apply hover:bg-gray-50 dark:hover:bg-gray-900 border-b last:border-0 border-gray-200 dark:border-gray-700 p-4 transition-all group-hover/results:opacity-75 hover:!opacity-100;
+}
 </style>
