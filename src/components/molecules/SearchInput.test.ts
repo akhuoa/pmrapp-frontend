@@ -149,6 +149,7 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
       name: 'exposures',
       query: { filter: "O'Hara-Rudy" },
     })
+    expect(wrapper.emitted('close')).toBeTruthy()
 
     wrapper.unmount()
   })
@@ -171,6 +172,7 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
       name: 'workspaces',
       query: { filter: "O'Hara" },
     })
+    expect(wrapper.emitted('close')).toBeTruthy()
 
     wrapper.unmount()
   })

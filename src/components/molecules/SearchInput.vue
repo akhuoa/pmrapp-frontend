@@ -24,7 +24,10 @@ const props = defineProps<{
   inOverlay?: boolean
 }>()
 
-const emit = defineEmits<(e: 'search', searchKind: string, searchTerm: string) => void>()
+const emit = defineEmits<{
+  (e: 'search', searchKind: string, searchTerm: string): void
+  (e: 'close'): void
+}>()
 
 const router = useRouter()
 const searchStore = useSearchStore()
@@ -150,14 +153,18 @@ const handleSearchTermClick = (kind: string, term: string) => {
 }
 
 const handleExposuresClick = () => {
-  searchInputRef.value?.inputRef?.blur()
-  isSearchFocused.value = false
+  handleBackdropClick()
+  if (props.inOverlay) {
+    emit('close')
+  }
   router.push({ name: 'exposures', query: { filter: searchInput.value.trim() } })
 }
 
 const handleWorkspacesClick = () => {
-  searchInputRef.value?.inputRef?.blur()
-  isSearchFocused.value = false
+  handleBackdropClick()
+  if (props.inOverlay) {
+    emit('close')
+  }
   router.push({ name: 'workspaces', query: { filter: searchInput.value.trim() } })
 }
 

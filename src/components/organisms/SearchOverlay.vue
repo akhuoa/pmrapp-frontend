@@ -61,7 +61,14 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
         </p>
       </div>
       <div class="py-4">
-        <SearchInput ref="searchInputRef" :inOverlay="true" initial-kind="" initial-term="" @search="handleSearch" />
+        <SearchInput
+          ref="searchInputRef"
+          :inOverlay="true"
+          initial-kind=""
+          initial-term=""
+          @search="handleSearch"
+          @close="emit('close')"
+        />
       </div>
     </div>
   </div>
