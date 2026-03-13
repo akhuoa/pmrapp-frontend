@@ -46,12 +46,25 @@ const searchInputRef = ref<InstanceType<typeof SearchField> | null>(null)
 const isSearchFocused = ref(false)
 const categoriesError = ref<string | null>(null)
 const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
+const exposuresButtonRef = ref<HTMLButtonElement | null>(null)
+const workspacesButtonRef = ref<HTMLButtonElement | null>(null)
 
 const setTermButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
   if (el) {
     termButtonRefs.value[index] = el as InstanceType<typeof TermButton>
   }
 }
+
+// All focusable suggestion buttons in focus order: TermButtons first (rendered
+// per category group), then the Exposures button, then the Workspaces button.
+// This matches the DOM order used in the template.
+const allSuggestionButtons = computed<HTMLElement[]>(() => {
+  const termEls = termButtonRefs.value.map((ref) => ref?.$el ?? ref).filter(Boolean)
+  const extras: HTMLElement[] = []
+  if (exposuresButtonRef.value) extras.push(exposuresButtonRef.value)
+  if (workspacesButtonRef.value) extras.push(workspacesButtonRef.value)
+  return [...termEls, ...extras]
+})
 
 onMounted(async () => {
   const validKinds = SEARCH_CATEGORIES.map((cat) => cat.value)
@@ -181,7 +194,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 
   if (event.key === 'Tab' && hasResults.value) {
-    const buttonEls = termButtonRefs.value.map((ref) => ref?.$el ?? ref)
+    const buttonEls = allSuggestionButtons.value
     if (buttonEls.length === 0) return
 
     const activeIndex = buttonEls.indexOf(event.target as HTMLElement)
@@ -206,20 +219,19 @@ const handleSearchInputKeyDown = async (event: KeyboardEvent) => {
   if (event.key === 'Tab' && hasResults.value) {
     event.preventDefault()
     await nextTick()
+    const buttonEls = allSuggestionButtons.value
     if (event.shiftKey) {
-      // Shift+Tab on search input → go to last term button.
-      const lastButton = termButtonRefs.value[termButtonRefs.value.length - 1]
+      // Shift+Tab on search input → go to last suggestion button.
+      const lastButton = buttonEls[buttonEls.length - 1]
       if (lastButton) {
-        const buttonEl = lastButton.$el || lastButton
-        buttonEl?.focus()
+        lastButton.focus()
         isSearchFocused.value = true
       }
     } else {
-      // Tab on search input → go to first term button.
-      const firstButton = termButtonRefs.value[0]
+      // Tab on search input → go to first suggestion button.
+      const firstButton = buttonEls[0]
       if (firstButton) {
-        const buttonEl = firstButton.$el || firstButton
-        buttonEl?.focus()
+        firstButton.focus()
         isSearchFocused.value = true
       }
     }
@@ -236,6 +248,8 @@ watch(isSearchFocused, (newVal) => {
 
 watch(filteredSearchTermsByCategory, () => {
   termButtonRefs.value = []
+  exposuresButtonRef.value = null
+  workspacesButtonRef.value = null
 })
 
 onUnmounted(() => {
@@ -318,6 +332,7 @@ defineExpose({
               Exposures
             </h4>
             <button
+              ref="exposuresButtonRef"
               class=""
               @click="handleExposuresClick"
             >
@@ -334,6 +349,7 @@ defineExpose({
               Workspaces
             </h4>
             <button
+              ref="workspacesButtonRef"
               class="cursor-pointer hover:text-primary-hover transition-colors"
               @click="handleWorkspacesClick"
             >
