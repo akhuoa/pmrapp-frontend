@@ -177,6 +177,35 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
     wrapper.unmount()
   })
 
+  it('allows keyboard navigation to suggestion buttons with Tab and Shift+Tab', async () => {
+    const wrapper = mountSearchInput()
+    await flushPromises()
+
+    const input = wrapper.find('input')
+    // Use a query that yields both exposures and workspaces suggestions
+    await input.setValue("O'Hara")
+    await input.trigger('focus')
+    await nextTick()
+
+    // Simulate forward tabbing from the input
+    await input.trigger('keydown', { key: 'Tab' })
+    await nextTick()
+
+    // Simulate reverse tabbing (Shift+Tab) within the dropdown
+    await input.trigger('keydown', { key: 'Tab', shiftKey: true })
+    await nextTick()
+
+    const buttons = wrapper.findAll('button')
+    const exposuresBtn = buttons.find((b) => b.text().includes('in exposures'))
+    const workspacesBtn = buttons.find((b) => b.text().includes('in workspaces'))
+
+    expect(exposuresBtn).toBeDefined()
+    expect(workspacesBtn).toBeDefined()
+    expect(exposuresBtn?.attributes('disabled')).toBeUndefined()
+    expect(workspacesBtn?.attributes('disabled')).toBeUndefined()
+
+    wrapper.unmount()
+  })
   it('shows "no results" message when query matches nothing in any category', async () => {
     const wrapper = mountSearchInput()
     await flushPromises()
