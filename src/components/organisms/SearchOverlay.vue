@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, nextTick, onUnmounted } from 'vue'
+import { nextTick, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import CloseButton from '@/components/atoms/CloseButton.vue'
 import SearchInput from '@/components/molecules/SearchInput.vue'
@@ -61,7 +61,14 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
         </p>
       </div>
       <div class="py-4">
-        <SearchInput ref="searchInputRef" :inOverlay="true" initial-kind="" initial-term="" @search="handleSearch" />
+        <SearchInput
+          ref="searchInputRef"
+          :inOverlay="true"
+          initial-kind=""
+          initial-term=""
+          @search="handleSearch"
+          @close="emit('close')"
+        />
       </div>
     </div>
   </div>
