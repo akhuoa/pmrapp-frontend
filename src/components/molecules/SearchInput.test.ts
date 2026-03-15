@@ -62,7 +62,13 @@ const mountSearchInput = (initialTerm = '') => {
       stubs: {
         SearchField: {
           name: 'SearchField',
-          template: '<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" @focus="$emit(\'focus\')" @blur="$emit(\'blur\')" />',
+          template:
+            `<input
+              :value="modelValue"
+              @input="$emit(\'update:modelValue\', $event.target.value)"
+              @focus="$emit(\'focus\')"
+              @blur="$emit(\'blur\')"
+            />`,
           props: ['modelValue'],
           emits: ['update:modelValue', 'focus', 'blur', 'search'],
           expose: ['inputRef'],
@@ -240,7 +246,7 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
 })
 
 describe('SearchInput.vue – getMatchingCount logic', () => {
-  it('matches description with normalised punctuation (O\'Hara-Rudy)', async () => {
+  it("matches description with normalised punctuation (O'Hara-Rudy)", async () => {
     const wrapper = mountSearchInput()
     await flushPromises()
 

@@ -120,9 +120,7 @@ const buildItemSearchText = (item: FilterableItem): string => {
 const getMatchingCount = (items: FilterableItem[], query: string): number => {
   const normalisedQuery = normaliseSearchText(query)
   if (!normalisedQuery.trim()) return 0
-  const tokens = normalisedQuery
-    .split(' ')
-    .filter((t) => t.length > 0)
+  const tokens = normalisedQuery.split(' ').filter((t) => t.length > 0)
   if (tokens.length === 0) return 0
   return items.filter((item) => {
     const searchableText = buildItemSearchText(item)
