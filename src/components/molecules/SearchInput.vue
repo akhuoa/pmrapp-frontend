@@ -111,18 +111,22 @@ interface FilterableItem {
   entity: { id: number; description: string | null }
 }
 
+const buildItemSearchText = (item: FilterableItem): string => {
+  const description = item.entity.description ?? ''
+  const id = item.entity.id.toString()
+  return normaliseSearchText(`${description} ${id}`)
+}
+
 const getMatchingCount = (items: FilterableItem[], query: string): number => {
-  if (!query.trim()) return 0
-  const tokens = normaliseSearchText(query.toLowerCase())
+  const normalisedQuery = normaliseSearchText(query)
+  if (!normalisedQuery.trim()) return 0
+  const tokens = normalisedQuery
     .split(' ')
     .filter((t) => t.length > 0)
   if (tokens.length === 0) return 0
   return items.filter((item) => {
-    const description = normaliseSearchText(item.entity.description?.toLowerCase() || '')
-    const id = item.entity.id.toString()
-    const matchesDescription = tokens.every((token) => description.includes(token))
-    const matchesId = id.includes(query.trim())
-    return matchesDescription || matchesId
+    const searchableText = buildItemSearchText(item)
+    return tokens.every((token) => searchableText.includes(token))
   }).length
 }
 
