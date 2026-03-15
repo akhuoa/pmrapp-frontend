@@ -62,12 +62,11 @@ const mountSearchInput = (initialTerm = '') => {
       stubs: {
         SearchField: {
           name: 'SearchField',
-          template:
-            `<input
+          template: `<input
               :value="modelValue"
-              @input="$emit(\'update:modelValue\', $event.target.value)"
-              @focus="$emit(\'focus\')"
-              @blur="$emit(\'blur\')"
+              @input="$emit('update:modelValue', $event.target.value)"
+              @focus="$emit('focus')"
+              @blur="$emit('blur')"
             />`,
           props: ['modelValue'],
           emits: ['update:modelValue', 'focus', 'blur', 'search'],

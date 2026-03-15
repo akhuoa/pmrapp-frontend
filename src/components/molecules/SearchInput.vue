@@ -1,22 +1,22 @@
 <script setup lang="ts">
 import {
+  type ComponentPublicInstance,
   computed,
   nextTick,
   onMounted,
   onUnmounted,
   ref,
   watch,
-  type ComponentPublicInstance,
 } from 'vue'
 import { useRouter } from 'vue-router'
 import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
-import { useSearchStore } from '@/stores/search'
-import { useExposureStore } from '@/stores/exposure'
-import { useWorkspaceStore } from '@/stores/workspace'
 import { SEARCH_CATEGORIES } from '@/constants/search'
-import { isValidTerm, normaliseSearchText } from '@/utils/search'
+import { useExposureStore } from '@/stores/exposure'
+import { useSearchStore } from '@/stores/search'
+import { useWorkspaceStore } from '@/stores/workspace'
 import { formatNumber } from '@/utils/format'
+import { isValidTerm, normaliseSearchText } from '@/utils/search'
 
 const props = defineProps<{
   initialTerm: string
