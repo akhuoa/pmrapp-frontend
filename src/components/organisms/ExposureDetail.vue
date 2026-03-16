@@ -89,6 +89,7 @@ const licenseInfo = ref<string>(DEFAULT_LICENSE)
 const availableViews = ref<ViewEntry[]>([])
 const isCitationDetailsOpen = ref(false)
 const hasOtherRelatedModels = ref(false)
+const accessDate = ref<Date>(new Date())
 const isDownloadingWorkspaceZip = ref(false)
 const isDownloadingWorkspaceTgz = ref(false)
 const isDownloadingCOMBINE = ref(false)
@@ -318,6 +319,76 @@ const filteredKeywords = computed(() => {
     )
     .map((keywordTuple) => keywordTuple[1] || '')
 })
+
+const getOrdinalSuffix = (day: number): string => {
+  if (day > 3 && day < 21) return 'th'
+  switch (day % 10) {
+    case 1: return 'st'
+    case 2: return 'nd'
+    case 3: return 'rd'
+    default: return 'th'
+  }
+}
+
+const howToCiteFirstLine = computed(() => {
+  const authors = metadataJSON.value.citation_authors
+  let authorYearPart = ''
+  const year = metadataJSON.value.citation_issued?.split('-')[0]
+
+  if (authors && authors.length > 0) {
+    let authorStr = ''
+    if (authors.length === 1) {
+      authorStr = authors[0][0] || ''
+    } else if (authors.length === 2) {
+      authorStr = `${authors[0][0] || ''} and ${authors[1][0] || ''}`
+    } else {
+      authorStr = `${authors[0][0] || ''} et al.`
+    }
+
+    authorYearPart = year ? ` ${authorStr} ${year}.` : ` ${authorStr}.`
+  } else if (year) {
+    authorYearPart = ` ${year}.`
+  }
+
+  const title = metadataJSON.value.citation_title
+  if (title) {
+    return `${title}.${authorYearPart}`
+  }
+  return authorYearPart.trim()
+})
+
+const formattedAccessDate = computed(() => {
+  const date = accessDate.value
+  const hours = date.getHours()
+  const minutes = date.getMinutes()
+  const ampm = hours >= 12 ? 'pm' : 'am'
+  const displayHours = hours % 12 || 12
+  const displayMinutes = minutes.toString().padStart(2, '0')
+  const timeStr = `${displayHours}.${displayMinutes}${ampm}`
+
+  const day = date.getDate()
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+  ]
+  const dateStr = `${day}${getOrdinalSuffix(day)} ${months[date.getMonth()]} ${date.getFullYear()}`
+  return `${timeStr} ${dateStr}`
+})
+
+const howToCiteText = computed(() => {
+  const lines: string[] = []
+  if (howToCiteFirstLine.value) {
+    lines.push(howToCiteFirstLine.value)
+  }
+  lines.push(exposureUrl.value)
+  lines.push(formattedAccessDate.value)
+  if (metadataJSON.value.model_author) {
+    lines.push(`CellML author(s): ${metadataJSON.value.model_author}`)
+  }
+  return lines.join('\n')
+})
+
+const exposureUrl = computed(() => window.location.href)
 
 const checkOtherRelatedModels = async () => {
   const term = metadataJSON.value.citation_id
@@ -811,21 +882,20 @@ onMounted(async () => {
           </dl>
         </div>
       </section>
-      <section v-if="metadataJSON.citations?.length" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+      <section v-if="howToCiteFirstLine || metadataJSON.model_author" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">How to cite</h4>
-        <ul class="space-y-4 text-sm">
-          <li v-for="citation in metadataJSON.citations" :key="citation.id">
-            <div class="group p-4 pr-8 bg-gray-50 dark:bg-gray-800 rounded-md relative">
-              {{ formatCitation(citation) }}
-              <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <CopyButton
-                  :text="formatCitation(citation)"
-                  title="Copy citation"
-                />
-              </div>
-            </div>
-          </li>
-        </ul>
+        <div class="group p-4 pr-8 bg-gray-50 dark:bg-gray-800 rounded-md relative text-sm leading-relaxed space-y-1">
+          <p v-if="howToCiteFirstLine">{{ howToCiteFirstLine }}</p>
+          <p>{{ exposureUrl }}</p>
+          <p>{{ formattedAccessDate }}</p>
+          <p v-if="metadataJSON.model_author">CellML author(s): {{ metadataJSON.model_author }}</p>
+          <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <CopyButton
+              :text="howToCiteText"
+              title="Copy citation"
+            />
+          </div>
+        </div>
       </section>
       <section v-if="licenseInfo" class="pt-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Licence</h4>

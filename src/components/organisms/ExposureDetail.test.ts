@@ -338,17 +338,13 @@ describe('ExposureDetail', () => {
     expect(sectionHeading?.exists()).toBe(true)
     expect(sectionHeading?.text()).toBe('How to cite')
 
-    const citationList = sectionHeading?.element.nextElementSibling
-    const citationItems = citationList?.querySelectorAll('li')
-    expect(citationItems?.length).toBeGreaterThan(0)
-    expect(citationList?.textContent).toContain(
-      'Baylor, S. M., Hollingworth, S., & Chandler, W. K. (2002)',
+    const sectionContent = sectionHeading?.element.nextElementSibling
+    expect(sectionContent).toBeDefined()
+    expect(sectionContent?.textContent).toContain(
+      'Comparison of Simulated and Measured Calcium Sparks in Intact Skeletal Muscle Fibers of the Frog.',
     )
-    expect(citationList?.textContent).toContain(
-      'Comparison of Simulated and Measured Calcium Sparks',
-    )
-    expect(citationList?.textContent).toContain('in Intact Skeletal Muscle Fibers of the Frog.')
-    expect(citationList?.textContent).toContain('Journal of General Physiology, 120, 349-368.')
+    expect(sectionContent?.textContent).toContain('Baylor et al. 2002.')
+    expect(sectionContent?.textContent).toContain('CellML author(s): Catherine Lloyd')
   })
 
   it('renders "Licence" section', async () => {
