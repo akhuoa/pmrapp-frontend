@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { nextTick, onUnmounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import CloseButton from '@/components/atoms/CloseButton.vue'
 import SearchInput from '@/components/molecules/SearchInput.vue'
 
@@ -11,7 +11,13 @@ const props = defineProps<{
 const emit = defineEmits<(e: 'close') => void>()
 
 const router = useRouter()
+const route = useRoute()
 const searchInputRef = ref<InstanceType<typeof SearchInput> | null>(null)
+
+const initialOverlayTerm = computed(() => {
+  const filterQuery = route.query.filter
+  return typeof filterQuery === 'string' ? filterQuery : ''
+})
 
 const handleKeyDown = (event: KeyboardEvent) => {
   if (event.key === 'Escape') {
@@ -65,7 +71,7 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
           ref="searchInputRef"
           :inOverlay="true"
           initial-kind=""
-          initial-term=""
+          :initial-term="initialOverlayTerm"
           @search="handleSearch"
           @close="emit('close')"
         />

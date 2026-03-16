@@ -151,6 +151,11 @@ const hasResults = computed(() => {
 
 const hasRelatedListResults = computed(() => exposuresCount.value > 0 || workspacesCount.value > 0)
 
+const showResultsPanel = computed(() => {
+  if (!searchInput.value.trim()) return false
+  return props.inOverlay ? true : isSearchFocused.value
+})
+
 const handleSearch = () => {
   const searchTerm = searchInput.value.trim()
   if (searchTerm === '') {
@@ -191,9 +196,19 @@ const handleWorkspacesClick = () => {
 }
 
 const handleBackdropClick = () => {
+  if (props.inOverlay) {
+    return
+  }
+
   // Blur the input to close the dropdown.
   searchInputRef.value?.inputRef?.blur()
   isSearchFocused.value = false
+}
+
+const handleSearchInputBlur = () => {
+  if (!props.inOverlay) {
+    isSearchFocused.value = false
+  }
 }
 
 const handleKeyDown = (event: KeyboardEvent) => {
@@ -274,7 +289,7 @@ defineExpose({
   <div :class="`relative ${isSearchFocused ? 'z-100' : ''}`">
     <!-- Backdrop overlay (only when not in SearchOverlay). -->
     <div
-      v-if="isSearchFocused && searchInput.trim().length > 0 && !props.inOverlay"
+      v-if="showResultsPanel && !props.inOverlay"
       class="fixed inset-0 bg-gray-400/75 dark:bg-gray-900/75 z-30"
       @click="handleBackdropClick"
     ></div>
@@ -290,13 +305,13 @@ defineExpose({
         class="flex-1"
         input-class="flex-1 min-w-0 outline-none focus:ring-0 px-4 py-2"
         @focus="isSearchFocused = true"
-        @blur="isSearchFocused = false"
+        @blur="handleSearchInputBlur"
         @search="handleSearch"
         @keydown="handleSearchInputKeyDown"
       />
     </div>
     <div
-      v-if="isSearchFocused && searchInput.trim().length > 0"
+      v-if="showResultsPanel"
       :class="`top-full left-0 w-full z-40 ${props.inOverlay ? '' : 'absolute'}`"
       @mousedown.prevent
     >

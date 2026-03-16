@@ -120,6 +120,27 @@ describe('SearchInput.vue – related list results', () => {
     wrapper.unmount()
   })
 
+  it('keeps related list results visible after blur when in overlay mode', async () => {
+    const wrapper = mountSearchInput()
+    await flushPromises()
+
+    const input = wrapper.find('input')
+    await input.setValue("O'Hara")
+    await input.trigger('focus')
+    await nextTick()
+
+    await input.trigger('blur')
+    await nextTick()
+
+    const buttons = wrapper.findAll('button')
+    const exposuresBtn = buttons.find((b) => b.text().includes('matching exposure'))
+    const workspacesBtn = buttons.find((b) => b.text().includes('matching workspace'))
+    expect(exposuresBtn).toBeDefined()
+    expect(workspacesBtn).toBeDefined()
+
+    wrapper.unmount()
+  })
+
   it('does not show exposures group when query does not match any exposure', async () => {
     const wrapper = mountSearchInput()
     await flushPromises()
