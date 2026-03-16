@@ -811,6 +811,22 @@ onMounted(async () => {
           </dl>
         </div>
       </section>
+      <section v-if="metadataJSON.citations?.length" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+        <h4 class="text-lg font-semibold mb-3">How to cite</h4>
+        <ul class="space-y-4 text-sm">
+          <li v-for="citation in metadataJSON.citations" :key="citation.id">
+            <div class="group p-4 pr-8 bg-gray-50 dark:bg-gray-800 rounded-md relative">
+              {{ formatCitation(citation) }}
+              <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <CopyButton
+                  :text="formatCitation(citation)"
+                  title="Copy citation"
+                />
+              </div>
+            </div>
+          </li>
+        </ul>
+      </section>
       <section v-if="licenseInfo" class="pt-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Licence</h4>
         <nav>

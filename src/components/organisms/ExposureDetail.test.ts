@@ -328,6 +328,29 @@ describe('ExposureDetail', () => {
     })
   })
 
+  it('renders "How to cite" section with formatted citation', async () => {
+    const wrapper = await mountComponent()
+
+    const sectionHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'How to cite')
+
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('How to cite')
+
+    const citationList = sectionHeading?.element.nextElementSibling
+    const citationItems = citationList?.querySelectorAll('li')
+    expect(citationItems?.length).toBeGreaterThan(0)
+    expect(citationList?.textContent).toContain(
+      'Baylor, S. M., Hollingworth, S., & Chandler, W. K. (2002)',
+    )
+    expect(citationList?.textContent).toContain(
+      'Comparison of Simulated and Measured Calcium Sparks',
+    )
+    expect(citationList?.textContent).toContain('in Intact Skeletal Muscle Fibers of the Frog.')
+    expect(citationList?.textContent).toContain('Journal of General Physiology, 120, 349-368.')
+  })
+
   it('renders "Licence" section', async () => {
     const wrapper = await mountComponent()
 
