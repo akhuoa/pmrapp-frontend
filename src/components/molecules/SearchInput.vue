@@ -9,6 +9,7 @@ import {
   watch,
 } from 'vue'
 import { useRouter } from 'vue-router'
+import ArrowRightIcon from '@/components/icons/ArrowRightIcon.vue'
 import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import { SEARCH_CATEGORIES } from '@/constants/search'
@@ -339,18 +340,24 @@ defineExpose({
               <button
                 v-if="exposuresCount > 0"
                 ref="exposuresButtonRef"
-                class="text-left cursor-pointer hover:text-primary-hover transition-colors"
+                class="inline-flex items-center gap-1 text-left cursor-pointer hover:text-primary-hover transition-colors"
                 @click="handleExposuresClick"
               >
-                View {{ formatNumber(exposuresCount) }} matching exposure{{ exposuresCount !== 1 ? 's' : '' }}
+                <ArrowRightIcon class="w-4 h-4" />
+                <span>
+                  View {{ formatNumber(exposuresCount) }} matching exposure{{ exposuresCount !== 1 ? 's' : '' }}
+                </span>
               </button>
               <button
                 v-if="workspacesCount > 0"
                 ref="workspacesButtonRef"
-                class="text-left cursor-pointer hover:text-primary-hover transition-colors"
+                class="inline-flex items-center gap-1 text-left cursor-pointer hover:text-primary-hover transition-colors"
                 @click="handleWorkspacesClick"
               >
-                View {{ formatNumber(workspacesCount) }} matching workspace{{ workspacesCount !== 1 ? 's' : '' }}
+                <ArrowRightIcon class="w-4 h-4" />
+                <span>
+                  View {{ formatNumber(workspacesCount) }} matching workspace{{ workspacesCount !== 1 ? 's' : '' }}
+                </span>
               </button>
             </div>
           </div>
