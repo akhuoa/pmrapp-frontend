@@ -353,7 +353,7 @@ defineExpose({
             class="result-group"
           >
             <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              Related list results
+              Matching listings
             </h4>
             <div class="flex flex-col gap-2">
               <button
