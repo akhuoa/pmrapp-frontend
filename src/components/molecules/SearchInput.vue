@@ -9,9 +9,9 @@ import {
   watch,
 } from 'vue'
 import { useRouter } from 'vue-router'
-import ArrowRightIcon from '@/components/icons/ArrowRightIcon.vue'
 import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
+import ArrowRightIcon from '@/components/icons/ArrowRightIcon.vue'
 import { SEARCH_CATEGORIES } from '@/constants/search'
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
