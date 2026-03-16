@@ -144,6 +144,8 @@ const hasResults = computed(() => {
   )
 })
 
+const hasRelatedListResults = computed(() => exposuresCount.value > 0 || workspacesCount.value > 0)
+
 const handleSearch = () => {
   const searchTerm = searchInput.value.trim()
   if (searchTerm === '') {
@@ -327,38 +329,30 @@ defineExpose({
             </div>
           </div>
           <div
-            v-if="exposuresCount > 0"
+            v-if="hasRelatedListResults"
             class="result-group"
           >
             <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              Exposures
+              Related list results
             </h4>
-            <button
-              ref="exposuresButtonRef"
-              class=""
-              @click="handleExposuresClick"
-            >
-              <span class="cursor-pointer hover:text-primary-hover transition-colors">
-                {{ formatNumber(exposuresCount) }} result{{ exposuresCount !== 1 ? 's' : '' }} in exposures
-              </span>
-            </button>
-          </div>
-          <div
-            v-if="workspacesCount > 0"
-            class="result-group"
-          >
-            <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              Workspaces
-            </h4>
-            <button
-              ref="workspacesButtonRef"
-              class="cursor-pointer hover:text-primary-hover transition-colors"
-              @click="handleWorkspacesClick"
-            >
-              <span class="">
-                {{ formatNumber(workspacesCount) }} result{{ workspacesCount !== 1 ? 's' : '' }} in workspaces
-              </span>
-            </button>
+            <div class="flex flex-col gap-2">
+              <button
+                v-if="exposuresCount > 0"
+                ref="exposuresButtonRef"
+                class="text-left cursor-pointer hover:text-primary-hover transition-colors"
+                @click="handleExposuresClick"
+              >
+                View {{ formatNumber(exposuresCount) }} matching exposure{{ exposuresCount !== 1 ? 's' : '' }}
+              </button>
+              <button
+                v-if="workspacesCount > 0"
+                ref="workspacesButtonRef"
+                class="text-left cursor-pointer hover:text-primary-hover transition-colors"
+                @click="handleWorkspacesClick"
+              >
+                View {{ formatNumber(workspacesCount) }} matching workspace{{ workspacesCount !== 1 ? 's' : '' }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
