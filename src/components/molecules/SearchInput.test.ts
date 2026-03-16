@@ -82,12 +82,12 @@ const mountSearchInput = (initialTerm = '') => {
   })
 }
 
-describe('SearchInput.vue – exposures and workspaces groups', () => {
+describe('SearchInput.vue – related list results', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  it('shows "N results in exposures" when query matches exposures', async () => {
+  it('shows a clear exposures action when query matches exposures', async () => {
     const wrapper = mountSearchInput()
     await flushPromises()
 
@@ -97,14 +97,14 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
     await nextTick()
 
     const buttons = wrapper.findAll('button')
-    const exposuresBtn = buttons.find((b) => b.text().includes('in exposures'))
+    const exposuresBtn = buttons.find((b) => b.text().includes('matching exposure'))
     expect(exposuresBtn).toBeDefined()
-    expect(exposuresBtn?.text()).toContain('1 result in exposures')
+    expect(exposuresBtn?.text()).toContain('View 1 matching exposure')
 
     wrapper.unmount()
   })
 
-  it('shows "N results in workspaces" when query matches workspaces', async () => {
+  it('shows a clear workspaces action when query matches workspaces', async () => {
     const wrapper = mountSearchInput()
     await flushPromises()
 
@@ -114,7 +114,7 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
     await nextTick()
 
     const buttons = wrapper.findAll('button')
-    const workspacesBtn = buttons.find((b) => b.text().includes('in workspaces'))
+    const workspacesBtn = buttons.find((b) => b.text().includes('matching workspace'))
     expect(workspacesBtn).toBeDefined()
 
     wrapper.unmount()
@@ -130,7 +130,7 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
     await nextTick()
 
     const buttons = wrapper.findAll('button')
-    const exposuresBtn = buttons.find((b) => b.text().includes('in exposures'))
+    const exposuresBtn = buttons.find((b) => b.text().includes('matching exposure'))
     expect(exposuresBtn).toBeUndefined()
 
     wrapper.unmount()
@@ -146,7 +146,7 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
     await nextTick()
 
     const buttons = wrapper.findAll('button')
-    const exposuresBtn = buttons.find((b) => b.text().includes('in exposures'))
+    const exposuresBtn = buttons.find((b) => b.text().includes('matching exposure'))
     expect(exposuresBtn).toBeDefined()
     await exposuresBtn?.trigger('click')
 
@@ -169,7 +169,7 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
     await nextTick()
 
     const buttons = wrapper.findAll('button')
-    const workspacesBtn = buttons.find((b) => b.text().includes('in workspaces'))
+    const workspacesBtn = buttons.find((b) => b.text().includes('matching workspace'))
     expect(workspacesBtn).toBeDefined()
     await workspacesBtn?.trigger('click')
 
@@ -201,8 +201,8 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
     await nextTick()
 
     const buttons = wrapper.findAll('button')
-    const exposuresBtn = buttons.find((b) => b.text().includes('in exposures'))
-    const workspacesBtn = buttons.find((b) => b.text().includes('in workspaces'))
+    const exposuresBtn = buttons.find((b) => b.text().includes('matching exposure'))
+    const workspacesBtn = buttons.find((b) => b.text().includes('matching workspace'))
 
     expect(exposuresBtn).toBeDefined()
     expect(workspacesBtn).toBeDefined()
@@ -236,9 +236,9 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
     await nextTick()
 
     const buttons = wrapper.findAll('button')
-    const exposuresBtn = buttons.find((b) => b.text().includes('in exposures'))
-    // Only 1 match → "1 result in exposures"
-    expect(exposuresBtn?.text()).toContain('1 result in exposures')
+    const exposuresBtn = buttons.find((b) => b.text().includes('matching exposure'))
+    // Only 1 match → singular label
+    expect(exposuresBtn?.text()).toContain('View 1 matching exposure')
 
     wrapper.unmount()
   })
@@ -257,7 +257,7 @@ describe('SearchInput.vue – getMatchingCount logic', () => {
     // "O'Hara-Rudy" normalises to tokens ["o", "hara", "rudy"]
     // which all match "o hara rudy cipa v1 0 2017"
     const buttons = wrapper.findAll('button')
-    const exposuresBtn = buttons.find((b) => b.text().includes('in exposures'))
+    const exposuresBtn = buttons.find((b) => b.text().includes('matching exposure'))
     expect(exposuresBtn).toBeDefined()
 
     wrapper.unmount()
