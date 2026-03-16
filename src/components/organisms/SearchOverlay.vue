@@ -62,8 +62,8 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
       </div>
       <div class="my-4 text-sm text-gray-500 dark:text-gray-400">
         <p class="lg:w-3/4">
-          Search for models across authors, CellML keywords, and publication references.
-          Start typing to see available terms grouped by category.
+          Search across authors, CellML keywords, and publication references,
+          with related list results for quickly opening filtered Exposures and Workspaces.
         </p>
       </div>
       <div class="py-4">
