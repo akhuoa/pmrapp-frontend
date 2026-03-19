@@ -1,18 +1,22 @@
 <script setup lang="ts">
 import {
+  type ComponentPublicInstance,
   computed,
   nextTick,
   onMounted,
   onUnmounted,
   ref,
   watch,
-  type ComponentPublicInstance,
 } from 'vue'
+import { useRouter } from 'vue-router'
 import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
-import { useSearchStore } from '@/stores/search'
 import { SEARCH_CATEGORIES } from '@/constants/search'
-import { isValidTerm } from '@/utils/search'
+import { useExposureStore } from '@/stores/exposure'
+import { useSearchStore } from '@/stores/search'
+import { useWorkspaceStore } from '@/stores/workspace'
+import { formatNumber } from '@/utils/format'
+import { isValidTerm, normaliseSearchText } from '@/utils/search'
 
 const props = defineProps<{
   initialTerm: string
@@ -20,9 +24,15 @@ const props = defineProps<{
   inOverlay?: boolean
 }>()
 
-const emit = defineEmits<(e: 'search', searchKind: string, searchTerm: string) => void>()
+const emit = defineEmits<{
+  (e: 'search', searchKind: string, searchTerm: string): void
+  (e: 'close'): void
+}>()
 
+const router = useRouter()
 const searchStore = useSearchStore()
+const exposureStore = useExposureStore()
+const workspaceStore = useWorkspaceStore()
 
 const searchInput = ref<string>(props.initialTerm)
 
@@ -36,12 +46,25 @@ const searchInputRef = ref<InstanceType<typeof SearchField> | null>(null)
 const isSearchFocused = ref(false)
 const categoriesError = ref<string | null>(null)
 const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
+const exposuresButtonRef = ref<HTMLButtonElement | null>(null)
+const workspacesButtonRef = ref<HTMLButtonElement | null>(null)
 
 const setTermButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
   if (el) {
     termButtonRefs.value[index] = el as InstanceType<typeof TermButton>
   }
 }
+
+// All focusable suggestion buttons in focus order: TermButtons first (rendered
+// per category group), then the Exposures button, then the Workspaces button.
+// This matches the DOM order used in the template.
+const allSuggestionButtons = computed<HTMLElement[]>(() => {
+  const termEls = termButtonRefs.value.map((ref) => ref?.$el ?? ref).filter(Boolean)
+  const extras: HTMLElement[] = []
+  if (exposuresButtonRef.value) extras.push(exposuresButtonRef.value)
+  if (workspacesButtonRef.value) extras.push(workspacesButtonRef.value)
+  return [...termEls, ...extras]
+})
 
 onMounted(async () => {
   const validKinds = SEARCH_CATEGORIES.map((cat) => cat.value)
@@ -52,6 +75,9 @@ onMounted(async () => {
     categoriesError.value = 'Failed to fetch search categories.'
     console.error('Failed to fetch search categories:', err)
   }
+
+  // Fetch exposures and workspaces silently so they are available for filtering.
+  await Promise.all([exposureStore.fetchExposures(), workspaceStore.fetchWorkspaces()])
 })
 
 const isLoading = computed(() => {
@@ -78,8 +104,44 @@ const filteredSearchTermsByCategory = computed(() => {
   }).filter((group) => group.terms.length > 0)
 })
 
+// Count items in a list whose description or ID matches the search query.
+// Replicates the same normalised AND-token logic used in List.vue.
+interface FilterableItem {
+  alias: string
+  entity: { id: number; description: string | null }
+}
+
+const buildItemSearchText = (item: FilterableItem): string => {
+  const description = item.entity.description ?? ''
+  const id = item.entity.id.toString()
+  return normaliseSearchText(`${description} ${id}`)
+}
+
+const getMatchingCount = (items: FilterableItem[], query: string): number => {
+  const normalisedQuery = normaliseSearchText(query)
+  if (!normalisedQuery.trim()) return 0
+  const tokens = normalisedQuery.split(' ').filter((t) => t.length > 0)
+  if (tokens.length === 0) return 0
+  return items.filter((item) => {
+    const searchableText = buildItemSearchText(item)
+    return tokens.every((token) => searchableText.includes(token))
+  }).length
+}
+
+const exposuresCount = computed(() =>
+  getMatchingCount(exposureStore.exposures, searchInput.value.trim()),
+)
+
+const workspacesCount = computed(() =>
+  getMatchingCount(workspaceStore.workspaces, searchInput.value.trim()),
+)
+
 const hasResults = computed(() => {
-  return filteredSearchTermsByCategory.value.length > 0
+  return (
+    filteredSearchTermsByCategory.value.length > 0 ||
+    exposuresCount.value > 0 ||
+    workspacesCount.value > 0
+  )
 })
 
 const handleSearch = () => {
@@ -105,6 +167,22 @@ const handleSearchTermClick = (kind: string, term: string) => {
   emit('search', kind, term)
 }
 
+const handleExposuresClick = () => {
+  handleBackdropClick()
+  if (props.inOverlay) {
+    emit('close')
+  }
+  router.push({ name: 'exposures', query: { filter: searchInput.value.trim() } })
+}
+
+const handleWorkspacesClick = () => {
+  handleBackdropClick()
+  if (props.inOverlay) {
+    emit('close')
+  }
+  router.push({ name: 'workspaces', query: { filter: searchInput.value.trim() } })
+}
+
 const handleBackdropClick = () => {
   // Blur the input to close the dropdown.
   searchInputRef.value?.inputRef?.blur()
@@ -118,7 +196,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 
   if (event.key === 'Tab' && hasResults.value) {
-    const buttonEls = termButtonRefs.value.map((ref) => ref?.$el ?? ref)
+    const buttonEls = allSuggestionButtons.value
     if (buttonEls.length === 0) return
 
     const activeIndex = buttonEls.indexOf(event.target as HTMLElement)
@@ -143,20 +221,19 @@ const handleSearchInputKeyDown = async (event: KeyboardEvent) => {
   if (event.key === 'Tab' && hasResults.value) {
     event.preventDefault()
     await nextTick()
+    const buttonEls = allSuggestionButtons.value
     if (event.shiftKey) {
-      // Shift+Tab on search input → go to last term button.
-      const lastButton = termButtonRefs.value[termButtonRefs.value.length - 1]
+      // Shift+Tab on search input → go to last suggestion button.
+      const lastButton = buttonEls[buttonEls.length - 1]
       if (lastButton) {
-        const buttonEl = lastButton.$el || lastButton
-        buttonEl?.focus()
+        lastButton.focus()
         isSearchFocused.value = true
       }
     } else {
-      // Tab on search input → go to first term button.
-      const firstButton = termButtonRefs.value[0]
+      // Tab on search input → go to first suggestion button.
+      const firstButton = buttonEls[0]
       if (firstButton) {
-        const buttonEl = firstButton.$el || firstButton
-        buttonEl?.focus()
+        firstButton.focus()
         isSearchFocused.value = true
       }
     }
@@ -173,6 +250,8 @@ watch(isSearchFocused, (newVal) => {
 
 watch(filteredSearchTermsByCategory, () => {
   termButtonRefs.value = []
+  exposuresButtonRef.value = null
+  workspacesButtonRef.value = null
 })
 
 onUnmounted(() => {
@@ -232,7 +311,7 @@ defineExpose({
           <div
             v-for="(categoryGroup, groupIndex) in filteredSearchTermsByCategory"
             :key="categoryGroup.kind"
-            class="hover:bg-gray-50 dark:hover:bg-gray-900 border-b last:border-0 border-gray-200 dark:border-gray-700 p-4 transition-all group-hover/results:opacity-75 hover:!opacity-100"
+            class="result-group"
           >
             <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
               {{ categoryGroup.label }}
@@ -247,6 +326,40 @@ defineExpose({
               />
             </div>
           </div>
+          <div
+            v-if="exposuresCount > 0"
+            class="result-group"
+          >
+            <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              Exposures
+            </h4>
+            <button
+              ref="exposuresButtonRef"
+              class=""
+              @click="handleExposuresClick"
+            >
+              <span class="cursor-pointer hover:text-primary-hover transition-colors">
+                {{ formatNumber(exposuresCount) }} result{{ exposuresCount !== 1 ? 's' : '' }} in exposures
+              </span>
+            </button>
+          </div>
+          <div
+            v-if="workspacesCount > 0"
+            class="result-group"
+          >
+            <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              Workspaces
+            </h4>
+            <button
+              ref="workspacesButtonRef"
+              class="cursor-pointer hover:text-primary-hover transition-colors"
+              @click="handleWorkspacesClick"
+            >
+              <span class="">
+                {{ formatNumber(workspacesCount) }} result{{ workspacesCount !== 1 ? 's' : '' }} in workspaces
+              </span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -256,4 +369,8 @@ defineExpose({
 <style scoped>
 @import '@/assets/box.css';
 @import '@/assets/error-box.css';
+
+.result-group {
+  @apply hover:bg-gray-50 dark:hover:bg-gray-900 border-b last:border-0 border-gray-200 dark:border-gray-700 p-4 transition-all group-hover/results:opacity-75 hover:!opacity-100;
+}
 </style>

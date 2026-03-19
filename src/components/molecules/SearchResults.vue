@@ -2,13 +2,13 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import TermButton from '@/components/atoms/TermButton.vue'
+import FileIcon from '@/components/icons/FileIcon.vue'
 import ListContent from '@/components/molecules/ListContent.vue'
 import ListItem from '@/components/molecules/ListItem.vue'
-import FileIcon from '@/components/icons/FileIcon.vue'
+import { SEARCH_KIND_LABEL_MAP } from '@/constants/search'
 import type { SearchResult } from '@/types/search'
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { formatDate, formatNumber } from '@/utils/format'
-import { SEARCH_KIND_LABEL_MAP } from '@/constants/search'
 import { isValidTerm } from '@/utils/search'
 
 interface Props {
