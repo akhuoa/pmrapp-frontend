@@ -4,9 +4,9 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import SearchInput from '@/components/molecules/SearchInput.vue'
 import SearchResults from '@/components/molecules/SearchResults.vue'
+import { useGlobalStateStore } from '@/stores/globalState'
 import { useSearchStore } from '@/stores/search'
 import type { SearchResult } from '@/types/search'
-import { useGlobalStateStore } from '@/stores/globalState'
 
 const route = useRoute()
 const router = useRouter()

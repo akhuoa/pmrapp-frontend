@@ -1,5 +1,63 @@
 import { describe, expect, it } from 'vitest'
-import { highlightTokens, isValidTerm, normaliseSearchText } from '@/utils/search'
+import { filterItemsByQuery, highlightTokens, isValidTerm, normaliseSearchText } from './search'
+
+interface TestItem {
+  id: number
+  text: string
+}
+
+const items: TestItem[] = [
+  { id: 505, text: "O'Hara-Rudy-CiPA-v1.0 (2017)" },
+  { id: 961, text: 'Mcallister, Noble, Tsien, 1975' },
+  { id: 164, text: 'A 3D human whole-body model with integrated organs' },
+]
+
+describe('filterItemsByQuery', () => {
+  it('returns filtered results by search text', () => {
+    const results = filterItemsByQuery({
+      query: 'cipa 2017',
+      items,
+      getSearchText: (item) => item.text,
+      getIdText: (item) => item.id.toString(),
+    })
+
+    expect(results).toHaveLength(1)
+    expect(results[0].id).toBe(505)
+  })
+
+  it('returns filtered results by id', () => {
+    const results = filterItemsByQuery({
+      query: '505',
+      items,
+      getSearchText: (item) => item.text,
+      getIdText: (item) => item.id.toString(),
+    })
+
+    expect(results).toHaveLength(1)
+    expect(results[0].id).toBe(505)
+  })
+
+  it('returns all items when query is empty', () => {
+    const results = filterItemsByQuery({
+      query: '',
+      items,
+      getSearchText: (item) => item.text,
+    })
+
+    expect(results).toHaveLength(items.length)
+  })
+
+  it('returns count via .length', () => {
+    const results = filterItemsByQuery({
+      query: 'noble',
+      items,
+      getSearchText: (item) => item.text,
+      getIdText: (item) => item.id.toString(),
+    })
+
+    expect(results.length).toBe(1)
+  })
+})
 
 describe('isValidTerm', () => {
   it('returns false for empty string', () => {

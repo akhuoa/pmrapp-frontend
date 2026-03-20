@@ -1,4 +1,4 @@
-import type { TextSegment } from '@/types/search'
+import type { QueryFilterOptions, TextSegment } from '@/types/search'
 
 /**
  * Returns true if a search term is valid (non-empty and not a broken URN).
@@ -71,4 +71,24 @@ export const highlightTokens = (original: string, tokens: string[]): TextSegment
   }
 
   return segments
+}
+
+export function filterItemsByQuery<T>(options: QueryFilterOptions<T>): T[] {
+  const { query, items, getSearchText, getIdText } = options
+  const trimmedQuery = query.trim()
+
+  if (!trimmedQuery) return items
+
+  const tokens = normaliseSearchText(trimmedQuery.toLowerCase())
+    .split(' ')
+    .filter((t) => t.length > 0)
+
+  if (tokens.length === 0) return items
+
+  return items.filter((item) => {
+    const searchableText = normaliseSearchText(getSearchText(item).toLowerCase())
+    const matchesSearchText = tokens.every((token) => searchableText.includes(token))
+    const matchesId = getIdText ? getIdText(item).includes(trimmedQuery) : false
+    return matchesSearchText || matchesId
+  })
 }
