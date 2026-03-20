@@ -40,3 +40,10 @@ export interface TextSegment {
   text: string
   highlighted: boolean
 }
+
+export interface QueryFilterOptions<T> {
+  query: string
+  items: T[]
+  getSearchText: (item: T) => string
+  getIdText?: (item: T) => string
+}
