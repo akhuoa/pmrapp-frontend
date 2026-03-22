@@ -1,59 +1,65 @@
 import { describe, expect, it } from 'vitest'
+import { exposures, workspaces } from '@/mocks/search'
 import { filterItemsByQuery, highlightTokens, isValidTerm, normaliseSearchText } from './search'
 
-interface TestItem {
-  id: number
-  text: string
-}
-
-const items: TestItem[] = [
-  { id: 505, text: "O'Hara-Rudy-CiPA-v1.0 (2017)" },
-  { id: 961, text: 'Mcallister, Noble, Tsien, 1975' },
-  { id: 164, text: 'A 3D human whole-body model with integrated organs' },
-]
-
 describe('filterItemsByQuery', () => {
-  it('returns filtered results by search text', () => {
+  it('returns filtered workspace results by search text', () => {
     const results = filterItemsByQuery({
       query: 'cipa 2017',
-      items,
-      getSearchText: (item) => item.text,
-      getIdText: (item) => item.id.toString(),
+      items: workspaces,
     })
 
     expect(results).toHaveLength(1)
-    expect(results[0].id).toBe(505)
+    expect(results[0].entity.id).toBe(505)
   })
 
-  it('returns filtered results by id', () => {
+  it('returns filtered workspace results by id', () => {
     const results = filterItemsByQuery({
       query: '505',
-      items,
-      getSearchText: (item) => item.text,
-      getIdText: (item) => item.id.toString(),
+      items: workspaces,
     })
 
     expect(results).toHaveLength(1)
-    expect(results[0].id).toBe(505)
+    expect(results[0].entity.id).toBe(505)
+  })
+
+  it('returns filtered exposure results by id', () => {
+    const results = filterItemsByQuery({
+      query: '386',
+      items: exposures,
+    })
+
+    expect(results).toHaveLength(1)
+    expect(results[0].entity.id).toBe(386)
+  })
+
+  it('does not match exposure by workspace_id or alias', () => {
+    const byWorkspaceId = filterItemsByQuery({
+      query: '505',
+      items: exposures,
+    })
+    const byAlias = filterItemsByQuery({
+      query: '5a0',
+      items: exposures,
+    })
+
+    expect(byWorkspaceId).toHaveLength(0)
+    expect(byAlias).toHaveLength(0)
   })
 
   it('returns all items when query is empty', () => {
     const results = filterItemsByQuery({
       query: '',
-      items,
-      getSearchText: (item) => item.text,
-      getIdText: (item) => item.id.toString(),
+      items: workspaces,
     })
 
-    expect(results).toHaveLength(items.length)
+    expect(results).toHaveLength(workspaces.length)
   })
 
   it('returns count via .length', () => {
     const results = filterItemsByQuery({
       query: 'noble',
-      items,
-      getSearchText: (item) => item.text,
-      getIdText: (item) => item.id.toString(),
+      items: exposures,
     })
 
     expect(results.length).toBe(1)
