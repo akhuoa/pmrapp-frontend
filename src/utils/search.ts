@@ -1,3 +1,4 @@
+import type { SortableEntity } from '@/types/common'
 import type { QueryFilterOptions, TextSegment } from '@/types/search'
 
 /**
@@ -73,8 +74,8 @@ export const highlightTokens = (original: string, tokens: string[]): TextSegment
   return segments
 }
 
-export function filterItemsByQuery<T>(options: QueryFilterOptions<T>): T[] {
-  const { query, items, getSearchText, getIdText } = options
+export function filterItemsByQuery<T extends SortableEntity>(options: QueryFilterOptions<T>): T[] {
+  const { query, items } = options
   const trimmedQuery = query.trim()
 
   if (!trimmedQuery) return items
@@ -86,9 +87,9 @@ export function filterItemsByQuery<T>(options: QueryFilterOptions<T>): T[] {
   if (tokens.length === 0) return items
 
   return items.filter((item) => {
-    const searchableText = normaliseSearchText(getSearchText(item).toLowerCase())
+    const searchableText = normaliseSearchText((item.entity.description || '').toLowerCase())
     const matchesSearchText = tokens.every((token) => searchableText.includes(token))
-    const matchesId = getIdText ? getIdText(item).includes(trimmedQuery) : false
+    const matchesId = item.entity.id.toString().includes(trimmedQuery)
     return matchesSearchText || matchesId
   })
 }

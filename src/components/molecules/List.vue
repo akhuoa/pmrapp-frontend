@@ -60,8 +60,6 @@ const filteredItems = computed(() => {
   const filtered = filterItemsByQuery({
     query: filterQuery.value,
     items: props.items,
-    getSearchText: (item) => item.entity.description || '',
-    getIdText: (item) => item.entity.id.toString(),
   })
 
   return sortEntities(filtered, sortBy.value)
