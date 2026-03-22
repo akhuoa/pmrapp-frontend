@@ -42,6 +42,7 @@ describe('filterItemsByQuery', () => {
       query: '',
       items,
       getSearchText: (item) => item.text,
+      getIdText: (item) => item.id.toString(),
     })
 
     expect(results).toHaveLength(items.length)
