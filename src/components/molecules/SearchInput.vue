@@ -319,12 +319,10 @@ defineExpose({
             </h4>
             <button
               ref="exposuresButtonRef"
-              class=""
+              class="cursor-pointer hover:text-primary-hover transition-colors"
               @click="handleExposuresClick"
             >
-              <span class="cursor-pointer hover:text-primary-hover transition-colors">
-                {{ formatNumber(exposuresCount) }} result{{ exposuresCount !== 1 ? 's' : '' }} in exposures
-              </span>
+              {{ formatNumber(exposuresCount) }} result{{ exposuresCount !== 1 ? 's' : '' }} in exposures
             </button>
           </div>
           <div
@@ -339,9 +337,7 @@ defineExpose({
               class="cursor-pointer hover:text-primary-hover transition-colors"
               @click="handleWorkspacesClick"
             >
-              <span class="">
-                {{ formatNumber(workspacesCount) }} result{{ workspacesCount !== 1 ? 's' : '' }} in workspaces
-              </span>
+              {{ formatNumber(workspacesCount) }} result{{ workspacesCount !== 1 ? 's' : '' }} in workspaces
             </button>
           </div>
         </div>
