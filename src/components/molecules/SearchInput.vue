@@ -318,6 +318,7 @@ defineExpose({
               Exposures
             </h4>
             <button
+              type="button"
               ref="exposuresButtonRef"
               class="cursor-pointer hover:text-primary-hover transition-colors"
               @click="handleExposuresClick"
@@ -333,6 +334,7 @@ defineExpose({
               Workspaces
             </h4>
             <button
+              type="button"
               ref="workspacesButtonRef"
               class="cursor-pointer hover:text-primary-hover transition-colors"
               @click="handleWorkspacesClick"
