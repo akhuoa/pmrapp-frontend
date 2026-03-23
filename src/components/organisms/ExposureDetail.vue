@@ -883,7 +883,7 @@ onMounted(async () => {
         </div>
       </section>
       <section v-if="howToCiteFirstLine || metadataJSON.model_author" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
-        <h4 class="text-lg font-semibold mb-3">How to cite</h4>
+        <h4 class="text-lg font-semibold mb-3">Cite this model</h4>
         <div class="group p-4 pr-8 bg-gray-50 dark:bg-gray-800 rounded-md relative text-sm leading-relaxed space-y-1">
           <p v-if="howToCiteFirstLine">{{ howToCiteFirstLine }}</p>
           <p>{{ exposureUrl }}</p>
