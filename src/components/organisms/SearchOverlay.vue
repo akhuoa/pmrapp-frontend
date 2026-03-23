@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onUnmounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import CloseButton from '@/components/atoms/CloseButton.vue'
 import SearchInput from '@/components/molecules/SearchInput.vue'
 
@@ -11,6 +11,7 @@ const props = defineProps<{
 const emit = defineEmits<(e: 'close') => void>()
 
 const router = useRouter()
+const route = useRoute()
 const searchInputRef = ref<InstanceType<typeof SearchInput> | null>(null)
 
 const handleKeyDown = (event: KeyboardEvent) => {
@@ -41,6 +42,11 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
   router.push({ path: '/search', query: { kind: searchKind, term: searchTerm } })
   emit('close')
 }
+
+const getInitialTerm = (): string => {
+  const filterQuery = route.query.filter
+  return typeof filterQuery === 'string' ? filterQuery : ''
+}
 </script>
 
 <template>
@@ -65,7 +71,7 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
           ref="searchInputRef"
           :inOverlay="true"
           initial-kind=""
-          initial-term=""
+          :initial-term="getInitialTerm()"
           @search="handleSearch"
           @close="emit('close')"
         />
