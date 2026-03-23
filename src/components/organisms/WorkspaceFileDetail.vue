@@ -8,6 +8,8 @@ import CodeIcon from '@/components/icons/CodeIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import PreviewIcon from '@/components/icons/PreviewIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
+import Breadcrumbs from '@/components/molecules/Breadcrumbs.vue'
+import type { BreadcrumbItem } from '@/components/molecules/Breadcrumbs.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { getWorkspaceService } from '@/services'
@@ -47,6 +49,23 @@ const backPath = computed(() => {
 })
 
 const { goBack } = useBackNavigation(backPath.value)
+
+const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
+  const parts = props.path.split('/')
+  const items: BreadcrumbItem[] = [
+    { label: 'Workspaces', to: '/workspaces' },
+    { label: props.alias, to: `/workspaces/${props.alias}` },
+  ]
+  parts.forEach((part, index) => {
+    const isLast = index === parts.length - 1
+    const partialPath = parts.slice(0, index + 1).join('/')
+    items.push({
+      label: part,
+      to: isLast ? undefined : `/workspaces/${props.alias}/file/${props.commitId}/${partialPath}`,
+    })
+  })
+  return items
+})
 
 const isImage = computed(() => isImageFile(props.path))
 const isPDF = computed(() => isPdfFile(props.path))
@@ -125,6 +144,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+  <Breadcrumbs :items="breadcrumbItems" />
+
   <BackButton
     label="Back"
     content-section="Workspace File Detail"

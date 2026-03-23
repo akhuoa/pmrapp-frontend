@@ -68,7 +68,7 @@ describe('ExposureDetail', () => {
       global: {
         stubs: {
           RouterLink: { template: '<a><slot /></a>' },
-          BackButton: true,
+          Breadcrumbs: true,
           CodeBlock: true,
           CopyButton: true,
           LoadingBox: true,
@@ -106,7 +106,7 @@ describe('ExposureDetail', () => {
       global: {
         stubs: {
           RouterLink: { template: '<a><slot /></a>' },
-          BackButton: true,
+          Breadcrumbs: true,
           CodeBlock: true,
           CopyButton: true,
           LoadingBox: true,
