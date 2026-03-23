@@ -22,7 +22,7 @@ import type { ErrorInfo } from '@/types/error'
 import { formatCitation, formatCitationAuthor } from '@/utils/citation'
 import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
-import { formatFileCount } from '@/utils/format'
+import { formatAccessDate, formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
 import { isValidTerm } from '@/utils/search'
 import TermButton from '../atoms/TermButton.vue'
@@ -320,16 +320,6 @@ const filteredKeywords = computed(() => {
     .map((keywordTuple) => keywordTuple[1] || '')
 })
 
-const getOrdinalSuffix = (day: number): string => {
-  if (day > 3 && day < 21) return 'th'
-  switch (day % 10) {
-    case 1: return 'st'
-    case 2: return 'nd'
-    case 3: return 'rd'
-    default: return 'th'
-  }
-}
-
 const howToCiteFirstLine = computed(() => {
   const authors = metadataJSON.value.citation_authors
   let authorYearPart = ''
@@ -358,21 +348,7 @@ const howToCiteFirstLine = computed(() => {
 })
 
 const formattedAccessDate = computed(() => {
-  const date = accessDate.value
-  const hours = date.getHours()
-  const minutes = date.getMinutes()
-  const ampm = hours >= 12 ? 'pm' : 'am'
-  const displayHours = hours % 12 || 12
-  const displayMinutes = minutes.toString().padStart(2, '0')
-  const timeStr = `${displayHours}.${displayMinutes}${ampm}`
-
-  const day = date.getDate()
-  const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
-  ]
-  const dateStr = `${day}${getOrdinalSuffix(day)} ${months[date.getMonth()]} ${date.getFullYear()}`
-  return `${timeStr} ${dateStr}`
+  return formatAccessDate(accessDate.value)
 })
 
 const howToCiteText = computed(() => {
