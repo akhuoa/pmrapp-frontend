@@ -43,6 +43,27 @@ const initialSort: SortOption =
   typeof sortQuery === 'string' && isValidSortOption(sortQuery) ? sortQuery : DEFAULT_SORT_OPTION
 const sortBy = ref<SortOption>(initialSort)
 
+watch(
+  () => route.query.filter,
+  (newFilter) => {
+    const nextFilter = typeof newFilter === 'string' ? newFilter : ''
+    if (filterQuery.value !== nextFilter) {
+      filterQuery.value = nextFilter
+    }
+  },
+)
+
+watch(
+  () => route.query.sort,
+  (newSort) => {
+    const nextSort =
+      typeof newSort === 'string' && isValidSortOption(newSort) ? newSort : DEFAULT_SORT_OPTION
+    if (sortBy.value !== nextSort) {
+      sortBy.value = nextSort
+    }
+  },
+)
+
 // Sync filter and sort with URL query parameters.
 watch([filterQuery, sortBy], ([newFilter, newSort]) => {
   const query: Record<string, string> = {}
