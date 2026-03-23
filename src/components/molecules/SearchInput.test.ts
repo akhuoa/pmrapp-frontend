@@ -4,8 +4,10 @@ import { nextTick } from 'vue'
 import SearchInput from '@/components/molecules/SearchInput.vue'
 
 const mockRouterPush = vi.fn()
+const mockRoute = { query: {} as Record<string, string> }
 
 vi.mock('vue-router', () => ({
+  useRoute: () => mockRoute,
   useRouter: () => ({ push: mockRouterPush }),
 }))
 
@@ -85,6 +87,7 @@ const mountSearchInput = (initialTerm = '') => {
 describe('SearchInput.vue – exposures and workspaces groups', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockRoute.query = {}
   })
 
   it('shows "N results in exposures" when query matches exposures', async () => {
@@ -178,6 +181,52 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
       query: { filter: "O'Hara" },
     })
     expect(wrapper.emitted('close')).toBeTruthy()
+
+    wrapper.unmount()
+  })
+
+  it('preserves existing sort query when navigating to exposures', async () => {
+    mockRoute.query = { sort: 'id-desc' }
+    const wrapper = mountSearchInput()
+    await flushPromises()
+
+    const input = wrapper.find('input')
+    await input.setValue("O'Hara-Rudy")
+    await input.trigger('focus')
+    await nextTick()
+
+    const buttons = wrapper.findAll('button')
+    const exposuresBtn = buttons.find((b) => b.text().includes('in exposures'))
+    expect(exposuresBtn).toBeDefined()
+    await exposuresBtn?.trigger('click')
+
+    expect(mockRouterPush).toHaveBeenCalledWith({
+      name: 'exposures',
+      query: { filter: "O'Hara-Rudy", sort: 'id-desc' },
+    })
+
+    wrapper.unmount()
+  })
+
+  it('preserves existing sort query when navigating to workspaces', async () => {
+    mockRoute.query = { sort: 'description-asc' }
+    const wrapper = mountSearchInput()
+    await flushPromises()
+
+    const input = wrapper.find('input')
+    await input.setValue("O'Hara")
+    await input.trigger('focus')
+    await nextTick()
+
+    const buttons = wrapper.findAll('button')
+    const workspacesBtn = buttons.find((b) => b.text().includes('in workspaces'))
+    expect(workspacesBtn).toBeDefined()
+    await workspacesBtn?.trigger('click')
+
+    expect(mockRouterPush).toHaveBeenCalledWith({
+      name: 'workspaces',
+      query: { filter: "O'Hara", sort: 'description-asc' },
+    })
 
     wrapper.unmount()
   })
