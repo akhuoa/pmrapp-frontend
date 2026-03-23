@@ -34,6 +34,7 @@ const detectedLanguage = computed(() => {
     ts: 'javascript',
     tsx: 'javascript',
     json: 'json',
+    conf: 'json',
     py: 'python',
     python: 'python',
     css: 'css',
@@ -54,9 +55,10 @@ const detectedLanguage = computed(() => {
     sedml: 'markup',
     matlab: 'matlab',
     m: 'matlab',
+    rdf: 'markup',
   }
 
-  return ext ? languageMap[ext] || 'none' : 'none'
+  return ext ? languageMap[ext] || 'plaintext' : 'none'
 })
 
 const highlightCode = async () => {
