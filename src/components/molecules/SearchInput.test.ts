@@ -37,11 +37,14 @@ const mockWorkspaces = [
   },
 ]
 
+const mockFetchExposures = vi.fn().mockResolvedValue(undefined)
+const mockFetchWorkspaces = vi.fn().mockResolvedValue(undefined)
+
 vi.mock('@/stores/exposure', () => ({
   useExposureStore: () => ({
     exposures: mockExposures,
     isLoading: false,
-    fetchExposures: vi.fn().mockResolvedValue(undefined),
+    fetchExposures: mockFetchExposures,
   }),
 }))
 
@@ -49,7 +52,7 @@ vi.mock('@/stores/workspace', () => ({
   useWorkspaceStore: () => ({
     workspaces: mockWorkspaces,
     isLoading: false,
-    fetchWorkspaces: vi.fn().mockResolvedValue(undefined),
+    fetchWorkspaces: mockFetchWorkspaces,
   }),
 }))
 
@@ -308,6 +311,49 @@ describe('SearchInput.vue – getMatchingCount logic', () => {
     const buttons = wrapper.findAll('button')
     const exposuresBtn = buttons.find((b) => b.text().includes('matching exposure'))
     expect(exposuresBtn).toBeDefined()
+
+    wrapper.unmount()
+  })
+})
+
+describe('SearchInput.vue – lazy-loading of exposures and workspaces', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockRoute.query = {}
+  })
+
+  it('does not call fetchExposures or fetchWorkspaces on mount with an empty query', async () => {
+    const wrapper = mountSearchInput('')
+    await flushPromises()
+
+    expect(mockFetchExposures).not.toHaveBeenCalled()
+    expect(mockFetchWorkspaces).not.toHaveBeenCalled()
+
+    wrapper.unmount()
+  })
+
+  it('calls fetchExposures and fetchWorkspaces once the user types a non-empty query', async () => {
+    const wrapper = mountSearchInput('')
+    await flushPromises()
+
+    expect(mockFetchExposures).not.toHaveBeenCalled()
+
+    const input = wrapper.find('input')
+    await input.setValue('Noble')
+    await nextTick()
+
+    expect(mockFetchExposures).toHaveBeenCalledOnce()
+    expect(mockFetchWorkspaces).toHaveBeenCalledOnce()
+
+    wrapper.unmount()
+  })
+
+  it('calls fetchExposures and fetchWorkspaces immediately when mounted with a non-empty initialTerm', async () => {
+    const wrapper = mountSearchInput('Noble')
+    await flushPromises()
+
+    expect(mockFetchExposures).toHaveBeenCalledOnce()
+    expect(mockFetchWorkspaces).toHaveBeenCalledOnce()
 
     wrapper.unmount()
   })

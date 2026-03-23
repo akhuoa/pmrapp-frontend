@@ -77,9 +77,6 @@ onMounted(async () => {
     categoriesError.value = 'Failed to fetch search categories.'
     console.error('Failed to fetch search categories:', err)
   }
-
-  // Fetch exposures and workspaces silently so they are available for filtering.
-  await Promise.all([exposureStore.fetchExposures(), workspaceStore.fetchWorkspaces()])
 })
 
 const isLoading = computed(() => {
@@ -252,6 +249,18 @@ watch(filteredSearchTermsByCategory, () => {
   exposuresButtonRef.value = null
   workspacesButtonRef.value = null
 })
+
+// Lazy-load exposures and workspaces only once the user has entered a non-empty query.
+watch(
+  searchInput,
+  (newVal) => {
+    if (newVal.trim()) {
+      exposureStore.fetchExposures()
+      workspaceStore.fetchWorkspaces()
+    }
+  },
+  { immediate: true },
+)
 
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeyDown)
