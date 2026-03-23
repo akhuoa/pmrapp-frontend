@@ -129,6 +129,11 @@ const hasResults = computed(() => {
   )
 })
 
+const isSuggestionsVisible = computed(() => {
+  if (!searchInput.value.trim()) return false
+  return props.inOverlay ? true : isSearchFocused.value
+})
+
 const handleSearch = () => {
   const searchTerm = searchInput.value.trim()
   if (searchTerm === '') {
@@ -283,7 +288,7 @@ defineExpose({
       />
     </div>
     <div
-      v-if="isSearchFocused && searchInput.trim().length > 0"
+      v-if="isSuggestionsVisible"
       :class="`top-full left-0 w-full z-40 ${props.inOverlay ? '' : 'absolute'}`"
       @mousedown.prevent
     >
