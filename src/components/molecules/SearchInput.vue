@@ -8,7 +8,7 @@ import {
   ref,
   watch,
 } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import { SEARCH_CATEGORIES } from '@/constants/search'
@@ -31,6 +31,7 @@ const emit = defineEmits<{
 }>()
 
 const router = useRouter()
+const route = useRoute()
 const searchStore = useSearchStore()
 const exposureStore = useExposureStore()
 const workspaceStore = useWorkspaceStore()
@@ -151,12 +152,21 @@ const handleSearchTermClick = (kind: string, term: string) => {
   emit('search', kind, term)
 }
 
+const buildListQuery = (): Record<string, string> => {
+  const query: Record<string, string> = { filter: searchInput.value.trim() }
+  const currentSort = route.query.sort
+  if (typeof currentSort === 'string' && currentSort.trim()) {
+    query.sort = currentSort
+  }
+  return query
+}
+
 const handleExposuresClick = () => {
   handleBackdropClick()
   if (props.inOverlay) {
     emit('close')
   }
-  router.push({ name: 'exposures', query: { filter: searchInput.value.trim() } })
+  router.push({ name: 'exposures', query: buildListQuery() })
 }
 
 const handleWorkspacesClick = () => {
@@ -164,7 +174,7 @@ const handleWorkspacesClick = () => {
   if (props.inOverlay) {
     emit('close')
   }
-  router.push({ name: 'workspaces', query: { filter: searchInput.value.trim() } })
+  router.push({ name: 'workspaces', query: buildListQuery() })
 }
 
 const handleBackdropClick = () => {
