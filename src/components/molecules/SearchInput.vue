@@ -8,15 +8,16 @@ import {
   ref,
   watch,
 } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import { SEARCH_CATEGORIES } from '@/constants/search'
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
 import { useWorkspaceStore } from '@/stores/workspace'
+import type { SortableEntity } from '@/types/common'
 import { formatNumber } from '@/utils/format'
-import { isValidTerm, normaliseSearchText } from '@/utils/search'
+import { filterItemsByQuery, isValidTerm, normaliseSearchText } from '@/utils/search'
 
 const props = defineProps<{
   initialTerm: string
@@ -30,6 +31,7 @@ const emit = defineEmits<{
 }>()
 
 const router = useRouter()
+const route = useRoute()
 const searchStore = useSearchStore()
 const exposureStore = useExposureStore()
 const workspaceStore = useWorkspaceStore()
@@ -104,28 +106,11 @@ const filteredSearchTermsByCategory = computed(() => {
   }).filter((group) => group.terms.length > 0)
 })
 
-// Count items in a list whose description or ID matches the search query.
-// Replicates the same normalised AND-token logic used in List.vue.
-interface FilterableItem {
-  alias: string
-  entity: { id: number; description: string | null }
-}
-
-const buildItemSearchText = (item: FilterableItem): string => {
-  const description = item.entity.description ?? ''
-  const id = item.entity.id.toString()
-  return normaliseSearchText(`${description} ${id}`)
-}
-
-const getMatchingCount = (items: FilterableItem[], query: string): number => {
+const getMatchingCount = <T extends SortableEntity>(items: T[], query: string): number => {
   const normalisedQuery = normaliseSearchText(query)
+  // Return 0 for empty or punctuation-only input.
   if (!normalisedQuery.trim()) return 0
-  const tokens = normalisedQuery.split(' ').filter((t) => t.length > 0)
-  if (tokens.length === 0) return 0
-  return items.filter((item) => {
-    const searchableText = buildItemSearchText(item)
-    return tokens.every((token) => searchableText.includes(token))
-  }).length
+  return filterItemsByQuery({ query: normalisedQuery, items }).length
 }
 
 const exposuresCount = computed(() =>
@@ -142,6 +127,11 @@ const hasResults = computed(() => {
     exposuresCount.value > 0 ||
     workspacesCount.value > 0
   )
+})
+
+const isSuggestionsVisible = computed(() => {
+  if (!searchInput.value.trim()) return false
+  return props.inOverlay ? true : isSearchFocused.value
 })
 
 const handleSearch = () => {
@@ -167,12 +157,21 @@ const handleSearchTermClick = (kind: string, term: string) => {
   emit('search', kind, term)
 }
 
+const buildListQuery = (): Record<string, string> => {
+  const query: Record<string, string> = { filter: searchInput.value.trim() }
+  const currentSort = route.query.sort
+  if (typeof currentSort === 'string' && currentSort.trim()) {
+    query.sort = currentSort
+  }
+  return query
+}
+
 const handleExposuresClick = () => {
   handleBackdropClick()
   if (props.inOverlay) {
     emit('close')
   }
-  router.push({ name: 'exposures', query: { filter: searchInput.value.trim() } })
+  router.push({ name: 'exposures', query: buildListQuery() })
 }
 
 const handleWorkspacesClick = () => {
@@ -180,7 +179,7 @@ const handleWorkspacesClick = () => {
   if (props.inOverlay) {
     emit('close')
   }
-  router.push({ name: 'workspaces', query: { filter: searchInput.value.trim() } })
+  router.push({ name: 'workspaces', query: buildListQuery() })
 }
 
 const handleBackdropClick = () => {
@@ -289,7 +288,7 @@ defineExpose({
       />
     </div>
     <div
-      v-if="isSearchFocused && searchInput.trim().length > 0"
+      v-if="isSuggestionsVisible"
       :class="`top-full left-0 w-full z-40 ${props.inOverlay ? '' : 'absolute'}`"
       @mousedown.prevent
     >
@@ -334,13 +333,12 @@ defineExpose({
               Exposures
             </h4>
             <button
+              type="button"
               ref="exposuresButtonRef"
-              class=""
+              class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
               @click="handleExposuresClick"
             >
-              <span class="cursor-pointer hover:text-primary-hover transition-colors">
-                {{ formatNumber(exposuresCount) }} result{{ exposuresCount !== 1 ? 's' : '' }} in exposures
-              </span>
+              See {{ formatNumber(exposuresCount) }} matching exposure{{ exposuresCount !== 1 ? 's' : '' }}
             </button>
           </div>
           <div
@@ -351,13 +349,12 @@ defineExpose({
               Workspaces
             </h4>
             <button
+              type="button"
               ref="workspacesButtonRef"
-              class="cursor-pointer hover:text-primary-hover transition-colors"
+              class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
               @click="handleWorkspacesClick"
             >
-              <span class="">
-                {{ formatNumber(workspacesCount) }} result{{ workspacesCount !== 1 ? 's' : '' }} in workspaces
-              </span>
+              See {{ formatNumber(workspacesCount) }} matching workspace{{ workspacesCount !== 1 ? 's' : '' }}
             </button>
           </div>
         </div>
