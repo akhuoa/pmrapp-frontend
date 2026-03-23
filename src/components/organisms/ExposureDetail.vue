@@ -886,7 +886,7 @@ onMounted(async () => {
         <h4 class="text-lg font-semibold mb-3">Cite this model</h4>
         <div class="group p-4 pr-8 bg-gray-50 dark:bg-gray-800 rounded-md relative text-sm leading-relaxed space-y-1">
           <p v-if="howToCiteFirstLine">{{ howToCiteFirstLine }}</p>
-          <p>{{ exposureUrl }}</p>
+          <p class="break-all">{{ exposureUrl }}</p>
           <p>{{ formattedAccessDate }}</p>
           <p v-if="metadataJSON.model_author">CellML author(s): {{ metadataJSON.model_author }}</p>
           <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
