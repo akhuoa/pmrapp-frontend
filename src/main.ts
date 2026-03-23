@@ -22,8 +22,16 @@ app.use(pinia)
 app.use(router)
 app.use(gtag)
 
-// Initialise authentication state from session storage.
+// Initialise authentication state from local storage.
 const authStore = useAuthStore()
 authStore.initAuth()
+
+// Sync authentication state across tabs: when another tab updates localStorage
+// (e.g. logs in or logs out), re-initialise the auth state in this tab.
+window.addEventListener('storage', (event) => {
+  if (event.key === 'auth_token' || event.key === 'username') {
+    authStore.initAuth()
+  }
+})
 
 app.mount('#app')
