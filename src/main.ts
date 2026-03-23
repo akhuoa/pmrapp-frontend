@@ -26,10 +26,13 @@ app.use(gtag)
 const authStore = useAuthStore()
 authStore.initAuth()
 
-// Sync authentication state across tabs: when another tab updates localStorage
-// (e.g. logs in or logs out), re-initialise the auth state in this tab.
+// Sync authentication state across tabs: when another tab logs in or out,
+// localStorage is updated and the storage event fires in all other tabs.
+// Listening only on auth_token avoids calling initAuth() twice when both
+// auth_token and username are written together during login.
+// This listener lives for the entire app lifetime and does not need cleanup.
 window.addEventListener('storage', (event) => {
-  if (event.key === 'auth_token' || event.key === 'username') {
+  if (event.key === 'auth_token') {
     authStore.initAuth()
   }
 })
