@@ -266,6 +266,14 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
     await nextTick()
     expect(document.activeElement).toBe(exposuresBtn?.element)
 
+    await workspacesBtn?.trigger('focus')
+    await nextTick()
+    // Simulate tabbing from the focused workspaces suggestion button.
+    await workspacesBtn?.trigger('keydown', { key: 'Tab' })
+    await nextTick()
+    // Focus should move to the next button, exposure.
+    expect(document.activeElement).toBe(exposuresBtn?.element)
+
     wrapper.unmount()
   })
 
