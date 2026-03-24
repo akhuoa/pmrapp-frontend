@@ -134,6 +134,13 @@ const isSuggestionsVisible = computed(() => {
   return props.inOverlay ? true : isSearchFocused.value
 })
 
+const defaultSearchKind = computed(() => {
+  if (SEARCH_CATEGORIES.some((category) => category.value === props.initialKind)) {
+    return props.initialKind
+  }
+  return 'citation_id'
+})
+
 const handleSearch = () => {
   const searchTerm = searchInput.value.trim()
   if (searchTerm === '') {
@@ -141,9 +148,10 @@ const handleSearch = () => {
     return
   }
 
-  // Use the first category kind that has matching results, or default to citation_id
+  // Use the first category kind that has matching results, otherwise prefer
+  // initialKind when valid, and finally fallback to citation_id.
   const firstCategoryWithResults = filteredSearchTermsByCategory.value[0]
-  const searchKind = firstCategoryWithResults?.kind || 'citation_id'
+  const searchKind = firstCategoryWithResults?.kind || defaultSearchKind.value
 
   // Blur the input to close the dropdown.
   // searchInputRef.value?.inputRef?.blur()

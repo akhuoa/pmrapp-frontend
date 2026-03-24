@@ -5,6 +5,11 @@ import SearchInput from '@/components/molecules/SearchInput.vue'
 
 const mockRouterPush = vi.fn()
 const mockRoute = { query: {} as Record<string, string> }
+const mockSearchCategories: Array<{
+  kind: string
+  loading: boolean
+  kindInfo?: { terms?: string[] }
+}> = []
 
 vi.mock('vue-router', () => ({
   useRoute: () => mockRoute,
@@ -13,7 +18,7 @@ vi.mock('vue-router', () => ({
 
 vi.mock('@/stores/search', () => ({
   useSearchStore: () => ({
-    categories: [],
+    categories: mockSearchCategories,
     isLoading: false,
     fetchCategories: vi.fn().mockResolvedValue(undefined),
   }),
@@ -53,11 +58,11 @@ vi.mock('@/stores/workspace', () => ({
   }),
 }))
 
-const mountSearchInput = (initialTerm = '') => {
+const mountSearchInput = (initialTerm = '', initialKind = 'citation_author_family_name') => {
   return mount(SearchInput, {
     props: {
       initialTerm,
-      initialKind: 'citation_author_family_name',
+      initialKind,
       inOverlay: true,
     },
     global: {
@@ -88,6 +93,7 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockRoute.query = {}
+    mockSearchCategories.splice(0)
   })
 
   it('shows "See N matching exposures" when query matches exposures', async () => {
@@ -308,6 +314,48 @@ describe('SearchInput.vue – getMatchingCount logic', () => {
     const buttons = wrapper.findAll('button')
     const exposuresBtn = buttons.find((b) => b.text().includes('matching exposure'))
     expect(exposuresBtn).toBeDefined()
+
+    wrapper.unmount()
+  })
+
+  it('uses valid initialKind as fallback search kind when no category matches are found', async () => {
+    const wrapper = mountSearchInput('Noble', 'model_author')
+    await flushPromises()
+
+    wrapper.findComponent({ name: 'SearchField' }).vm.$emit('search')
+    await nextTick()
+
+    expect(wrapper.emitted('search')?.[0]).toEqual(['model_author', 'Noble'])
+
+    wrapper.unmount()
+  })
+
+  it('falls back to citation_id when initialKind is invalid and no category matches are found', async () => {
+    const wrapper = mountSearchInput('Noble', 'not_a_real_kind')
+    await flushPromises()
+
+    wrapper.findComponent({ name: 'SearchField' }).vm.$emit('search')
+    await nextTick()
+
+    expect(wrapper.emitted('search')?.[0]).toEqual(['citation_id', 'Noble'])
+
+    wrapper.unmount()
+  })
+
+  it('prefers the first matching category kind over initialKind', async () => {
+    mockSearchCategories.push({
+      kind: 'cellml_keyword',
+      loading: false,
+      kindInfo: { terms: ['Noble keyword'] },
+    })
+
+    const wrapper = mountSearchInput('Noble', 'model_author')
+    await flushPromises()
+
+    wrapper.findComponent({ name: 'SearchField' }).vm.$emit('search')
+    await nextTick()
+
+    expect(wrapper.emitted('search')?.[0]).toEqual(['cellml_keyword', 'Noble'])
 
     wrapper.unmount()
   })
