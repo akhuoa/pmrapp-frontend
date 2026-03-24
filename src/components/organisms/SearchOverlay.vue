@@ -47,6 +47,11 @@ const getInitialTerm = (): string => {
   const filterQuery = route.query.filter
   return typeof filterQuery === 'string' ? filterQuery : ''
 }
+
+const getInitialKind = (): string => {
+  const kindQuery = route.query.kind
+  return typeof kindQuery === 'string' ? kindQuery : ''
+}
 </script>
 
 <template>
@@ -70,7 +75,7 @@ const getInitialTerm = (): string => {
         <SearchInput
           ref="searchInputRef"
           :inOverlay="true"
-          initial-kind=""
+          :initial-kind="getInitialKind()"
           :initial-term="getInitialTerm()"
           @search="handleSearch"
           @close="emit('close')"
