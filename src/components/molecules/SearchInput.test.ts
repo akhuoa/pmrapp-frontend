@@ -242,7 +242,7 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
     await flushPromises()
 
     const input = wrapper.find('input')
-    // Use a query that yields both exposures and workspaces suggestions
+    // Use a query that yields both exposures and workspaces suggestions.
     await input.setValue("O'Hara")
     await input.trigger('focus')
     await nextTick()
@@ -256,12 +256,12 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
     expect(exposuresBtn?.attributes('disabled')).toBeUndefined()
     expect(workspacesBtn?.attributes('disabled')).toBeUndefined()
 
-    // Simulate forward tabbing from the input
+    // Simulate forward tabbing from the input.
     await input.trigger('keydown', { key: 'Tab' })
     await nextTick()
     expect(document.activeElement).toBe(workspacesBtn?.element)
 
-    // Simulate reverse tabbing (Shift+Tab) within the dropdown
+    // Simulate reverse tabbing (Shift+Tab) within the dropdown.
     await input.trigger('keydown', { key: 'Tab', shiftKey: true })
     await nextTick()
     expect(document.activeElement).toBe(exposuresBtn?.element)
@@ -295,7 +295,7 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
 
     const buttons = wrapper.findAll('button')
     const exposuresBtn = buttons.find((b) => b.text().includes('matching exposure'))
-    // Only 1 match → "See 1 matching exposure"
+    // Only 1 match → "See 1 matching exposure".
     expect(exposuresBtn?.text()).toContain('See 1 matching exposure')
 
     wrapper.unmount()
@@ -313,7 +313,7 @@ describe('SearchInput.vue – getMatchingCount logic', () => {
     await nextTick()
 
     // "O'Hara-Rudy" normalises to tokens ["o", "hara", "rudy"]
-    // which all match "o hara rudy cipa v1 0 2017"
+    // which all match "o hara rudy cipa v1 0 2017".
     const buttons = wrapper.findAll('button')
     const exposuresBtn = buttons.find((b) => b.text().includes('matching exposure'))
     expect(exposuresBtn).toBeDefined()
