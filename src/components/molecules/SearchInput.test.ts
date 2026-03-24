@@ -247,14 +247,6 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
     await input.trigger('focus')
     await nextTick()
 
-    // Simulate forward tabbing from the input
-    await input.trigger('keydown', { key: 'Tab' })
-    await nextTick()
-
-    // Simulate reverse tabbing (Shift+Tab) within the dropdown
-    await input.trigger('keydown', { key: 'Tab', shiftKey: true })
-    await nextTick()
-
     const buttons = wrapper.findAll('button')
     const exposuresBtn = buttons.find((b) => b.text().includes('matching exposure'))
     const workspacesBtn = buttons.find((b) => b.text().includes('matching workspace'))
@@ -263,6 +255,16 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
     expect(workspacesBtn).toBeDefined()
     expect(exposuresBtn?.attributes('disabled')).toBeUndefined()
     expect(workspacesBtn?.attributes('disabled')).toBeUndefined()
+
+    // Simulate forward tabbing from the input
+    await input.trigger('keydown', { key: 'Tab' })
+    await nextTick()
+    expect(document.activeElement).toBe(workspacesBtn?.element)
+
+    // Simulate reverse tabbing (Shift+Tab) within the dropdown
+    await input.trigger('keydown', { key: 'Tab', shiftKey: true })
+    await nextTick()
+    expect(document.activeElement).toBe(exposuresBtn?.element)
 
     wrapper.unmount()
   })
