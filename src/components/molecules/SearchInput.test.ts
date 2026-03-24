@@ -266,6 +266,7 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
 
     wrapper.unmount()
   })
+
   it('shows "no results" message when query matches nothing in any category', async () => {
     const wrapper = mountSearchInput()
     await flushPromises()
