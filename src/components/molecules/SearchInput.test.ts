@@ -2,6 +2,7 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import SearchInput from '@/components/molecules/SearchInput.vue'
+import { exposures, workspaces } from '@/mocks/search'
 
 const mockRouterPush = vi.fn()
 const mockRoute = { query: {} as Record<string, string> }
@@ -24,27 +25,9 @@ vi.mock('@/stores/search', () => ({
   }),
 }))
 
-const mockExposures = [
-  {
-    alias: 'ohara',
-    entity: { id: 10, created_ts: 1000, description: "O'Hara-Rudy-CiPA-v1.0 (2017)" },
-  },
-  {
-    alias: 'noble',
-    entity: { id: 11, created_ts: 2000, description: 'Noble, 2003' },
-  },
-]
-
-const mockWorkspaces = [
-  {
-    alias: 'ws-ohara',
-    entity: { id: 20, created_ts: 1000, description: "O'Hara model workspace" },
-  },
-]
-
 vi.mock('@/stores/exposure', () => ({
   useExposureStore: () => ({
-    exposures: mockExposures,
+    exposures,
     isLoading: false,
     fetchExposures: vi.fn().mockResolvedValue(undefined),
   }),
@@ -52,7 +35,7 @@ vi.mock('@/stores/exposure', () => ({
 
 vi.mock('@/stores/workspace', () => ({
   useWorkspaceStore: () => ({
-    workspaces: mockWorkspaces,
+    workspaces,
     isLoading: false,
     fetchWorkspaces: vi.fn().mockResolvedValue(undefined),
   }),
