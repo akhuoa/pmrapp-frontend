@@ -110,7 +110,8 @@ const getMatchingCount = <T extends SortableEntity>(items: T[], query: string): 
   const normalisedQuery = normaliseSearchText(query)
   // Return 0 for empty or punctuation-only input.
   if (!normalisedQuery.trim()) return 0
-  return filterItemsByQuery({ query: normalisedQuery, items }).length
+  // Use the raw query for filtering so counts match list page behaviour.
+  return filterItemsByQuery({ query, items }).length
 }
 
 const exposuresCount = computed(() =>
