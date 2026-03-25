@@ -29,34 +29,36 @@ const detectedLanguage = computed(() => {
 
   // Map file extensions to Prism language names.
   const languageMap: Record<string, string> = {
+    c: 'c',
+    cellml: 'markup',
+    conf: 'json',
+    cpp: 'cpp',
+    css: 'css',
+    f77: 'fortran',
+    fortran: 'fortran',
+    h: 'cpp',
+    htm: 'markup',
+    html: 'markup',
     js: 'javascript',
-    jsx: 'javascript',
-    ts: 'javascript',
-    tsx: 'javascript',
     json: 'json',
+    jsx: 'javascript',
+    m: 'matlab',
+    markdown: 'markdown',
+    matlab: 'matlab',
+    md: 'markdown',
     py: 'python',
     python: 'python',
-    css: 'css',
-    scss: 'css',
+    rdf: 'markup',
     sass: 'css',
-    c: 'c',
-    cpp: 'cpp',
-    h: 'cpp',
-    fortran: 'fortran',
-    f77: 'fortran',
-    html: 'markup',
-    htm: 'markup',
-    xml: 'markup',
-    svg: 'markup',
-    md: 'markdown',
-    markdown: 'markdown',
-    cellml: 'markup',
+    scss: 'css',
     sedml: 'markup',
-    matlab: 'matlab',
-    m: 'matlab',
+    svg: 'markup',
+    ts: 'javascript',
+    tsx: 'javascript',
+    xml: 'markup',
   }
 
-  return ext ? languageMap[ext] || 'none' : 'none'
+  return ext ? languageMap[ext] || 'plaintext' : 'none'
 })
 
 const highlightCode = async () => {
