@@ -2,11 +2,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import UserDropdown from '@/components/molecules/UserDropdown.vue'
 import SearchIcon from '@/components/icons/SearchIcon.vue'
+import UserDropdown from '@/components/molecules/UserDropdown.vue'
 import SearchOverlay from '@/components/organisms/SearchOverlay.vue'
-import ActionButton from '../atoms/ActionButton.vue'
 import { useGlobalStateStore } from '@/stores/globalState'
+import ActionButton from '../atoms/ActionButton.vue'
 
 const route = useRoute()
 const isSearchOverlayVisible = ref(false)
