@@ -13,6 +13,7 @@ export const useExposureStore = defineStore('exposure', () => {
   const lastFetchTime = ref<number | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
+  const fetchExposuresInFlight = ref<Promise<void> | null>(null)
 
   const isCacheValid = (): boolean => {
     if (!lastFetchTime.value) return false
@@ -21,25 +22,35 @@ export const useExposureStore = defineStore('exposure', () => {
   }
 
   const fetchExposures = async (forceRefresh = false): Promise<void> => {
+    if (fetchExposuresInFlight.value) {
+      return fetchExposuresInFlight.value
+    }
+
     // Use cache if valid and not forcing refresh.
     if (!forceRefresh && isCacheValid() && exposures.value.length > 0) {
       return
     }
 
-    isLoading.value = true
-    error.value = null
+    const fetchPromise = (async () => {
+      isLoading.value = true
+      error.value = null
 
-    try {
-      const data = await getExposureService().listAliasedExposures()
+      try {
+        const data = await getExposureService().listAliasedExposures()
 
-      exposures.value = data
-      lastFetchTime.value = Date.now()
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to load exposures'
-      console.error('Error loading exposures:', err)
-    } finally {
-      isLoading.value = false
-    }
+        exposures.value = data
+        lastFetchTime.value = Date.now()
+      } catch (err) {
+        error.value = err instanceof Error ? err.message : 'Failed to load exposures'
+        console.error('Error loading exposures:', err)
+      } finally {
+        isLoading.value = false
+        fetchExposuresInFlight.value = null
+      }
+    })()
+
+    fetchExposuresInFlight.value = fetchPromise
+    return fetchPromise
   }
 
   const getExposureInfo = async (alias: string): Promise<ExposureInfo> => {
@@ -145,6 +156,7 @@ export const useExposureStore = defineStore('exposure', () => {
     exposureHTMLCache.value.clear()
     lastFetchTime.value = null
     error.value = null
+    fetchExposuresInFlight.value = null
   }
 
   return {
