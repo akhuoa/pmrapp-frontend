@@ -45,7 +45,17 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
 
 const getInitialTerm = (): string => {
   const filterQuery = route.query.filter
-  return typeof filterQuery === 'string' ? filterQuery : ''
+  const termQuery = route.query.term
+
+  if (typeof filterQuery === 'string') {
+    return filterQuery
+  }
+
+  if (typeof termQuery === 'string') {
+    return termQuery
+  }
+
+  return ''
 }
 
 const getInitialKind = (): string => {
