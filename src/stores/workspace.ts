@@ -11,6 +11,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
   const lastFetchTime = ref<number | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
+  const fetchWorkspacesInFlight = ref<Promise<void> | null>(null)
 
   const isCacheValid = (): boolean => {
     if (!lastFetchTime.value) return false
@@ -19,25 +20,35 @@ export const useWorkspaceStore = defineStore('workspace', () => {
   }
 
   const fetchWorkspaces = async (forceRefresh = false): Promise<void> => {
+    if (fetchWorkspacesInFlight.value) {
+      return fetchWorkspacesInFlight.value
+    }
+
     // Use cache if valid and not forcing refresh.
     if (!forceRefresh && isCacheValid() && workspaces.value.length > 0) {
       return
     }
 
-    isLoading.value = true
-    error.value = null
+    const fetchPromise = (async () => {
+      isLoading.value = true
+      error.value = null
 
-    try {
-      const data = await getWorkspaceService().listAliasedWorkspaces()
+      try {
+        const data = await getWorkspaceService().listAliasedWorkspaces()
 
-      workspaces.value = data
-      lastFetchTime.value = Date.now()
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to load workspaces'
-      console.error('Error loading workspaces:', err)
-    } finally {
-      isLoading.value = false
-    }
+        workspaces.value = data
+        lastFetchTime.value = Date.now()
+      } catch (err) {
+        error.value = err instanceof Error ? err.message : 'Failed to load workspaces'
+        console.error('Error loading workspaces:', err)
+      } finally {
+        isLoading.value = false
+        fetchWorkspacesInFlight.value = null
+      }
+    })()
+
+    fetchWorkspacesInFlight.value = fetchPromise
+    return fetchPromise
   }
 
   const getWorkspaceInfo = async (
@@ -68,6 +79,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     workspaceInfoCache.value.clear()
     lastFetchTime.value = null
     error.value = null
+    fetchWorkspacesInFlight.value = null
   }
 
   return {

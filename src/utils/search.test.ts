@@ -1,5 +1,70 @@
 import { describe, expect, it } from 'vitest'
-import { highlightTokens, isValidTerm, normaliseSearchText } from '@/utils/search'
+import { exposures, workspaces } from '@/mocks/search'
+import { filterItemsByQuery, highlightTokens, isValidTerm, normaliseSearchText } from './search'
+
+describe('filterItemsByQuery', () => {
+  it('returns filtered workspace results by search text', () => {
+    const results = filterItemsByQuery({
+      query: 'cipa 2017',
+      items: workspaces,
+    })
+
+    expect(results).toHaveLength(1)
+    expect(results[0].entity.id).toBe(505)
+  })
+
+  it('returns filtered workspace results by id', () => {
+    const results = filterItemsByQuery({
+      query: '505',
+      items: workspaces,
+    })
+
+    expect(results).toHaveLength(1)
+    expect(results[0].entity.id).toBe(505)
+  })
+
+  it('returns filtered exposure results by id', () => {
+    const results = filterItemsByQuery({
+      query: '386',
+      items: exposures,
+    })
+
+    expect(results).toHaveLength(1)
+    expect(results[0].entity.id).toBe(386)
+  })
+
+  it('does not match exposure by workspace_id or alias', () => {
+    const byWorkspaceId = filterItemsByQuery({
+      query: '505',
+      items: exposures,
+    })
+    const byAlias = filterItemsByQuery({
+      query: '5a0',
+      items: exposures,
+    })
+
+    expect(byWorkspaceId).toHaveLength(0)
+    expect(byAlias).toHaveLength(0)
+  })
+
+  it('returns all items when query is empty', () => {
+    const results = filterItemsByQuery({
+      query: '',
+      items: workspaces,
+    })
+
+    expect(results).toHaveLength(workspaces.length)
+  })
+
+  it('returns count via .length', () => {
+    const results = filterItemsByQuery({
+      query: 'noble',
+      items: exposures,
+    })
+
+    expect(results.length).toBe(1)
+  })
+})
 
 describe('isValidTerm', () => {
   it('returns false for empty string', () => {
