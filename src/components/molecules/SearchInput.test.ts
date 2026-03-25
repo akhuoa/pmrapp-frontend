@@ -304,7 +304,7 @@ describe('SearchInput.vue – getMatchingCount logic', () => {
     await nextTick()
 
     // "O'Hara-Rudy" normalises to tokens ["o", "hara", "rudy"]
-    // which all match "o hara rudy cipa v1 0 2017".
+    // which all match "O'Hara-Rudy-CiPA-v1.0 (2017)".
     const buttons = wrapper.findAll('button')
     const exposuresBtn = buttons.find((b) => b.text().includes('matching exposure'))
     expect(exposuresBtn).toBeDefined()
