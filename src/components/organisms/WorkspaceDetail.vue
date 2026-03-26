@@ -3,7 +3,6 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
-import BackButton from '@/components/atoms/BackButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import Breadcrumbs from '@/components/molecules/Breadcrumbs.vue'
 import type { BreadcrumbItem } from '@/components/molecules/Breadcrumbs.vue'
@@ -204,13 +203,6 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
 
 <template>
   <Breadcrumbs :items="breadcrumbItems" />
-
-  <BackButton
-    v-if="path"
-    label="Back to parent folder"
-    content-section="Workspace Detail"
-    :on-click="goBack"
-  />
 
   <ErrorBlock
     v-if="error"

@@ -1,7 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import BackButton from '@/components/atoms/BackButton.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import CodeIcon from '@/components/icons/CodeIcon.vue'
@@ -145,12 +144,6 @@ onBeforeUnmount(() => {
 
 <template>
   <Breadcrumbs :items="breadcrumbItems" />
-
-  <BackButton
-    label="Back"
-    content-section="Workspace File Detail"
-    :on-click="goBack"
-  />
 
   <ErrorBlock
     v-if="error"
