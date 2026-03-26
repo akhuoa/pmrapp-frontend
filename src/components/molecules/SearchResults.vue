@@ -78,7 +78,7 @@ const isIdActive = (ids: string[] | undefined) => {
           :title="item.data.description?.[0] || item.resource_path"
           :link="item.data.aliased_uri?.[0] || ''"
         >
-          <div>
+          <div class="text-gray-600 dark:text-gray-400">
             <small class="inline-flex items-center gap-1 flex-wrap">
               <span>
                 #{{ getExposureIdFromResourcePath(item.resource_path) }}
@@ -91,7 +91,7 @@ const isIdActive = (ids: string[] | undefined) => {
                 v-if="item.data.model_author?.filter(isValidTerm).length"
                 class="flex items-center gap-1"
               >
-                <span class="text-gray-600 dark:text-gray-400">
+                <span>
                   by
                 </span>
                 <template v-for="(author, index) in item.data.model_author.filter(isValidTerm)" :key="index">
