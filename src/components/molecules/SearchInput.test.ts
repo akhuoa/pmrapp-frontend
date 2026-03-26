@@ -2,9 +2,15 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import SearchInput from '@/components/molecules/SearchInput.vue'
+import { exposures, workspaces } from '@/mocks/search'
 
 const mockRouterPush = vi.fn()
 const mockRoute = { query: {} as Record<string, string> }
+const mockSearchCategories: Array<{
+  kind: string
+  loading: boolean
+  kindInfo?: { terms?: string[] }
+}> = []
 
 vi.mock('vue-router', () => ({
   useRoute: () => mockRoute,
@@ -13,33 +19,15 @@ vi.mock('vue-router', () => ({
 
 vi.mock('@/stores/search', () => ({
   useSearchStore: () => ({
-    categories: [],
+    categories: mockSearchCategories,
     isLoading: false,
     fetchCategories: vi.fn().mockResolvedValue(undefined),
   }),
 }))
 
-const mockExposures = [
-  {
-    alias: 'ohara',
-    entity: { id: 10, created_ts: 1000, description: "O'Hara-Rudy-CiPA-v1.0 (2017)" },
-  },
-  {
-    alias: 'noble',
-    entity: { id: 11, created_ts: 2000, description: 'Noble, 2003' },
-  },
-]
-
-const mockWorkspaces = [
-  {
-    alias: 'ws-ohara',
-    entity: { id: 20, created_ts: 1000, description: "O'Hara model workspace" },
-  },
-]
-
 vi.mock('@/stores/exposure', () => ({
   useExposureStore: () => ({
-    exposures: mockExposures,
+    exposures,
     isLoading: false,
     fetchExposures: vi.fn().mockResolvedValue(undefined),
   }),
@@ -47,17 +35,17 @@ vi.mock('@/stores/exposure', () => ({
 
 vi.mock('@/stores/workspace', () => ({
   useWorkspaceStore: () => ({
-    workspaces: mockWorkspaces,
+    workspaces,
     isLoading: false,
     fetchWorkspaces: vi.fn().mockResolvedValue(undefined),
   }),
 }))
 
-const mountSearchInput = (initialTerm = '') => {
+const mountSearchInput = (initialTerm = '', initialKind = 'citation_author_family_name') => {
   return mount(SearchInput, {
     props: {
       initialTerm,
-      initialKind: 'citation_author_family_name',
+      initialKind,
       inOverlay: true,
     },
     global: {
@@ -88,6 +76,7 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockRoute.query = {}
+    mockSearchCategories.splice(0)
   })
 
   it('shows "See N matching exposures" when query matches exposures', async () => {
@@ -236,17 +225,9 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
     await flushPromises()
 
     const input = wrapper.find('input')
-    // Use a query that yields both exposures and workspaces suggestions
+    // Use a query that yields both exposures and workspaces suggestions.
     await input.setValue("O'Hara")
     await input.trigger('focus')
-    await nextTick()
-
-    // Simulate forward tabbing from the input
-    await input.trigger('keydown', { key: 'Tab' })
-    await nextTick()
-
-    // Simulate reverse tabbing (Shift+Tab) within the dropdown
-    await input.trigger('keydown', { key: 'Tab', shiftKey: true })
     await nextTick()
 
     const buttons = wrapper.findAll('button')
@@ -258,8 +239,27 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
     expect(exposuresBtn?.attributes('disabled')).toBeUndefined()
     expect(workspacesBtn?.attributes('disabled')).toBeUndefined()
 
+    // Simulate forward tabbing from the input.
+    await input.trigger('keydown', { key: 'Tab' })
+    await nextTick()
+    expect(document.activeElement).toBe(workspacesBtn?.element)
+
+    // Simulate reverse tabbing (Shift+Tab) within the dropdown.
+    await input.trigger('keydown', { key: 'Tab', shiftKey: true })
+    await nextTick()
+    expect(document.activeElement).toBe(exposuresBtn?.element)
+
+    await workspacesBtn?.trigger('focus')
+    await nextTick()
+    // Simulate tabbing from the focused workspaces suggestion button.
+    await workspacesBtn?.trigger('keydown', { key: 'Tab' })
+    await nextTick()
+    // Focus should move to the next button, exposure.
+    expect(document.activeElement).toBe(exposuresBtn?.element)
+
     wrapper.unmount()
   })
+
   it('shows "no results" message when query matches nothing in any category', async () => {
     const wrapper = mountSearchInput()
     await flushPromises()
@@ -286,7 +286,7 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
 
     const buttons = wrapper.findAll('button')
     const exposuresBtn = buttons.find((b) => b.text().includes('matching exposure'))
-    // Only 1 match → "See 1 matching exposure"
+    // Only 1 match → "See 1 matching exposure".
     expect(exposuresBtn?.text()).toContain('See 1 matching exposure')
 
     wrapper.unmount()
@@ -304,10 +304,52 @@ describe('SearchInput.vue – getMatchingCount logic', () => {
     await nextTick()
 
     // "O'Hara-Rudy" normalises to tokens ["o", "hara", "rudy"]
-    // which all match "o hara rudy cipa v1 0 2017"
+    // which all match "O'Hara-Rudy-CiPA-v1.0 (2017)".
     const buttons = wrapper.findAll('button')
     const exposuresBtn = buttons.find((b) => b.text().includes('matching exposure'))
     expect(exposuresBtn).toBeDefined()
+
+    wrapper.unmount()
+  })
+
+  it('uses valid initialKind as fallback search kind when no category matches are found', async () => {
+    const wrapper = mountSearchInput('Noble', 'model_author')
+    await flushPromises()
+
+    wrapper.findComponent({ name: 'SearchField' }).vm.$emit('search')
+    await nextTick()
+
+    expect(wrapper.emitted('search')?.[0]).toEqual(['model_author', 'Noble'])
+
+    wrapper.unmount()
+  })
+
+  it('falls back to citation_id when initialKind is invalid and no category matches are found', async () => {
+    const wrapper = mountSearchInput('Noble', 'not_a_real_kind')
+    await flushPromises()
+
+    wrapper.findComponent({ name: 'SearchField' }).vm.$emit('search')
+    await nextTick()
+
+    expect(wrapper.emitted('search')?.[0]).toEqual(['citation_id', 'Noble'])
+
+    wrapper.unmount()
+  })
+
+  it('prefers the first matching category kind over initialKind', async () => {
+    mockSearchCategories.push({
+      kind: 'cellml_keyword',
+      loading: false,
+      kindInfo: { terms: ['Noble keyword'] },
+    })
+
+    const wrapper = mountSearchInput('Noble', 'model_author')
+    await flushPromises()
+
+    wrapper.findComponent({ name: 'SearchField' }).vm.$emit('search')
+    await nextTick()
+
+    expect(wrapper.emitted('search')?.[0]).toEqual(['cellml_keyword', 'Noble'])
 
     wrapper.unmount()
   })

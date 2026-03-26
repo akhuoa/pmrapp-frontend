@@ -58,13 +58,13 @@ const setTermButtonRef = (el: Element | ComponentPublicInstance | null, index: n
 }
 
 // All focusable suggestion buttons in focus order: TermButtons first (rendered
-// per category group), then the Exposures button, then the Workspaces button.
+// per category group), then the Workspaces button, then the Exposures button.
 // This matches the DOM order used in the template.
 const allSuggestionButtons = computed<HTMLElement[]>(() => {
   const termEls = termButtonRefs.value.map((ref) => ref?.$el ?? ref).filter(Boolean)
   const extras: HTMLElement[] = []
-  if (exposuresButtonRef.value) extras.push(exposuresButtonRef.value)
   if (workspacesButtonRef.value) extras.push(workspacesButtonRef.value)
+  if (exposuresButtonRef.value) extras.push(exposuresButtonRef.value)
   return [...termEls, ...extras]
 })
 
@@ -110,7 +110,8 @@ const getMatchingCount = <T extends SortableEntity>(items: T[], query: string): 
   const normalisedQuery = normaliseSearchText(query)
   // Return 0 for empty or punctuation-only input.
   if (!normalisedQuery.trim()) return 0
-  return filterItemsByQuery({ query: normalisedQuery, items }).length
+  // Use the raw query for filtering so counts match list page behaviour.
+  return filterItemsByQuery({ query, items }).length
 }
 
 const exposuresCount = computed(() =>
@@ -134,6 +135,13 @@ const isSuggestionsVisible = computed(() => {
   return props.inOverlay ? true : isSearchFocused.value
 })
 
+const defaultSearchKind = computed(() => {
+  if (SEARCH_CATEGORIES.some((category) => category.value === props.initialKind)) {
+    return props.initialKind
+  }
+  return 'citation_id'
+})
+
 const handleSearch = () => {
   const searchTerm = searchInput.value.trim()
   if (searchTerm === '') {
@@ -141,9 +149,10 @@ const handleSearch = () => {
     return
   }
 
-  // Use the first category kind that has matching results, or default to citation_id
+  // Use the first category kind that has matching results, otherwise prefer
+  // initialKind when valid, and finally fallback to citation_id.
   const firstCategoryWithResults = filteredSearchTermsByCategory.value[0]
-  const searchKind = firstCategoryWithResults?.kind || 'citation_id'
+  const searchKind = firstCategoryWithResults?.kind || defaultSearchKind.value
 
   // Blur the input to close the dropdown.
   // searchInputRef.value?.inputRef?.blur()
