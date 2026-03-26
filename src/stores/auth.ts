@@ -11,8 +11,8 @@ export const useAuthStore = defineStore('auth', () => {
     username.value = user
     isAuthenticated.value = true
 
-    // TEMPORARY: Using localStorage for token persistence so that the login
-    // state is shared across all tabs in the same browser.
+    // TEMPORARY: Using localStorage for token persistence
+    // so that the login state is shared across all tabs in the same browser.
     // This is not the most secure approach as it's still vulnerable to XSS attacks.
     // This can be HttpOnly cookies or other secure storage mechanisms in the future.
     localStorage.setItem('auth_token', authToken)
