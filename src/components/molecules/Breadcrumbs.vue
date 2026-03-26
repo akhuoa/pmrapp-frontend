@@ -9,6 +9,18 @@ export interface BreadcrumbItem {
 defineProps<{
   items: BreadcrumbItem[]
 }>()
+
+const truncateCharLimit = 26
+
+const isOverflowing = (label: string): boolean => {
+  return label.length > truncateCharLimit
+}
+
+const truncateClass = [
+  'truncate',
+  'inline-block',
+  `sm:max-w-[${truncateCharLimit}ch]`,
+].join(' ')
 </script>
 
 <template>
@@ -17,7 +29,7 @@ defineProps<{
       <li
         v-for="(item, index) in items"
         :key="index"
-        class="flex items-center gap-1"
+        class="flex items-center gap-1 min-w-0"
       >
         <span
           v-if="index > 0"
@@ -28,12 +40,16 @@ defineProps<{
           v-if="item.to"
           :to="item.to"
           class="text-primary hover:text-primary-hover transition-colors"
+          :class="truncateClass"
+          :title="isOverflowing(item.label) ? item.label : undefined"
         >
           {{ item.label }}
         </RouterLink>
         <span
           v-else
           class="text-gray-800 dark:text-gray-200"
+          :class="truncateClass"
+          :title="isOverflowing(item.label) ? item.label : undefined"
           aria-current="page"
         >
           {{ item.label }}
