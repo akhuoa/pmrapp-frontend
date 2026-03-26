@@ -1,18 +1,23 @@
 <script setup lang="ts">
 import {
+  type ComponentPublicInstance,
   computed,
   nextTick,
   onMounted,
   onUnmounted,
   ref,
   watch,
-  type ComponentPublicInstance,
 } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
-import { useSearchStore } from '@/stores/search'
 import { SEARCH_CATEGORIES } from '@/constants/search'
-import { isValidTerm } from '@/utils/search'
+import { useExposureStore } from '@/stores/exposure'
+import { useSearchStore } from '@/stores/search'
+import { useWorkspaceStore } from '@/stores/workspace'
+import type { SortableEntity } from '@/types/common'
+import { formatNumber } from '@/utils/format'
+import { filterItemsByQuery, isValidTerm, normaliseSearchText } from '@/utils/search'
 
 const props = defineProps<{
   initialTerm: string
@@ -20,9 +25,16 @@ const props = defineProps<{
   inOverlay?: boolean
 }>()
 
-const emit = defineEmits<(e: 'search', searchKind: string, searchTerm: string) => void>()
+const emit = defineEmits<{
+  (e: 'search', searchKind: string, searchTerm: string): void
+  (e: 'close'): void
+}>()
 
+const router = useRouter()
+const route = useRoute()
 const searchStore = useSearchStore()
+const exposureStore = useExposureStore()
+const workspaceStore = useWorkspaceStore()
 
 const searchInput = ref<string>(props.initialTerm)
 
@@ -36,12 +48,25 @@ const searchInputRef = ref<InstanceType<typeof SearchField> | null>(null)
 const isSearchFocused = ref(false)
 const categoriesError = ref<string | null>(null)
 const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
+const exposuresButtonRef = ref<HTMLButtonElement | null>(null)
+const workspacesButtonRef = ref<HTMLButtonElement | null>(null)
 
 const setTermButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
   if (el) {
     termButtonRefs.value[index] = el as InstanceType<typeof TermButton>
   }
 }
+
+// All focusable suggestion buttons in focus order: TermButtons first (rendered
+// per category group), then the Workspaces button, then the Exposures button.
+// This matches the DOM order used in the template.
+const allSuggestionButtons = computed<HTMLElement[]>(() => {
+  const termEls = termButtonRefs.value.map((ref) => ref?.$el ?? ref).filter(Boolean)
+  const extras: HTMLElement[] = []
+  if (workspacesButtonRef.value) extras.push(workspacesButtonRef.value)
+  if (exposuresButtonRef.value) extras.push(exposuresButtonRef.value)
+  return [...termEls, ...extras]
+})
 
 onMounted(async () => {
   const validKinds = SEARCH_CATEGORIES.map((cat) => cat.value)
@@ -52,6 +77,9 @@ onMounted(async () => {
     categoriesError.value = 'Failed to fetch search categories.'
     console.error('Failed to fetch search categories:', err)
   }
+
+  // Fetch exposures and workspaces silently so they are available for filtering.
+  await Promise.all([exposureStore.fetchExposures(), workspaceStore.fetchWorkspaces()])
 })
 
 const isLoading = computed(() => {
@@ -78,8 +106,40 @@ const filteredSearchTermsByCategory = computed(() => {
   }).filter((group) => group.terms.length > 0)
 })
 
+const getMatchingCount = <T extends SortableEntity>(items: T[], query: string): number => {
+  const normalisedQuery = normaliseSearchText(query)
+  // Return 0 for empty or punctuation-only input.
+  if (!normalisedQuery.trim()) return 0
+  // Use the raw query for filtering so counts match list page behaviour.
+  return filterItemsByQuery({ query, items }).length
+}
+
+const exposuresCount = computed(() =>
+  getMatchingCount(exposureStore.exposures, searchInput.value.trim()),
+)
+
+const workspacesCount = computed(() =>
+  getMatchingCount(workspaceStore.workspaces, searchInput.value.trim()),
+)
+
 const hasResults = computed(() => {
-  return filteredSearchTermsByCategory.value.length > 0
+  return (
+    filteredSearchTermsByCategory.value.length > 0 ||
+    exposuresCount.value > 0 ||
+    workspacesCount.value > 0
+  )
+})
+
+const isSuggestionsVisible = computed(() => {
+  if (!searchInput.value.trim()) return false
+  return props.inOverlay ? true : isSearchFocused.value
+})
+
+const defaultSearchKind = computed(() => {
+  if (SEARCH_CATEGORIES.some((category) => category.value === props.initialKind)) {
+    return props.initialKind
+  }
+  return 'citation_id'
 })
 
 const handleSearch = () => {
@@ -89,9 +149,10 @@ const handleSearch = () => {
     return
   }
 
-  // Use the first category kind that has matching results, or default to citation_id
+  // Use the first category kind that has matching results, otherwise prefer
+  // initialKind when valid, and finally fallback to citation_id.
   const firstCategoryWithResults = filteredSearchTermsByCategory.value[0]
-  const searchKind = firstCategoryWithResults?.kind || 'citation_id'
+  const searchKind = firstCategoryWithResults?.kind || defaultSearchKind.value
 
   // Blur the input to close the dropdown.
   // searchInputRef.value?.inputRef?.blur()
@@ -103,6 +164,31 @@ const handleSearchTermClick = (kind: string, term: string) => {
   searchInputRef.value?.inputRef?.blur()
   isSearchFocused.value = false
   emit('search', kind, term)
+}
+
+const buildListQuery = (): Record<string, string> => {
+  const query: Record<string, string> = { filter: searchInput.value.trim() }
+  const currentSort = route.query.sort
+  if (typeof currentSort === 'string' && currentSort.trim()) {
+    query.sort = currentSort
+  }
+  return query
+}
+
+const handleExposuresClick = () => {
+  handleBackdropClick()
+  if (props.inOverlay) {
+    emit('close')
+  }
+  router.push({ name: 'exposures', query: buildListQuery() })
+}
+
+const handleWorkspacesClick = () => {
+  handleBackdropClick()
+  if (props.inOverlay) {
+    emit('close')
+  }
+  router.push({ name: 'workspaces', query: buildListQuery() })
 }
 
 const handleBackdropClick = () => {
@@ -118,7 +204,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 
   if (event.key === 'Tab' && hasResults.value) {
-    const buttonEls = termButtonRefs.value.map((ref) => ref?.$el ?? ref)
+    const buttonEls = allSuggestionButtons.value
     if (buttonEls.length === 0) return
 
     const activeIndex = buttonEls.indexOf(event.target as HTMLElement)
@@ -143,20 +229,19 @@ const handleSearchInputKeyDown = async (event: KeyboardEvent) => {
   if (event.key === 'Tab' && hasResults.value) {
     event.preventDefault()
     await nextTick()
+    const buttonEls = allSuggestionButtons.value
     if (event.shiftKey) {
-      // Shift+Tab on search input → go to last term button.
-      const lastButton = termButtonRefs.value[termButtonRefs.value.length - 1]
+      // Shift+Tab on search input → go to last suggestion button.
+      const lastButton = buttonEls[buttonEls.length - 1]
       if (lastButton) {
-        const buttonEl = lastButton.$el || lastButton
-        buttonEl?.focus()
+        lastButton.focus()
         isSearchFocused.value = true
       }
     } else {
-      // Tab on search input → go to first term button.
-      const firstButton = termButtonRefs.value[0]
+      // Tab on search input → go to first suggestion button.
+      const firstButton = buttonEls[0]
       if (firstButton) {
-        const buttonEl = firstButton.$el || firstButton
-        buttonEl?.focus()
+        firstButton.focus()
         isSearchFocused.value = true
       }
     }
@@ -173,6 +258,8 @@ watch(isSearchFocused, (newVal) => {
 
 watch(filteredSearchTermsByCategory, () => {
   termButtonRefs.value = []
+  exposuresButtonRef.value = null
+  workspacesButtonRef.value = null
 })
 
 onUnmounted(() => {
@@ -210,7 +297,7 @@ defineExpose({
       />
     </div>
     <div
-      v-if="isSearchFocused && searchInput.trim().length > 0"
+      v-if="isSuggestionsVisible"
       :class="`top-full left-0 w-full z-40 ${props.inOverlay ? '' : 'absolute'}`"
       @mousedown.prevent
     >
@@ -232,7 +319,7 @@ defineExpose({
           <div
             v-for="(categoryGroup, groupIndex) in filteredSearchTermsByCategory"
             :key="categoryGroup.kind"
-            class="hover:bg-gray-50 dark:hover:bg-gray-900 border-b last:border-0 border-gray-200 dark:border-gray-700 p-4 transition-all group-hover/results:opacity-75 hover:!opacity-100"
+            class="result-group"
           >
             <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
               {{ categoryGroup.label }}
@@ -247,6 +334,38 @@ defineExpose({
               />
             </div>
           </div>
+          <div
+            v-if="workspacesCount > 0"
+            class="result-group"
+          >
+            <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              Workspaces
+            </h4>
+            <button
+              type="button"
+              ref="workspacesButtonRef"
+              class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
+              @click="handleWorkspacesClick"
+            >
+              See {{ formatNumber(workspacesCount) }} matching workspace{{ workspacesCount !== 1 ? 's' : '' }}
+            </button>
+          </div>
+          <div
+            v-if="exposuresCount > 0"
+            class="result-group"
+          >
+            <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              Exposures
+            </h4>
+            <button
+              type="button"
+              ref="exposuresButtonRef"
+              class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
+              @click="handleExposuresClick"
+            >
+              See {{ formatNumber(exposuresCount) }} matching exposure{{ exposuresCount !== 1 ? 's' : '' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -256,4 +375,8 @@ defineExpose({
 <style scoped>
 @import '@/assets/box.css';
 @import '@/assets/error-box.css';
+
+.result-group {
+  @apply hover:bg-gray-50 dark:hover:bg-gray-900 border-b last:border-0 border-gray-200 dark:border-gray-700 p-4 transition-all group-hover/results:opacity-75 hover:!opacity-100;
+}
 </style>
