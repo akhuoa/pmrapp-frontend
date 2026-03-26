@@ -139,7 +139,7 @@ watch(
             <span v-else>{{ segment.text }}</span>
           </template>
         </template>
-        <p>
+        <p class="text-gray-600 dark:text-gray-400">
           <small>
             #<template v-for="(segment, si) in filteredItemIdSegments[index]" :key="`id-${si}`">
               <mark v-if="segment.highlighted" class="text-highlight">{{ segment.text }}</mark>

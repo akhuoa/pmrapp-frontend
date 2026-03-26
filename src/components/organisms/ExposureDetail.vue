@@ -580,14 +580,14 @@ onMounted(async () => {
           Derived from workspace
           <RouterLink
             :to="`/workspaces/${exposureInfo.workspace_alias}`"
-            class="text-link"
+            class="text-link dark:underline dark:decoration-dotted"
           >
             {{ exposureInfo.exposure.description }}
           </RouterLink>
           at changeset
           <RouterLink
             :to="`/workspaces/${exposureInfo.workspace_alias}/file/${exposureInfo.exposure.commit_id}`"
-            class="text-link font-mono"
+            class="text-link font-mono dark:underline dark:decoration-dotted"
           >
             {{ exposureInfo.exposure.commit_id.substring(0, 12) }}
           </RouterLink>.
@@ -842,7 +842,7 @@ onMounted(async () => {
   @apply text-sm;
 
   & :deep(a) {
-    @apply text-link;
+    @apply text-link dark:underline dark:decoration-dotted hover:text-link-hover transition;
   }
 
   & :deep(h2) {
