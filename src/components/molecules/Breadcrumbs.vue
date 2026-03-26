@@ -28,7 +28,7 @@ const isOverflowing = (label: string): boolean => {
 </script>
 
 <template>
-  <nav aria-label="breadcrumb" class="mb-4">
+  <nav aria-label="breadcrumb" class="mb-8">
     <ol class="flex flex-wrap items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
       <li
         v-for="(item, index) in items"
