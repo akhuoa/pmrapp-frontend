@@ -842,7 +842,7 @@ onMounted(async () => {
   @apply text-sm;
 
   & :deep(a) {
-    @apply text-link underline decoration-dotted hover:text-link-hover transition;
+    @apply text-link dark:underline dark:decoration-dotted hover:text-link-hover transition;
   }
 
   & :deep(h2) {
