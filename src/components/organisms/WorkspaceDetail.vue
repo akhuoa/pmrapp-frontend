@@ -3,8 +3,9 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
-import BackButton from '@/components/atoms/BackButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
+import Breadcrumbs from '@/components/molecules/Breadcrumbs.vue'
+import type { BreadcrumbItem } from '@/components/molecules/Breadcrumbs.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import FolderIcon from '@/components/icons/FolderIcon.vue'
@@ -65,8 +66,31 @@ const goBack = () => {
   }
 }
 
-const backButtonText = computed(() => {
-  return !props.path ? 'Back to workspaces' : `Back to ${props.path}`
+const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
+  const workspaceName = workspaceInfo.value?.workspace.description || props.alias
+  const commitId = workspaceInfo.value?.commit.commit_id || props.commitId
+
+  const items: BreadcrumbItem[] = [
+    { label: 'Workspaces', to: '/workspaces' },
+    {
+      label: workspaceName,
+      to: props.path ? `/workspaces/${props.alias}` : undefined,
+    },
+  ]
+
+  if (props.path) {
+    const parts = props.path.split('/')
+    parts.forEach((part, index) => {
+      const isLast = index === parts.length - 1
+      const partialPath = parts.slice(0, index + 1).join('/')
+      items.push({
+        label: part,
+        to: isLast ? undefined : `/workspaces/${props.alias}/file/${commitId}/${partialPath}`,
+      })
+    })
+  }
+
+  return items
 })
 
 const fileCountText = computed(() => {
@@ -178,11 +202,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
 </script>
 
 <template>
-  <BackButton
-    :label="backButtonText"
-    content-section="Workspace Detail"
-    :on-click="goBack"
-  />
+  <Breadcrumbs :items="breadcrumbItems" />
 
   <ErrorBlock
     v-if="error"
