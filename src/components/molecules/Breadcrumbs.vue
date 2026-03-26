@@ -10,16 +10,16 @@ defineProps<{
   items: BreadcrumbItem[]
 }>()
 
-const truncateCharLimit = 26
+const TRUNCATE_CHAR_LIMIT = 26
 
 const isOverflowing = (label: string): boolean => {
-  return label.length > truncateCharLimit
+  return label.length > TRUNCATE_CHAR_LIMIT
 }
 
 const truncateClass = [
   'truncate',
   'inline-block',
-  `sm:max-w-[${truncateCharLimit}ch]`,
+  `sm:max-w-[${TRUNCATE_CHAR_LIMIT}ch]`,
 ].join(' ')
 </script>
 
