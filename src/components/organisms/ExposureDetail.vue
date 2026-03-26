@@ -580,14 +580,14 @@ onMounted(async () => {
           Derived from workspace
           <RouterLink
             :to="`/workspaces/${exposureInfo.workspace_alias}`"
-            class="text-link underline decoration-dotted"
+            class="text-link dark:underline dark:decoration-dotted"
           >
             {{ exposureInfo.exposure.description }}
           </RouterLink>
           at changeset
           <RouterLink
             :to="`/workspaces/${exposureInfo.workspace_alias}/file/${exposureInfo.exposure.commit_id}`"
-            class="text-link font-mono underline decoration-dotted"
+            class="text-link font-mono dark:underline dark:decoration-dotted"
           >
             {{ exposureInfo.exposure.commit_id.substring(0, 12) }}
           </RouterLink>.
