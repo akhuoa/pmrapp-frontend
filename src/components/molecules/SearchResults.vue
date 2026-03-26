@@ -78,7 +78,7 @@ const isIdActive = (ids: string[] | undefined) => {
           :title="item.data.description?.[0] || item.resource_path"
           :link="item.data.aliased_uri?.[0] || ''"
         >
-          <div>
+          <div class="text-gray-600 dark:text-gray-400">
             <small class="inline-flex items-center gap-1 flex-wrap">
               <span>
                 #{{ getExposureIdFromResourcePath(item.resource_path) }}
@@ -91,12 +91,12 @@ const isIdActive = (ids: string[] | undefined) => {
                 v-if="item.data.model_author?.filter(isValidTerm).length"
                 class="flex items-center gap-1"
               >
-                <span class="text-gray-600 dark:text-gray-400">
+                <span>
                   by
                 </span>
                 <template v-for="(author, index) in item.data.model_author.filter(isValidTerm)" :key="index">
                   <button
-                    class="cursor-pointer hover:text-primary-hover transition-colors"
+                    class="cursor-pointer hover:text-link-hover transition-colors"
                     :class="kind === 'model_author' && term.toLowerCase() === author.toLowerCase()
                       ? textHighlightClass
                       : ''"
@@ -119,7 +119,7 @@ const isIdActive = (ids: string[] | undefined) => {
               <template v-if="item.data.citation_author_family_name?.length">
                 <template v-for="(author, index) in item.data.citation_author_family_name" :key="index">
                   <button
-                    class="cursor-pointer hover:text-primary-hover transition-colors"
+                    class="cursor-pointer hover:text-link-hover transition-colors"
                     :class="kind === 'citation_author_family_name' && term.toLowerCase() === author.toLowerCase()
                       ? textHighlightClass
                       : ''"
@@ -134,7 +134,7 @@ const isIdActive = (ids: string[] | undefined) => {
               <template v-if="item.data.citation_id?.filter(isValidTerm).length">
                 <template v-for="(id, index) in item.data.citation_id.filter(isValidTerm)" :key="id">
                   <button
-                    class="cursor-pointer hover:text-primary-hover transition-colors"
+                    class="cursor-pointer hover:text-link-hover transition-colors"
                     :class="isIdActive([id]) ? textHighlightClass : ''"
                     @click="handleKeywordClick('citation_id', id)"
                   >
