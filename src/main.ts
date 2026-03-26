@@ -28,12 +28,20 @@ authStore.initAuth()
 
 // Sync authentication state across tabs: when another tab logs in or out,
 // localStorage is updated and the storage event fires in all other tabs.
-// Listening only on auth_token avoids calling initAuth() twice when both
-// auth_token and username are written together during login.
-// This listener lives for the entire app lifetime and does not need cleanup.
+// We listen to both auth_token and username, and debounce re-initialisation
+// so that when both keys are written during login, initAuth() runs only once
+// after storage has settled. This listener lives for the entire app lifetime
+// and does not need explicit cleanup.
+let authStorageSyncTimeout: number | undefined
+
 window.addEventListener('storage', (event) => {
-  if (event.key === 'auth_token') {
-    authStore.initAuth()
+  if (event.key === 'auth_token' || event.key === 'username') {
+    if (authStorageSyncTimeout !== undefined) {
+      clearTimeout(authStorageSyncTimeout)
+    }
+    authStorageSyncTimeout = window.setTimeout(() => {
+      authStore.initAuth()
+    }, 50)
   }
 })
 
