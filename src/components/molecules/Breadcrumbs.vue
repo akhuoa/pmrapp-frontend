@@ -12,15 +12,19 @@ defineProps<{
 
 const TRUNCATE_CHAR_LIMIT = 26
 
-const isOverflowing = (label: string): boolean => {
-  return label.length > TRUNCATE_CHAR_LIMIT
-}
-
 const truncateClass = [
   'truncate',
   'inline-block',
+].join(' ')
+
+const truncateClassWithLimit = [
+  truncateClass,
   `sm:max-w-[${TRUNCATE_CHAR_LIMIT}ch]`,
 ].join(' ')
+
+const isOverflowing = (label: string): boolean => {
+  return label.length > TRUNCATE_CHAR_LIMIT
+}
 </script>
 
 <template>
@@ -40,7 +44,7 @@ const truncateClass = [
           v-if="item.to"
           :to="item.to"
           class="text-primary hover:text-primary-hover transition-colors"
-          :class="truncateClass"
+          :class="truncateClassWithLimit"
           :title="isOverflowing(item.label) ? item.label : undefined"
         >
           {{ item.label }}
