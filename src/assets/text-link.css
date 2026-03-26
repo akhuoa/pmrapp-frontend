@@ -2,5 +2,10 @@
 @reference "./main.css";
 
 .text-link {
-  @apply text-link cursor-pointer hover:text-link-hover transition-colors;
+  color: var(--color-text-link);
+  @apply cursor-pointer transition-colors;
+}
+
+.text-link:hover {
+  color: var(--color-text-link-hover);
 }
