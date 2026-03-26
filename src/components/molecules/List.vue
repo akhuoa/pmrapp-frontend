@@ -6,7 +6,7 @@ import ListItem from '@/components/molecules/ListItem.vue'
 import ListToolbar from '@/components/molecules/ListToolbar.vue'
 import type { SortOption } from '@/types/common'
 import { formatDate } from '@/utils/format'
-import { highlightTokens, normaliseSearchText } from '@/utils/search'
+import { filterItemsByQuery, highlightTokens, normaliseSearchText } from '@/utils/search'
 import { DEFAULT_SORT_OPTION, isValidSortOption, sortEntities } from '@/utils/sort'
 
 interface Props<T> {
@@ -43,6 +43,27 @@ const initialSort: SortOption =
   typeof sortQuery === 'string' && isValidSortOption(sortQuery) ? sortQuery : DEFAULT_SORT_OPTION
 const sortBy = ref<SortOption>(initialSort)
 
+watch(
+  () => route.query.filter,
+  (newFilter) => {
+    const nextFilter = typeof newFilter === 'string' ? newFilter : ''
+    if (filterQuery.value !== nextFilter) {
+      filterQuery.value = nextFilter
+    }
+  },
+)
+
+watch(
+  () => route.query.sort,
+  (newSort) => {
+    const nextSort =
+      typeof newSort === 'string' && isValidSortOption(newSort) ? newSort : DEFAULT_SORT_OPTION
+    if (sortBy.value !== nextSort) {
+      sortBy.value = nextSort
+    }
+  },
+)
+
 // Sync filter and sort with URL query parameters.
 watch([filterQuery, sortBy], ([newFilter, newSort]) => {
   const query: Record<string, string> = {}
@@ -57,23 +78,12 @@ const handleRefresh = async () => {
 }
 
 const filteredItems = computed(() => {
-  let result = props.items
+  const filtered = filterItemsByQuery({
+    query: filterQuery.value,
+    items: props.items,
+  })
 
-  // Filter by search query using the same tokens as highlighting.
-  if (activeQueryTokens.value.length > 0) {
-    result = result.filter((item: T) => {
-      const description = normaliseSearchText(item.entity.description?.toLowerCase() || '')
-      const id = item.entity.id.toString()
-      const matchesDescription = activeQueryTokens.value.every((token) =>
-        description.includes(token),
-      )
-      const matchesId = id.includes(filterQuery.value.trim())
-      return matchesDescription || matchesId
-    })
-  }
-
-  // Sort based on selected option.
-  return sortEntities(result, sortBy.value)
+  return sortEntities(filtered, sortBy.value)
 })
 
 const filteredItemSegments = computed(() =>
