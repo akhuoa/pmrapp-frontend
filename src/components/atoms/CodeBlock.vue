@@ -24,6 +24,16 @@ const props = defineProps<{
 const codeBlock = ref<HTMLElement | null>(null)
 const darkThemeMediaQuery = ref<MediaQueryList | null>(null)
 
+const preformatClass = [
+  'line-numbers',
+  'bg-gray-50',
+  'dark:bg-gray-900',
+  'rounded',
+  'overflow-x-auto',
+  'text-sm!',
+  'm-0!'
+].join(' ')
+
 const detectedLanguage = computed(() => {
   const ext = props.filename.split('.').pop()?.toLowerCase()
 
@@ -133,7 +143,7 @@ watch(
 
 <template>
   <div class="relative">
-    <pre class="line-numbers bg-gray-50 dark:bg-gray-900 rounded overflow-x-auto text-sm! m-0!"><code
+    <pre :class="preformatClass"><code
       ref="codeBlock"
       :class="`language-${detectedLanguage}`"
     >{{ code }}</code></pre>
