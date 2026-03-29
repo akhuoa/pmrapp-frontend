@@ -91,8 +91,23 @@ const highlightCode = async () => {
 }
 
 const toggleWrap = async () => {
-  if (!preBlock.value) return
-  preBlock.value.classList.toggle('!whitespace-pre-wrap')
+  if (!preBlock.value || !codeBlock.value) return
+
+  const isWrapped = preBlock.value.classList.toggle('!whitespace-pre-wrap')
+  codeBlock.value.classList.toggle('!whitespace-pre-wrap')
+
+  await nextTick()
+
+  if (!isWrapped) {
+    const lineSpans = preBlock.value.querySelectorAll('.line-numbers-rows > span')
+    lineSpans.forEach((span) => {
+      (span as HTMLElement).style.height = ''
+    })
+  }
+
+  if (Prism.plugins.lineNumbers && Prism.plugins.lineNumbers.resize) {
+    Prism.plugins.lineNumbers.resize(preBlock.value)
+  }
 }
 
 const loadPrismTheme = async (isDark: boolean) => {
