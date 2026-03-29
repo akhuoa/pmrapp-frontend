@@ -25,6 +25,7 @@ const props = defineProps<{
 const codeBlock = ref<HTMLElement | null>(null)
 const preBlock = ref<HTMLElement | null>(null)
 const darkThemeMediaQuery = ref<MediaQueryList | null>(null)
+let observer: ResizeObserver | null = null
 
 const preformatClass = [
   'line-numbers',
@@ -92,7 +93,6 @@ const highlightCode = async () => {
 const toggleWrap = async () => {
   if (!preBlock.value) return
   preBlock.value.classList.toggle('!whitespace-pre-wrap')
-  window.dispatchEvent(new Event('resize'))
 }
 
 const loadPrismTheme = async (isDark: boolean) => {
@@ -133,11 +133,27 @@ onMounted(() => {
 
   // Listen for theme changes.
   darkThemeMediaQuery.value.addEventListener('change', handleThemeChange)
+
+  if (preBlock.value) {
+    observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (Prism.plugins.lineNumbers && Prism.plugins.lineNumbers.resize) {
+          Prism.plugins.lineNumbers.resize(entry.target as HTMLElement)
+        }
+      }
+    })
+
+    observer.observe(preBlock.value)
+  }
 })
 
 onBeforeUnmount(() => {
   if (darkThemeMediaQuery.value) {
     darkThemeMediaQuery.value.removeEventListener('change', handleThemeChange)
+  }
+
+  if (observer) {
+    observer.disconnect()
   }
 })
 
