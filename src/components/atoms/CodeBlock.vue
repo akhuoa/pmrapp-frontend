@@ -34,7 +34,10 @@ const preformatClass = [
   'rounded',
   'overflow-x-auto',
   'text-sm!',
-  'm-0!'
+  'm-0!',
+  'transition-all',
+  'duration-200',
+  'ease-in-out'
 ].join(' ')
 
 const detectedLanguage = computed(() => {
@@ -206,6 +209,10 @@ pre {
 
 code {
   font-family: inherit;
+}
+
+:deep(.line-numbers-rows > span) {
+  transition: height 0.2s ease-in-out;
 }
 </style>
 
