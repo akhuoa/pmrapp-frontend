@@ -2,7 +2,6 @@
 import WrapIcon from '@/components/icons/WrapIcon.vue'
 
 const props = defineProps<{
-  text: string
   title?: string
   onClick?: () => void
 }>()

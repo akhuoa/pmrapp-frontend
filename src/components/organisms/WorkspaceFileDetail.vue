@@ -166,7 +166,6 @@ onBeforeUnmount(() => {
           <WrapButton
             v-if="shouldShowAsText"
             :disabled="(isSvg || isMarkdown) ? !showCode : false"
-            :text="fileContent"
             title="Wrap code"
             @click="toggleCodeWrap"
           />
