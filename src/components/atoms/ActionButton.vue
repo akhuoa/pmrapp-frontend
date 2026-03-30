@@ -87,6 +87,7 @@ const buttonClasses = 'inline-flex items-center justify-center gap-2 cursor-poin
     @mouseleave="isHovered = false"
   >
     <slot />
+    <Tooltip v-if="tooltip" :visible="isHovered" :anchor-el="buttonEl">{{ tooltip }}</Tooltip>
   </a>
   <RouterLink
     v-else-if="to"
@@ -107,6 +108,6 @@ const buttonClasses = 'inline-flex items-center justify-center gap-2 cursor-poin
     @mouseleave="isHovered = false"
   >
     <slot />
+    <Tooltip v-if="tooltip" :visible="isHovered" :anchor-el="buttonEl">{{ tooltip }}</Tooltip>
   </button>
-  <Tooltip v-if="tooltip" :visible="isHovered" :anchor-el="buttonEl">{{ tooltip }}</Tooltip>
 </template>

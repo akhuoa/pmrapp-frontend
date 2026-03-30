@@ -47,12 +47,11 @@ onBeforeUnmount(() => {
     @mouseleave="isHovered = false"
   >
     <CopyIcon class="w-4 h-4" />
+    <Tooltip
+      :visible="isHovered || isCopied"
+      :anchor-el="buttonRef"
+    >
+      {{ isCopied ? 'Copied!' : (title || 'Copy') }}
+    </Tooltip>
   </button>
-
-  <Tooltip
-    :visible="isHovered || isCopied"
-    :anchor-el="buttonRef"
-  >
-    {{ isCopied ? 'Copied!' : (title || 'Copy') }}
-  </Tooltip>
 </template>
