@@ -45,6 +45,8 @@ onBeforeUnmount(() => {
     :aria-label="isCopied ? 'Copied!' : (title || 'Copy')"
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
+    @focus="isHovered = true"
+    @blur="isHovered = false"
   >
     <CopyIcon class="w-4 h-4" />
     <Tooltip
