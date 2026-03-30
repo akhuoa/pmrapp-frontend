@@ -14,8 +14,6 @@ import 'prismjs/components/prism-markdown'
 import 'prismjs/components/prism-matlab'
 import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
 import 'prismjs/plugins/line-numbers/prism-line-numbers'
-import CopyButton from './CopyButton.vue'
-import WrapButton from './WrapButton.vue'
 
 const props = defineProps<{
   code: string
@@ -113,6 +111,10 @@ const toggleWrap = async () => {
   }
 }
 
+defineExpose({
+  toggleWrap,
+})
+
 const loadPrismTheme = async (isDark: boolean) => {
   // Remove existing Prism theme stylesheets.
   const existingThemes = document.querySelectorAll('link[data-prism-theme]')
@@ -184,7 +186,7 @@ watch(
 </script>
 
 <template>
-  <div class="relative">
+  <div>
     <pre
       ref="preBlock"
       :class="preformatClass"
@@ -192,11 +194,6 @@ watch(
       ref="codeBlock"
       :class="`language-${detectedLanguage}`"
     >{{ code }}</code></pre>
-
-    <div class="absolute top-2 right-2">
-      <WrapButton :text="code" title="Wrap code" @click="toggleWrap" />
-      <CopyButton :text="code" title="Copy code" />
-    </div>
   </div>
 </template>
 

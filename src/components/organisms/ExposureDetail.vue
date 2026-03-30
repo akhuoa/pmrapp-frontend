@@ -6,6 +6,7 @@ import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
+import WrapButton from '@/components/atoms/WrapButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
@@ -82,6 +83,7 @@ const exposureFileId = ref<number>(NaN)
 const detailHTML = ref<string>('')
 const generatedCode = ref<string>('')
 const generatedCodeFilename = ref<string>('')
+const codeBlockRef = ref<InstanceType<typeof CodeBlock> | null>(null)
 const mathsJSON = ref<[string, string[]][]>([])
 const metadataJSON = ref<Metadata>({})
 const htmlViewRef = ref<HTMLElement | null>(null)
@@ -236,6 +238,10 @@ const generateCode = async (langPath: string, fileName: string) => {
 
 const downloadCode = () => {
   downloadFileFromContent(generatedCode.value, generatedCodeFilename.value)
+}
+
+const toggleCodeWrap = () => {
+  codeBlockRef.value?.toggleWrap()
 }
 
 const generateMath = async () => {
@@ -501,18 +507,23 @@ onMounted(async () => {
         <div class="box p-0! overflow-hidden">
           <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
             <span>{{ generatedCodeFilename }}</span>
-            <ActionButton
-              @click="downloadCode"
-              variant="icon"
-              content-section="Exposure Detail"
-              title="Download"
-              aria-label="Download"
-            >
-              <DownloadIcon class="w-4 h-4" />
-              <span class="sr-only">Download</span>
-            </ActionButton>
+            <div class="flex items-center gap-2">
+              <WrapButton :text="generatedCode" title="Wrap code" @click="toggleCodeWrap" />
+              <CopyButton :text="generatedCode" title="Copy code" />
+              <ActionButton
+                @click="downloadCode"
+                variant="icon"
+                content-section="Exposure Detail"
+                title="Download"
+                aria-label="Download"
+              >
+                <DownloadIcon class="w-4 h-4" />
+                <span class="sr-only">Download</span>
+              </ActionButton>
+            </div>
           </div>
           <CodeBlock
+            ref="codeBlockRef"
             :code="generatedCode"
             :filename="generatedCodeFilename"
           />
