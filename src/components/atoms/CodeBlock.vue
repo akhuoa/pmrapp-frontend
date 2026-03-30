@@ -107,7 +107,7 @@ const toggleWrap = async () => {
     })
   }
 
-  if (Prism.plugins.lineNumbers && Prism.plugins.lineNumbers.resize) {
+  if (Prism.plugins.lineNumbers?.resize) {
     Prism.plugins.lineNumbers.resize(preBlock.value)
   }
 }
@@ -158,7 +158,7 @@ onMounted(() => {
   if (preBlock.value) {
     observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        if (Prism.plugins.lineNumbers && Prism.plugins.lineNumbers.resize) {
+        if (Prism.plugins.lineNumbers?.resize) {
           Prism.plugins.lineNumbers.resize(entry.target as HTMLElement)
         }
       }
