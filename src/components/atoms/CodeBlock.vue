@@ -155,7 +155,7 @@ onMounted(() => {
   // Listen for theme changes.
   darkThemeMediaQuery.value.addEventListener('change', handleThemeChange)
 
-  if (preBlock.value) {
+  if (preBlock.value && typeof ResizeObserver === 'function') {
     observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
         if (Prism.plugins.lineNumbers?.resize) {
