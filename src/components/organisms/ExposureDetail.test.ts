@@ -231,9 +231,13 @@ describe('ExposureDetail', () => {
     expect(copyButton.props('text')).toBe(mockGeneratedCode)
     expect(copyButton.props('title')).toBe('Copy code')
 
-    const downloadButton = codegenView.find('button[title="Download"]')
+    const downloadButton = codegenView.find('button[aria-label="Download"]')
     expect(downloadButton.exists()).toBe(true)
-    expect(downloadButton.attributes('aria-label')).toBe('Download')
+
+    const srOnlyText = downloadButton.find('.sr-only')
+    expect(srOnlyText.exists()).toBe(true)
+    expect(downloadButton.attributes('aria-label')).toBe(srOnlyText.text())
+    expect(srOnlyText.text()).toBe('Download')
   })
 
   it('calls CodeBlock.toggleWrap when clicking the wrap button in codegen view', async () => {

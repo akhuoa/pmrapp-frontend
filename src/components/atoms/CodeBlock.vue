@@ -92,12 +92,12 @@ const highlightCode = async () => {
   }
 }
 
-const toggleWrap = async () => {
+const syncWrapAndLineNumbers = async () => {
   if (!preBlock.value || !codeBlock.value) return
 
-  isWrapped.value = !isWrapped.value
-  preBlock.value.classList.toggle('!whitespace-pre-wrap')
-  codeBlock.value.classList.toggle('!whitespace-pre-wrap')
+  // Keep wrap classes in sync after Prism mutates highlighted markup.
+  preBlock.value.classList.toggle('!whitespace-pre-wrap', isWrapped.value)
+  codeBlock.value.classList.toggle('!whitespace-pre-wrap', isWrapped.value)
 
   await nextTick()
 
@@ -112,6 +112,18 @@ const toggleWrap = async () => {
   if (Prism.plugins.lineNumbers?.resize) {
     Prism.plugins.lineNumbers.resize(preBlock.value)
   }
+}
+
+const refreshCodeBlock = async () => {
+  await highlightCode()
+  await syncWrapAndLineNumbers()
+}
+
+const toggleWrap = async () => {
+  if (!preBlock.value || !codeBlock.value) return
+
+  isWrapped.value = !isWrapped.value
+  await syncWrapAndLineNumbers()
 }
 
 defineExpose({
@@ -148,7 +160,7 @@ const handleThemeChange = (e: MediaQueryListEvent) => {
 }
 
 onMounted(() => {
-  highlightCode()
+  void refreshCodeBlock()
 
   darkThemeMediaQuery.value = window.matchMedia('(prefers-color-scheme: dark)')
 
@@ -184,7 +196,7 @@ onBeforeUnmount(() => {
 watch(
   () => props.code,
   () => {
-    highlightCode()
+    void refreshCodeBlock()
   },
 )
 </script>

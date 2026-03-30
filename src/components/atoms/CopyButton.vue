@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, ref } from 'vue'
-import CopyIcon from '@/components/icons/CopyIcon.vue'
 import Tooltip from '@/components/atoms/Tooltip.vue'
+import CopyIcon from '@/components/icons/CopyIcon.vue'
 
 const props = defineProps<{
   text: string
@@ -9,6 +9,7 @@ const props = defineProps<{
 }>()
 
 const isCopied = ref(false)
+const isHovered = ref(false)
 const buttonRef = ref<HTMLElement | null>(null)
 let copiedTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -41,15 +42,16 @@ onBeforeUnmount(() => {
     ref="buttonRef"
     @click="handleCopy"
     class="relative p-2 text-gray-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
-    :title="isCopied ? 'Copied!' : (title || 'Copy')"
+    :aria-label="isCopied ? 'Copied!' : (title || 'Copy')"
+    @mouseenter="isHovered = true"
+    @mouseleave="isHovered = false"
   >
     <CopyIcon class="w-4 h-4" />
+    <Tooltip
+      :visible="isHovered || isCopied"
+      :anchor-el="buttonRef"
+    >
+      {{ isCopied ? 'Copied!' : (title || 'Copy') }}
+    </Tooltip>
   </button>
-
-  <Tooltip
-    :visible="isCopied"
-    :anchor-el="buttonRef"
-  >
-    Copied!
-  </Tooltip>
 </template>
