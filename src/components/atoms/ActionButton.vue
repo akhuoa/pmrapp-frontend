@@ -53,8 +53,7 @@ const secondaryDarkModeClasses = 'dark:border-gray-800 dark:bg-gray-800 dark:hov
 const variantClasses = {
   primary:
     'px-3 py-1 rounded border border-primary bg-primary text-white hover:opacity-90 transition-opacity',
-  secondary:
-    `px-3 py-1 rounded border text-link hover:text-link-hover transition ${secondaryLightModeClasses} ${secondaryDarkModeClasses}`,
+  secondary: `px-3 py-1 rounded border text-link hover:text-link-hover transition ${secondaryLightModeClasses} ${secondaryDarkModeClasses}`,
   link: 'text-primary hover:text-primary-hover transition-colors',
   icon: 'p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors',
 }

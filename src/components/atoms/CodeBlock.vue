@@ -35,7 +35,7 @@ const preformatClass = [
   'm-0!',
   'transition-all',
   'duration-200',
-  'ease-in-out'
+  'ease-in-out',
 ].join(' ')
 
 const detectedLanguage = computed(() => {
@@ -102,7 +102,8 @@ const toggleWrap = async () => {
   if (!isWrapped) {
     const lineSpans = preBlock.value.querySelectorAll('.line-numbers-rows > span')
     lineSpans.forEach((span) => {
-      (span as HTMLElement).style.height = ''
+      const lineSpan = span as HTMLElement
+      lineSpan.style.height = ''
     })
   }
 
