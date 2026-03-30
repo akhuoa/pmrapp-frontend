@@ -22,8 +22,8 @@ const buttonTitle = computed(() => {
     ref="buttonRef"
     :class="[
       'relative p-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed rounded transition-all',
-      'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700',
-      { 'bg-gray-200 dark:bg-gray-700': props.active }
+      'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+      { 'bg-gray-100 dark:bg-gray-700': props.active }
     ]"
     :aria-label="buttonTitle"
     @mouseenter="isHovered = true"

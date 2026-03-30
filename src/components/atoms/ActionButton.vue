@@ -61,7 +61,7 @@ const variantClasses = {
     'px-3 py-1 rounded border border-primary bg-primary text-white hover:opacity-90 transition-opacity',
   secondary: `px-3 py-1 rounded border text-link hover:text-link-hover transition ${secondaryLightModeClasses} ${secondaryDarkModeClasses}`,
   link: 'text-primary hover:text-primary-hover transition-colors',
-  icon: 'p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors',
+  icon: 'p-2 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors',
 }
 
 const sizeClasses = {

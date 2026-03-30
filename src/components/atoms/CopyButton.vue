@@ -41,7 +41,7 @@ onBeforeUnmount(() => {
   <button
     ref="buttonRef"
     @click="handleCopy"
-    class="relative p-2 text-gray-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+    class="relative p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
     :aria-label="isCopied ? 'Copied!' : (title || 'Copy')"
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
