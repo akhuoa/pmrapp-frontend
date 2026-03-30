@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { type RouteLocationRaw, useRoute } from 'vue-router'
-import { trackButtonClick } from '@/utils/analytics'
 import Tooltip from '@/components/atoms/Tooltip.vue'
+import { trackButtonClick } from '@/utils/analytics'
 
 type ButtonVariant = 'primary' | 'secondary' | 'link' | 'icon'
 type ButtonSize = 'sm' | 'md' | 'lg'

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, ref } from 'vue'
-import CopyIcon from '@/components/icons/CopyIcon.vue'
 import Tooltip from '@/components/atoms/Tooltip.vue'
+import CopyIcon from '@/components/icons/CopyIcon.vue'
 
 const props = defineProps<{
   text: string
