@@ -32,6 +32,7 @@ watch(
       updatePosition()
     }
   },
+  { immediate: true },
 )
 
 watch(
