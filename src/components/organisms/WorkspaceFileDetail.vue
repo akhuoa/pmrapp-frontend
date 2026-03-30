@@ -91,10 +91,6 @@ const toggleCodeWrap = () => {
   codeBlockRef.value?.toggleWrap()
 }
 
-const codeWrapButtonTitle = computed(() => {
-  return codeBlockRef.value?.isWrapped ? 'Unwrap lines' : 'Wrap long lines'
-})
-
 onMounted(async () => {
   try {
     // Fetch images, SVGs, and PDFs as blobs.
@@ -170,7 +166,6 @@ onBeforeUnmount(() => {
           <WrapButton
             v-if="shouldShowAsText"
             :disabled="(isSvg || isMarkdown) ? !showCode : false"
-            :title="codeWrapButtonTitle"
             :active="codeBlockRef?.isWrapped"
             @click="toggleCodeWrap"
           />
