@@ -194,6 +194,16 @@ describe('ExposureDetail', () => {
           props: ['code', 'filename'],
           template: '<div class="code-block-stub" />',
         },
+        WrapButton: {
+          name: 'WrapButton',
+          props: ['title'],
+          template: '<button class="wrap-button-stub">Wrap</button>',
+        },
+        CopyButton: {
+          name: 'CopyButton',
+          props: ['text', 'title'],
+          template: '<button class="copy-button-stub">Copy</button>',
+        },
       },
     })
 
@@ -208,6 +218,22 @@ describe('ExposureDetail', () => {
     expect(codeBlock.exists()).toBe(true)
     expect(codeBlock.props('code')).toBe(mockGeneratedCode)
     expect(codeBlock.props('filename')).toBe('code.c')
+
+    const codegenView = wrapper.find('article > div.relative')
+    expect(codegenView.exists()).toBe(true)
+
+    const wrapButton = codegenView.findComponent({ name: 'WrapButton' })
+    expect(wrapButton.exists()).toBe(true)
+    expect(wrapButton.props('title')).toBe('Wrap code')
+
+    const copyButton = codegenView.findComponent({ name: 'CopyButton' })
+    expect(copyButton.exists()).toBe(true)
+    expect(copyButton.props('text')).toBe(mockGeneratedCode)
+    expect(copyButton.props('title')).toBe('Copy code')
+
+    const downloadButton = codegenView.find('button[title="Download"]')
+    expect(downloadButton.exists()).toBe(true)
+    expect(downloadButton.attributes('aria-label')).toBe('Download')
   })
 
   it('renders files list with 7 items', async () => {
