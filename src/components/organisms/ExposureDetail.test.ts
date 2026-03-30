@@ -236,6 +236,39 @@ describe('ExposureDetail', () => {
     expect(downloadButton.attributes('aria-label')).toBe('Download')
   })
 
+  it('calls CodeBlock.toggleWrap when clicking the wrap button in codegen view', async () => {
+    const toggleWrapMock = vi.fn()
+
+    const wrapper = await mountComponent({
+      props: {
+        view: 'cellml_codegen',
+      },
+      generatedCode: mockGeneratedCode,
+      stubs: {
+        CodeBlock: {
+          name: 'CodeBlock',
+          props: ['code', 'filename'],
+          methods: {
+            toggleWrap: toggleWrapMock,
+          },
+          template: '<div class="code-block-stub" />',
+        },
+        WrapButton: {
+          name: 'WrapButton',
+          props: ['title'],
+          template: '<button class="wrap-button-stub">Wrap</button>',
+        },
+      },
+    })
+
+    const wrapButton = wrapper.find('.wrap-button-stub')
+    expect(wrapButton.exists()).toBe(true)
+
+    await wrapButton.trigger('click')
+
+    expect(toggleWrapMock).toHaveBeenCalledTimes(1)
+  })
+
   it('renders files list with 7 items', async () => {
     const wrapper = await mountComponent()
 
