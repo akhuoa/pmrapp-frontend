@@ -85,6 +85,8 @@ const buttonClasses = 'inline-flex items-center justify-center gap-2 cursor-poin
     @click="handleClick"
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
+    @focus="isHovered = true"
+    @blur="isHovered = false"
   >
     <slot />
     <Tooltip v-if="tooltip" :visible="isHovered" :anchor-el="buttonEl">{{ tooltip }}</Tooltip>
@@ -106,6 +108,8 @@ const buttonClasses = 'inline-flex items-center justify-center gap-2 cursor-poin
     @click="handleClick"
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
+    @focus="isHovered = true"
+    @blur="isHovered = false"
   >
     <slot />
     <Tooltip v-if="tooltip" :visible="isHovered" :anchor-el="buttonEl">{{ tooltip }}</Tooltip>

@@ -28,6 +28,8 @@ const buttonTitle = computed(() => {
     :aria-label="buttonTitle"
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
+    @focus="isHovered = true"
+    @blur="isHovered = false"
   >
     <WrapIcon class="w-4 h-4" />
     <Tooltip :visible="isHovered" :anchor-el="buttonRef">{{ buttonTitle }}</Tooltip>
