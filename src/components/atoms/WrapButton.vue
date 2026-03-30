@@ -30,6 +30,6 @@ const buttonTitle = computed(() => {
     @mouseleave="isHovered = false"
   >
     <WrapIcon class="w-4 h-4" />
+    <Tooltip :visible="isHovered" :anchor-el="buttonRef">{{ buttonTitle }}</Tooltip>
   </button>
-  <Tooltip :visible="isHovered" :anchor-el="buttonRef">{{ buttonTitle }}</Tooltip>
 </template>
