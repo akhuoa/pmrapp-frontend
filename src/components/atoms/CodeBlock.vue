@@ -14,7 +14,6 @@ import 'prismjs/components/prism-markdown'
 import 'prismjs/components/prism-matlab'
 import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
 import 'prismjs/plugins/line-numbers/prism-line-numbers'
-import CopyButton from './CopyButton.vue'
 
 const props = defineProps<{
   code: string
@@ -22,7 +21,22 @@ const props = defineProps<{
 }>()
 
 const codeBlock = ref<HTMLElement | null>(null)
+const preBlock = ref<HTMLElement | null>(null)
 const darkThemeMediaQuery = ref<MediaQueryList | null>(null)
+let observer: ResizeObserver | null = null
+
+const preformatClass = [
+  'line-numbers',
+  'bg-gray-50',
+  'dark:bg-gray-900',
+  'rounded',
+  'overflow-x-auto',
+  'text-sm!',
+  'm-0!',
+  'transition-all',
+  'duration-200',
+  'ease-in-out'
+].join(' ')
 
 const detectedLanguage = computed(() => {
   const ext = props.filename.split('.').pop()?.toLowerCase()
@@ -77,6 +91,30 @@ const highlightCode = async () => {
   }
 }
 
+const toggleWrap = async () => {
+  if (!preBlock.value || !codeBlock.value) return
+
+  const isWrapped = preBlock.value.classList.toggle('!whitespace-pre-wrap')
+  codeBlock.value.classList.toggle('!whitespace-pre-wrap')
+
+  await nextTick()
+
+  if (!isWrapped) {
+    const lineSpans = preBlock.value.querySelectorAll('.line-numbers-rows > span')
+    lineSpans.forEach((span) => {
+      (span as HTMLElement).style.height = ''
+    })
+  }
+
+  if (Prism.plugins.lineNumbers && Prism.plugins.lineNumbers.resize) {
+    Prism.plugins.lineNumbers.resize(preBlock.value)
+  }
+}
+
+defineExpose({
+  toggleWrap,
+})
+
 const loadPrismTheme = async (isDark: boolean) => {
   // Remove existing Prism theme stylesheets.
   const existingThemes = document.querySelectorAll('link[data-prism-theme]')
@@ -115,11 +153,27 @@ onMounted(() => {
 
   // Listen for theme changes.
   darkThemeMediaQuery.value.addEventListener('change', handleThemeChange)
+
+  if (preBlock.value) {
+    observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (Prism.plugins.lineNumbers && Prism.plugins.lineNumbers.resize) {
+          Prism.plugins.lineNumbers.resize(entry.target as HTMLElement)
+        }
+      }
+    })
+
+    observer.observe(preBlock.value)
+  }
 })
 
 onBeforeUnmount(() => {
   if (darkThemeMediaQuery.value) {
     darkThemeMediaQuery.value.removeEventListener('change', handleThemeChange)
+  }
+
+  if (observer) {
+    observer.disconnect()
   }
 })
 
@@ -132,15 +186,14 @@ watch(
 </script>
 
 <template>
-  <div class="relative">
-    <pre class="line-numbers bg-gray-50 dark:bg-gray-900 rounded overflow-x-auto text-sm! m-0!"><code
+  <div>
+    <pre
+      ref="preBlock"
+      :class="preformatClass"
+    ><code
       ref="codeBlock"
       :class="`language-${detectedLanguage}`"
     >{{ code }}</code></pre>
-
-    <div class="absolute top-2 right-2">
-      <CopyButton :text="code" title="Copy code" />
-    </div>
   </div>
 </template>
 
@@ -153,6 +206,10 @@ pre {
 
 code {
   font-family: inherit;
+}
+
+:deep(.line-numbers-rows > span) {
+  transition: height 0.2s ease-in-out;
 }
 </style>
 
