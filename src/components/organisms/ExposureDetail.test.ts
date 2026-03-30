@@ -196,7 +196,7 @@ describe('ExposureDetail', () => {
         },
         WrapButton: {
           name: 'WrapButton',
-          props: ['title'],
+          props: ['active'],
           template: '<button class="wrap-button-stub">Wrap</button>',
         },
         CopyButton: {
@@ -224,7 +224,7 @@ describe('ExposureDetail', () => {
 
     const wrapButton = codegenView.findComponent({ name: 'WrapButton' })
     expect(wrapButton.exists()).toBe(true)
-    expect(wrapButton.props('title')).toBe('Wrap code')
+    expect(wrapButton.props('active')).toBeFalsy()
 
     const copyButton = codegenView.findComponent({ name: 'CopyButton' })
     expect(copyButton.exists()).toBe(true)
@@ -255,7 +255,7 @@ describe('ExposureDetail', () => {
         },
         WrapButton: {
           name: 'WrapButton',
-          props: ['title'],
+          props: ['active'],
           template: '<button class="wrap-button-stub">Wrap</button>',
         },
       },

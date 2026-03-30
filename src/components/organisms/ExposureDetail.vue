@@ -508,7 +508,7 @@ onMounted(async () => {
           <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
             <span>{{ generatedCodeFilename }}</span>
             <div class="flex items-center gap-2">
-              <WrapButton title="Wrap code" @click="toggleCodeWrap" />
+              <WrapButton :active="codeBlockRef?.isWrapped" @click="toggleCodeWrap" />
               <CopyButton :text="generatedCode" title="Copy code" />
               <ActionButton
                 @click="downloadCode"

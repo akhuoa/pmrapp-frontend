@@ -166,7 +166,7 @@ onBeforeUnmount(() => {
           <WrapButton
             v-if="shouldShowAsText"
             :disabled="(isSvg || isMarkdown) ? !showCode : false"
-            title="Wrap code"
+            :active="codeBlockRef?.isWrapped"
             @click="toggleCodeWrap"
           />
           <CopyButton

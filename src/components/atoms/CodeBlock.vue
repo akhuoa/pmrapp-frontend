@@ -23,6 +23,7 @@ const props = defineProps<{
 const codeBlock = ref<HTMLElement | null>(null)
 const preBlock = ref<HTMLElement | null>(null)
 const darkThemeMediaQuery = ref<MediaQueryList | null>(null)
+const isWrapped = ref(false)
 let observer: ResizeObserver | null = null
 
 const preformatClass = [
@@ -94,12 +95,13 @@ const highlightCode = async () => {
 const toggleWrap = async () => {
   if (!preBlock.value || !codeBlock.value) return
 
-  const isWrapped = preBlock.value.classList.toggle('!whitespace-pre-wrap')
+  isWrapped.value = !isWrapped.value
+  preBlock.value.classList.toggle('!whitespace-pre-wrap')
   codeBlock.value.classList.toggle('!whitespace-pre-wrap')
 
   await nextTick()
 
-  if (!isWrapped) {
+  if (!isWrapped.value) {
     const lineSpans = preBlock.value.querySelectorAll('.line-numbers-rows > span')
     lineSpans.forEach((span) => {
       const lineSpan = span as HTMLElement
@@ -114,6 +116,7 @@ const toggleWrap = async () => {
 
 defineExpose({
   toggleWrap,
+  isWrapped,
 })
 
 const loadPrismTheme = async (isDark: boolean) => {
