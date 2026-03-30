@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { type RouteLocationRaw, useRoute } from 'vue-router'
 import { trackButtonClick } from '@/utils/analytics'
+import Tooltip from '@/components/atoms/Tooltip.vue'
 
 type ButtonVariant = 'primary' | 'secondary' | 'link' | 'icon'
 type ButtonSize = 'sm' | 'md' | 'lg'
@@ -16,6 +18,7 @@ interface Props {
   download?: boolean
   target?: string
   rel?: string
+  tooltip?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -29,6 +32,9 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const route = useRoute()
+
+const buttonEl = ref<HTMLElement | null>(null)
+const isHovered = ref(false)
 
 const handleClick = (event: Event) => {
   const buttonText = (event.currentTarget as HTMLElement)?.textContent?.trim() || ''
@@ -70,12 +76,15 @@ const buttonClasses = 'inline-flex items-center justify-center gap-2 cursor-poin
 <template>
   <a
     v-if="href"
+    ref="buttonEl"
     :href="href"
     :class="[variantClasses[variant], sizeClasses[size], disabledClasses[variant], buttonClasses]"
     :download="download || undefined"
     :target="target"
     :rel="rel"
     @click="handleClick"
+    @mouseenter="isHovered = true"
+    @mouseleave="isHovered = false"
   >
     <slot />
   </a>
@@ -89,11 +98,15 @@ const buttonClasses = 'inline-flex items-center justify-center gap-2 cursor-poin
   </RouterLink>
   <button
     v-else
+    ref="buttonEl"
     :class="[variantClasses[variant], sizeClasses[size], disabledClasses[variant], buttonClasses]"
     :type="type"
     :disabled="disabled"
     @click="handleClick"
+    @mouseenter="isHovered = true"
+    @mouseleave="isHovered = false"
   >
     <slot />
   </button>
+  <Tooltip v-if="tooltip" :visible="isHovered" :anchor-el="buttonEl">{{ tooltip }}</Tooltip>
 </template>

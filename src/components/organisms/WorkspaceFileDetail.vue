@@ -178,7 +178,7 @@ onBeforeUnmount(() => {
             variant="icon"
             content-section="Workspace File Detail"
             @click="downloadFile"
-            title="Download"
+            tooltip="Download"
             :aria-label="'Download'"
           >
             <DownloadIcon class="w-4 h-4" />
