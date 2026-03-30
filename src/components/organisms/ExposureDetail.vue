@@ -572,11 +572,11 @@ onMounted(async () => {
                   @click="downloadFile(entry[0])"
                   variant="icon"
                   content-section="Exposure Detail"
-                  :title="`Download ${entry[0]}`"
+                  :tooltip="`Download ${entry[0]}`"
                   :aria-label="`Download ${entry[0]}`"
                 >
                   <DownloadIcon class="w-4 h-4" />
-                  <span class="sr-only">Download</span>
+                  <span class="sr-only">Download {{ entry[0] }}</span>
                 </ActionButton>
               </div>
             </div>
