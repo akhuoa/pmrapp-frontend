@@ -67,6 +67,9 @@ onUnmounted(() => {
       <span class="max-w-[8rem] truncate hidden sm:inline">
         {{ authStore.username }}
       </span>
+      <span class="sr-only sm:hidden">
+        {{ authStore.username }}
+      </span>
     </button>
 
     <div
