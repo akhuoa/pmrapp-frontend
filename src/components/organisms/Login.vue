@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import { getAuthService } from '@/services'
@@ -9,11 +9,16 @@ import { useAuthStore } from '@/stores/auth'
 const router = useRouter()
 const authStore = useAuthStore()
 const username = ref('')
+const usernameInput = ref<HTMLInputElement | null>(null)
 const password = ref('')
 const error = ref<string | null>(null)
 const isLoading = ref(false)
 
 const authService = getAuthService()
+
+onMounted(() => {
+  usernameInput.value?.focus()
+})
 
 const handleSubmit = async () => {
   error.value = null
@@ -58,6 +63,7 @@ const handleSubmit = async () => {
           Username
         </label>
         <input
+          ref="usernameInput"
           id="username"
           v-model="username"
           type="text"
