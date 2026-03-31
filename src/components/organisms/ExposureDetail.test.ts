@@ -3,7 +3,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import ExposureDetail from '@/components/organisms/ExposureDetail.vue'
-import { mockExposureInfo, mockMetadata } from '@/mocks/exposureInfo'
+import { mockExposureInfo, mockGeneratedCode, mockMetadata } from '@/mocks/exposureInfo'
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
 
@@ -25,7 +25,19 @@ describe('ExposureDetail', () => {
   let exposureStore: ReturnType<typeof useExposureStore>
   let searchStore: ReturnType<typeof useSearchStore>
 
-  const mountComponent = async () => {
+  const mountComponent = async ({
+    props = {},
+    stubs = {},
+    generatedCode = '',
+  }: {
+    props?: Partial<{
+      alias: string
+      file: string
+      view: string
+    }>
+    stubs?: Record<string, unknown>
+    generatedCode?: string
+  } = {}) => {
     vi.spyOn(exposureStore, 'getExposureInfo').mockResolvedValue(mockExposureInfo)
     vi.spyOn(exposureStore, 'getExposureSafeHTML').mockImplementation(
       async (_id, _fileId, _view, filename) => {
@@ -38,6 +50,7 @@ describe('ExposureDetail', () => {
       async (_id, _fileId, _view, filename) => {
         if (filename === 'cmeta.json') return JSON.stringify(mockMetadata)
         if (filename === 'math.json') return '[]'
+        if (filename === 'code.C.c') return generatedCode
         return ''
       },
     )
@@ -64,6 +77,7 @@ describe('ExposureDetail', () => {
         alias: mockExposureInfo.exposure_alias,
         file: '',
         view: '',
+        ...props,
       },
       global: {
         stubs: {
@@ -71,12 +85,14 @@ describe('ExposureDetail', () => {
           BackButton: true,
           CodeBlock: true,
           CopyButton: true,
+          WrapButton: true,
           LoadingBox: true,
           ErrorBlock: true,
           TermButton: { template: '<button><slot /></button>' },
           ChevronDownIcon: true,
           DownloadIcon: true,
           FileIcon: true,
+          ...stubs,
         },
       },
     })
@@ -109,6 +125,7 @@ describe('ExposureDetail', () => {
           BackButton: true,
           CodeBlock: true,
           CopyButton: true,
+          WrapButton: true,
           LoadingBox: true,
           ErrorBlock: true,
           TermButton: { template: '<button><slot /></button>' },
@@ -163,6 +180,97 @@ describe('ExposureDetail', () => {
     const modelStatusHeading = htmlView.find('h4')
     expect(modelStatusHeading.exists()).toBe(true)
     expect(modelStatusHeading.text()).toBe('Model Status')
+  })
+
+  it('loads the default generated code when the codegen view is opened', async () => {
+    const wrapper = await mountComponent({
+      props: {
+        view: 'cellml_codegen',
+      },
+      generatedCode: mockGeneratedCode,
+      stubs: {
+        CodeBlock: {
+          name: 'CodeBlock',
+          props: ['code', 'filename'],
+          template: '<div class="code-block-stub" />',
+        },
+        WrapButton: {
+          name: 'WrapButton',
+          props: ['active'],
+          template: '<button class="wrap-button-stub">Wrap</button>',
+        },
+        CopyButton: {
+          name: 'CopyButton',
+          props: ['text', 'title'],
+          template: '<button class="copy-button-stub">Copy</button>',
+        },
+      },
+    })
+
+    expect(exposureStore.getExposureRawContent).toHaveBeenCalledWith(
+      mockExposureInfo.exposure.id,
+      mockExposureInfo.exposure.files?.[0]?.id ?? 598,
+      'cellml_codegen',
+      'code.C.c',
+    )
+
+    const codeBlock = wrapper.findComponent({ name: 'CodeBlock' })
+    expect(codeBlock.exists()).toBe(true)
+    expect(codeBlock.props('code')).toBe(mockGeneratedCode)
+    expect(codeBlock.props('filename')).toBe('code.c')
+
+    const codegenView = wrapper.find('article > div.relative')
+    expect(codegenView.exists()).toBe(true)
+
+    const wrapButton = codegenView.findComponent({ name: 'WrapButton' })
+    expect(wrapButton.exists()).toBe(true)
+    expect(wrapButton.props('active')).toBeFalsy()
+
+    const copyButton = codegenView.findComponent({ name: 'CopyButton' })
+    expect(copyButton.exists()).toBe(true)
+    expect(copyButton.props('text')).toBe(mockGeneratedCode)
+    expect(copyButton.props('title')).toBe('Copy code')
+
+    const downloadButton = codegenView.find('button[aria-label="Download"]')
+    expect(downloadButton.exists()).toBe(true)
+
+    const srOnlyText = downloadButton.find('.sr-only')
+    expect(srOnlyText.exists()).toBe(true)
+    expect(downloadButton.attributes('aria-label')).toBe(srOnlyText.text())
+    expect(srOnlyText.text()).toBe('Download')
+  })
+
+  it('calls CodeBlock.toggleWrap when clicking the wrap button in codegen view', async () => {
+    const toggleWrapMock = vi.fn()
+
+    const wrapper = await mountComponent({
+      props: {
+        view: 'cellml_codegen',
+      },
+      generatedCode: mockGeneratedCode,
+      stubs: {
+        CodeBlock: {
+          name: 'CodeBlock',
+          props: ['code', 'filename'],
+          methods: {
+            toggleWrap: toggleWrapMock,
+          },
+          template: '<div class="code-block-stub" />',
+        },
+        WrapButton: {
+          name: 'WrapButton',
+          props: ['active'],
+          template: '<button class="wrap-button-stub">Wrap</button>',
+        },
+      },
+    })
+
+    const wrapButton = wrapper.find('.wrap-button-stub')
+    expect(wrapButton.exists()).toBe(true)
+
+    await wrapButton.trigger('click')
+
+    expect(toggleWrapMock).toHaveBeenCalledTimes(1)
   })
 
   it('renders files list with 7 items', async () => {
