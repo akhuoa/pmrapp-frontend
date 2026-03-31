@@ -64,7 +64,9 @@ onUnmounted(() => {
       class="nav-link flex items-center gap-2 p-2 transition-colors cursor-pointer"
     >
       <UserIcon class="w-5 h-5" />
-      <span>{{ authStore.username }}</span>
+      <span class="max-w-[8rem] truncate hidden sm:inline">
+        {{ authStore.username }}
+      </span>
     </button>
 
     <div
