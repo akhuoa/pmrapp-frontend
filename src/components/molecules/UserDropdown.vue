@@ -62,7 +62,6 @@ onUnmounted(() => {
     <button
       @click="toggleDropdown"
       class="nav-link flex items-center gap-2 p-2 transition-colors cursor-pointer"
-      aria-label="User menu"
     >
       <UserIcon class="w-5 h-5" />
       <span>{{ authStore.username }}</span>
