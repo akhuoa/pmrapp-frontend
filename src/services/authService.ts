@@ -13,7 +13,9 @@ export const authService = {
     })
 
     if (!response.ok) {
-      throw new Error(`Login failed: ${response.status}`)
+      const errorText = await response.text()
+      const errorMessage = errorText || `Login failed: ${response.status}`
+      throw new Error(errorMessage)
     }
 
     const token = await response.text()
