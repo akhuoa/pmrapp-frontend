@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import { getAuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth'
+import CloseButton from '@/components/atoms/CloseButton.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -50,13 +51,21 @@ const handleSubmit = async () => {
 </script>
 
 <template>
+  <!-- Error message -->
+  <div
+    class="error-box flex items-center max-w-md mx-auto mb-4 transition-all"
+    :class="error ? 'visibility-visible opacity-100 translate-y-0' : 'visibility-hidden opacity-0 translate-y-[100%]'"
+  >
+    <p class="text-sm">{{ error }}</p>
+    <CloseButton
+      @click="error = null"
+      class="ml-auto"
+      aria-label="Close error message"
+    />
+  </div>
+
   <div class="max-w-md mx-auto box">
     <form @submit.prevent="handleSubmit" class="space-y-4">
-      <!-- Error message -->
-      <div v-if="error" class="error-box">
-        <p class="text-sm">{{ error }}</p>
-      </div>
-
       <!-- Username field -->
       <div>
         <label for="username" class="label-field block mb-2">
