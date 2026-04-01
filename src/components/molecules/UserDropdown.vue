@@ -61,10 +61,10 @@ onUnmounted(() => {
   <div v-if="authStore.isAuthenticated" ref="dropdownRef" class="relative">
     <button
       @click="toggleDropdown"
-      class="nav-link flex items-center gap-2 p-2 transition-colors cursor-pointer"
+      class="nav-link p-2 transition-colors cursor-pointer relative"
     >
       <UserIcon class="w-5 h-5" />
-      <span class="max-w-[8rem] truncate hidden sm:inline">
+      <span class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-2 text-xs text-gray-700 dark:text-gray-300 max-w-[4.6rem] truncate hidden sm:inline">
         {{ authStore.username }}
       </span>
       <span class="sr-only sm:hidden">
