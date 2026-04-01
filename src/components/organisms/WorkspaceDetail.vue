@@ -78,7 +78,7 @@ const sortedEntries = computed(() => {
   if (!workspaceInfo.value) return []
 
   const treeInfo = workspaceInfo.value.target?.TreeInfo
-  if (!treeInfo || !treeInfo.entries) return []
+  if (!treeInfo?.entries) return []
 
   const entries = [...treeInfo.entries]
 
