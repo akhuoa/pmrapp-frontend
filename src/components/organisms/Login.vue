@@ -54,7 +54,7 @@ const handleSubmit = async () => {
   <!-- Error message -->
   <div
     class="error-box flex items-center max-w-md mx-auto mb-4 transition-all"
-    :class="error ? 'visibility-visible opacity-100 translate-y-0' : 'visibility-hidden opacity-0 translate-y-[100%]'"
+    :class="error ? 'visible opacity-100 translate-y-0 pointer-events-auto' : 'invisible opacity-0 translate-y-[100%] pointer-events-none'"
   >
     <p class="text-sm">{{ error }}</p>
     <CloseButton
@@ -64,7 +64,7 @@ const handleSubmit = async () => {
     />
   </div>
 
-  <div class="max-w-md mx-auto box">
+  <div class="max-w-md mx-auto box relative">
     <form @submit.prevent="handleSubmit" class="space-y-4">
       <!-- Username field -->
       <div>
