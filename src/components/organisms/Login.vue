@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import { getAuthService } from '@/services'
@@ -14,11 +14,39 @@ const usernameInput = ref<HTMLInputElement | null>(null)
 const password = ref('')
 const error = ref<string | null>(null)
 const isLoading = ref(false)
+const ERROR_AUTO_HIDE_MS = 5000
+let errorTimer: ReturnType<typeof setTimeout> | null = null
 
 const authService = getAuthService()
 
+const clearErrorTimer = () => {
+  if (!errorTimer) {
+    return
+  }
+
+  clearTimeout(errorTimer)
+  errorTimer = null
+}
+
 onMounted(() => {
   usernameInput.value?.focus()
+})
+
+watch(error, (newError) => {
+  clearErrorTimer()
+
+  if (!newError) {
+    return
+  }
+
+  errorTimer = setTimeout(() => {
+    error.value = null
+    errorTimer = null
+  }, ERROR_AUTO_HIDE_MS)
+})
+
+onBeforeUnmount(() => {
+  clearErrorTimer()
 })
 
 const handleSubmit = async () => {
