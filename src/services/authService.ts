@@ -2,6 +2,14 @@ import type { LoginCredentials } from '@/types/auth'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
+const LOGIN_ERROR_MESSAGES = {
+  invalidCredentials: 'Incorrect username or password. Please try again.',
+  forbidden: 'Your account does not have permission to sign in here.',
+  tooManyRequests: 'Too many login attempts. Please wait a moment and try again.',
+  serviceUnavailable: 'The sign-in service is temporarily unavailable. Please try again later.',
+  generic: 'Unable to sign in right now. Please try again.',
+} as const
+
 const normaliseErrorText = (errorText: string): string => {
   const trimmed = errorText.trim()
   return trimmed.replace(/^['\"]|['\"]$/g, '')
@@ -9,7 +17,7 @@ const normaliseErrorText = (errorText: string): string => {
 
 const getKnownLoginErrorMessage = (key: string): string | undefined => {
   if (key === 'invalidcredentials' || key === 'invalid_credentials') {
-    return 'Incorrect username or password. Please try again.'
+    return LOGIN_ERROR_MESSAGES.invalidCredentials
   }
 
   return undefined
@@ -17,22 +25,22 @@ const getKnownLoginErrorMessage = (key: string): string | undefined => {
 
 const getLoginErrorMessageByStatus = (status: number): string => {
   if (status === 401) {
-    return 'Incorrect username or password. Please try again.'
+    return LOGIN_ERROR_MESSAGES.invalidCredentials
   }
 
   if (status === 403) {
-    return 'Your account does not have permission to sign in here.'
+    return LOGIN_ERROR_MESSAGES.forbidden
   }
 
   if (status === 429) {
-    return 'Too many login attempts. Please wait a moment and try again.'
+    return LOGIN_ERROR_MESSAGES.tooManyRequests
   }
 
   if (status >= 500) {
-    return 'The sign-in service is temporarily unavailable. Please try again later.'
+    return LOGIN_ERROR_MESSAGES.serviceUnavailable
   }
 
-  return 'Unable to sign in right now. Please try again.'
+  return LOGIN_ERROR_MESSAGES.generic
 }
 
 const mapLoginErrorMessage = (errorText: string, status: number): string => {
