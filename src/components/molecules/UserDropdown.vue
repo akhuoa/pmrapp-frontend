@@ -5,8 +5,10 @@ import ConfirmDialog from '@/components/atoms/ConfirmDialog.vue'
 import UserIcon from '@/components/icons/UserIcon.vue'
 import { getAuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth'
+import { useGlobalStateStore } from '@/stores/globalState'
 
 const authStore = useAuthStore()
+const globalStateStore = useGlobalStateStore()
 const router = useRouter()
 const authService = getAuthService()
 
@@ -45,6 +47,10 @@ const handleLogout = async () => {
 
 const cancelLogout = () => {
   showLogoutConfirm.value = false
+}
+
+const handleLoginClick = () => {
+  globalStateStore.requestLoginUsernameFocus()
 }
 
 const handleClickOutside = (event: MouseEvent) => {
@@ -101,6 +107,7 @@ onUnmounted(() => {
     v-else
     to="/login"
     class="nav-link"
+    @click="handleLoginClick"
   >
     Log in
   </RouterLink>

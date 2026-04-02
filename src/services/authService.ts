@@ -2,6 +2,53 @@ import type { LoginCredentials } from '@/types/auth'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
+const normaliseErrorText = (errorText: string): string => {
+  const trimmed = errorText.trim()
+  return trimmed.replace(/^['\"]|['\"]$/g, '')
+}
+
+const getLoginErrorMessage = (key: number | string): string => {
+  if (key === 401 || key === 'invalidcredentials' || key === 'invalid_credentials') {
+    return 'Incorrect username or password. Please try again.'
+  }
+
+  if (key === 403) {
+    return 'Your account does not have permission to sign in here.'
+  }
+
+  if (key === 429) {
+    return 'Too many login attempts. Please wait a moment and try again.'
+  }
+
+  if (typeof key === 'number' && key >= 500) {
+    return 'The sign-in service is temporarily unavailable. Please try again later.'
+  }
+
+  return 'Unable to sign in right now. Please try again.'
+}
+
+const mapLoginErrorMessage = (errorText: string, status: number): string => {
+  if (!errorText) {
+    return getLoginErrorMessage(status)
+  }
+
+  const normalisedText = normaliseErrorText(errorText)
+  const normalisedKey = normalisedText.toLowerCase()
+  const mappedMessage = getLoginErrorMessage(normalisedKey)
+
+  if (mappedMessage) {
+    return mappedMessage
+  }
+
+  // If backend returns machine-style codes, avoid exposing raw text.
+  const looksLikeMachineCode = /^[a-z0-9_-]+$/i.test(normalisedText) || /^[A-Z][a-zA-Z0-9]+$/.test(normalisedText)
+  if (looksLikeMachineCode) {
+    return getLoginErrorMessage(status)
+  }
+
+  return normalisedText
+}
+
 export const authService = {
   async login(credentials: LoginCredentials): Promise<string> {
     const response = await fetch(`${API_BASE_URL}/api/bearer/from_login_password`, {
@@ -14,7 +61,7 @@ export const authService = {
 
     if (!response.ok) {
       const errorText = await response.text()
-      const errorMessage = errorText || `Login failed: ${response.status}`
+      const errorMessage = mapLoginErrorMessage(errorText, response.status)
       throw new Error(errorMessage)
     }
 

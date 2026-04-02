@@ -1,24 +1,75 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import { getAuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth'
 import CloseButton from '@/components/atoms/CloseButton.vue'
+import { useGlobalStateStore } from '@/stores/globalState'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const globalStateStore = useGlobalStateStore()
 const username = ref('')
 const usernameInput = ref<HTMLInputElement | null>(null)
 const password = ref('')
 const error = ref<string | null>(null)
 const isLoading = ref(false)
+const ERROR_AUTO_HIDE_MS = 5000
+let errorTimer: ReturnType<typeof setTimeout> | null = null
 
 const authService = getAuthService()
 
-onMounted(() => {
+const clearErrorTimer = () => {
+  if (!errorTimer) {
+    return
+  }
+
+  clearTimeout(errorTimer)
+  errorTimer = null
+}
+
+const focusUsernameInput = () => {
   usernameInput.value?.focus()
+}
+
+onMounted(() => {
+  focusUsernameInput()
+
+  if (globalStateStore.isLoginUsernameFocusRequested) {
+    focusUsernameInput()
+    globalStateStore.consumeLoginUsernameFocus()
+  }
+})
+
+watch(
+  () => globalStateStore.isLoginUsernameFocusRequested,
+  (isFocusRequested) => {
+    if (!isFocusRequested) {
+      return
+    }
+
+    focusUsernameInput()
+    globalStateStore.consumeLoginUsernameFocus()
+  }
+)
+
+watch(error, (newError) => {
+  clearErrorTimer()
+
+  if (!newError) {
+    return
+  }
+
+  errorTimer = setTimeout(() => {
+    error.value = null
+    errorTimer = null
+  }, ERROR_AUTO_HIDE_MS)
+})
+
+onBeforeUnmount(() => {
+  clearErrorTimer()
 })
 
 const handleSubmit = async () => {
@@ -26,6 +77,7 @@ const handleSubmit = async () => {
 
   if (!username.value || !password.value) {
     error.value = 'Please enter both username and password'
+    focusUsernameInput()
     return
   }
 
@@ -44,6 +96,7 @@ const handleSubmit = async () => {
     router.push('/')
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Login failed'
+    focusUsernameInput()
   } finally {
     isLoading.value = false
   }
