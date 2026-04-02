@@ -436,6 +436,25 @@ describe('ExposureDetail', () => {
     })
   })
 
+  it('renders "How to cite" section with formatted citation', async () => {
+    const wrapper = await mountComponent()
+
+    const sectionHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'How to cite')
+
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('How to cite')
+
+    const sectionContent = sectionHeading?.element.nextElementSibling
+    expect(sectionContent).toBeDefined()
+    expect(sectionContent?.textContent).toContain(
+      'Comparison of Simulated and Measured Calcium Sparks in Intact Skeletal Muscle Fibers of the Frog.',
+    )
+    expect(sectionContent?.textContent).toContain('Baylor et al. 2002.')
+    expect(sectionContent?.textContent).toContain('CellML author(s): Catherine Lloyd')
+  })
+
   it('renders "Licence" section', async () => {
     const wrapper = await mountComponent()
 
