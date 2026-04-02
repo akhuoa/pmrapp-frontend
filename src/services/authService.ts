@@ -7,20 +7,28 @@ const normaliseErrorText = (errorText: string): string => {
   return trimmed.replace(/^['\"]|['\"]$/g, '')
 }
 
-const getLoginErrorMessage = (key: number | string): string => {
-  if (key === 401 || key === 'invalidcredentials' || key === 'invalid_credentials') {
+const getKnownLoginErrorMessage = (key: string): string | undefined => {
+  if (key === 'invalidcredentials' || key === 'invalid_credentials') {
     return 'Incorrect username or password. Please try again.'
   }
 
-  if (key === 403) {
+  return undefined
+}
+
+const getLoginErrorMessageByStatus = (status: number): string => {
+  if (status === 401) {
+    return 'Incorrect username or password. Please try again.'
+  }
+
+  if (status === 403) {
     return 'Your account does not have permission to sign in here.'
   }
 
-  if (key === 429) {
+  if (status === 429) {
     return 'Too many login attempts. Please wait a moment and try again.'
   }
 
-  if (typeof key === 'number' && key >= 500) {
+  if (status >= 500) {
     return 'The sign-in service is temporarily unavailable. Please try again later.'
   }
 
@@ -29,12 +37,12 @@ const getLoginErrorMessage = (key: number | string): string => {
 
 const mapLoginErrorMessage = (errorText: string, status: number): string => {
   if (!errorText) {
-    return getLoginErrorMessage(status)
+    return getLoginErrorMessageByStatus(status)
   }
 
   const normalisedText = normaliseErrorText(errorText)
   const normalisedKey = normalisedText.toLowerCase()
-  const mappedMessage = getLoginErrorMessage(normalisedKey)
+  const mappedMessage = getKnownLoginErrorMessage(normalisedKey)
 
   if (mappedMessage) {
     return mappedMessage
@@ -43,10 +51,11 @@ const mapLoginErrorMessage = (errorText: string, status: number): string => {
   // If backend returns machine-style codes, avoid exposing raw text.
   const looksLikeMachineCode = /^[a-z0-9_-]+$/i.test(normalisedText) || /^[A-Z][a-zA-Z0-9]+$/.test(normalisedText)
   if (looksLikeMachineCode) {
-    return getLoginErrorMessage(status)
+    return getLoginErrorMessageByStatus(status)
   }
 
-  return normalisedText
+  // Preserve human-readable backend detail for unknown cases.
+  return normalisedText || getLoginErrorMessageByStatus(status)
 }
 
 export const authService = {
