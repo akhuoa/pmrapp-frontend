@@ -6,9 +6,11 @@ import ActionButton from '@/components/atoms/ActionButton.vue'
 import { getAuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth'
 import CloseButton from '@/components/atoms/CloseButton.vue'
+import { useGlobalStateStore } from '@/stores/globalState'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const globalStateStore = useGlobalStateStore()
 const username = ref('')
 const usernameInput = ref<HTMLInputElement | null>(null)
 const password = ref('')
@@ -28,9 +30,30 @@ const clearErrorTimer = () => {
   errorTimer = null
 }
 
-onMounted(() => {
+const focusUsernameInput = () => {
   usernameInput.value?.focus()
+}
+
+onMounted(() => {
+  focusUsernameInput()
+
+  if (globalStateStore.isLoginUsernameFocusRequested) {
+    focusUsernameInput()
+    globalStateStore.consumeLoginUsernameFocus()
+  }
 })
+
+watch(
+  () => globalStateStore.isLoginUsernameFocusRequested,
+  (isFocusRequested) => {
+    if (!isFocusRequested) {
+      return
+    }
+
+    focusUsernameInput()
+    globalStateStore.consumeLoginUsernameFocus()
+  }
+)
 
 watch(error, (newError) => {
   clearErrorTimer()
