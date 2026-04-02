@@ -3,7 +3,6 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
-import BackButton from '@/components/atoms/BackButton.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
@@ -13,8 +12,9 @@ import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import LoadingIcon from '@/components/icons/LoadingIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
+import Breadcrumbs from '@/components/molecules/Breadcrumbs.vue'
+import type { BreadcrumbItem } from '@/components/molecules/Breadcrumbs.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
-import { useBackNavigation } from '@/composables/useBackNavigation'
 import { downloadCOMBINEArchive, downloadWorkspaceArchive } from '@/services/downloadUrlService'
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
@@ -94,7 +94,6 @@ const hasOtherRelatedModels = ref(false)
 const isDownloadingWorkspaceZip = ref(false)
 const isDownloadingWorkspaceTgz = ref(false)
 const isDownloadingCOMBINE = ref(false)
-const { goBack } = useBackNavigation('/exposures')
 
 const router = useRouter()
 const searchStore = useSearchStore()
@@ -103,6 +102,11 @@ const searchStore = useSearchStore()
 // It is not a part of the API request parameters.
 // Note: Keep as "exposure" (singular) to match server file paths, not the router path.
 const routePath = `/exposure/${props.alias}`
+
+const exposureTitle = computed(() => {
+  if (!exposureInfo.value) return props.alias
+  return exposureInfo.value.exposure.description || `Exposure ${exposureInfo.value.exposure.id}`
+})
 
 const pageTitle = computed(() => {
   if (props.view) {
@@ -114,8 +118,24 @@ const pageTitle = computed(() => {
       return `${viewEntry.name}`
     }
   }
-  if (!exposureInfo.value) return ''
-  return exposureInfo.value.exposure.description || `Exposure ${exposureInfo.value.exposure.id}`
+  return exposureTitle.value || ''
+})
+
+const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
+  const items: BreadcrumbItem[] = [{ label: 'Exposures', to: '/exposures' }]
+
+  if (props.file && props.view) {
+    items.push({ label: exposureTitle.value, to: `/exposures/${props.alias}` })
+    items.push({ label: props.file, to: `/exposures/${props.alias}/${props.file}` })
+    items.push({ label: props.view })
+  } else if (props.file) {
+    items.push({ label: exposureTitle.value, to: `/exposures/${props.alias}` })
+    items.push({ label: props.file })
+  } else {
+    items.push({ label: exposureTitle.value })
+  }
+
+  return items
 })
 
 const openCORFiles = computed(() => {
@@ -467,11 +487,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <BackButton
-    label="Back to exposures"
-    content-section="Exposure Detail"
-    :on-click="goBack"
-  />
+  <Breadcrumbs :items="breadcrumbItems" />
 
   <ErrorBlock
     v-if="error"
