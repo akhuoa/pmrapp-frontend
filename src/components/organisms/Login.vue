@@ -77,6 +77,7 @@ const handleSubmit = async () => {
 
   if (!username.value || !password.value) {
     error.value = 'Please enter both username and password'
+    focusUsernameInput()
     return
   }
 
@@ -95,6 +96,7 @@ const handleSubmit = async () => {
     router.push('/')
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Login failed'
+    focusUsernameInput()
   } finally {
     isLoading.value = false
   }
