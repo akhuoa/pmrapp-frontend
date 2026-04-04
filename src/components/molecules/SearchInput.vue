@@ -335,22 +335,6 @@ defineExpose({
             </div>
           </div>
           <div
-            v-if="workspacesCount > 0"
-            class="result-group"
-          >
-            <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              Workspaces
-            </h4>
-            <button
-              type="button"
-              ref="workspacesButtonRef"
-              class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
-              @click="handleWorkspacesClick"
-            >
-              See {{ formatNumber(workspacesCount) }} matching workspace{{ workspacesCount !== 1 ? 's' : '' }}
-            </button>
-          </div>
-          <div
             v-if="exposuresCount > 0"
             class="result-group"
           >
@@ -364,6 +348,22 @@ defineExpose({
               @click="handleExposuresClick"
             >
               See {{ formatNumber(exposuresCount) }} matching exposure{{ exposuresCount !== 1 ? 's' : '' }}
+            </button>
+          </div>
+          <div
+            v-if="workspacesCount > 0"
+            class="result-group"
+          >
+            <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              Workspaces
+            </h4>
+            <button
+              type="button"
+              ref="workspacesButtonRef"
+              class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
+              @click="handleWorkspacesClick"
+            >
+              See {{ formatNumber(workspacesCount) }} matching workspace{{ workspacesCount !== 1 ? 's' : '' }}
             </button>
           </div>
         </div>
