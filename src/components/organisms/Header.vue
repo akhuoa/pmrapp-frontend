@@ -21,8 +21,8 @@ const handleSearchClick = () => {
 }
 
 const navLinks = [
-  { path: '/workspaces', label: 'Workspaces' },
   { path: '/exposures', label: 'Exposures' },
+  { path: '/workspaces', label: 'Workspaces' },
 ]
 
 const isActive = (path: string) => computed(() => route.path.startsWith(path))
