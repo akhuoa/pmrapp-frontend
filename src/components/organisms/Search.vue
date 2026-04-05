@@ -100,8 +100,9 @@ const hasResults = computed(() => searchResults.value.length > 0)
 </script>
 
 <template>
-  <div class="flex items-center justify-between">
+  <div class="flex items-center justify-between gap-4">
     <SearchInput
+      class="flex-1"
       ref="searchInputRef"
       :initial-kind="kind"
       :initial-term="term"
