@@ -16,12 +16,13 @@ const searchInputRef = ref<InstanceType<typeof SearchInput> | null>(null)
 
 let isMouseDownOnBackdrop = false
 
-const handleBackdropMouseDown = () => {
+const handleBackdropMouseDown = (event: MouseEvent) => {
+  if (event.button !== 0) return
   isMouseDownOnBackdrop = true
 }
 
-const handleBackdropClick = () => {
-  if (isMouseDownOnBackdrop) {
+const handleBackdropMouseUp = (event: MouseEvent) => {
+  if (isMouseDownOnBackdrop && event.target === event.currentTarget) {
     emit('close')
   }
   isMouseDownOnBackdrop = false
@@ -43,6 +44,7 @@ watch(
       document.addEventListener('keydown', handleKeyDown)
     } else {
       document.removeEventListener('keydown', handleKeyDown)
+      isMouseDownOnBackdrop = false
     }
   },
 )
@@ -82,7 +84,7 @@ const getInitialKind = (): string => {
     v-if="show"
     class="fixed inset-0 bg-gray-800/75 dark:bg-gray-900/75 z-50 flex justify-center items-start pt-20"
     @mousedown.self="handleBackdropMouseDown"
-    @click.self="handleBackdropClick"
+    @mouseup="handleBackdropMouseUp"
   >
     <div class="w-full max-w-4xl bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
       <div class="flex justify-between items-center mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
