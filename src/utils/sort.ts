@@ -1,4 +1,6 @@
 import type { SortableEntity, SortOption } from '@/types/common'
+import type { SearchResult } from '@/types/search'
+import { getExposureIdFromResourcePath } from '@/utils/exposure'
 
 /**
  * Grouped sort options for dropdown with two groups: Fields and Direction
@@ -41,6 +43,78 @@ export const isValidSortOption = (value: unknown): value is SortOption => {
   const directions =
     SORT_OPTIONS_GROUPED.find((g) => g.group === 'Direction')?.options.map((o) => o.value) ?? []
   return fields.some((f) => directions.some((d) => `${f}-${d}` === value))
+}
+
+/**
+ * Sorting function for search results, which use a different data shape to SortableEntity.
+ */
+export function sortSearchResults(items: SearchResult[], sortBy: SortOption): SearchResult[] {
+  return [...items].sort((a, b) => {
+    switch (sortBy) {
+      case 'description-asc': {
+        const descA = a.data.description?.[0] ?? null
+        const descB = b.data.description?.[0] ?? null
+
+        if (descA === null && descB === null) return 0
+        if (descA === null) return 1
+        if (descB === null) return -1
+
+        return descA.localeCompare(descB)
+      }
+      case 'description-desc': {
+        const descA = a.data.description?.[0] ?? null
+        const descB = b.data.description?.[0] ?? null
+
+        if (descA === null && descB === null) return 0
+        if (descA === null) return 1
+        if (descB === null) return -1
+
+        return descB.localeCompare(descA)
+      }
+      case 'id-asc': {
+        const idA = getExposureIdFromResourcePath(a.resource_path)
+        const idB = getExposureIdFromResourcePath(b.resource_path)
+
+        if (idA === null && idB === null) return 0
+        if (idA === null) return 1
+        if (idB === null) return -1
+
+        return idA - idB
+      }
+      case 'id-desc': {
+        const idA = getExposureIdFromResourcePath(a.resource_path)
+        const idB = getExposureIdFromResourcePath(b.resource_path)
+
+        if (idA === null && idB === null) return 0
+        if (idA === null) return 1
+        if (idB === null) return -1
+
+        return idB - idA
+      }
+      case 'date-asc': {
+        const dateA = a.data.created_ts?.[0] != null ? Number(a.data.created_ts[0]) : null
+        const dateB = b.data.created_ts?.[0] != null ? Number(b.data.created_ts[0]) : null
+
+        if (dateA === null && dateB === null) return 0
+        if (dateA === null) return 1
+        if (dateB === null) return -1
+
+        return dateA - dateB
+      }
+      case 'date-desc': {
+        const dateA = a.data.created_ts?.[0] != null ? Number(a.data.created_ts[0]) : null
+        const dateB = b.data.created_ts?.[0] != null ? Number(b.data.created_ts[0]) : null
+
+        if (dateA === null && dateB === null) return 0
+        if (dateA === null) return 1
+        if (dateB === null) return -1
+
+        return dateB - dateA
+      }
+      default:
+        return 0
+    }
+  })
 }
 
 /**
