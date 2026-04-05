@@ -14,6 +14,19 @@ const router = useRouter()
 const route = useRoute()
 const searchInputRef = ref<InstanceType<typeof SearchInput> | null>(null)
 
+let isMouseDownOnBackdrop = false
+
+const handleBackdropMouseDown = () => {
+  isMouseDownOnBackdrop = true
+}
+
+const handleBackdropClick = () => {
+  if (isMouseDownOnBackdrop) {
+    emit('close')
+  }
+  isMouseDownOnBackdrop = false
+}
+
 const handleKeyDown = (event: KeyboardEvent) => {
   if (event.key === 'Escape') {
     emit('close')
@@ -68,7 +81,8 @@ const getInitialKind = (): string => {
   <div
     v-if="show"
     class="fixed inset-0 bg-gray-800/75 dark:bg-gray-900/75 z-50 flex justify-center items-start pt-20"
-    @click.self="emit('close')"
+    @mousedown.self="handleBackdropMouseDown"
+    @click.self="handleBackdropClick"
   >
     <div class="w-full max-w-4xl bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
       <div class="flex justify-between items-center mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
