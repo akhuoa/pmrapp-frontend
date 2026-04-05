@@ -89,7 +89,9 @@ const loadResults = async () => {
 }
 
 const handleSearch = (searchKind: string, searchTerm: string) => {
-  router.push({ path: '/search', query: { kind: searchKind, term: searchTerm } })
+  const query: Record<string, string> = { kind: searchKind, term: searchTerm }
+  if (sortBy.value !== DEFAULT_SORT_OPTION) query.sort = sortBy.value
+  router.push({ path: '/search', query })
 }
 
 const sortedResults = computed(() => sortSearchResults(searchResults.value, sortBy.value))
