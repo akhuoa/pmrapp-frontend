@@ -100,16 +100,22 @@ const hasResults = computed(() => searchResults.value.length > 0)
 </script>
 
 <template>
-  <SearchInput ref="searchInputRef" :initial-kind="kind" :initial-term="term" @search="handleSearch" />
+  <div class="flex items-center justify-between">
+    <SearchInput
+      ref="searchInputRef"
+      :initial-kind="kind"
+      :initial-term="term"
+      @search="handleSearch"
+    />
+    <SortDropdown
+      v-if="hasResults || isLoading"
+      :model-value="sortBy"
+      :options="SORT_OPTIONS_GROUPED"
+      @update:model-value="(value) => (sortBy = value)"
+    />
+  </div>
   <div class="mt-8">
     <main class="flex-1 min-w-0 relative">
-      <div v-if="hasResults || isLoading" class="mb-4 flex justify-end">
-        <SortDropdown
-          :model-value="sortBy"
-          :options="SORT_OPTIONS_GROUPED"
-          @update:model-value="(value) => (sortBy = value)"
-        />
-      </div>
       <SearchResults
         :results="sortedResults"
         :is-loading="isLoading"
