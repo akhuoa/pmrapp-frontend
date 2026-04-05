@@ -10,6 +10,8 @@ import { useSearchStore } from '@/stores/search'
 import type { SortOption } from '@/types/common'
 import type { SearchResult } from '@/types/search'
 import { DEFAULT_SORT_OPTION, SORT_OPTIONS_GROUPED, isValidSortOption, sortSearchResults } from '@/utils/sort'
+import ActionButton from '@/components/atoms/ActionButton.vue'
+import RefreshIcon from '@/components/icons/RefreshIcon.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -97,12 +99,16 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
 const sortedResults = computed(() => sortSearchResults(searchResults.value, sortBy.value))
 
 const hasResults = computed(() => searchResults.value.length > 0)
+
+const handleRefresh = () => {
+  // emit('refresh')
+}
 </script>
 
 <template>
-  <div class="flex items-center justify-between gap-4">
+  <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
     <SearchInput
-      class="flex-1"
+      class="flex-1 w-full sm:w-auto"
       ref="searchInputRef"
       :initial-kind="kind"
       :initial-term="term"
@@ -114,6 +120,16 @@ const hasResults = computed(() => searchResults.value.length > 0)
       :options="SORT_OPTIONS_GROUPED"
       @update:model-value="(value) => (sortBy = value)"
     />
+    <ActionButton
+      variant="secondary"
+      size="lg"
+      :disabled="isLoading"
+      content-section="Search Results"
+      @click="handleRefresh"
+    >
+      <RefreshIcon />
+      <span>{{ isLoading ? 'Loading...' : 'Refresh' }}</span>
+    </ActionButton>
   </div>
   <div class="mt-8">
     <main class="flex-1 min-w-0 relative">
