@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import type { SearchResult } from '@/types/search'
 import { sortSearchResults } from '@/utils/sort'
 
-const makeResult = (overrides: Partial<SearchResult['data']> & { resource_path?: string }): SearchResult => ({
+const makeResult = (
+  overrides: Partial<SearchResult['data']> & { resource_path?: string },
+): SearchResult => ({
   resource_path: overrides.resource_path ?? '/exposure/1/file.cellml',
   data: {
     aliased_uri: [],
@@ -17,19 +19,39 @@ const makeResult = (overrides: Partial<SearchResult['data']> & { resource_path?:
   },
 })
 
-const resultA = makeResult({ resource_path: '/exposure/10/a.cellml', description: ['Alpha model'], created_ts: ['1000'] })
-const resultB = makeResult({ resource_path: '/exposure/20/b.cellml', description: ['Beta model'],  created_ts: ['2000'] })
-const resultC = makeResult({ resource_path: '/exposure/5/c.cellml',  description: ['Gamma model'], created_ts: ['500']  })
+const resultA = makeResult({
+  resource_path: '/exposure/10/a.cellml',
+  description: ['Alpha model'],
+  created_ts: ['1000'],
+})
+const resultB = makeResult({
+  resource_path: '/exposure/20/b.cellml',
+  description: ['Beta model'],
+  created_ts: ['2000'],
+})
+const resultC = makeResult({
+  resource_path: '/exposure/5/c.cellml',
+  description: ['Gamma model'],
+  created_ts: ['500'],
+})
 
 describe('sortSearchResults – description', () => {
   it('sorts by description ascending', () => {
     const sorted = sortSearchResults([resultC, resultB, resultA], 'description-asc')
-    expect(sorted.map((r) => r.data.description[0])).toEqual(['Alpha model', 'Beta model', 'Gamma model'])
+    expect(sorted.map((r) => r.data.description[0])).toEqual([
+      'Alpha model',
+      'Beta model',
+      'Gamma model',
+    ])
   })
 
   it('sorts by description descending', () => {
     const sorted = sortSearchResults([resultA, resultC, resultB], 'description-desc')
-    expect(sorted.map((r) => r.data.description[0])).toEqual(['Gamma model', 'Beta model', 'Alpha model'])
+    expect(sorted.map((r) => r.data.description[0])).toEqual([
+      'Gamma model',
+      'Beta model',
+      'Alpha model',
+    ])
   })
 
   it('places items with null description at the end when sorting ascending', () => {

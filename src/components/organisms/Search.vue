@@ -9,7 +9,12 @@ import { useGlobalStateStore } from '@/stores/globalState'
 import { useSearchStore } from '@/stores/search'
 import type { SortOption } from '@/types/common'
 import type { SearchResult } from '@/types/search'
-import { DEFAULT_SORT_OPTION, SORT_OPTIONS_GROUPED, isValidSortOption, sortSearchResults } from '@/utils/sort'
+import {
+  DEFAULT_SORT_OPTION,
+  SORT_OPTIONS_GROUPED,
+  isValidSortOption,
+  sortSearchResults,
+} from '@/utils/sort'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import RefreshIcon from '@/components/icons/RefreshIcon.vue'
 
