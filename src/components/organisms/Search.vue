@@ -2,6 +2,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import ActionButton from '@/components/atoms/ActionButton.vue'
+import RefreshIcon from '@/components/icons/RefreshIcon.vue'
 import SearchInput from '@/components/molecules/SearchInput.vue'
 import SearchResults from '@/components/molecules/SearchResults.vue'
 import SortDropdown from '@/components/molecules/SortDropdown.vue'
@@ -11,12 +13,10 @@ import type { SortOption } from '@/types/common'
 import type { SearchResult } from '@/types/search'
 import {
   DEFAULT_SORT_OPTION,
-  SORT_OPTIONS_GROUPED,
   isValidSortOption,
+  SORT_OPTIONS_GROUPED,
   sortSearchResults,
 } from '@/utils/sort'
-import ActionButton from '@/components/atoms/ActionButton.vue'
-import RefreshIcon from '@/components/icons/RefreshIcon.vue'
 
 const route = useRoute()
 const router = useRouter()
