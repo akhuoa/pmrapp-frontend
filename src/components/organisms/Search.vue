@@ -69,7 +69,7 @@ watch([kind, term], async () => {
   await loadResults()
 })
 
-const loadResults = async () => {
+const loadResults = async (forceRefresh = false) => {
   if (!kind.value || !term.value) {
     // If no search parameters are provided, do not redirect.
     // Simply return without loading results to avoid confusing UX.
@@ -81,7 +81,7 @@ const loadResults = async () => {
   searchResults.value = []
 
   try {
-    searchResults.value = await searchStore.searchIndexTerm(kind.value, term.value)
+    searchResults.value = await searchStore.searchIndexTerm(kind.value, term.value, forceRefresh)
   } catch (err) {
     resultsError.value = err instanceof Error ? err.message : 'Failed to load search results'
     console.error('Failed to load search results:', err)
@@ -100,8 +100,8 @@ const sortedResults = computed(() => sortSearchResults(searchResults.value, sort
 
 const hasResults = computed(() => searchResults.value.length > 0)
 
-const handleRefresh = () => {
-  // emit('refresh')
+const handleRefresh = async () => {
+  await loadResults(true)
 }
 </script>
 
