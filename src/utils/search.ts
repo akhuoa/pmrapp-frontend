@@ -1,7 +1,7 @@
+import type { LocationQuery, LocationQueryRaw } from 'vue-router'
 import type { SortableEntity } from '@/types/common'
 import type { QueryFilterOptions, TextSegment } from '@/types/search'
 import { DEFAULT_SORT_OPTION, isValidSortOption } from '@/utils/sort'
-import type { LocationQuery, LocationQueryRaw } from 'vue-router'
 
 /**
  * Returns true if a search term is valid (non-empty and not a broken URN).
