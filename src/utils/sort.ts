@@ -65,7 +65,11 @@ const compareNullableNumber = (a: number | null, b: number | null, desc = false)
   return desc ? b - a : a - b
 }
 
-const sortByValues = <T>(items: T[], sortBy: SortOption, getValues: (item: T) => SortValues): T[] => {
+const sortByValues = <T>(
+  items: T[],
+  sortBy: SortOption,
+  getValues: (item: T) => SortValues,
+): T[] => {
   return [...items].sort((a, b) => {
     const valuesA = getValues(a)
     const valuesB = getValues(b)
