@@ -14,16 +14,42 @@ import 'prismjs/components/prism-markdown'
 import 'prismjs/components/prism-matlab'
 import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
 import 'prismjs/plugins/line-numbers/prism-line-numbers'
+import { usePrismHighlight } from '@/composables/usePrismHighlight'
+
+// Minimal HTML entity encoding used to display plain text before the service
+// worker has finished highlighting the code.
+const escapeHtml = (text: string): string =>
+  text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
 
 const props = defineProps<{
   code: string
   filename: string
 }>()
 
+const { highlight } = usePrismHighlight()
+
 const codeBlock = ref<HTMLElement | null>(null)
 const preBlock = ref<HTMLElement | null>(null)
 const darkThemeMediaQuery = ref<MediaQueryList | null>(null)
 const isWrapped = ref(false)
+const isHighlighting = ref(false)
+
+// Holds the v-html content for the <code> element.
+// Initialised with escaped plain text so the file is immediately visible
+// before the service worker has finished highlighting.
+const displayCode = ref(escapeHtml(props.code))
+
+// Generation counter used to discard stale service-worker responses when the
+// displayed file changes while a previous request is still in flight.
+// Declared with `let` in <script setup> – each component instance gets its own
+// copy because Vue runs the setup function once per instance.
+let requestGeneration = 0
+
 let observer: ResizeObserver | null = null
 
 const preformatClass = [
@@ -76,20 +102,57 @@ const detectedLanguage = computed(() => {
   return ext ? languageMap[ext] || 'plaintext' : 'none'
 })
 
-const highlightCode = async () => {
-  await nextTick()
-  if (codeBlock.value && props.code) {
-    try {
-      // Clear previous highlighting.
-      codeBlock.value.removeAttribute('data-highlighted')
+/**
+ * Remove any stale line-number rows injected by the Prism line-numbers plugin
+ * from a previous highlighting pass so the plugin rebuilds them correctly.
+ */
+const clearLineNumberRows = () => {
+  preBlock.value?.querySelectorAll('.line-numbers-rows').forEach((el) => {
+    el.remove()
+  })
+}
 
-      if (detectedLanguage.value !== 'none') {
-        Prism.highlightElement(codeBlock.value)
-      }
-    } catch (err) {
-      console.error('Error highlighting code:', err)
-    }
+/**
+ * Fire the Prism lifecycle hooks that the line-numbers plugin listens to.
+ * Must be called after the highlighted HTML has been flushed to the DOM.
+ */
+const triggerLineNumberHooks = () => {
+  if (!codeBlock.value || !preBlock.value) return
+  const env = {
+    element: codeBlock.value,
+    language: detectedLanguage.value,
+    grammar: Prism.languages[detectedLanguage.value],
+    code: props.code,
   }
+  Prism.hooks.run('after-highlight', env)
+  Prism.hooks.run('complete', env)
+}
+
+const highlightCode = async () => {
+  if (!props.code || detectedLanguage.value === 'none') {
+    displayCode.value = escapeHtml(props.code)
+    return
+  }
+
+  // Show plain text immediately while the service worker processes the code.
+  displayCode.value = escapeHtml(props.code)
+  isHighlighting.value = true
+  const generation = ++requestGeneration
+
+  // The composable sends work to the Prism service worker and returns the
+  // highlighted HTML.  If the service worker is unavailable it falls back to
+  // running Prism.highlight() on the main thread transparently.
+  const html = await highlight(props.code, detectedLanguage.value)
+
+  // Discard stale results if a newer request was dispatched while this one
+  // was being processed.
+  if (generation !== requestGeneration) return
+
+  clearLineNumberRows()
+  displayCode.value = html
+  await nextTick()
+  triggerLineNumberHooks()
+  isHighlighting.value = false
 }
 
 const syncWrapAndLineNumbers = async () => {
@@ -100,6 +163,9 @@ const syncWrapAndLineNumbers = async () => {
   codeBlock.value.classList.toggle('!whitespace-pre-wrap', isWrapped.value)
 
   await nextTick()
+
+  // Re-check refs after await in case the component was unmounted.
+  if (!preBlock.value) return
 
   if (!isWrapped.value) {
     const lineSpans = preBlock.value.querySelectorAll('.line-numbers-rows > span')
@@ -203,13 +269,20 @@ watch(
 
 <template>
   <div>
+    <div
+      v-if="isHighlighting"
+      class="animate-pulse bg-gray-100 dark:bg-gray-800 rounded px-3 py-2 text-sm text-gray-500 dark:text-gray-400 mb-2"
+    >
+      Highlighting code…
+    </div>
     <pre
       ref="preBlock"
       :class="preformatClass"
     ><code
       ref="codeBlock"
       :class="`language-${detectedLanguage}`"
-    >{{ code }}</code></pre>
+      v-html="displayCode"
+    ></code></pre>
   </div>
 </template>
 
@@ -240,3 +313,4 @@ code {
   }
 }
 </style>
+
