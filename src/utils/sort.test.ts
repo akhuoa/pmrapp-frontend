@@ -113,6 +113,17 @@ describe('sortSearchResults – date', () => {
     expect(sorted[0].data.created_ts[0]).toBe('1000')
     expect(sorted[1].data.created_ts).toEqual([])
   })
+
+  it('places items with an unparseable date at the end', () => {
+    const invalidDate = makeResult({
+      resource_path: '/exposure/99/invalid.cellml',
+      description: ['Invalid date'],
+      created_ts: ['not-a-number'],
+    })
+    const sorted = sortSearchResults([invalidDate, resultA], 'date-asc')
+    expect(sorted[0].data.created_ts[0]).toBe('1000')
+    expect(sorted[1].resource_path).toBe('/exposure/99/invalid.cellml')
+  })
 })
 
 describe('sortSearchResults – does not mutate the original array', () => {
