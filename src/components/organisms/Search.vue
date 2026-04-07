@@ -126,6 +126,7 @@ const handleRefresh = async () => {
       @update:model-value="(value) => (sortBy = value)"
     />
     <ActionButton
+      v-if="hasResults || isLoading"
       variant="secondary"
       size="lg"
       :disabled="isLoading"
