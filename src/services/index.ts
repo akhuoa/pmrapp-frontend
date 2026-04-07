@@ -1,5 +1,6 @@
 import { authService } from './authService'
 import { exposureService } from './exposureService'
+import { highlightService } from './highlightService'
 import { searchService } from './searchService'
 import { workspaceService } from './workspaceService'
 
@@ -8,3 +9,4 @@ export const getWorkspaceService = () => workspaceService
 export const getExposureService = () => exposureService
 export const getAuthService = () => authService
 export const getSearchService = () => searchService
+export const getHighlightService = () => highlightService
