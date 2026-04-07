@@ -15,6 +15,9 @@ import 'prismjs/components/prism-matlab'
 import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
 import 'prismjs/plugins/line-numbers/prism-line-numbers'
 
+// Files larger than this threshold will not be syntax-highlighted to prevent browser freeze.
+const MAX_HIGHLIGHT_SIZE_BYTES = 500 * 1024 // 500 KB
+
 const props = defineProps<{
   code: string
   filename: string
@@ -26,18 +29,22 @@ const darkThemeMediaQuery = ref<MediaQueryList | null>(null)
 const isWrapped = ref(false)
 let observer: ResizeObserver | null = null
 
-const preformatClass = [
-  'line-numbers',
-  'bg-gray-50',
-  'dark:bg-gray-900',
-  'rounded',
-  'overflow-x-auto',
-  'text-sm!',
-  'm-0!',
-  'transition-all',
-  'duration-200',
-  'ease-in-out',
-].join(' ')
+const isTooLargeForHighlighting = computed(() => props.code.length > MAX_HIGHLIGHT_SIZE_BYTES)
+
+const preformatClass = computed(() =>
+  [
+    ...(!isTooLargeForHighlighting.value ? ['line-numbers'] : []),
+    'bg-gray-50',
+    'dark:bg-gray-900',
+    'rounded',
+    'overflow-x-auto',
+    'text-sm!',
+    'm-0!',
+    'transition-all',
+    'duration-200',
+    'ease-in-out',
+  ].join(' '),
+)
 
 const detectedLanguage = computed(() => {
   const ext = props.filename.split('.').pop()?.toLowerCase()
@@ -83,7 +90,7 @@ const highlightCode = async () => {
       // Clear previous highlighting.
       codeBlock.value.removeAttribute('data-highlighted')
 
-      if (detectedLanguage.value !== 'none') {
+      if (detectedLanguage.value !== 'none' && !isTooLargeForHighlighting.value) {
         Prism.highlightElement(codeBlock.value)
       }
     } catch (err) {
@@ -100,6 +107,9 @@ const syncWrapAndLineNumbers = async () => {
   codeBlock.value.classList.toggle('!whitespace-pre-wrap', isWrapped.value)
 
   await nextTick()
+
+  // Re-check refs after await in case the component was unmounted.
+  if (!preBlock.value) return
 
   if (!isWrapped.value) {
     const lineSpans = preBlock.value.querySelectorAll('.line-numbers-rows > span')
@@ -203,6 +213,12 @@ watch(
 
 <template>
   <div>
+    <div
+      v-if="isTooLargeForHighlighting"
+      class="bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded px-3 py-2 text-sm text-amber-800 dark:text-amber-200 mb-2"
+    >
+      ⚠️ This file is too large for syntax highlighting. Displaying raw content.
+    </div>
     <pre
       ref="preBlock"
       :class="preformatClass"
