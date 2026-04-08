@@ -1,5 +1,13 @@
 import Prism from 'prismjs'
 
+const escapeHtml = (text: string): string =>
+  text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+
 /**
  * URL of the compiled service worker script.
  *
@@ -60,7 +68,7 @@ function getServiceWorker(): Promise<ServiceWorker | null> {
 /** Synchronous main-thread fallback using `Prism.highlight()`. */
 function mainThreadHighlight(code: string, language: string): string {
   const grammar = Prism.languages[language]
-  return grammar ? Prism.highlight(code, grammar, language) : ''
+  return grammar ? Prism.highlight(code, grammar, language) : escapeHtml(code)
 }
 
 /**

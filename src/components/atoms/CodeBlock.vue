@@ -1,19 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import Prism from 'prismjs'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import 'prismjs/components/prism-markup'
-import 'prismjs/components/prism-css'
-import 'prismjs/components/prism-c'
-import 'prismjs/components/prism-cpp'
-import 'prismjs/components/prism-fortran'
-import 'prismjs/components/prism-javascript'
-import 'prismjs/components/prism-json'
-import 'prismjs/components/prism-python'
-import 'prismjs/components/prism-markdown'
-import 'prismjs/components/prism-matlab'
-import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
-import 'prismjs/plugins/line-numbers/prism-line-numbers'
 import { usePrismHighlight } from '@/composables/usePrismHighlight'
 
 // Minimal HTML entity encoding used to display plain text before the service
@@ -50,10 +37,7 @@ const displayCode = ref(escapeHtml(props.code))
 // copy because Vue runs the setup function once per instance.
 let requestGeneration = 0
 
-let observer: ResizeObserver | null = null
-
 const preformatClass = [
-  'line-numbers',
   'bg-gray-50',
   'dark:bg-gray-900',
   'rounded',
@@ -102,32 +86,6 @@ const detectedLanguage = computed(() => {
   return ext ? languageMap[ext] || 'plaintext' : 'none'
 })
 
-/**
- * Remove any stale line-number rows injected by the Prism line-numbers plugin
- * from a previous highlighting pass so the plugin rebuilds them correctly.
- */
-const clearLineNumberRows = () => {
-  preBlock.value?.querySelectorAll('.line-numbers-rows').forEach((el) => {
-    el.remove()
-  })
-}
-
-/**
- * Fire the Prism lifecycle hooks that the line-numbers plugin listens to.
- * Must be called after the highlighted HTML has been flushed to the DOM.
- */
-const triggerLineNumberHooks = () => {
-  if (!codeBlock.value || !preBlock.value) return
-  const env = {
-    element: codeBlock.value,
-    language: detectedLanguage.value,
-    grammar: Prism.languages[detectedLanguage.value],
-    code: props.code,
-  }
-  Prism.hooks.run('after-highlight', env)
-  Prism.hooks.run('complete', env)
-}
-
 const highlightCode = async () => {
   if (!props.code || detectedLanguage.value === 'none') {
     displayCode.value = escapeHtml(props.code)
@@ -148,10 +106,8 @@ const highlightCode = async () => {
   // was being processed.
   if (generation !== requestGeneration) return
 
-  clearLineNumberRows()
   displayCode.value = html
   await nextTick()
-  triggerLineNumberHooks()
   isHighlighting.value = false
 }
 
@@ -168,15 +124,7 @@ const syncWrapAndLineNumbers = async () => {
   if (!preBlock.value) return
 
   if (!isWrapped.value) {
-    const lineSpans = preBlock.value.querySelectorAll('.line-numbers-rows > span')
-    lineSpans.forEach((span) => {
-      const lineSpan = span as HTMLElement
-      lineSpan.style.height = ''
-    })
-  }
-
-  if (Prism.plugins.lineNumbers?.resize) {
-    Prism.plugins.lineNumbers.resize(preBlock.value)
+    return
   }
 }
 
@@ -235,27 +183,11 @@ onMounted(() => {
 
   // Listen for theme changes.
   darkThemeMediaQuery.value.addEventListener('change', handleThemeChange)
-
-  if (preBlock.value && typeof ResizeObserver === 'function') {
-    observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        if (Prism.plugins.lineNumbers?.resize) {
-          Prism.plugins.lineNumbers.resize(entry.target as HTMLElement)
-        }
-      }
-    })
-
-    observer.observe(preBlock.value)
-  }
 })
 
 onBeforeUnmount(() => {
   if (darkThemeMediaQuery.value) {
     darkThemeMediaQuery.value.removeEventListener('change', handleThemeChange)
-  }
-
-  if (observer) {
-    observer.disconnect()
   }
 })
 
@@ -297,9 +229,6 @@ code {
   font-family: inherit;
 }
 
-:deep(.line-numbers-rows > span) {
-  transition: height 0.2s ease-in-out;
-}
 </style>
 
 <style>
