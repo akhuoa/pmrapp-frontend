@@ -13,6 +13,7 @@ import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { downloadWorkspaceArchive } from '@/services/downloadUrlService'
 import { useWorkspaceStore } from '@/stores/workspace'
+import type { ErrorInfo } from '@/types/error'
 import type { WorkspaceInfo } from '@/types/workspace'
 import { downloadWorkspaceFile } from '@/utils/download'
 import { formatFileCount } from '@/utils/format'
@@ -26,7 +27,7 @@ const props = defineProps<{
 const router = useRouter()
 const workspaceStore = useWorkspaceStore()
 const workspaceInfo = ref<WorkspaceInfo | null>(null)
-const error = ref<string | null>(null)
+const error = ref<ErrorInfo | null>(null)
 const isLoading = ref(true)
 const isDownloadingWorkspaceZip = ref(false)
 const isDownloadingWorkspaceTgz = ref(false)
@@ -77,7 +78,7 @@ const sortedEntries = computed(() => {
   if (!workspaceInfo.value) return []
 
   const treeInfo = workspaceInfo.value.target?.TreeInfo
-  if (!treeInfo || !treeInfo.entries) return []
+  if (!treeInfo?.entries) return []
 
   const entries = [...treeInfo.entries]
 
@@ -112,6 +113,7 @@ const downloadFile = async (filename: string) => {
 const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
   if (!workspaceInfo.value) return
 
+  const fileName = workspaceInfo.value.workspace.description || ''
   const loadingRef = format === 'zip' ? isDownloadingWorkspaceZip : isDownloadingWorkspaceTgz
   loadingRef.value = true
 
@@ -120,7 +122,8 @@ const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
       workspaceInfo.value.workspace.url,
       props.alias,
       workspaceInfo.value.commit.commit_id,
-      format
+      format,
+      fileName,
     )
   } catch (err) {
     console.error('Error downloading workspace archive:', err)
@@ -146,7 +149,19 @@ const loadWorkspaceInfo = async () => {
     }
   } catch (err) {
     if (currentRequest === requestCounter.value) {
-      error.value = err instanceof Error ? err.message : 'Failed to load workspace.'
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load workspace.'
+
+      if (errorMessage.toLowerCase().includes('not found')) {
+        error.value = {
+          title: 'Workspace not found',
+          message: 'The workspace you are looking for does not exist or has been removed.',
+        }
+      } else {
+        error.value = {
+          title: 'Error loading workspace',
+          message: errorMessage,
+        }
+      }
       console.error('Error loading workspace:', err)
     }
   } finally {
@@ -171,8 +186,8 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
 
   <ErrorBlock
     v-if="error"
-    title="Error loading workspace"
-    :error="error"
+    :title="error.title"
+    :error="error.message"
   />
 
   <LoadingBox v-else-if="isLoading" message="Loading workspace..." />
@@ -253,15 +268,17 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
                 {{ entry.name }}
               </RouterLink>
             </div>
-            <button
+            <ActionButton
               v-if="entry.kind !== 'tree'"
-              @click.prevent="downloadFile(entry.name)"
-              class="ml-4 p-2 text-gray-500 cursor-pointer hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-              :title="`Download ${entry.name}`"
+              variant="icon"
+              content-section="Workspace Detail"
+              @click="downloadFile(entry.name)"
+              :tooltip="`Download ${entry.name}`"
               :aria-label="`Download ${entry.name}`"
             >
               <DownloadIcon class="w-4 h-4" />
-            </button>
+              <span class="sr-only">Download {{ entry.name }}</span>
+            </ActionButton>
           </div>
         </li>
       </ul>

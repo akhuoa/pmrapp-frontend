@@ -3,7 +3,9 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
+import CopyButton from '@/components/atoms/CopyButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
+import WrapButton from '@/components/atoms/WrapButton.vue'
 import CodeIcon from '@/components/icons/CodeIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import PreviewIcon from '@/components/icons/PreviewIcon.vue'
@@ -28,6 +30,7 @@ const fileBlobUrl = ref<string>('')
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 const showCode = ref(false)
+const codeBlockRef = ref<InstanceType<typeof CodeBlock> | null>(null)
 
 // Extract filename from full path for download purposes.
 const filename = computed(() => {
@@ -82,6 +85,10 @@ const downloadFile = () => {
 
 const toggleCodeView = () => {
   showCode.value = !showCode.value
+}
+
+const toggleCodeWrap = () => {
+  codeBlockRef.value?.toggleWrap()
 }
 
 onMounted(async () => {
@@ -149,48 +156,59 @@ onBeforeUnmount(() => {
             v-if="isSvg || isMarkdown"
             @click="toggleCodeView"
             class="flex items-center cursor-pointer gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-            :title="showCode ? 'Show preview' : 'Show code'"
-            :aria-label="showCode ? 'Show preview' : 'Show code'"
           >
             <PreviewIcon class="w-4 h-4" v-if="showCode" />
             <CodeIcon class="w-4 h-4" v-else />
             {{ showCode ? 'Preview' : 'Code' }}
           </button>
-          <button
+          <WrapButton
+            v-if="shouldShowAsText"
+            :disabled="(isSvg || isMarkdown) ? !showCode : false"
+            :active="codeBlockRef?.isWrapped"
+            @click="toggleCodeWrap"
+          />
+          <CopyButton
+            v-if="shouldShowAsText"
+            :text="fileContent"
+            title="Copy code"
+          />
+          <ActionButton
+            variant="icon"
+            content-section="Workspace File Detail"
             @click="downloadFile"
-            class="flex items-center cursor-pointer gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-            title="Download"
+            tooltip="Download"
             :aria-label="'Download'"
           >
             <DownloadIcon class="w-4 h-4" />
-            Download
-          </button>
+            <span class="sr-only">Download</span>
+          </ActionButton>
         </div>
       </div>
 
       <!-- SVG Rendered View -->
-      <div v-if="isSvg && shouldShowPreview" class="flex justify-center p-8 bg-gray-50 dark:bg-gray-900 rounded">
+      <div v-if="isSvg && shouldShowPreview" class="flex justify-center p-4 bg-gray-50 dark:bg-gray-900 rounded">
         <img :src="fileBlobUrl" :alt="path" class="max-w-full h-auto" />
       </div>
 
       <!-- Markdown Preview -->
-      <div v-else-if="isMarkdown && shouldShowPreview" class="p-8">
+      <div v-else-if="isMarkdown && shouldShowPreview" class="p-4">
         <div class="max-w-none" v-html="renderedMarkdown"></div>
       </div>
 
       <!-- Image View -->
-      <div v-else-if="isImage && imageDataUrl" class="flex justify-center p-8 bg-gray-50 dark:bg-gray-900 rounded">
+      <div v-else-if="isImage && imageDataUrl" class="flex justify-center p-4 bg-gray-50 dark:bg-gray-900 rounded">
         <img :src="imageDataUrl" :alt="path" class="max-w-full h-auto" />
       </div>
 
       <!-- PDF View -->
-      <div v-else-if="isPDF" class="flex justify-center p-8 bg-gray-50 dark:bg-gray-900 rounded">
+      <div v-else-if="isPDF" class="flex justify-center">
         <embed :src="fileBlobUrl" type="application/pdf" width="100%" height="800px" />
       </div>
 
       <!-- Code/Text View -->
       <div v-else-if="shouldShowAsText" class="relative">
         <CodeBlock
+          ref="codeBlockRef"
           :code="fileContent"
           :filename="filename"
         />

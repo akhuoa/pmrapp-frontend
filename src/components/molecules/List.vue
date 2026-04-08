@@ -6,7 +6,8 @@ import ListItem from '@/components/molecules/ListItem.vue'
 import ListToolbar from '@/components/molecules/ListToolbar.vue'
 import type { SortOption } from '@/types/common'
 import { formatDate } from '@/utils/format'
-import { DEFAULT_SORT_OPTION, sortEntities } from '@/utils/sort'
+import { filterItemsByQuery, highlightTokens, normaliseSearchText } from '@/utils/search'
+import { DEFAULT_SORT_OPTION, isValidSortOption, sortEntities } from '@/utils/sort'
 
 interface Props<T> {
   items: T[]
@@ -29,11 +30,46 @@ const emit = defineEmits<{
 const route = useRoute()
 const router = useRouter()
 const filterQuery = ref((route.query.filter as string) || '')
-const sortBy = ref<SortOption>(DEFAULT_SORT_OPTION)
 
-// Sync filter query with URL query parameter.
-watch(filterQuery, (newValue) => {
-  const query = newValue.trim() ? { filter: newValue } : {}
+const activeQueryTokens = computed<string[]>(() => {
+  if (!filterQuery.value.trim()) return []
+  return normaliseSearchText(filterQuery.value.toLowerCase())
+    .split(' ')
+    .filter((t) => t.length > 0)
+})
+
+const sortQuery = route.query.sort
+const initialSort: SortOption =
+  typeof sortQuery === 'string' && isValidSortOption(sortQuery) ? sortQuery : DEFAULT_SORT_OPTION
+const sortBy = ref<SortOption>(initialSort)
+
+watch(
+  () => route.query.filter,
+  (newFilter) => {
+    const nextFilter = typeof newFilter === 'string' ? newFilter : ''
+    if (filterQuery.value !== nextFilter) {
+      filterQuery.value = nextFilter
+    }
+  },
+)
+
+watch(
+  () => route.query.sort,
+  (newSort) => {
+    const nextSort =
+      typeof newSort === 'string' && isValidSortOption(newSort) ? newSort : DEFAULT_SORT_OPTION
+    if (sortBy.value !== nextSort) {
+      sortBy.value = nextSort
+    }
+  },
+)
+
+// Sync filter and sort with URL query parameters.
+watch([filterQuery, sortBy], ([newFilter, newSort]) => {
+  const query: Record<string, string> = {}
+  const trimmedFilter = newFilter.trim()
+  if (trimmedFilter) query.filter = trimmedFilter
+  if (newSort !== DEFAULT_SORT_OPTION) query.sort = newSort
   router.replace({ query })
 })
 
@@ -42,22 +78,23 @@ const handleRefresh = async () => {
 }
 
 const filteredItems = computed(() => {
-  let result = props.items
+  const filtered = filterItemsByQuery({
+    query: filterQuery.value,
+    items: props.items,
+  })
 
-  // Filter by search query.
-  if (filterQuery.value.trim()) {
-    const query = filterQuery.value.toLowerCase()
-
-    result = result.filter((item: T) => {
-      const description = item.entity.description?.toLowerCase() || ''
-      const id = item.entity.id.toString()
-      return description.includes(query) || id.includes(query)
-    })
-  }
-
-  // Sort based on selected option.
-  return sortEntities(result, sortBy.value)
+  return sortEntities(filtered, sortBy.value)
 })
+
+const filteredItemSegments = computed(() =>
+  filteredItems.value.map((item) => highlightTokens(props.getTitle(item), activeQueryTokens.value)),
+)
+
+const filteredItemIdSegments = computed(() =>
+  filteredItems.value.map((item) =>
+    highlightTokens(item.entity.id.toString(), activeQueryTokens.value),
+  ),
+)
 
 watch(
   [filteredItems, () => props.items.length],
@@ -91,14 +128,24 @@ watch(
   >
     <template #item>
       <ListItem
-        v-for="item in filteredItems"
+        v-for="(item, index) in filteredItems"
         :key="item.alias"
         :title="props.getTitle(item)"
         :link="`${props.routeBase}/${item.alias}`"
       >
-        <p>
+        <template #title>
+          <template v-for="(segment, si) in filteredItemSegments[index]" :key="si">
+            <mark v-if="segment.highlighted" class="text-highlight">{{ segment.text }}</mark>
+            <span v-else>{{ segment.text }}</span>
+          </template>
+        </template>
+        <p class="text-gray-600 dark:text-gray-400">
           <small>
-            #{{ item.entity.id }} ·
+            #<template v-for="(segment, si) in filteredItemIdSegments[index]" :key="`id-${si}`">
+              <mark v-if="segment.highlighted" class="text-highlight">{{ segment.text }}</mark>
+              <span v-else>{{ segment.text }}</span>
+            </template>
+            ·
             Created on {{ formatDate(item.entity.created_ts) }}
           </small>
         </p>
@@ -106,3 +153,7 @@ watch(
     </template>
   </ListContent>
 </template>
+
+<style scoped>
+@import '@/assets/text-highlight.css';
+</style>

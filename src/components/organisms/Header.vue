@@ -2,11 +2,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import UserDropdown from '@/components/molecules/UserDropdown.vue'
 import SearchIcon from '@/components/icons/SearchIcon.vue'
+import UserDropdown from '@/components/molecules/UserDropdown.vue'
 import SearchOverlay from '@/components/organisms/SearchOverlay.vue'
-import ActionButton from '../atoms/ActionButton.vue'
 import { useGlobalStateStore } from '@/stores/globalState'
+import ActionButton from '../atoms/ActionButton.vue'
 
 const route = useRoute()
 const isSearchOverlayVisible = ref(false)
@@ -29,7 +29,7 @@ const isActive = (path: string) => computed(() => route.path.startsWith(path))
 </script>
 
 <template>
-  <header class="header-border-top bg-background border-b border-gray-200 dark:border-gray-700 sticky top-0 z-100">
+  <header class="header-border-top bg-surface border-b border-gray-200 dark:border-gray-700 sticky top-0 z-[100]">
     <div class="container mx-auto px-4 py-4 flex items-center justify-between">
       <RouterLink to="/" class="flex items-center nav-link">
         <img src="/logo.png" alt="Physiome Model Repository" width="48" height="48" />

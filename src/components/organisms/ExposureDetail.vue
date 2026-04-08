@@ -7,6 +7,7 @@ import BackButton from '@/components/atoms/BackButton.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
+import WrapButton from '@/components/atoms/WrapButton.vue'
 import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
@@ -17,6 +18,7 @@ import { useBackNavigation } from '@/composables/useBackNavigation'
 import { downloadCOMBINEArchive, downloadWorkspaceArchive } from '@/services/downloadUrlService'
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
+import type { ErrorInfo } from '@/types/error'
 import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
 import { formatCitation, formatCitationAuthor } from '@/utils/citation'
 import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
@@ -73,7 +75,7 @@ const CODEGEN_LANGUAGES = [
 
 const exposureStore = useExposureStore()
 const exposureInfo = ref<ExposureInfo | null>(null)
-const error = ref<string | null>(null)
+const error = ref<ErrorInfo | null>(null)
 const isLoading = ref(true)
 const exposureId = ref<number>(NaN)
 const exposureFilePath = ref<string>(props.file)
@@ -81,6 +83,7 @@ const exposureFileId = ref<number>(NaN)
 const detailHTML = ref<string>('')
 const generatedCode = ref<string>('')
 const generatedCodeFilename = ref<string>('')
+const codeBlockRef = ref<InstanceType<typeof CodeBlock> | null>(null)
 const mathsJSON = ref<[string, string[]][]>([])
 const metadataJSON = ref<Metadata>({})
 const htmlViewRef = ref<HTMLElement | null>(null)
@@ -133,6 +136,7 @@ const navigationFiles = computed(() => {
 const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
   if (!exposureInfo.value) return
 
+  const fileName = exposureInfo.value.exposure.description || ''
   const loadingRef = format === 'zip' ? isDownloadingWorkspaceZip : isDownloadingWorkspaceTgz
   loadingRef.value = true
 
@@ -142,6 +146,7 @@ const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
       exposureInfo.value.workspace_alias,
       exposureInfo.value.exposure.commit_id,
       format,
+      fileName,
     )
   } catch (err) {
     console.error('Error downloading workspace archive:', err)
@@ -235,7 +240,13 @@ const downloadCode = () => {
   downloadFileFromContent(generatedCode.value, generatedCodeFilename.value)
 }
 
+const toggleCodeWrap = () => {
+  codeBlockRef.value?.toggleWrap()
+}
+
 const generateMath = async () => {
+  error.value = null
+
   try {
     const response = await exposureStore.getExposureRawContent(
       exposureId.value,
@@ -245,12 +256,18 @@ const generateMath = async () => {
     )
     mathsJSON.value = JSON.parse(response)
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to parse mathematics data'
+    const errorMessage = err instanceof Error ? err.message : 'Failed to parse mathematics data.'
+    error.value = {
+      title: 'Error parsing mathematics',
+      message: errorMessage,
+    }
     console.error('Error parsing mathematics JSON:', err)
   }
 }
 
 const generateMetadata = async () => {
+  error.value = null
+
   try {
     const metadata = await exposureStore.getExposureRawContent(
       exposureId.value,
@@ -260,6 +277,11 @@ const generateMetadata = async () => {
     )
     metadataJSON.value = JSON.parse(metadata)
   } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Failed to parse metadata JSON.'
+    error.value = {
+      title: 'Error parsing metadata',
+      message: errorMessage,
+    }
     console.error('Error parsing metadata JSON:', err)
   }
 }
@@ -419,11 +441,24 @@ watch(
 )
 
 onMounted(async () => {
+  error.value = null
+
   try {
     exposureInfo.value = await exposureStore.getExposureInfo(props.alias)
     await loadInitialView()
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to load exposure'
+    const errorMessage = err instanceof Error ? err.message : 'Failed to load exposure.'
+    if (errorMessage.toLowerCase().includes('not found')) {
+      error.value = {
+        title: 'Exposure not found',
+        message: 'The exposure you are looking for does not exist or has been removed.',
+      }
+    } else {
+      error.value = {
+        title: 'Error loading exposure',
+        message: errorMessage,
+      }
+    }
     console.error('Error loading exposure:', err)
   } finally {
     isLoading.value = false
@@ -440,8 +475,8 @@ onMounted(async () => {
 
   <ErrorBlock
     v-if="error"
-    title="Error loading exposure"
-    :error="error"
+    :title="error.title"
+    :error="error.message"
   />
 
   <LoadingBox v-else-if="isLoading" message="Loading exposure..." />
@@ -472,17 +507,23 @@ onMounted(async () => {
         <div class="box p-0! overflow-hidden">
           <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
             <span>{{ generatedCodeFilename }}</span>
-            <button
-              @click.prevent="downloadCode"
-              class="flex items-center cursor-pointer gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-              title="Download"
-              aria-label="Download"
-            >
-              <DownloadIcon class="w-4 h-4" />
-              Download
-            </button>
+            <div class="flex items-center gap-2">
+              <WrapButton :active="codeBlockRef?.isWrapped" @click="toggleCodeWrap" />
+              <CopyButton :text="generatedCode" title="Copy code" />
+              <ActionButton
+                @click="downloadCode"
+                variant="icon"
+                content-section="Exposure Detail"
+                tooltip="Download"
+                aria-label="Download"
+              >
+                <DownloadIcon class="w-4 h-4" />
+                <span class="sr-only">Download</span>
+              </ActionButton>
+            </div>
           </div>
           <CodeBlock
+            ref="codeBlockRef"
             :code="generatedCode"
             :filename="generatedCodeFilename"
           />
@@ -493,7 +534,7 @@ onMounted(async () => {
         <div v-for="value in mathsJSON" :key="value[0]"
           class="mb-6 pb-6 last:mb-0 last:pb-0 border-b border-gray-200 dark:border-gray-700 last:border-0"
         >
-          <h4 class="font-semibold mb-4">Component: {{ value[0] }}</h4>
+          <h4 class="font-semibold mb-4">{{ value[0] }}</h4>
           <div v-for="math in value[1]" :key="math">
             <div v-html="math" class="text-sm math-view"></div>
           </div>
@@ -527,14 +568,16 @@ onMounted(async () => {
                 </RouterLink>
               </div>
               <div class="flex items-center gap-2 ml-4 flex-shrink-0">
-                <button
-                  @click.prevent="downloadFile(entry[0])"
-                  class="ml-4 p-2 text-gray-500 cursor-pointer hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-                  :title="`Download ${entry[0]}`"
+                <ActionButton
+                  @click="downloadFile(entry[0])"
+                  variant="icon"
+                  content-section="Exposure Detail"
+                  :tooltip="`Download ${entry[0]}`"
                   :aria-label="`Download ${entry[0]}`"
                 >
                   <DownloadIcon class="w-4 h-4" />
-                </button>
+                  <span class="sr-only">Download {{ entry[0] }}</span>
+                </ActionButton>
               </div>
             </div>
           </li>
@@ -548,14 +591,14 @@ onMounted(async () => {
           Derived from workspace
           <RouterLink
             :to="`/workspaces/${exposureInfo.workspace_alias}`"
-            class="text-link"
+            class="text-link dark:underline dark:decoration-dotted"
           >
             {{ exposureInfo.exposure.description }}
           </RouterLink>
           at changeset
           <RouterLink
             :to="`/workspaces/${exposureInfo.workspace_alias}/file/${exposureInfo.exposure.commit_id}`"
-            class="text-link font-mono"
+            class="text-link font-mono dark:underline dark:decoration-dotted"
           >
             {{ exposureInfo.exposure.commit_id.substring(0, 12) }}
           </RouterLink>.
@@ -609,7 +652,7 @@ onMounted(async () => {
                 rel="noopener noreferrer"
                 :content-section="`Exposure Detail - ${pageTitle}`"
               >
-                Open in OpenCOR's web app
+                Open with OpenCOR's Web app
               </ActionButton>
             </li>
             <li
@@ -810,7 +853,7 @@ onMounted(async () => {
   @apply text-sm;
 
   & :deep(a) {
-    @apply text-link;
+    @apply text-link dark:underline dark:decoration-dotted hover:text-link-hover transition;
   }
 
   & :deep(h2) {

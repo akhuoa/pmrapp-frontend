@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onBeforeUnmount, ref } from 'vue'
+import Tooltip from '@/components/atoms/Tooltip.vue'
 import CopyIcon from '@/components/icons/CopyIcon.vue'
 
 const props = defineProps<{
@@ -8,32 +9,51 @@ const props = defineProps<{
 }>()
 
 const isCopied = ref(false)
+const isHovered = ref(false)
+const buttonRef = ref<HTMLElement | null>(null)
+let copiedTimer: ReturnType<typeof setTimeout> | null = null
 
 const handleCopy = async () => {
   try {
     await navigator.clipboard.writeText(props.text)
     isCopied.value = true
-    setTimeout(() => {
+
+    if (copiedTimer) {
+      clearTimeout(copiedTimer)
+    }
+
+    copiedTimer = setTimeout(() => {
       isCopied.value = false
     }, 2000)
   } catch (err) {
     console.error('Failed to copy:', err)
   }
 }
+
+onBeforeUnmount(() => {
+  if (copiedTimer) {
+    clearTimeout(copiedTimer)
+  }
+})
 </script>
 
 <template>
   <button
+    ref="buttonRef"
     @click="handleCopy"
-    class="relative p-2 text-gray-500 cursor-pointer hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
-    :title="isCopied ? 'Copied!' : (title || 'Copy')"
+    class="relative p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
+    :aria-label="isCopied ? 'Copied!' : (title || 'Copy')"
+    @mouseenter="isHovered = true"
+    @mouseleave="isHovered = false"
+    @focus="isHovered = true"
+    @blur="isHovered = false"
   >
     <CopyIcon class="w-4 h-4" />
-    <span
-      v-if="isCopied"
-      class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 dark:bg-gray-700 text-white text-xs px-2 py-1 rounded whitespace-nowrap"
+    <Tooltip
+      :visible="isHovered || isCopied"
+      :anchor-el="buttonRef"
     >
-      Copied!
-    </span>
+      {{ isCopied ? 'Copied!' : (title || 'Copy') }}
+    </Tooltip>
   </button>
 </template>
