@@ -15,6 +15,16 @@
 /// <reference lib="webworker" />
 
 import Prism from 'prismjs'
+import 'prismjs/components/prism-markup'
+import 'prismjs/components/prism-css'
+import 'prismjs/components/prism-c'
+import 'prismjs/components/prism-cpp'
+import 'prismjs/components/prism-fortran'
+import 'prismjs/components/prism-javascript'
+import 'prismjs/components/prism-json'
+import 'prismjs/components/prism-python'
+import 'prismjs/components/prism-markdown'
+import 'prismjs/components/prism-matlab'
 
 export type HighlightMessage = {
   id: string
@@ -32,30 +42,7 @@ export type HighlightResult = {
 // `self` as Window; the explicit cast corrects that for this file.
 const swScope = self as unknown as ServiceWorkerGlobalScope
 
-type PrismGlobal = typeof globalThis & {
-  Prism?: typeof Prism
-}
-
-const prismReady = (async () => {
-  // Prism language components expect a global Prism reference.
-  ;(globalThis as PrismGlobal).Prism = Prism
-
-  await Promise.all([
-    import('prismjs/components/prism-markup'),
-    import('prismjs/components/prism-css'),
-    import('prismjs/components/prism-c'),
-    import('prismjs/components/prism-cpp'),
-    import('prismjs/components/prism-fortran'),
-    import('prismjs/components/prism-javascript'),
-    import('prismjs/components/prism-json'),
-    import('prismjs/components/prism-python'),
-    import('prismjs/components/prism-markdown'),
-    import('prismjs/components/prism-matlab'),
-  ])
-})()
-
-const handleMessage = async (event: ExtendableMessageEvent): Promise<void> => {
-  await prismReady
+const handleMessage = (event: ExtendableMessageEvent): void => {
 
   const { id, code, language } = event.data as HighlightMessage
 
@@ -75,7 +62,7 @@ const handleMessage = async (event: ExtendableMessageEvent): Promise<void> => {
 }
 
 swScope.addEventListener('message', (event: ExtendableMessageEvent) => {
-  event.waitUntil(handleMessage(event))
+  handleMessage(event)
 })
 
 // Claim all open clients immediately so the service worker is active for the
