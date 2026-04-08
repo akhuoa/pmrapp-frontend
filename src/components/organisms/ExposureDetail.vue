@@ -257,9 +257,7 @@ const generateMath = async () => {
     const parsedMaths = JSON.parse(response)
     mathsJSON.value = Array.isArray(parsedMaths)
       ? parsedMaths.filter(
-          (value): value is [string, string[]] =>
-            Array.isArray(value[1]) &&
-            value[1].length > 0,
+          (value): value is [string, string[]] => Array.isArray(value[1]) && value[1].length > 0,
         )
       : []
   } catch (err) {
