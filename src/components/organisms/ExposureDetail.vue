@@ -254,7 +254,14 @@ const generateMath = async () => {
       'cellml_math',
       'math.json',
     )
-    mathsJSON.value = JSON.parse(response)
+    const parsedMaths = JSON.parse(response)
+    mathsJSON.value = Array.isArray(parsedMaths)
+      ? parsedMaths.filter(
+          (value): value is [string, string[]] =>
+            Array.isArray(value[1]) &&
+            value[1].length > 0,
+        )
+      : []
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Failed to parse mathematics data.'
     error.value = {
