@@ -943,13 +943,32 @@ onMounted(async () => {
   }
 }
 
-.math-section :deep(mjx-math > mjx-mrow) {
-  display: block;
-  margin-bottom: 0.75rem;
+.math-section :deep(mjx-math) {
+  display: table;
+  width: 100%;
 }
 
-.math-section :deep(mjx-container) {
-  overflow-x: auto;
-  overflow-y: hidden;
+.math-section :deep(mjx-math > mjx-mrow) {
+  display: table-row;
+}
+
+.math-section :deep(mjx-math > mjx-mrow > *) {
+  display: table-cell;
+  padding-bottom: 0.75rem;
+  vertical-align: middle;
+}
+
+.math-section :deep(mjx-math > mjx-mrow > *:nth-child(1)) {
+  text-align: right;
+  padding-right: 0.5rem;
+}
+
+.math-section :deep(mjx-math > mjx-mrow > *:nth-child(2)) {
+  text-align: center;
+}
+
+.math-section :deep(mjx-math > mjx-mrow > *:nth-child(3)) {
+  text-align: left;
+  padding-left: 0.5rem;
 }
 </style>
