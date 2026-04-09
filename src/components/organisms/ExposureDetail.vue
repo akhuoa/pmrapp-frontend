@@ -35,8 +35,16 @@ const props = defineProps<{
 }>()
 
 declare global {
+  interface MathJaxGlobal {
+    startup?: {
+      typeset?: boolean
+    }
+    typesetClear?: (elements?: Element[]) => void
+    typesetPromise?: (elements?: Element[]) => Promise<void>
+  }
+
   interface Window {
-    MathJax: any
+    MathJax?: MathJaxGlobal
   }
 }
 
@@ -315,6 +323,10 @@ const loadMathJax = (): Promise<void> => {
 
 const renderMath = async () => {
   if (!window.MathJax || !mathContainer.value) {
+    return
+  }
+
+  if (!window.MathJax.typesetClear || !window.MathJax.typesetPromise) {
     return
   }
 
