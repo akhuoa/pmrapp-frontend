@@ -95,6 +95,8 @@ const hasOtherRelatedModels = ref(false)
 const isDownloadingWorkspaceZip = ref(false)
 const isDownloadingWorkspaceTgz = ref(false)
 const isDownloadingCOMBINE = ref(false)
+const isMathLoading = ref(false)
+const isMathJaxReady = ref(false)
 const mathContainer = ref<HTMLElement | null>(null)
 const { goBack } = useBackNavigation('/exposures')
 
@@ -307,6 +309,24 @@ const loadCodegenView = async () => {
   )
 }
 
+const loadMathView = async () => {
+  isMathLoading.value = true
+  isMathJaxReady.value = false
+
+  // Start loading MathJax in parallel so it does not block initial mount.
+  const mathJaxPromise = loadMathJax().catch((err: unknown) => {
+    console.error('Failed to load MathJax:', err)
+  })
+
+  try {
+    await generateMath()
+    await mathJaxPromise
+    isMathJaxReady.value = true
+  } finally {
+    isMathLoading.value = false
+  }
+}
+
 const handleKeywordClick = (kind: string, keyword: string) => {
   router.push({ path: '/search', query: { kind, term: keyword } })
 }
@@ -409,7 +429,7 @@ const loadInitialView = async () => {
     }
 
     if (props.view === 'cellml_math') {
-      await generateMath()
+      await loadMathView()
     }
   }
 }
@@ -435,7 +455,7 @@ watch(
     if (newView === 'cellml_codegen') {
       await loadCodegenView()
     } else if (newView === 'cellml_math') {
-      await generateMath()
+      await loadMathView()
     } else {
       await loadDefaultView()
     }
@@ -443,9 +463,15 @@ watch(
 )
 
 watch(
-  [() => props.view, () => mathsJSON.value.length, () => isLoading.value],
-  async ([view, mathsCount, loading]) => {
-    if (view !== 'cellml_math' || mathsCount === 0 || loading) {
+  [
+    () => props.view,
+    () => mathsJSON.value.length,
+    () => isLoading.value,
+    () => isMathLoading.value,
+    () => isMathJaxReady.value,
+  ],
+  async ([view, mathsCount, loading, mathLoading, mathJaxReady]) => {
+    if (view !== 'cellml_math' || mathsCount === 0 || loading || mathLoading || !mathJaxReady) {
       return
     }
 
@@ -457,8 +483,6 @@ watch(
 
 onMounted(async () => {
   error.value = null
-
-  await loadMathJax()
 
   try {
     exposureInfo.value = await exposureStore.getExposureInfo(props.alias)
@@ -548,16 +572,21 @@ onMounted(async () => {
       </div>
 
       <div
-        v-else-if="props.view === 'cellml_math' && mathsJSON.length"
-        class="box"
-        ref="mathContainer"
+        v-else-if="props.view === 'cellml_math'"
       >
-        <div v-for="value in mathsJSON" :key="value[0]"
-          class="mb-6 pb-6 last:mb-0 last:pb-0 border-b border-gray-200 dark:border-gray-700 last:border-0 math-section"
+        <LoadingBox v-if="isMathLoading" message="Loading mathematics..." />
+        <div
+          v-else-if="mathsJSON.length"
+          class="box"
+          ref="mathContainer"
         >
-          <h4 class="font-semibold mb-4">{{ value[0] }}</h4>
-          <div v-for="math in value[1]" :key="math">
-            <div v-html="math" class="text-sm overflow-auto math-view"></div>
+          <div v-for="value in mathsJSON" :key="value[0]"
+            class="mb-6 pb-6 last:mb-0 last:pb-0 border-b border-gray-200 dark:border-gray-700 last:border-0 math-section"
+          >
+            <h4 class="font-semibold mb-4">{{ value[0] }}</h4>
+            <div v-for="math in value[1]" :key="math">
+              <div v-html="math" class="text-sm overflow-auto math-view"></div>
+            </div>
           </div>
         </div>
       </div>
