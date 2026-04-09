@@ -295,8 +295,8 @@ const loadMathJax = (): Promise<void> => {
 
     window.MathJax = {
       startup: {
-        typeset: false // To handle typesetting manually.
-      }
+        typeset: false, // To handle typesetting manually.
+      },
     }
 
     const script = document.createElement('script')
