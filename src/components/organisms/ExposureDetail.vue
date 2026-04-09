@@ -272,6 +272,47 @@ const generateMath = async () => {
   }
 }
 
+const loadMathJax = (): Promise<void> => {
+  return new Promise((resolve) => {
+    const scriptId = 'mathjax-script'
+
+    // If it's already loaded, just resolve.
+    if (window.MathJax && window.MathJax.typesetPromise) {
+      resolve()
+      return
+    }
+
+    // Prevent loading the script multiple times.
+    if (document.getElementById(scriptId)) {
+      const checkInterval = setInterval(() => {
+        if (window.MathJax && window.MathJax.typesetPromise) {
+          clearInterval(checkInterval)
+          resolve()
+        }
+      }, 100)
+      return
+    }
+
+    window.MathJax = {
+      startup: {
+        typeset: false // To handle typesetting manually.
+      }
+    }
+
+    const script = document.createElement('script')
+    script.id = scriptId
+
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@4/mml-chtml.js'
+    script.async = true
+
+    script.onload = () => {
+      resolve()
+    }
+
+    document.head.appendChild(script)
+  })
+}
+
 const renderMath = async () => {
   if (!window.MathJax || !mathContainer.value) {
     return
@@ -474,6 +515,8 @@ watch(
 
 onMounted(async () => {
   error.value = null
+
+  await loadMathJax()
 
   try {
     exposureInfo.value = await exposureStore.getExposureInfo(props.alias)
