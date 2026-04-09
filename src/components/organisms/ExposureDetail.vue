@@ -34,6 +34,12 @@ const props = defineProps<{
   view: string
 }>()
 
+declare global {
+  interface Window {
+    MathJax: any
+  }
+}
+
 const DEFAULT_LICENSE = 'https://creativecommons.org/licenses/by/3.0/'
 const AVAILABLE_VIEWS = [
   {
@@ -94,6 +100,7 @@ const hasOtherRelatedModels = ref(false)
 const isDownloadingWorkspaceZip = ref(false)
 const isDownloadingWorkspaceTgz = ref(false)
 const isDownloadingCOMBINE = ref(false)
+const mathContainer = ref<HTMLElement | null>(null)
 const { goBack } = useBackNavigation('/exposures')
 
 const router = useRouter()
@@ -263,6 +270,18 @@ const generateMath = async () => {
     }
     console.error('Error parsing mathematics JSON:', err)
   }
+}
+
+const renderMath = async () => {
+  if (!window.MathJax || !mathContainer.value) {
+    return
+  }
+
+  window.MathJax.typesetClear([mathContainer.value])
+
+  await window.MathJax.typesetPromise([mathContainer.value]).catch((err: Error) => {
+    console.error('MathJax rendering failed:', err)
+  })
 }
 
 const generateMetadata = async () => {
@@ -440,6 +459,19 @@ watch(
   },
 )
 
+watch(
+  [() => props.view, () => mathsJSON.value.length, () => isLoading.value],
+  async ([view, mathsCount, loading]) => {
+    if (view !== 'cellml_math' || mathsCount === 0 || loading) {
+      return
+    }
+
+    await nextTick()
+    await renderMath()
+  },
+  { flush: 'post' },
+)
+
 onMounted(async () => {
   error.value = null
 
@@ -530,13 +562,17 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div v-else-if="props.view === 'cellml_math' && mathsJSON.length" class="box overflow-auto">
+      <div
+        v-else-if="props.view === 'cellml_math' && mathsJSON.length"
+        class="box"
+        ref="mathContainer"
+      >
         <div v-for="value in mathsJSON" :key="value[0]"
-          class="mb-6 pb-6 last:mb-0 last:pb-0 border-b border-gray-200 dark:border-gray-700 last:border-0"
+          class="mb-6 pb-6 last:mb-0 last:pb-0 border-b border-gray-200 dark:border-gray-700 last:border-0 math-section"
         >
           <h4 class="font-semibold mb-4">{{ value[0] }}</h4>
           <div v-for="math in value[1]" :key="math">
-            <div v-html="math" class="text-sm math-view"></div>
+            <div v-html="math" class="text-sm overflow-auto math-view"></div>
           </div>
         </div>
       </div>
@@ -905,5 +941,15 @@ onMounted(async () => {
   & :deep(math) {
     @apply flex flex-col gap-4;
   }
+}
+
+.math-section :deep(mjx-math > mjx-mrow) {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.math-section :deep(mjx-container) {
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 </style>
