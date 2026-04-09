@@ -25,6 +25,7 @@ import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
+import { loadMathJax, renderMathInElement } from '@/utils/mathjax'
 import { isValidTerm } from '@/utils/search'
 import TermButton from '../atoms/TermButton.vue'
 
@@ -33,20 +34,6 @@ const props = defineProps<{
   file: string
   view: string
 }>()
-
-declare global {
-  interface MathJaxGlobal {
-    startup?: {
-      typeset?: boolean
-    }
-    typesetClear?: (elements?: Element[]) => void
-    typesetPromise?: (elements?: Element[]) => Promise<void>
-  }
-
-  interface Window {
-    MathJax?: MathJaxGlobal
-  }
-}
 
 const DEFAULT_LICENSE = 'https://creativecommons.org/licenses/by/3.0/'
 const AVAILABLE_VIEWS = [
@@ -280,63 +267,6 @@ const generateMath = async () => {
   }
 }
 
-const loadMathJax = (): Promise<void> => {
-  return new Promise((resolve) => {
-    const scriptId = 'mathjax-script'
-
-    // If it's already loaded, just resolve.
-    if (window.MathJax?.typesetPromise) {
-      resolve()
-      return
-    }
-
-    // Prevent loading the script multiple times.
-    if (document.getElementById(scriptId)) {
-      const checkInterval = setInterval(() => {
-        if (window.MathJax?.typesetPromise) {
-          clearInterval(checkInterval)
-          resolve()
-        }
-      }, 100)
-      return
-    }
-
-    window.MathJax = {
-      startup: {
-        typeset: false, // To handle typesetting manually.
-      },
-    }
-
-    const script = document.createElement('script')
-    script.id = scriptId
-
-    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@4/mml-chtml.js'
-    script.async = true
-
-    script.onload = () => {
-      resolve()
-    }
-
-    document.head.appendChild(script)
-  })
-}
-
-const renderMath = async () => {
-  if (!window.MathJax || !mathContainer.value) {
-    return
-  }
-
-  if (!window.MathJax.typesetClear || !window.MathJax.typesetPromise) {
-    return
-  }
-
-  window.MathJax.typesetClear([mathContainer.value])
-
-  await window.MathJax.typesetPromise([mathContainer.value]).catch((err: Error) => {
-    console.error('MathJax rendering failed:', err)
-  })
-}
-
 const generateMetadata = async () => {
   error.value = null
 
@@ -520,7 +450,7 @@ watch(
     }
 
     await nextTick()
-    await renderMath()
+    await renderMathInElement(mathContainer.value)
   },
   { flush: 'post' },
 )
