@@ -277,7 +277,7 @@ const loadMathJax = (): Promise<void> => {
     const scriptId = 'mathjax-script'
 
     // If it's already loaded, just resolve.
-    if (window.MathJax && window.MathJax.typesetPromise) {
+    if (window.MathJax?.typesetPromise) {
       resolve()
       return
     }
@@ -285,7 +285,7 @@ const loadMathJax = (): Promise<void> => {
     // Prevent loading the script multiple times.
     if (document.getElementById(scriptId)) {
       const checkInterval = setInterval(() => {
-        if (window.MathJax && window.MathJax.typesetPromise) {
+        if (window.MathJax?.typesetPromise) {
           clearInterval(checkInterval)
           resolve()
         }
