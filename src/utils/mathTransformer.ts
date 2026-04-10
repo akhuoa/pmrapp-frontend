@@ -3,6 +3,43 @@ import { _MathTransforms } from 'https://w3c.github.io/mathml-polyfills/all-poly
 
 let isMathPolyfillsInitialized = false
 const MATH_POLYFILLS_STYLE_ATTR = 'data-math-polyfills'
+const OPEN_TO_CLOSE_FENCE: Record<string, string> = {
+  '(': ')',
+  '[': ']',
+  '{': '}',
+  '<': '>',
+  '⟨': '⟩',
+  '⌊': '⌋',
+  '⌈': '⌉',
+}
+
+const isFenceOperator = (element: Element): element is HTMLElement =>
+  element.tagName.toLowerCase() === 'mo' && element.getAttribute('fence') === 'true'
+
+const getFenceText = (element: Element): string => (element.textContent || '').trim()
+
+const fixMismatchedFencePairs = (root: ParentNode) => {
+  const rows = root.querySelectorAll('mrow')
+
+  rows.forEach((row) => {
+    const children = Array.from(row.children)
+    if (children.length < 2) return
+
+    const firstFence = children.find(isFenceOperator)
+    const lastFence = [...children].reverse().find(isFenceOperator)
+
+    if (!firstFence || !lastFence || firstFence === lastFence) return
+
+    const openingFence = getFenceText(firstFence)
+    const closingFence = getFenceText(lastFence)
+    const expectedClosingFence = OPEN_TO_CLOSE_FENCE[openingFence]
+
+    if (expectedClosingFence && closingFence && closingFence !== expectedClosingFence) {
+      // Remove only the mismatched trailing fence injected by polyfills.
+      lastFence.remove()
+    }
+  })
+}
 
 /**
  * Injects the necessary CSS for polyfills into the document head.
@@ -48,7 +85,11 @@ export const formatMathMLTable = (rawMathML: string): string => {
   const mathBlocks = doc.querySelectorAll('math')
 
   mathBlocks.forEach((math) => {
-    const rows = Array.from(math.children).filter((child) => child.tagName === 'mrow')
+    fixMismatchedFencePairs(math)
+
+    const rows = Array.from(math.children).filter(
+      (child) => child.tagName.toLowerCase() === 'mrow',
+    )
 
     if (rows.length > 1) {
       const mtable = doc.createElement('mtable')
