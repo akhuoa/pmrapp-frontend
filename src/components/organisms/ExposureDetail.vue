@@ -27,6 +27,7 @@ import { formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
 import { isValidTerm } from '@/utils/search'
 import TermButton from '../atoms/TermButton.vue'
+import { initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
 
 const props = defineProps<{
   alias: string
@@ -247,6 +248,8 @@ const toggleCodeWrap = () => {
 const generateMath = async () => {
   error.value = null
 
+  initMathPolyfills()
+
   try {
     const response = await exposureStore.getExposureRawContent(
       exposureId.value,
@@ -254,7 +257,11 @@ const generateMath = async () => {
       'cellml_math',
       'math.json',
     )
-    mathsJSON.value = JSON.parse(response)
+    const mathResponseJSON = JSON.parse(response)
+    mathsJSON.value = mathResponseJSON.map((entry: [string, string[]]) => {
+      const mathMLArray = entry[1].map((mathML) => transformMathString(mathML))
+      return [entry[0], mathMLArray]
+    })
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Failed to parse mathematics data.'
     error.value = {
