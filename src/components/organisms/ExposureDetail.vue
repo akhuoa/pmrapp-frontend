@@ -25,6 +25,7 @@ import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
+import { loadMathJax, renderMathInElement } from '@/utils/mathjax'
 import { isValidTerm } from '@/utils/search'
 import TermButton from '../atoms/TermButton.vue'
 
@@ -94,6 +95,9 @@ const hasOtherRelatedModels = ref(false)
 const isDownloadingWorkspaceZip = ref(false)
 const isDownloadingWorkspaceTgz = ref(false)
 const isDownloadingCOMBINE = ref(false)
+const isMathLoading = ref(false)
+const isMathJaxReady = ref(false)
+const mathContainer = ref<HTMLElement | null>(null)
 const { goBack } = useBackNavigation('/exposures')
 
 const router = useRouter()
@@ -305,6 +309,24 @@ const loadCodegenView = async () => {
   )
 }
 
+const loadMathView = async () => {
+  isMathLoading.value = true
+  isMathJaxReady.value = false
+
+  // Start loading MathJax in parallel so it does not block initial mount.
+  const mathJaxPromise = loadMathJax().catch((err: unknown) => {
+    console.error('Failed to load MathJax:', err)
+  })
+
+  try {
+    await generateMath()
+    await mathJaxPromise
+    isMathJaxReady.value = true
+  } finally {
+    isMathLoading.value = false
+  }
+}
+
 const handleKeywordClick = (kind: string, keyword: string) => {
   router.push({ path: '/search', query: { kind, term: keyword } })
 }
@@ -407,7 +429,7 @@ const loadInitialView = async () => {
     }
 
     if (props.view === 'cellml_math') {
-      await generateMath()
+      await loadMathView()
     }
   }
 }
@@ -433,11 +455,30 @@ watch(
     if (newView === 'cellml_codegen') {
       await loadCodegenView()
     } else if (newView === 'cellml_math') {
-      await generateMath()
+      await loadMathView()
     } else {
       await loadDefaultView()
     }
   },
+)
+
+watch(
+  [
+    () => props.view,
+    () => mathsJSON.value.length,
+    () => isLoading.value,
+    () => isMathLoading.value,
+    () => isMathJaxReady.value,
+  ],
+  async ([view, mathsCount, loading, mathLoading, mathJaxReady]) => {
+    if (view !== 'cellml_math' || mathsCount === 0 || loading || mathLoading || !mathJaxReady) {
+      return
+    }
+
+    await nextTick()
+    await renderMathInElement(mathContainer.value)
+  },
+  { flush: 'post' },
 )
 
 onMounted(async () => {
@@ -530,13 +571,22 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div v-else-if="props.view === 'cellml_math' && mathsJSON.length" class="box overflow-auto">
-        <div v-for="value in mathsJSON" :key="value[0]"
-          class="mb-6 pb-6 last:mb-0 last:pb-0 border-b border-gray-200 dark:border-gray-700 last:border-0"
+      <div
+        v-else-if="props.view === 'cellml_math'"
+      >
+        <LoadingBox v-if="isMathLoading" message="Loading mathematics..." />
+        <div
+          v-else-if="mathsJSON.length"
+          class="box"
+          ref="mathContainer"
         >
-          <h4 class="font-semibold mb-4">{{ value[0] }}</h4>
-          <div v-for="math in value[1]" :key="math">
-            <div v-html="math" class="text-sm math-view"></div>
+          <div v-for="value in mathsJSON" :key="value[0]"
+            class="mb-6 pb-6 last:mb-0 last:pb-0 border-b border-gray-200 dark:border-gray-700 last:border-0 math-section"
+          >
+            <h4 class="font-semibold mb-4">{{ value[0] }}</h4>
+            <div v-for="math in value[1]" :key="math">
+              <div v-html="math" class="text-sm overflow-auto math-view"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -905,5 +955,34 @@ onMounted(async () => {
   & :deep(math) {
     @apply flex flex-col gap-4;
   }
+}
+
+.math-section :deep(mjx-math) {
+  display: table;
+  width: 100%;
+}
+
+.math-section :deep(mjx-math > mjx-mrow) {
+  display: table-row;
+}
+
+.math-section :deep(mjx-math > mjx-mrow > *) {
+  display: table-cell;
+  padding-bottom: 0.75rem;
+  vertical-align: middle;
+}
+
+.math-section :deep(mjx-math > mjx-mrow > *:nth-child(1)) {
+  text-align: right;
+  padding-right: 0.5rem;
+}
+
+.math-section :deep(mjx-math > mjx-mrow > *:nth-child(2)) {
+  text-align: center;
+}
+
+.math-section :deep(mjx-math > mjx-mrow > *:nth-child(3)) {
+  text-align: left;
+  padding-left: 0.5rem;
 }
 </style>
