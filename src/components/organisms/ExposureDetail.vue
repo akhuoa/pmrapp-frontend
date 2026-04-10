@@ -543,7 +543,7 @@ onMounted(async () => {
         >
           <h4 class="font-semibold mb-4">{{ value[0] }}</h4>
           <div v-for="math in value[1]" :key="math">
-            <div v-html="math" class="text-sm overflow-auto math-view"></div>
+            <div v-html="math" class="text-sm overflow-auto math-view p-2"></div>
           </div>
         </div>
       </div>
