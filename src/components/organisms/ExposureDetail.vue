@@ -27,7 +27,7 @@ import { formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
 import { isValidTerm } from '@/utils/search'
 import TermButton from '../atoms/TermButton.vue'
-import { initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
+import { initMathPolyfills, transformMathString, formatMathMLTable } from '@/utils/mathTransformer'
 
 const props = defineProps<{
   alias: string
@@ -259,7 +259,7 @@ const generateMath = async () => {
     )
     const mathResponseJSON = JSON.parse(response)
     mathsJSON.value = mathResponseJSON.map((entry: [string, string[]]) => {
-      const mathMLArray = entry[1].map((mathML) => transformMathString(mathML))
+      const mathMLArray = entry[1].map((mathML) => formatMathMLTable(transformMathString(mathML)))
       return [entry[0], mathMLArray]
     })
   } catch (err) {
@@ -537,13 +537,13 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div v-else-if="props.view === 'cellml_math' && mathsJSON.length" class="box overflow-auto">
+      <div v-else-if="props.view === 'cellml_math' && mathsJSON.length" class="box">
         <div v-for="value in mathsJSON" :key="value[0]"
           class="mb-6 pb-6 last:mb-0 last:pb-0 border-b border-gray-200 dark:border-gray-700 last:border-0"
         >
           <h4 class="font-semibold mb-4">{{ value[0] }}</h4>
           <div v-for="math in value[1]" :key="math">
-            <div v-html="math" class="text-sm math-view"></div>
+            <div v-html="math" class="text-sm overflow-auto math-view"></div>
           </div>
         </div>
       </div>
@@ -909,8 +909,25 @@ onMounted(async () => {
 }
 
 .math-view {
-  & :deep(math) {
-    @apply flex flex-col gap-4;
+  & :deep(math > mtable) {
+    border-spacing: 0 0.75em;
+  }
+
+  & :deep(math > mtable > mtr > mtd:nth-child(1)) {
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 0.5em;
+  }
+
+  & :deep(math > mtable > mtr > mtd:nth-child(2)) {
+    text-align: center;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  & :deep(math > mtable > mtr > mtd:nth-child(3)) {
+    text-align: left;
+    padding-left: 0.5em;
   }
 }
 </style>

@@ -36,3 +36,41 @@ export function transformMathString(rawMathML: string): string {
 
   return container.innerHTML
 }
+
+/**
+ * Formats a MathML string into a table structure for better rendering.
+ * @param rawMathML The string containing updated <math> tags.
+ * @returns The formatted MathML string.
+ */
+export const formatMathMLTable = (rawMathML: string): string => {
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(rawMathML, 'text/html')
+  const mathBlocks = doc.querySelectorAll('math')
+
+  mathBlocks.forEach((math) => {
+    const rows = Array.from(math.children).filter((child) => child.tagName === 'mrow')
+
+    if (rows.length > 1) {
+      const mtable = doc.createElement('mtable')
+      mtable.setAttribute('columnalign', 'right center left')
+      mtable.setAttribute('rowspacing', '0.75em')
+
+      rows.forEach((row) => {
+        const mtr = doc.createElement('mtr')
+
+        Array.from(row.childNodes).forEach((node) => {
+          const mtd = doc.createElement('mtd')
+          mtd.appendChild(node)
+          mtr.appendChild(mtd)
+        })
+
+        mtable.appendChild(mtr)
+        row.remove()
+      })
+
+      math.appendChild(mtable)
+    }
+  })
+
+  return doc.body.innerHTML
+}
