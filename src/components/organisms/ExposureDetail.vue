@@ -913,6 +913,13 @@ onMounted(async () => {
     border-spacing: 0 0.75em;
   }
 
+  & :deep(math mi),
+  & :deep(math mo),
+  & :deep(math mn) {
+    padding-left: 0.05em;
+    padding-right: 0.05em;
+  }
+
   & :deep(math > mtable > mtr > mtd:nth-child(1)) {
     display: flex;
     justify-content: flex-end;
