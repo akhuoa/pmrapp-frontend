@@ -543,7 +543,7 @@ onMounted(async () => {
         >
           <h4 class="font-semibold mb-4">{{ value[0] }}</h4>
           <div v-for="math in value[1]" :key="math">
-            <div v-html="math" class="text-sm overflow-auto math-view p-2"></div>
+            <div v-html="math" class="math-view"></div>
           </div>
         </div>
       </div>
@@ -909,15 +909,22 @@ onMounted(async () => {
 }
 
 .math-view {
+  @apply p-2 text-center text-sm overflow-auto;
+
   & :deep(math > mtable) {
-    border-spacing: 0 0.75em;
+    border-spacing: 0.5em 0.75em;
   }
 
   & :deep(math mi),
   & :deep(math mo),
   & :deep(math mn) {
+    line-height: 1.4;
     padding-left: 0.05em;
     padding-right: 0.05em;
+  }
+
+  & :deep(math > mtable > mtr + mtr > mtd) {
+    padding-top: 0.5em;
   }
 
   & :deep(math > mtable > mtr > mtd:nth-child(1)) {
@@ -926,10 +933,10 @@ onMounted(async () => {
     padding-right: 0.5em;
   }
 
-  & :deep(math > mtable > mtr > mtd:nth-child(2)) {
+  & :deep(math > mtable > mtr > mtd[data-math-operator='equals']) {
     text-align: center;
-    padding-left: 0.5em;
-    padding-right: 0.5em;
+    padding-left: 0.25em;
+    padding-right: 0.25em;
   }
 
   & :deep(math > mtable > mtr > mtd:nth-child(3)) {

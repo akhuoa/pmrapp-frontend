@@ -127,7 +127,7 @@ export const formatMathMLTable = (rawMathML: string): string => {
       (child) => child.tagName.toLowerCase() === 'mrow',
     )
 
-    if (rows.length > 1) {
+    if (rows.length) {
       const mtable = doc.createElement('mtable')
       mtable.setAttribute('columnalign', 'right center left')
       mtable.setAttribute('rowspacing', '0.75em')
@@ -137,6 +137,15 @@ export const formatMathMLTable = (rawMathML: string): string => {
 
         Array.from(row.childNodes).forEach((node) => {
           const mtd = doc.createElement('mtd')
+
+          if (
+            node.nodeType === Node.ELEMENT_NODE
+            && (node as Element).tagName.toLowerCase() === 'mo'
+            && ((node.textContent || '').trim() === '=' || (node as Element).getAttribute('form') === 'infix')
+          ) {
+            mtd.setAttribute('data-math-operator', 'equals')
+          }
+
           mtd.appendChild(node)
           mtr.appendChild(mtd)
         })
