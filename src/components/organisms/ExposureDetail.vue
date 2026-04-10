@@ -248,7 +248,7 @@ const toggleCodeWrap = () => {
 const generateMath = async () => {
   error.value = null
 
-  initMathPolyfills()
+  await initMathPolyfills()
 
   try {
     const response = await exposureStore.getExposureRawContent(

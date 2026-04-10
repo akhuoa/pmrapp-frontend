@@ -1,7 +1,15 @@
-// @ts-ignore - The polyfill lib might not have @types
-import { _MathTransforms } from 'https://w3c.github.io/mathml-polyfills/all-polyfills.js'
+const MATH_POLYFILLS_MODULE_URL = 'https://w3c.github.io/mathml-polyfills/all-polyfills.js'
+
+type MathTransformsModule = {
+  _MathTransforms?: {
+    getCSSStyleSheet: () => HTMLStyleElement
+    transform: (container: HTMLElement) => void
+  }
+}
 
 let isMathPolyfillsInitialized = false
+let isMathPolyfillsInitializing = false
+let loadedMathTransforms: MathTransformsModule['_MathTransforms'] | null = null
 const MATH_POLYFILLS_STYLE_ATTR = 'data-math-polyfills'
 const OPEN_TO_CLOSE_FENCE: Record<string, string> = {
   '(': ')',
@@ -41,24 +49,52 @@ const fixMismatchedFencePairs = (root: ParentNode) => {
   })
 }
 
+const loadMathTransforms = async () => {
+  if (loadedMathTransforms) return loadedMathTransforms
+  if (typeof window === 'undefined') return null
+
+  try {
+    // Avoid static URL imports so Node-based test runners don't fail at module parse time.
+    const dynamicImport = new Function('path', 'return import(path)') as (
+      path: string,
+    ) => Promise<MathTransformsModule>
+    const module = await dynamicImport(MATH_POLYFILLS_MODULE_URL)
+    loadedMathTransforms = module._MathTransforms || null
+  } catch (err) {
+    console.warn('Unable to load MathML polyfills module:', err)
+    loadedMathTransforms = null
+  }
+
+  return loadedMathTransforms
+}
+
 /**
  * Injects the necessary CSS for polyfills into the document head.
  */
-export function initMathPolyfills() {
-  if (typeof document === 'undefined' || isMathPolyfillsInitialized) {
+export async function initMathPolyfills() {
+  if (typeof document === 'undefined' || isMathPolyfillsInitialized || isMathPolyfillsInitializing) {
     return
   }
 
-  const existingStyle = document.head.querySelector(`[${MATH_POLYFILLS_STYLE_ATTR}="true"]`)
-  if (existingStyle) {
+  isMathPolyfillsInitializing = true
+
+  try {
+    const existingStyle = document.head.querySelector(`[${MATH_POLYFILLS_STYLE_ATTR}="true"]`)
+    if (existingStyle) {
+      isMathPolyfillsInitialized = true
+      return
+    }
+
+    const mathTransforms = await loadMathTransforms()
+    if (!mathTransforms) return
+
+    const style = mathTransforms.getCSSStyleSheet()
+    style.setAttribute(MATH_POLYFILLS_STYLE_ATTR, 'true')
+    document.head.appendChild(style)
     isMathPolyfillsInitialized = true
-    return
+  } finally {
+    isMathPolyfillsInitializing = false
   }
-
-  const style = _MathTransforms.getCSSStyleSheet()
-  style.setAttribute(MATH_POLYFILLS_STYLE_ATTR, 'true')
-  document.head.appendChild(style)
-  isMathPolyfillsInitialized = true
 }
 
 /**
@@ -69,7 +105,7 @@ export function transformMathString(rawMathML: string): string {
   const container = document.createElement('div')
   container.innerHTML = rawMathML
 
-  _MathTransforms.transform(container)
+  loadedMathTransforms?.transform(container)
 
   return container.innerHTML
 }
