@@ -465,7 +465,7 @@ describe('ExposureDetail', () => {
         mathsJSON: mathData,
       })
 
-      const mathBox = wrapper.find('.box.overflow-auto')
+      const mathBox = wrapper.find('.box')
       expect(mathBox.exists()).toBe(true)
 
       // Only the two non-empty components should have headings.
