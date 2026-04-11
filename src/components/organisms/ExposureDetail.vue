@@ -25,9 +25,9 @@ import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
+import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
 import { isValidTerm } from '@/utils/search'
 import TermButton from '../atoms/TermButton.vue'
-import { initMathPolyfills, transformMathString, formatMathMLTable } from '@/utils/mathTransformer'
 
 const props = defineProps<{
   alias: string
