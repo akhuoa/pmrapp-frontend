@@ -254,9 +254,9 @@ const generateMath = async () => {
       'cellml_math',
       'math.json',
     )
-    const parsedMaths = JSON.parse(response)
-    mathsJSON.value = Array.isArray(parsedMaths)
-      ? parsedMaths.filter(
+    const mathResponseJSON = JSON.parse(response)
+    mathsJSON.value = Array.isArray(mathResponseJSON)
+      ? mathResponseJSON.filter(
           (value): value is [string, string[]] => Array.isArray(value[1]) && value[1].length > 0,
         )
       : []
