@@ -72,7 +72,11 @@ const loadMathTransforms = async () => {
  * Injects the necessary CSS for polyfills into the document head.
  */
 export async function initMathPolyfills() {
-  if (typeof document === 'undefined' || isMathPolyfillsInitialized || isMathPolyfillsInitializing) {
+  if (
+    typeof document === 'undefined' ||
+    isMathPolyfillsInitialized ||
+    isMathPolyfillsInitializing
+  ) {
     return
   }
 
@@ -123,9 +127,7 @@ export const formatMathMLTable = (rawMathML: string): string => {
   mathBlocks.forEach((math) => {
     fixMismatchedFencePairs(math)
 
-    const rows = Array.from(math.children).filter(
-      (child) => child.tagName.toLowerCase() === 'mrow',
-    )
+    const rows = Array.from(math.children).filter((child) => child.tagName.toLowerCase() === 'mrow')
 
     if (rows.length) {
       const mtable = doc.createElement('mtable')
@@ -139,9 +141,10 @@ export const formatMathMLTable = (rawMathML: string): string => {
           const mtd = doc.createElement('mtd')
 
           if (
-            node.nodeType === Node.ELEMENT_NODE
-            && (node as Element).tagName.toLowerCase() === 'mo'
-            && ((node.textContent || '').trim() === '=' || (node as Element).getAttribute('form') === 'infix')
+            node.nodeType === Node.ELEMENT_NODE &&
+            (node as Element).tagName.toLowerCase() === 'mo' &&
+            ((node.textContent || '').trim() === '=' ||
+              (node as Element).getAttribute('form') === 'infix')
           ) {
             mtd.setAttribute('data-math-operator', 'equals')
           }
