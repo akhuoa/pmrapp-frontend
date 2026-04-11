@@ -258,10 +258,11 @@ const generateMath = async () => {
       'math.json',
     )
     const mathResponseJSON = JSON.parse(response)
-    mathsJSON.value = mathResponseJSON.map((entry: [string, string[]]) => {
+    const transformedMathsJSON = mathResponseJSON.map((entry: [string, string[]]) => {
       const mathMLArray = entry[1].map((mathML) => formatMathMLTable(transformMathString(mathML)))
       return [entry[0], mathMLArray]
     })
+    mathsJSON.value = transformedMathsJSON
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Failed to parse mathematics data.'
     error.value = {
