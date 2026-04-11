@@ -255,11 +255,12 @@ const generateMath = async () => {
       'math.json',
     )
     const mathResponseJSON = JSON.parse(response)
-    mathsJSON.value = Array.isArray(mathResponseJSON)
+    const filteredMathsJSON = Array.isArray(mathResponseJSON)
       ? mathResponseJSON.filter(
           (value): value is [string, string[]] => Array.isArray(value[1]) && value[1].length > 0,
         )
       : []
+    mathsJSON.value = filteredMathsJSON
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Failed to parse mathematics data.'
     error.value = {
