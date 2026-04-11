@@ -538,15 +538,18 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div v-else-if="props.view === 'cellml_math' && mathsJSON.length" class="box">
-        <div v-for="value in mathsJSON" :key="value[0]"
-          class="mb-6 pb-6 last:mb-0 last:pb-0 border-b border-gray-200 dark:border-gray-700 last:border-0"
-        >
-          <h4 class="font-semibold mb-4">{{ value[0] }}</h4>
-          <div v-for="math in value[1]" :key="math">
-            <div v-html="math" class="math-view"></div>
+      <div v-else-if="props.view === 'cellml_math'" class="box">
+        <p v-if="!mathsJSON.length" class="text-sm text-gray-500 dark:text-gray-400">No mathematics content available.</p>
+        <template v-else>
+          <div v-for="value in mathsJSON" :key="value[0]"
+            class="mb-6 pb-6 last:mb-0 last:pb-0 border-b border-gray-200 dark:border-gray-700 last:border-0"
+          >
+            <h4 class="font-semibold mb-4">{{ value[0] }}</h4>
+            <div v-for="math in value[1]" :key="math">
+              <div v-html="math" class="math-view"></div>
+            </div>
           </div>
-        </div>
+        </template>
       </div>
 
       <div v-else-if="detailHTML" class="box">
