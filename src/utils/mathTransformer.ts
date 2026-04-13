@@ -123,6 +123,7 @@ export const formatMathMLTable = (rawMathML: string): string => {
   const parser = new DOMParser()
   const doc = parser.parseFromString(rawMathML, 'text/html')
   const mathBlocks = doc.querySelectorAll('math')
+  const NS = 'http://www.w3.org/1998/Math/MathML'
 
   mathBlocks.forEach((math) => {
     fixMismatchedFencePairs(math)
@@ -130,15 +131,15 @@ export const formatMathMLTable = (rawMathML: string): string => {
     const rows = Array.from(math.children).filter((child) => child.tagName.toLowerCase() === 'mrow')
 
     if (rows.length) {
-      const mtable = doc.createElement('mtable')
+      const mtable = doc.createElementNS(NS, 'mtable')
       mtable.setAttribute('columnalign', 'right center left')
       mtable.setAttribute('rowspacing', '0.75em')
 
       rows.forEach((row) => {
-        const mtr = doc.createElement('mtr')
+        const mtr = doc.createElementNS(NS, 'mtr')
 
         Array.from(row.childNodes).forEach((node) => {
-          const mtd = doc.createElement('mtd')
+          const mtd = doc.createElementNS(NS, 'mtd')
 
           if (
             node.nodeType === Node.ELEMENT_NODE &&
