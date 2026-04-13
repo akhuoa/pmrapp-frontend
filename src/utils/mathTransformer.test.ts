@@ -1,9 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import {
-  formatMathMLTable,
-  initMathPolyfills,
-  transformMathString,
-} from '@/utils/mathTransformer'
+import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
 
 /**
  * Tests for MathML transformation utilities.
