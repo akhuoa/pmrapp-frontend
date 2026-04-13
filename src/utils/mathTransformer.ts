@@ -104,6 +104,8 @@ export async function initMathPolyfills() {
  * @param rawMathML The string containing legacy <math> tags.
  */
 export function transformMathString(rawMathML: string): string {
+  if (typeof document === 'undefined') return rawMathML
+
   const container = document.createElement('div')
   container.innerHTML = rawMathML
 
@@ -118,6 +120,8 @@ export function transformMathString(rawMathML: string): string {
  * @returns The formatted MathML string.
  */
 export const formatMathMLTable = (rawMathML: string): string => {
+  if (typeof document === 'undefined') return rawMathML
+
   const parser = new DOMParser()
   const doc = parser.parseFromString(rawMathML, 'text/html')
   const mathBlocks = doc.querySelectorAll('math')
