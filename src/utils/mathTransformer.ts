@@ -7,6 +7,15 @@ type MathTransformsModule = {
   }
 }
 
+let sharedDOMParser: DOMParser | null = null
+
+const getDOMParser = (): DOMParser => {
+  if (!sharedDOMParser) {
+    sharedDOMParser = new DOMParser()
+  }
+  return sharedDOMParser
+}
+
 let isMathPolyfillsInitialized = false
 let isMathPolyfillsInitializing = false
 let loadedMathTransforms: MathTransformsModule['_MathTransforms'] | null = null
@@ -122,7 +131,7 @@ export function transformMathString(rawMathML: string): string {
 export const formatMathMLTable = (rawMathML: string): string => {
   if (typeof document === 'undefined') return rawMathML
 
-  const parser = new DOMParser()
+  const parser = getDOMParser()
   const doc = parser.parseFromString(rawMathML, 'text/html')
   const mathBlocks = doc.querySelectorAll('math')
   const NS = 'http://www.w3.org/1998/Math/MathML'
