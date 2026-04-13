@@ -54,10 +54,8 @@ const loadMathTransforms = async () => {
   if (typeof window === 'undefined') return null
 
   try {
-    // Avoid static URL imports so Node-based test runners don't fail at module parse time.
-    // Use dynamic import() instead of new Function to comply with strict CSP.
-    // Dynamic imports are evaluated at runtime, not parse time, so they don't
-    // cause issues with Node-based test runners.
+    // Dynamic import() avoids unsafe-eval CSP violations
+    // while remaining compatible with Node test runners.
     const module = await import(MATH_POLYFILLS_MODULE_URL)
     loadedMathTransforms = module._MathTransforms || null
   } catch (err) {
