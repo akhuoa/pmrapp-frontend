@@ -33,8 +33,9 @@ vi.mock('https://w3c.github.io/mathml-polyfills/all-polyfills.js', () => ({
 describe('initMathPolyfills', () => {
   it('injects the polyfill CSS into the document head', async () => {
     // Remove any previously injected styles (from other tests).
-    const existings = document.head.querySelectorAll('[data-math-polyfills="true"]')
-    existings.forEach((el) => el.remove())
+    for (const el of document.head.querySelectorAll('[data-math-polyfills="true"]')) {
+      el.remove()
+    }
 
     await initMathPolyfills()
 
@@ -45,7 +46,7 @@ describe('initMathPolyfills', () => {
 
   it('does not throw when the document is unavailable', async () => {
     const originalDocument = globalThis.document
-    // @ts-ignore
+    // @ts-expect-error
     delete globalThis.document
 
     await expect(initMathPolyfills()).resolves.toBeUndefined()
@@ -91,7 +92,7 @@ describe('transformMathString', () => {
 
   it('returns the input unchanged when the document is unavailable', () => {
     const originalDocument = globalThis.document
-    // @ts-ignore
+    // @ts-expect-error
     delete globalThis.document
 
     const result = transformMathString(simpleEquation)
@@ -184,7 +185,7 @@ describe('formatMathMLTable', () => {
 
   it('returns the input unchanged when the document is unavailable', () => {
     const originalDocument = globalThis.document
-    // @ts-ignore
+    // @ts-expect-error
     delete globalThis.document
 
     const result = formatMathMLTable(multiRowEquation)
