@@ -1,15 +1,9 @@
-const MATH_POLYFILLS_MODULE_URL = 'https://w3c.github.io/mathml-polyfills/all-polyfills.js'
-
-type MathTransformsModule = {
-  _MathTransforms?: {
-    getCSSStyleSheet: () => HTMLStyleElement
-    transform: (container: HTMLElement) => void
-  }
-}
+// Vendored at src/vendor/mathml-polyfills/ — see scripts/update-mathml-polyfills.sh to upgrade.
+import type { _MathTransforms as MathTransforms } from '@/vendor/mathml-polyfills/all-polyfills.js'
 
 let isMathPolyfillsInitialized = false
 let isMathPolyfillsInitializing = false
-let loadedMathTransforms: MathTransformsModule['_MathTransforms'] | null = null
+let loadedMathTransforms: typeof MathTransforms | null = null
 const MATH_POLYFILLS_STYLE_ATTR = 'data-math-polyfills'
 const OPEN_TO_CLOSE_FENCE: Record<string, string> = {
   '(': ')',
@@ -54,12 +48,8 @@ const loadMathTransforms = async () => {
   if (typeof window === 'undefined') return null
 
   try {
-    // Avoid static URL imports so Node-based test runners don't fail at module parse time.
-    const dynamicImport = new Function('path', 'return import(path)') as (
-      path: string,
-    ) => Promise<MathTransformsModule>
-    const module = await dynamicImport(MATH_POLYFILLS_MODULE_URL)
-    loadedMathTransforms = module._MathTransforms || null
+    const { _MathTransforms } = await import('@/vendor/mathml-polyfills/all-polyfills.js')
+    loadedMathTransforms = _MathTransforms ?? null
   } catch (err) {
     console.warn('Unable to load MathML polyfills module:', err)
     loadedMathTransforms = null
