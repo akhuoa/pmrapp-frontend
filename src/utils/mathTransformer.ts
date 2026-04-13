@@ -55,10 +55,10 @@ const loadMathTransforms = async () => {
 
   try {
     // Avoid static URL imports so Node-based test runners don't fail at module parse time.
-    const dynamicImport = new Function('path', 'return import(path)') as (
-      path: string,
-    ) => Promise<MathTransformsModule>
-    const module = await dynamicImport(MATH_POLYFILLS_MODULE_URL)
+    // Use dynamic import() instead of new Function to comply with strict CSP.
+    // Dynamic imports are evaluated at runtime, not parse time, so they don't
+    // cause issues with Node-based test runners.
+    const module = await import(MATH_POLYFILLS_MODULE_URL)
     loadedMathTransforms = module._MathTransforms || null
   } catch (err) {
     console.warn('Unable to load MathML polyfills module:', err)
