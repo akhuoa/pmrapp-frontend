@@ -25,7 +25,7 @@ import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
-import { isValidTerm } from '@/utils/search'
+import { buildSearchQuery, isValidTerm } from '@/utils/search'
 import TermButton from '../atoms/TermButton.vue'
 
 const props = defineProps<{
@@ -312,7 +312,8 @@ const loadCodegenView = async () => {
 }
 
 const handleKeywordClick = (kind: string, keyword: string) => {
-  router.push({ path: '/search', query: { kind, term: keyword } })
+  const currentQuery = router.currentRoute.value.query
+  router.push({ path: '/search', query: buildSearchQuery(kind, keyword, currentQuery) })
 }
 
 const handleCitationAuthorClick = (authorParts: string[]) => {
