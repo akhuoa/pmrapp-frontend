@@ -26,7 +26,7 @@ import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
 import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
-import { isValidTerm } from '@/utils/search'
+import { buildSearchQuery, isValidTerm } from '@/utils/search'
 import TermButton from '../atoms/TermButton.vue'
 
 const props = defineProps<{
@@ -258,7 +258,12 @@ const generateMath = async () => {
       'math.json',
     )
     const mathResponseJSON = JSON.parse(response)
-    const transformedMathsJSON = mathResponseJSON.map((entry: [string, string[]]) => {
+    const filteredMathsJSON = Array.isArray(mathResponseJSON)
+      ? mathResponseJSON.filter(
+          (value): value is [string, string[]] => Array.isArray(value[1]) && value[1].length > 0,
+        )
+      : []
+    const transformedMathsJSON = filteredMathsJSON.map((entry): [string, string[]] => {
       const mathMLArray = entry[1].map((mathML) => formatMathMLTable(transformMathString(mathML)))
       return [entry[0], mathMLArray]
     })
@@ -314,7 +319,8 @@ const loadCodegenView = async () => {
 }
 
 const handleKeywordClick = (kind: string, keyword: string) => {
-  router.push({ path: '/search', query: { kind, term: keyword } })
+  const currentQuery = router.currentRoute.value.query
+  router.push({ path: '/search', query: buildSearchQuery(kind, keyword, currentQuery) })
 }
 
 const handleCitationAuthorClick = (authorParts: string[]) => {
