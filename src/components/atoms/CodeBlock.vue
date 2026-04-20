@@ -14,6 +14,11 @@ import 'prismjs/components/prism-markdown'
 import 'prismjs/components/prism-matlab'
 import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
 import 'prismjs/plugins/line-numbers/prism-line-numbers'
+import { highlightService } from '@/services/highlightService'
+
+// Minimal HTML entity encoding used to display plain text before the service responds.
+const escapeHtml = (text: string): string =>
+  text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
 const props = defineProps<{
   code: string
@@ -24,6 +29,18 @@ const codeBlock = ref<HTMLElement | null>(null)
 const preBlock = ref<HTMLElement | null>(null)
 const darkThemeMediaQuery = ref<MediaQueryList | null>(null)
 const isWrapped = ref(false)
+const isHighlighting = ref(false)
+
+// Holds the v-html content for the <code> element.
+// Initialised with escaped plain text so the file is immediately visible.
+const displayCode = ref(escapeHtml(props.code))
+
+// Generation counter used to discard stale service responses when the file
+// changes while a previous request is still in flight.
+// Declared with `let` in <script setup> – each component instance gets its own
+// copy because Vue runs the setup function once per instance.
+let requestGeneration = 0
+
 let observer: ResizeObserver | null = null
 
 const preformatClass = [
@@ -76,19 +93,76 @@ const detectedLanguage = computed(() => {
   return ext ? languageMap[ext] || 'plaintext' : 'none'
 })
 
-const highlightCode = async () => {
-  await nextTick()
-  if (codeBlock.value && props.code) {
-    try {
-      // Clear previous highlighting.
-      codeBlock.value.removeAttribute('data-highlighted')
+/**
+ * Remove any stale line-number rows injected by the Prism line-numbers plugin
+ * from a previous highlighting pass so the plugin rebuilds them correctly.
+ */
+const clearLineNumberRows = () => {
+  preBlock.value?.querySelectorAll('.line-numbers-rows').forEach((el) => {
+    el.remove()
+  })
+}
 
-      if (detectedLanguage.value !== 'none') {
-        Prism.highlightElement(codeBlock.value)
-      }
-    } catch (err) {
-      console.error('Error highlighting code:', err)
-    }
+/**
+ * Fire the Prism lifecycle hooks that the line-numbers plugin listens to.
+ * Must be called after the highlighted HTML has been flushed to the DOM.
+ */
+const triggerLineNumberHooks = () => {
+  if (!codeBlock.value || !preBlock.value) return
+  const env = {
+    element: codeBlock.value,
+    language: detectedLanguage.value,
+    grammar: Prism.languages[detectedLanguage.value],
+    code: props.code,
+  }
+  Prism.hooks.run('after-highlight', env)
+  Prism.hooks.run('complete', env)
+}
+
+const highlightCode = async () => {
+  if (!props.code || detectedLanguage.value === 'none') {
+    displayCode.value = escapeHtml(props.code)
+    return
+  }
+
+  // Show plain text immediately while the service request is in flight.
+  displayCode.value = escapeHtml(props.code)
+  isHighlighting.value = true
+  const generation = ++requestGeneration
+
+  try {
+    // Off-main-thread path: ask the server to highlight the code.
+    // Security: displayCode is populated only with the response from our own
+    // trusted backend API (/api/highlight).  The backend is responsible for
+    // producing safe Prism-tokenised HTML.  Never pass untrusted third-party
+    // HTML through this path.
+    const html = await highlightService.highlight(props.code, detectedLanguage.value)
+
+    // Discard the result if a newer request has already been dispatched.
+    if (generation !== requestGeneration) return
+
+    clearLineNumberRows()
+    displayCode.value = html
+    await nextTick()
+    triggerLineNumberHooks()
+  } catch {
+    // Service unavailable or failed – fall back to main-thread Prism so the
+    // viewer still works in development or when the backend is unreachable.
+    if (generation !== requestGeneration) return
+
+    clearLineNumberRows()
+    await nextTick()
+    if (!codeBlock.value || generation !== requestGeneration) return
+    // Vue has already applied displayCode (escaped plain text) to innerHTML
+    // via v-html, so codeBlock.textContent is the original source ready for Prism.
+    codeBlock.value.removeAttribute('data-highlighted')
+    Prism.highlightElement(codeBlock.value)
+    // Sync displayCode so Vue does not overwrite Prism's output on re-render.
+    displayCode.value = codeBlock.value.innerHTML
+  }
+
+  if (generation === requestGeneration) {
+    isHighlighting.value = false
   }
 }
 
@@ -100,6 +174,9 @@ const syncWrapAndLineNumbers = async () => {
   codeBlock.value.classList.toggle('!whitespace-pre-wrap', isWrapped.value)
 
   await nextTick()
+
+  // Re-check refs after await in case the component was unmounted.
+  if (!preBlock.value) return
 
   if (!isWrapped.value) {
     const lineSpans = preBlock.value.querySelectorAll('.line-numbers-rows > span')
@@ -203,13 +280,20 @@ watch(
 
 <template>
   <div>
+    <div
+      v-if="isHighlighting"
+      class="animate-pulse bg-gray-100 dark:bg-gray-800 rounded px-3 py-2 text-sm text-gray-500 dark:text-gray-400 mb-2"
+    >
+      Highlighting code…
+    </div>
     <pre
       ref="preBlock"
       :class="preformatClass"
     ><code
       ref="codeBlock"
       :class="`language-${detectedLanguage}`"
-    >{{ code }}</code></pre>
+      v-html="displayCode"
+    ></code></pre>
   </div>
 </template>
 
