@@ -26,7 +26,7 @@ import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
 import { loadMathJax, renderMathInElement } from '@/utils/mathjax'
-import { isValidTerm } from '@/utils/search'
+import { buildSearchQuery, isValidTerm } from '@/utils/search'
 import TermButton from '../atoms/TermButton.vue'
 
 const props = defineProps<{
@@ -258,7 +258,13 @@ const generateMath = async () => {
       'cellml_math',
       'math.json',
     )
-    mathsJSON.value = JSON.parse(response)
+    const mathResponseJSON = JSON.parse(response)
+    const filteredMathsJSON = Array.isArray(mathResponseJSON)
+      ? mathResponseJSON.filter(
+          (value): value is [string, string[]] => Array.isArray(value[1]) && value[1].length > 0,
+        )
+      : []
+    mathsJSON.value = filteredMathsJSON
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Failed to parse mathematics data.'
     error.value = {
@@ -328,7 +334,8 @@ const loadMathView = async () => {
 }
 
 const handleKeywordClick = (kind: string, keyword: string) => {
-  router.push({ path: '/search', query: { kind, term: keyword } })
+  const currentQuery = router.currentRoute.value.query
+  router.push({ path: '/search', query: buildSearchQuery(kind, keyword, currentQuery) })
 }
 
 const handleCitationAuthorClick = (authorParts: string[]) => {
@@ -571,24 +578,19 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div
-        v-else-if="props.view === 'cellml_math'"
-      >
+      <div v-else-if="props.view === 'cellml_math'" class="box">
         <LoadingBox v-if="isMathLoading" message="Loading mathematics..." />
-        <div
-          v-else-if="mathsJSON.length"
-          class="box"
-          ref="mathContainer"
-        >
+        <p v-if="!mathsJSON.length" class="text-sm text-gray-500 dark:text-gray-400">No mathematics content available.</p>
+        <template v-else>
           <div v-for="value in mathsJSON" :key="value[0]"
-            class="mb-6 pb-6 last:mb-0 last:pb-0 border-b border-gray-200 dark:border-gray-700 last:border-0 math-section"
+            class="mb-6 pb-6 last:mb-0 last:pb-0 border-b border-gray-200 dark:border-gray-700 last:border-0"
           >
             <h4 class="font-semibold mb-4">{{ value[0] }}</h4>
             <div v-for="math in value[1]" :key="math">
-              <div v-html="math" class="text-sm overflow-auto math-view"></div>
+              <div v-html="math" class="math-view"></div>
             </div>
           </div>
-        </div>
+        </template>
       </div>
 
       <div v-else-if="detailHTML" class="box">
@@ -952,6 +954,8 @@ onMounted(async () => {
 }
 
 .math-view {
+  @apply p-2 text-center text-sm overflow-auto;
+
   & :deep(math) {
     @apply flex flex-col gap-4;
   }

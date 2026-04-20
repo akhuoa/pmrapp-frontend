@@ -3,6 +3,7 @@ import { nextTick, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import CloseButton from '@/components/atoms/CloseButton.vue'
 import SearchInput from '@/components/molecules/SearchInput.vue'
+import { buildSearchQuery } from '@/utils/search'
 
 const props = defineProps<{
   show: boolean
@@ -13,6 +14,20 @@ const emit = defineEmits<(e: 'close') => void>()
 const router = useRouter()
 const route = useRoute()
 const searchInputRef = ref<InstanceType<typeof SearchInput> | null>(null)
+
+let isMouseDownOnBackdrop = false
+
+const handleBackdropMouseDown = (event: MouseEvent) => {
+  if (event.button !== 0) return
+  isMouseDownOnBackdrop = true
+}
+
+const handleBackdropMouseUp = (event: MouseEvent) => {
+  if (isMouseDownOnBackdrop && event.target === event.currentTarget) {
+    emit('close')
+  }
+  isMouseDownOnBackdrop = false
+}
 
 const handleKeyDown = (event: KeyboardEvent) => {
   if (event.key === 'Escape') {
@@ -30,6 +45,7 @@ watch(
       document.addEventListener('keydown', handleKeyDown)
     } else {
       document.removeEventListener('keydown', handleKeyDown)
+      isMouseDownOnBackdrop = false
     }
   },
 )
@@ -39,7 +55,7 @@ onUnmounted(() => {
 })
 
 const handleSearch = (searchKind: string, searchTerm: string) => {
-  router.push({ path: '/search', query: { kind: searchKind, term: searchTerm } })
+  router.push({ path: '/search', query: buildSearchQuery(searchKind, searchTerm, route.query) })
   emit('close')
 }
 
@@ -68,7 +84,8 @@ const getInitialKind = (): string => {
   <div
     v-if="show"
     class="fixed inset-0 bg-gray-800/75 dark:bg-gray-900/75 z-50 flex justify-center items-start pt-20"
-    @click.self="emit('close')"
+    @mousedown.self="handleBackdropMouseDown"
+    @mouseup="handleBackdropMouseUp"
   >
     <div class="w-full max-w-4xl bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
       <div class="flex justify-between items-center mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
