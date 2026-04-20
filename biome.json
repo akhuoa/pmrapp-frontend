@@ -5,6 +5,9 @@
       "tailwindDirectives": true
     }
   },
+  "files": {
+    "includes": ["**", "!src/vendor"]
+  },
   "formatter": {
     "indentStyle": "space",
     "lineWidth": 100,
@@ -47,9 +50,6 @@
       "includes": ["*.json", "!package.json"]
     }
   ],
-  "files": {
-    "includes": ["**", "!src/vendor"]
-  },
   "vcs": {
     "clientKind": "git",
     "enabled": true,
