@@ -11,11 +11,12 @@ export const useAuthStore = defineStore('auth', () => {
     username.value = user
     isAuthenticated.value = true
 
-    // TEMPORARY: Using sessionStorage for token persistence.
+    // TEMPORARY: Using localStorage for token persistence
+    // so that the login state is shared across all tabs in the same browser.
     // This is not the most secure approach as it's still vulnerable to XSS attacks.
     // This can be HttpOnly cookies or other secure storage mechanisms in the future.
-    sessionStorage.setItem('auth_token', authToken)
-    sessionStorage.setItem('username', user)
+    localStorage.setItem('auth_token', authToken)
+    localStorage.setItem('username', user)
   }
 
   function clearAuth() {
@@ -23,19 +24,23 @@ export const useAuthStore = defineStore('auth', () => {
     username.value = null
     isAuthenticated.value = false
 
-    // Clear authentication data from sessionStorage.
-    sessionStorage.removeItem('auth_token')
-    sessionStorage.removeItem('username')
+    // Clear authentication data from localStorage.
+    localStorage.removeItem('auth_token')
+    localStorage.removeItem('username')
   }
 
   function initAuth() {
-    const storedToken = sessionStorage.getItem('auth_token')
-    const storedUsername = sessionStorage.getItem('username')
+    const storedToken = localStorage.getItem('auth_token')
+    const storedUsername = localStorage.getItem('username')
 
     if (storedToken && storedUsername) {
       token.value = storedToken
       username.value = storedUsername
       isAuthenticated.value = true
+    } else {
+      token.value = null
+      username.value = null
+      isAuthenticated.value = false
     }
   }
 

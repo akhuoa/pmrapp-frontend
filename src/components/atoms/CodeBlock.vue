@@ -14,7 +14,6 @@ import 'prismjs/components/prism-markdown'
 import 'prismjs/components/prism-matlab'
 import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
 import 'prismjs/plugins/line-numbers/prism-line-numbers'
-import CopyButton from './CopyButton.vue'
 
 const props = defineProps<{
   code: string
@@ -22,41 +21,59 @@ const props = defineProps<{
 }>()
 
 const codeBlock = ref<HTMLElement | null>(null)
+const preBlock = ref<HTMLElement | null>(null)
 const darkThemeMediaQuery = ref<MediaQueryList | null>(null)
+const isWrapped = ref(false)
+let observer: ResizeObserver | null = null
+
+const preformatClass = [
+  'line-numbers',
+  'bg-gray-50',
+  'dark:bg-gray-900',
+  'rounded',
+  'overflow-x-auto',
+  'text-sm!',
+  'm-0!',
+  'transition-all',
+  'duration-200',
+  'ease-in-out',
+].join(' ')
 
 const detectedLanguage = computed(() => {
   const ext = props.filename.split('.').pop()?.toLowerCase()
 
   // Map file extensions to Prism language names.
   const languageMap: Record<string, string> = {
+    c: 'c',
+    cellml: 'markup',
+    conf: 'json',
+    cpp: 'cpp',
+    css: 'css',
+    f77: 'fortran',
+    fortran: 'fortran',
+    h: 'cpp',
+    htm: 'markup',
+    html: 'markup',
     js: 'javascript',
-    jsx: 'javascript',
-    ts: 'javascript',
-    tsx: 'javascript',
     json: 'json',
+    jsx: 'javascript',
+    m: 'matlab',
+    markdown: 'markdown',
+    matlab: 'matlab',
+    md: 'markdown',
     py: 'python',
     python: 'python',
-    css: 'css',
-    scss: 'css',
+    rdf: 'markup',
     sass: 'css',
-    c: 'c',
-    cpp: 'cpp',
-    h: 'cpp',
-    fortran: 'fortran',
-    f77: 'fortran',
-    html: 'markup',
-    htm: 'markup',
-    xml: 'markup',
-    svg: 'markup',
-    md: 'markdown',
-    markdown: 'markdown',
-    cellml: 'markup',
+    scss: 'css',
     sedml: 'markup',
-    matlab: 'matlab',
-    m: 'matlab',
+    svg: 'markup',
+    ts: 'javascript',
+    tsx: 'javascript',
+    xml: 'markup',
   }
 
-  return ext ? languageMap[ext] || 'none' : 'none'
+  return ext ? languageMap[ext] || 'plaintext' : 'none'
 })
 
 const highlightCode = async () => {
@@ -74,6 +91,45 @@ const highlightCode = async () => {
     }
   }
 }
+
+const syncWrapAndLineNumbers = async () => {
+  if (!preBlock.value || !codeBlock.value) return
+
+  // Keep wrap classes in sync after Prism mutates highlighted markup.
+  preBlock.value.classList.toggle('!whitespace-pre-wrap', isWrapped.value)
+  codeBlock.value.classList.toggle('!whitespace-pre-wrap', isWrapped.value)
+
+  await nextTick()
+
+  if (!isWrapped.value) {
+    const lineSpans = preBlock.value.querySelectorAll('.line-numbers-rows > span')
+    lineSpans.forEach((span) => {
+      const lineSpan = span as HTMLElement
+      lineSpan.style.height = ''
+    })
+  }
+
+  if (Prism.plugins.lineNumbers?.resize) {
+    Prism.plugins.lineNumbers.resize(preBlock.value)
+  }
+}
+
+const refreshCodeBlock = async () => {
+  await highlightCode()
+  await syncWrapAndLineNumbers()
+}
+
+const toggleWrap = async () => {
+  if (!preBlock.value || !codeBlock.value) return
+
+  isWrapped.value = !isWrapped.value
+  await syncWrapAndLineNumbers()
+}
+
+defineExpose({
+  toggleWrap,
+  isWrapped,
+})
 
 const loadPrismTheme = async (isDark: boolean) => {
   // Remove existing Prism theme stylesheets.
@@ -104,7 +160,7 @@ const handleThemeChange = (e: MediaQueryListEvent) => {
 }
 
 onMounted(() => {
-  highlightCode()
+  void refreshCodeBlock()
 
   darkThemeMediaQuery.value = window.matchMedia('(prefers-color-scheme: dark)')
 
@@ -113,32 +169,47 @@ onMounted(() => {
 
   // Listen for theme changes.
   darkThemeMediaQuery.value.addEventListener('change', handleThemeChange)
+
+  if (preBlock.value && typeof ResizeObserver === 'function') {
+    observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (Prism.plugins.lineNumbers?.resize) {
+          Prism.plugins.lineNumbers.resize(entry.target as HTMLElement)
+        }
+      }
+    })
+
+    observer.observe(preBlock.value)
+  }
 })
 
 onBeforeUnmount(() => {
   if (darkThemeMediaQuery.value) {
     darkThemeMediaQuery.value.removeEventListener('change', handleThemeChange)
   }
+
+  if (observer) {
+    observer.disconnect()
+  }
 })
 
 watch(
   () => props.code,
   () => {
-    highlightCode()
+    void refreshCodeBlock()
   },
 )
 </script>
 
 <template>
-  <div class="relative">
-    <pre class="line-numbers bg-gray-50 dark:bg-gray-900 rounded overflow-x-auto text-sm! m-0!"><code
+  <div>
+    <pre
+      ref="preBlock"
+      :class="preformatClass"
+    ><code
       ref="codeBlock"
       :class="`language-${detectedLanguage}`"
     >{{ code }}</code></pre>
-
-    <div class="absolute top-2 right-2">
-      <CopyButton :text="code" title="Copy code" />
-    </div>
   </div>
 </template>
 
@@ -151,6 +222,10 @@ pre {
 
 code {
   font-family: inherit;
+}
+
+:deep(.line-numbers-rows > span) {
+  transition: height 0.2s ease-in-out;
 }
 </style>
 

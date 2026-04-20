@@ -2,7 +2,9 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
+import CopyButton from '@/components/atoms/CopyButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
+import WrapButton from '@/components/atoms/WrapButton.vue'
 import CodeIcon from '@/components/icons/CodeIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import PreviewIcon from '@/components/icons/PreviewIcon.vue'
@@ -29,6 +31,7 @@ const fileBlobUrl = ref<string>('')
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 const showCode = ref(false)
+const codeBlockRef = ref<InstanceType<typeof CodeBlock> | null>(null)
 
 // Extract filename from full path for download purposes.
 const filename = computed(() => {
@@ -102,6 +105,10 @@ const toggleCodeView = () => {
   showCode.value = !showCode.value
 }
 
+const toggleCodeWrap = () => {
+  codeBlockRef.value?.toggleWrap()
+}
+
 onMounted(async () => {
   try {
     // Fetch images, SVGs, and PDFs as blobs.
@@ -163,18 +170,27 @@ onBeforeUnmount(() => {
             v-if="isSvg || isMarkdown"
             @click="toggleCodeView"
             class="flex items-center cursor-pointer gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-            :title="showCode ? 'Show preview' : 'Show code'"
-            :aria-label="showCode ? 'Show preview' : 'Show code'"
           >
             <PreviewIcon class="w-4 h-4" v-if="showCode" />
             <CodeIcon class="w-4 h-4" v-else />
             {{ showCode ? 'Preview' : 'Code' }}
           </button>
+          <WrapButton
+            v-if="shouldShowAsText"
+            :disabled="(isSvg || isMarkdown) ? !showCode : false"
+            :active="codeBlockRef?.isWrapped"
+            @click="toggleCodeWrap"
+          />
+          <CopyButton
+            v-if="shouldShowAsText"
+            :text="fileContent"
+            title="Copy code"
+          />
           <ActionButton
             variant="icon"
             content-section="Workspace File Detail"
             @click="downloadFile"
-            title="Download"
+            tooltip="Download"
             :aria-label="'Download'"
           >
             <DownloadIcon class="w-4 h-4" />
@@ -206,6 +222,7 @@ onBeforeUnmount(() => {
       <!-- Code/Text View -->
       <div v-else-if="shouldShowAsText" class="relative">
         <CodeBlock
+          ref="codeBlockRef"
           :code="fileContent"
           :filename="filename"
         />

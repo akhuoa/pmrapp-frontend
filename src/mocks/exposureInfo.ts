@@ -419,3 +419,42 @@ export const mockMetadata = {
     },
   ],
 }
+
+export const mockGeneratedCode = `
+/*
+   There are a total of 0 entries in the algebraic variable array.
+   There are a total of 3 entries in each of the rate and state variable arrays.
+   There are a total of 2 entries in the constant variable array.
+ */
+/*
+ * VOI is time in component environment (second).
+ * STATES[0] is Ca in component Ca (micromolar).
+ * CONSTANTS[0] is k1 in component reaction_constants (second_order_rate_constant).
+ * CONSTANTS[1] is k1_ in component reaction_constants (first_order_rate_constant).
+ * STATES[1] is ATP in component ATP (micromolar).
+ * STATES[2] is CaATP in component CaATP (micromolar).
+ * RATES[0] is d/dt Ca in component Ca (micromolar).
+ * RATES[1] is d/dt ATP in component ATP (micromolar).
+ * RATES[2] is d/dt CaATP in component CaATP (micromolar).
+ */
+void
+initConsts(double* CONSTANTS, double* RATES, double *STATES)
+{
+STATES[0] = 0.05;
+CONSTANTS[0] = 1.566E7;
+CONSTANTS[1] = 34461.0;
+STATES[1] = 8000.0;
+STATES[2] = 1.0;
+}
+void
+computeRates(double VOI, double* CONSTANTS, double* RATES, double* STATES, double* ALGEBRAIC)
+{
+RATES[0] =  CONSTANTS[1]*STATES[2] -  CONSTANTS[0]*STATES[0]*STATES[1];
+RATES[1] =  CONSTANTS[1]*STATES[2] -  CONSTANTS[0]*STATES[0]*STATES[1];
+RATES[2] =  CONSTANTS[0]*STATES[0]*STATES[1] -  CONSTANTS[1]*STATES[2];
+}
+void
+computeVariables(double VOI, double* CONSTANTS, double* RATES, double* STATES, double* ALGEBRAIC)
+{
+}
+`
