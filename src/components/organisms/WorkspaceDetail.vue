@@ -78,7 +78,7 @@ const sortedEntries = computed(() => {
   if (!workspaceInfo.value) return []
 
   const treeInfo = workspaceInfo.value.target?.TreeInfo
-  if (!treeInfo || !treeInfo.entries) return []
+  if (!treeInfo?.entries) return []
 
   const entries = [...treeInfo.entries]
 
@@ -273,11 +273,11 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
               variant="icon"
               content-section="Workspace Detail"
               @click="downloadFile(entry.name)"
-              :title="`Download ${entry.name}`"
+              :tooltip="`Download ${entry.name}`"
               :aria-label="`Download ${entry.name}`"
             >
               <DownloadIcon class="w-4 h-4" />
-              <span class="sr-only">Download</span>
+              <span class="sr-only">Download {{ entry.name }}</span>
             </ActionButton>
           </div>
         </li>

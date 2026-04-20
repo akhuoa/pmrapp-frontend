@@ -7,6 +7,7 @@ import BackButton from '@/components/atoms/BackButton.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
+import WrapButton from '@/components/atoms/WrapButton.vue'
 import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
@@ -24,7 +25,7 @@ import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { formatAccessDate, formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
-import { isValidTerm } from '@/utils/search'
+import { buildSearchQuery, isValidTerm } from '@/utils/search'
 import TermButton from '../atoms/TermButton.vue'
 
 const props = defineProps<{
@@ -82,6 +83,7 @@ const exposureFileId = ref<number>(NaN)
 const detailHTML = ref<string>('')
 const generatedCode = ref<string>('')
 const generatedCodeFilename = ref<string>('')
+const codeBlockRef = ref<InstanceType<typeof CodeBlock> | null>(null)
 const mathsJSON = ref<[string, string[]][]>([])
 const metadataJSON = ref<Metadata>({})
 const htmlViewRef = ref<HTMLElement | null>(null)
@@ -239,6 +241,10 @@ const downloadCode = () => {
   downloadFileFromContent(generatedCode.value, generatedCodeFilename.value)
 }
 
+const toggleCodeWrap = () => {
+  codeBlockRef.value?.toggleWrap()
+}
+
 const generateMath = async () => {
   error.value = null
 
@@ -249,7 +255,13 @@ const generateMath = async () => {
       'cellml_math',
       'math.json',
     )
-    mathsJSON.value = JSON.parse(response)
+    const mathResponseJSON = JSON.parse(response)
+    const filteredMathsJSON = Array.isArray(mathResponseJSON)
+      ? mathResponseJSON.filter(
+          (value): value is [string, string[]] => Array.isArray(value[1]) && value[1].length > 0,
+        )
+      : []
+    mathsJSON.value = filteredMathsJSON
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Failed to parse mathematics data.'
     error.value = {
@@ -301,7 +313,8 @@ const loadCodegenView = async () => {
 }
 
 const handleKeywordClick = (kind: string, keyword: string) => {
-  router.push({ path: '/search', query: { kind, term: keyword } })
+  const currentQuery = router.currentRoute.value.query
+  router.push({ path: '/search', query: buildSearchQuery(kind, keyword, currentQuery) })
 }
 
 const handleCitationAuthorClick = (authorParts: string[]) => {
@@ -548,33 +561,41 @@ onMounted(async () => {
         <div class="box p-0! overflow-hidden">
           <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
             <span>{{ generatedCodeFilename }}</span>
-            <ActionButton
-              @click="downloadCode"
-              variant="icon"
-              content-section="Exposure Detail"
-              title="Download"
-              aria-label="Download"
-            >
-              <DownloadIcon class="w-4 h-4" />
-              <span class="sr-only">Download</span>
-            </ActionButton>
+            <div class="flex items-center gap-2">
+              <WrapButton :active="codeBlockRef?.isWrapped" @click="toggleCodeWrap" />
+              <CopyButton :text="generatedCode" title="Copy code" />
+              <ActionButton
+                @click="downloadCode"
+                variant="icon"
+                content-section="Exposure Detail"
+                tooltip="Download"
+                aria-label="Download"
+              >
+                <DownloadIcon class="w-4 h-4" />
+                <span class="sr-only">Download</span>
+              </ActionButton>
+            </div>
           </div>
           <CodeBlock
+            ref="codeBlockRef"
             :code="generatedCode"
             :filename="generatedCodeFilename"
           />
         </div>
       </div>
 
-      <div v-else-if="props.view === 'cellml_math' && mathsJSON.length" class="box overflow-auto">
-        <div v-for="value in mathsJSON" :key="value[0]"
-          class="mb-6 pb-6 last:mb-0 last:pb-0 border-b border-gray-200 dark:border-gray-700 last:border-0"
-        >
-          <h4 class="font-semibold mb-4">{{ value[0] }}</h4>
-          <div v-for="math in value[1]" :key="math">
-            <div v-html="math" class="text-sm math-view"></div>
+      <div v-else-if="props.view === 'cellml_math'" class="box">
+        <p v-if="!mathsJSON.length" class="text-sm text-gray-500 dark:text-gray-400">No mathematics content available.</p>
+        <template v-else>
+          <div v-for="value in mathsJSON" :key="value[0]"
+            class="mb-6 pb-6 last:mb-0 last:pb-0 border-b border-gray-200 dark:border-gray-700 last:border-0"
+          >
+            <h4 class="font-semibold mb-4">{{ value[0] }}</h4>
+            <div v-for="math in value[1]" :key="math">
+              <div v-html="math" class="math-view"></div>
+            </div>
           </div>
-        </div>
+        </template>
       </div>
 
       <div v-else-if="detailHTML" class="box">
@@ -608,11 +629,11 @@ onMounted(async () => {
                   @click="downloadFile(entry[0])"
                   variant="icon"
                   content-section="Exposure Detail"
-                  :title="`Download ${entry[0]}`"
+                  :tooltip="`Download ${entry[0]}`"
                   :aria-label="`Download ${entry[0]}`"
                 >
                   <DownloadIcon class="w-4 h-4" />
-                  <span class="sr-only">Download</span>
+                  <span class="sr-only">Download {{ entry[0] }}</span>
                 </ActionButton>
               </div>
             </div>
@@ -627,14 +648,14 @@ onMounted(async () => {
           Derived from workspace
           <RouterLink
             :to="`/workspaces/${exposureInfo.workspace_alias}`"
-            class="text-link"
+            class="text-link dark:underline dark:decoration-dotted"
           >
             {{ exposureInfo.exposure.description }}
           </RouterLink>
           at changeset
           <RouterLink
             :to="`/workspaces/${exposureInfo.workspace_alias}/file/${exposureInfo.exposure.commit_id}`"
-            class="text-link font-mono"
+            class="text-link font-mono dark:underline dark:decoration-dotted"
           >
             {{ exposureInfo.exposure.commit_id.substring(0, 12) }}
           </RouterLink>.
@@ -904,7 +925,7 @@ onMounted(async () => {
   @apply text-sm;
 
   & :deep(a) {
-    @apply text-link;
+    @apply text-link dark:underline dark:decoration-dotted hover:text-link-hover transition;
   }
 
   & :deep(h2) {
@@ -953,6 +974,8 @@ onMounted(async () => {
 }
 
 .math-view {
+  @apply p-2 text-center text-sm overflow-auto;
+
   & :deep(math) {
     @apply flex flex-col gap-4;
   }
