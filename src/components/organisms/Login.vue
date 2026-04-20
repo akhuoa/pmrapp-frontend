@@ -52,7 +52,7 @@ watch(
 
     focusUsernameInput()
     globalStateStore.consumeLoginUsernameFocus()
-  }
+  },
 )
 
 watch(error, (newError) => {
