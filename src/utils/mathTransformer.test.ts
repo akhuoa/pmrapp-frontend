@@ -5,17 +5,16 @@ import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/uti
  * Tests for MathML transformation utilities.
  *
  * Key behaviours tested:
- * 1. CSP-compliant dynamic import of polyfills (no unsafe-eval)
- * 2. Polyfill initialisation with idempotency and style injection
- * 3. MathML transformation applying polyfill transforms
- * 4. Table formatting with proper mtable attributes
- * 5. Mismatched fence pair removal (e.g., '(' paired with '>')
- * 6. Non-DOM environment graceful degradation (returns input unchanged)
- * 7. Equals operator detection and marking for styling
- * 8. Structure preservation through transformations
+ * 1. Polyfill initialisation with idempotency and style injection
+ * 2. MathML transformation applying polyfill transforms
+ * 3. Table formatting with proper mtable attributes
+ * 4. Mismatched fence pair removal (e.g., '(' paired with '>')
+ * 5. Non-DOM environment graceful degradation (returns input unchanged)
+ * 6. Equals operator detection and marking for styling
+ * 7. Structure preservation through transformations
  */
 
-// Mock the dynamic import.
+// Mock the polyfill import.
 vi.mock('../vendor/mathml-polyfills/all-polyfills-bundle.js', () => ({
   _MathTransforms: {
     getCSSStyleSheet: () => {
@@ -52,15 +51,6 @@ describe('initMathPolyfills', () => {
     await expect(initMathPolyfills()).resolves.toBeUndefined()
 
     globalThis.document = originalDocument
-  })
-
-  it('does not throw when the polyfill module fails to load', async () => {
-    // Mock a failed import to test graceful error handling.
-    vi.doMock('../vendor/mathml-polyfills/all-polyfills-bundle.js', () => {
-      throw new Error('Module load failed')
-    })
-
-    await expect(initMathPolyfills()).resolves.toBeUndefined()
   })
 })
 
