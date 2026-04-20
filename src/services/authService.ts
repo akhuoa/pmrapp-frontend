@@ -12,7 +12,7 @@ const LOGIN_ERROR_MESSAGES = {
 
 const normaliseErrorText = (errorText: string): string => {
   const trimmed = errorText.trim()
-  return trimmed.replace(/^['\"]|['\"]$/g, '')
+  return trimmed.replace(/^['"]|['"]$/g, '')
 }
 
 const getKnownLoginErrorMessage = (key: string): string | undefined => {

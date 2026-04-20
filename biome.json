@@ -48,7 +48,7 @@
     }
   ],
   "files": {
-    "includes": ["**", "!src/vendor/**"]
+    "includes": ["**", "!src/vendor"]
   },
   "vcs": {
     "clientKind": "git",
