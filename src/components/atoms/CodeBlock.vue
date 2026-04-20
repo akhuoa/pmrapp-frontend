@@ -1,33 +1,43 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import Prism from 'prismjs'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import 'prismjs/components/prism-markup'
-import 'prismjs/components/prism-css'
-import 'prismjs/components/prism-c'
-import 'prismjs/components/prism-cpp'
-import 'prismjs/components/prism-fortran'
-import 'prismjs/components/prism-javascript'
-import 'prismjs/components/prism-json'
-import 'prismjs/components/prism-python'
-import 'prismjs/components/prism-markdown'
-import 'prismjs/components/prism-matlab'
-import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
-import 'prismjs/plugins/line-numbers/prism-line-numbers'
+import { usePrismHighlight } from '@/composables/usePrismHighlight'
+
+// Minimal HTML entity encoding used to display plain text before the service
+// worker has finished highlighting the code.
+const escapeHtml = (text: string): string =>
+  text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
 
 const props = defineProps<{
   code: string
   filename: string
 }>()
 
+const { highlight } = usePrismHighlight()
+
 const codeBlock = ref<HTMLElement | null>(null)
 const preBlock = ref<HTMLElement | null>(null)
 const darkThemeMediaQuery = ref<MediaQueryList | null>(null)
 const isWrapped = ref(false)
-let observer: ResizeObserver | null = null
+const isHighlighting = ref(false)
+
+// Holds the v-html content for the <code> element.
+// Initialised with escaped plain text so the file is immediately visible
+// before the service worker has finished highlighting.
+const displayCode = ref(escapeHtml(props.code))
+
+// Generation counter used to discard stale service-worker responses when the
+// displayed file changes while a previous request is still in flight.
+// Declared with `let` in <script setup> – each component instance gets its own
+// copy because Vue runs the setup function once per instance.
+let requestGeneration = 0
 
 const preformatClass = [
-  'line-numbers',
   'bg-gray-50',
   'dark:bg-gray-900',
   'rounded',
@@ -77,19 +87,28 @@ const detectedLanguage = computed(() => {
 })
 
 const highlightCode = async () => {
-  await nextTick()
-  if (codeBlock.value && props.code) {
-    try {
-      // Clear previous highlighting.
-      codeBlock.value.removeAttribute('data-highlighted')
-
-      if (detectedLanguage.value !== 'none') {
-        Prism.highlightElement(codeBlock.value)
-      }
-    } catch (err) {
-      console.error('Error highlighting code:', err)
-    }
+  if (!props.code || detectedLanguage.value === 'none') {
+    displayCode.value = escapeHtml(props.code)
+    return
   }
+
+  // Show plain text immediately while the service worker processes the code.
+  displayCode.value = escapeHtml(props.code)
+  isHighlighting.value = true
+  const generation = ++requestGeneration
+
+  // The composable sends work to the Prism service worker and returns the
+  // highlighted HTML.  If the service worker is unavailable it falls back to
+  // running Prism.highlight() on the main thread transparently.
+  const html = await highlight(props.code, detectedLanguage.value)
+
+  // Discard stale results if a newer request was dispatched while this one
+  // was being processed.
+  if (generation !== requestGeneration) return
+
+  displayCode.value = html
+  await nextTick()
+  isHighlighting.value = false
 }
 
 const syncWrapAndLineNumbers = async () => {
@@ -101,16 +120,11 @@ const syncWrapAndLineNumbers = async () => {
 
   await nextTick()
 
-  if (!isWrapped.value) {
-    const lineSpans = preBlock.value.querySelectorAll('.line-numbers-rows > span')
-    lineSpans.forEach((span) => {
-      const lineSpan = span as HTMLElement
-      lineSpan.style.height = ''
-    })
-  }
+  // Re-check refs after await in case the component was unmounted.
+  if (!preBlock.value) return
 
-  if (Prism.plugins.lineNumbers?.resize) {
-    Prism.plugins.lineNumbers.resize(preBlock.value)
+  if (!isWrapped.value) {
+    return
   }
 }
 
@@ -169,27 +183,11 @@ onMounted(() => {
 
   // Listen for theme changes.
   darkThemeMediaQuery.value.addEventListener('change', handleThemeChange)
-
-  if (preBlock.value && typeof ResizeObserver === 'function') {
-    observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        if (Prism.plugins.lineNumbers?.resize) {
-          Prism.plugins.lineNumbers.resize(entry.target as HTMLElement)
-        }
-      }
-    })
-
-    observer.observe(preBlock.value)
-  }
 })
 
 onBeforeUnmount(() => {
   if (darkThemeMediaQuery.value) {
     darkThemeMediaQuery.value.removeEventListener('change', handleThemeChange)
-  }
-
-  if (observer) {
-    observer.disconnect()
   }
 })
 
@@ -203,13 +201,20 @@ watch(
 
 <template>
   <div>
+    <div
+      v-if="isHighlighting"
+      class="animate-pulse bg-gray-100 dark:bg-gray-800 rounded px-3 py-2 text-sm text-gray-500 dark:text-gray-400 mb-2"
+    >
+      Highlighting code…
+    </div>
     <pre
       ref="preBlock"
       :class="preformatClass"
     ><code
       ref="codeBlock"
       :class="`language-${detectedLanguage}`"
-    >{{ code }}</code></pre>
+      v-html="displayCode"
+    ></code></pre>
   </div>
 </template>
 
@@ -224,9 +229,6 @@ code {
   font-family: inherit;
 }
 
-:deep(.line-numbers-rows > span) {
-  transition: height 0.2s ease-in-out;
-}
 </style>
 
 <style>
@@ -240,3 +242,4 @@ code {
   }
 }
 </style>
+
