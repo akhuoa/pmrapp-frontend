@@ -18,6 +18,10 @@ import { isCodeFile, isImageFile, isMarkdownFile, isPdfFile, isSvgFile } from '@
 import { renderMarkdown } from '@/utils/markdown'
 import ActionButton from '../atoms/ActionButton.vue'
 
+// Files with text length above this threshold are not rendered in the preview to prevent browser freeze.
+// This uses JavaScript string length (UTF-16 code units), not exact file size in bytes.
+const MAX_PREVIEW_TEXT_LENGTH = 500 * 1024 // ~500KB
+
 const props = defineProps<{
   alias: string
   commitId: string
@@ -74,6 +78,9 @@ const imageDataUrl = computed(() => {
   if (!isImage.value) return ''
   return fileBlobUrl.value
 })
+
+// Fast guard: avoid rendering very large text payloads in the browser preview.
+const isTooLargeForPreview = computed(() => fileContent.value.length > MAX_PREVIEW_TEXT_LENGTH)
 
 const downloadFile = () => {
   if (isImage.value || isSvg.value || isPDF.value) {
@@ -162,13 +169,13 @@ onBeforeUnmount(() => {
             {{ showCode ? 'Preview' : 'Code' }}
           </button>
           <WrapButton
-            v-if="shouldShowAsText"
+            v-if="shouldShowAsText && !isTooLargeForPreview"
             :disabled="(isSvg || isMarkdown) ? !showCode : false"
             :active="codeBlockRef?.isWrapped"
             @click="toggleCodeWrap"
           />
           <CopyButton
-            v-if="shouldShowAsText"
+            v-if="shouldShowAsText && !isTooLargeForPreview"
             :text="fileContent"
             title="Copy code"
           />
@@ -203,6 +210,20 @@ onBeforeUnmount(() => {
       <!-- PDF View -->
       <div v-else-if="isPDF" class="flex justify-center">
         <embed :src="fileBlobUrl" type="application/pdf" width="100%" height="800px" />
+      </div>
+
+      <!-- Code/Text View (Too Large) -->
+      <div v-else-if="shouldShowAsText && isTooLargeForPreview" class="text-center py-8 text-gray-500 dark:text-gray-400">
+        <p class="mb-4">This file is too large to preview in the browser.</p>
+        <ActionButton
+          variant="primary"
+          size="lg"
+          @click="downloadFile"
+          content-section="Workspace File Detail"
+        >
+          <DownloadIcon class="w-4 h-4" />
+          Download
+        </ActionButton>
       </div>
 
       <!-- Code/Text View -->

@@ -50,10 +50,7 @@ beforeEach(() => {
   )
 })
 
-const MAX_HIGHLIGHT_SIZE_BYTES = 500 * 1024 // 500 KB – mirrors the constant in CodeBlock.vue
-
 const smallCode = 'const x = 1'
-const largeCode = 'x'.repeat(MAX_HIGHLIGHT_SIZE_BYTES + 1)
 
 describe('CodeBlock', () => {
   afterEach(() => {
@@ -68,37 +65,11 @@ describe('CodeBlock', () => {
     wrapper.unmount()
   })
 
-  it('includes the line-numbers class for small files', () => {
+  it('includes the line-numbers class', () => {
     const wrapper = mount(CodeBlock, {
       props: { code: smallCode, filename: 'example.py' },
     })
     expect(wrapper.find('pre').classes()).toContain('line-numbers')
-    wrapper.unmount()
-  })
-
-  it('does not include line-numbers class for large files', () => {
-    const wrapper = mount(CodeBlock, {
-      props: { code: largeCode, filename: 'model.cellml' },
-    })
-    expect(wrapper.find('pre').classes()).not.toContain('line-numbers')
-    wrapper.unmount()
-  })
-
-  it('shows warning notice for large files', () => {
-    const wrapper = mount(CodeBlock, {
-      props: { code: largeCode, filename: 'model.cellml' },
-    })
-    const notice = wrapper.find('[class*="bg-amber"]')
-    expect(notice.exists()).toBe(true)
-    expect(notice.text()).toContain('too large for syntax highlighting')
-    wrapper.unmount()
-  })
-
-  it('does not show warning notice for small files', () => {
-    const wrapper = mount(CodeBlock, {
-      props: { code: smallCode, filename: 'model.cellml' },
-    })
-    expect(wrapper.find('[class*="bg-amber"]').exists()).toBe(false)
     wrapper.unmount()
   })
 
@@ -118,31 +89,17 @@ describe('CodeBlock', () => {
     wrapper.unmount()
   })
 
-  it('updates warning visibility when code changes from small to large', async () => {
+  it('updates code when props change', async () => {
     const wrapper = mount(CodeBlock, {
       props: { code: smallCode, filename: 'model.cellml' },
     })
 
-    expect(wrapper.find('[class*="bg-amber"]').exists()).toBe(false)
+    expect(wrapper.find('code').text()).toBe(smallCode)
 
-    await wrapper.setProps({ code: largeCode })
+    await wrapper.setProps({ code: 'new code' })
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.find('[class*="bg-amber"]').exists()).toBe(true)
-    wrapper.unmount()
-  })
-
-  it('removes warning when code changes from large to small', async () => {
-    const wrapper = mount(CodeBlock, {
-      props: { code: largeCode, filename: 'model.cellml' },
-    })
-
-    expect(wrapper.find('[class*="bg-amber"]').exists()).toBe(true)
-
-    await wrapper.setProps({ code: smallCode })
-    await wrapper.vm.$nextTick()
-
-    expect(wrapper.find('[class*="bg-amber"]').exists()).toBe(false)
+    expect(wrapper.find('code').text()).toBe('new code')
     wrapper.unmount()
   })
 })

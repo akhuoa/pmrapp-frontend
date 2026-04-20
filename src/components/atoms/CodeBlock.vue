@@ -15,9 +15,6 @@ import 'prismjs/components/prism-matlab'
 import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
 import 'prismjs/plugins/line-numbers/prism-line-numbers'
 
-// Files larger than this threshold will not be syntax-highlighted to prevent browser freeze.
-const MAX_HIGHLIGHT_SIZE_BYTES = 500 * 1024 // 500 KB
-
 const props = defineProps<{
   code: string
   filename: string
@@ -29,11 +26,9 @@ const darkThemeMediaQuery = ref<MediaQueryList | null>(null)
 const isWrapped = ref(false)
 let observer: ResizeObserver | null = null
 
-const isTooLargeForHighlighting = computed(() => props.code.length > MAX_HIGHLIGHT_SIZE_BYTES)
-
 const preformatClass = computed(() =>
   [
-    ...(!isTooLargeForHighlighting.value ? ['line-numbers'] : []),
+    'line-numbers',
     'bg-gray-50',
     'dark:bg-gray-900',
     'rounded',
@@ -90,7 +85,7 @@ const highlightCode = async () => {
       // Clear previous highlighting.
       codeBlock.value.removeAttribute('data-highlighted')
 
-      if (detectedLanguage.value !== 'none' && !isTooLargeForHighlighting.value) {
+      if (detectedLanguage.value !== 'none') {
         Prism.highlightElement(codeBlock.value)
       }
     } catch (err) {
@@ -212,21 +207,13 @@ watch(
 </script>
 
 <template>
-  <div>
-    <div
-      v-if="isTooLargeForHighlighting"
-      class="bg-amber-50 dark:bg-amber-900/20 px-3 py-2 text-sm text-amber-800 dark:text-amber-200"
-    >
-      ⚠️ This file is too large for syntax highlighting. Displaying raw content.
-    </div>
-    <pre
-      ref="preBlock"
-      :class="preformatClass"
-    ><code
-      ref="codeBlock"
-      :class="`language-${detectedLanguage}`"
-    >{{ code }}</code></pre>
-  </div>
+  <pre
+    ref="preBlock"
+    :class="preformatClass"
+  ><code
+    ref="codeBlock"
+    :class="`language-${detectedLanguage}`"
+  >{{ code }}</code></pre>
 </template>
 
 <style scoped>
