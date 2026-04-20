@@ -1,4 +1,4 @@
-const MATH_POLYFILLS_MODULE_URL = 'https://w3c.github.io/mathml-polyfills/all-polyfills.js'
+const MATH_POLYFILLS_MODULE_URL = '../vendor/mathml-polyfills/all-polyfills-bundle.js'
 
 type MathTransformsModule = {
   _MathTransforms?: {

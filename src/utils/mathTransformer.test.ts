@@ -16,7 +16,7 @@ import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/uti
  */
 
 // Mock the dynamic import.
-vi.mock('https://w3c.github.io/mathml-polyfills/all-polyfills.js', () => ({
+vi.mock('../vendor/mathml-polyfills/all-polyfills-bundle.js', () => ({
   _MathTransforms: {
     getCSSStyleSheet: () => {
       const style = document.createElement('style')
@@ -56,7 +56,7 @@ describe('initMathPolyfills', () => {
 
   it('does not throw when the polyfill module fails to load', async () => {
     // Mock a failed import to test graceful error handling.
-    vi.doMock('https://w3c.github.io/mathml-polyfills/all-polyfills.js', () => {
+    vi.doMock('../vendor/mathml-polyfills/all-polyfills-bundle.js', () => {
       throw new Error('Module load failed')
     })
 
