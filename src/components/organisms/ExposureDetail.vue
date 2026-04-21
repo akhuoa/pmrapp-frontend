@@ -938,6 +938,14 @@ onMounted(async () => {
     font-size: 0.95em;
   }
 
+  & :deep(math mfrac > :first-child) {
+    padding-bottom: 0.14em;
+  }
+
+  & :deep(math mfrac > :nth-child(2)) {
+    padding-top: 0.14em;
+  }
+
   & :deep(math :is(msub, msup, msubsup, mmultiscripts, munder, mover, munderover) > :not(:first-child)) {
     font-size: 0.95em;
   }
