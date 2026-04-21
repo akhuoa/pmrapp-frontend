@@ -18,9 +18,8 @@ import { isCodeFile, isImageFile, isMarkdownFile, isPdfFile, isSvgFile } from '@
 import { renderMarkdown } from '@/utils/markdown'
 import ActionButton from '../atoms/ActionButton.vue'
 
-// Files with text length above this threshold are not rendered in the preview to prevent browser freeze.
-// This uses JavaScript string length (UTF-16 code units), not exact file size in bytes.
-const MAX_PREVIEW_TEXT_LENGTH = 500 * 1024 // ~500KB
+// Files with size above this threshold are not rendered in the preview to prevent browser freeze.
+const MAX_PREVIEW_FILE_SIZE_BYTES = 500 * 1024 // ~500 KB
 
 const props = defineProps<{
   alias: string
@@ -31,6 +30,7 @@ const props = defineProps<{
 const fileContent = ref<string>('')
 const fileBlob = ref<Blob>(new Blob())
 const fileBlobUrl = ref<string>('')
+const fileSizeBytes = ref(0)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 const showCode = ref(false)
@@ -79,11 +79,11 @@ const imageDataUrl = computed(() => {
   return fileBlobUrl.value
 })
 
-// Fast guard: avoid rendering very large text payloads in the browser preview.
-const isTooLargeForPreview = computed(() => fileContent.value.length > MAX_PREVIEW_TEXT_LENGTH)
+// Fast guard: avoid rendering very large payloads in the browser preview.
+const isTooLargeForPreview = computed(() => fileSizeBytes.value > MAX_PREVIEW_FILE_SIZE_BYTES)
 
 const downloadFile = () => {
-  if (isImage.value || isSvg.value || isPDF.value) {
+  if (isImage.value || isSvg.value || isPDF.value || isTooLargeForPreview.value) {
     downloadFileFromBlob(fileBlob.value, filename.value)
   } else {
     downloadFileFromContent(fileContent.value, filename.value)
@@ -105,10 +105,11 @@ onMounted(async () => {
       props.commitId,
       props.path,
     )
+    fileBlob.value = blob
+    fileSizeBytes.value = blob.size
 
     // Image-like previews use an object URL from the blob.
     if (isImage.value || isSvg.value || isPDF.value) {
-      fileBlob.value = blob
       fileBlobUrl.value = URL.createObjectURL(blob)
 
       // For SVG, also get text content for code view.
@@ -116,8 +117,10 @@ onMounted(async () => {
         fileContent.value = await blob.text()
       }
     } else {
-      // Text-like previews decode the fetched blob into a string.
-      fileContent.value = await blob.text()
+      // Skip text decode for oversized code-like previews; download remains available via blob.
+      if (!isTooLargeForPreview.value || isMarkdown.value) {
+        fileContent.value = await blob.text()
+      }
     }
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to load file.'
