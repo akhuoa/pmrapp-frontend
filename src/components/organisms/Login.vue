@@ -3,9 +3,9 @@
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
+import CloseButton from '@/components/atoms/CloseButton.vue'
 import { getAuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth'
-import CloseButton from '@/components/atoms/CloseButton.vue'
 import { useGlobalStateStore } from '@/stores/globalState'
 
 const router = useRouter()
