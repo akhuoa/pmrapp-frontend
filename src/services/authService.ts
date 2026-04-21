@@ -12,7 +12,7 @@ const LOGIN_ERROR_MESSAGES = {
 
 const normaliseErrorText = (errorText: string): string => {
   const trimmed = errorText.trim()
-  return trimmed.replace(/^['\"]|['\"]$/g, '')
+  return trimmed.replace(/^['"]|['"]$/g, '')
 }
 
 const getKnownLoginErrorMessage = (key: string): string | undefined => {
@@ -57,7 +57,8 @@ const mapLoginErrorMessage = (errorText: string, status: number): string => {
   }
 
   // If backend returns machine-style codes, avoid exposing raw text.
-  const looksLikeMachineCode = /^[a-z0-9_-]+$/i.test(normalisedText) || /^[A-Z][a-zA-Z0-9]+$/.test(normalisedText)
+  const looksLikeMachineCode =
+    /^[a-z0-9_-]+$/i.test(normalisedText) || /^[A-Z][a-zA-Z0-9]+$/.test(normalisedText)
   if (looksLikeMachineCode) {
     return getLoginErrorMessageByStatus(status)
   }
