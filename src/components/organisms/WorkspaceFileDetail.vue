@@ -115,12 +115,13 @@ onMounted(async () => {
         fileContent.value = await blob.text()
       }
     } else {
-      // Fetch text files as text.
-      fileContent.value = await getWorkspaceService().getRawFile(
+      // Fetch text files through blob endpoint and decode to text.
+      const blob = await getWorkspaceService().getRawFileBlob(
         props.alias,
         props.commitId,
         props.path,
       )
+      fileContent.value = await blob.text()
     }
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to load file.'
