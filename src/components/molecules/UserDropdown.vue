@@ -18,7 +18,7 @@ const showLogoutConfirm = ref(false)
 
 const menuId = 'user-dropdown-menu'
 const buttonLabel = computed(() =>
-  authStore.username ? `${authStore.username} – user menu` : 'User menu'
+  authStore.username ? `${authStore.username} – user menu` : 'User menu',
 )
 
 const toggleDropdown = () => {

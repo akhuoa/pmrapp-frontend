@@ -57,7 +57,8 @@ const mapLoginErrorMessage = (errorText: string, status: number): string => {
   }
 
   // If backend returns machine-style codes, avoid exposing raw text.
-  const looksLikeMachineCode = /^[a-z0-9_-]+$/i.test(normalisedText) || /^[A-Z][a-zA-Z0-9]+$/.test(normalisedText)
+  const looksLikeMachineCode =
+    /^[a-z0-9_-]+$/i.test(normalisedText) || /^[A-Z][a-zA-Z0-9]+$/.test(normalisedText)
   if (looksLikeMachineCode) {
     return getLoginErrorMessageByStatus(status)
   }

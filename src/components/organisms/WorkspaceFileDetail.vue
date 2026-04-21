@@ -96,11 +96,7 @@ const toggleCodeWrap = () => {
 
 onMounted(async () => {
   try {
-    const blob = await getWorkspaceService().getRawFileBlob(
-      props.alias,
-      props.commitId,
-      props.path,
-    )
+    const blob = await getWorkspaceService().getRawFileBlob(props.alias, props.commitId, props.path)
     fileBlob.value = blob
     fileSizeBytes.value = blob.size
 
