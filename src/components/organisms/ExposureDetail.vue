@@ -933,6 +933,10 @@ onMounted(async () => {
     padding-right: 0.05em;
   }
 
+  & :deep(math mi) {
+    font-style: italic;
+  }
+
   & :deep(math mfrac > :first-child),
   & :deep(math mfrac > :nth-child(2)) {
     font-size: 0.95em;
