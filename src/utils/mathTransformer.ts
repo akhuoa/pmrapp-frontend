@@ -22,6 +22,7 @@ const OPEN_TO_CLOSE_FENCE: Record<string, string> = {
 }
 const INVISIBLE_TIMES_CHAR = '\u2062'
 const VISIBLE_MULTIPLICATION_DOT = '·'
+const PIECEWISE_KEYWORDS = new Set(['if', 'otherwise'])
 
 const isFenceOperator = (element: Element): element is HTMLElement =>
   element.tagName.toLowerCase() === 'mo' && element.getAttribute('fence') === 'true'
@@ -55,6 +56,77 @@ const normalizeInvisibleTimesSeparators = (mathml: string): string =>
   mathml
     .replaceAll(INVISIBLE_TIMES_CHAR, VISIBLE_MULTIPLICATION_DOT)
     .replaceAll(/&#8290;|&#x2062;|&InvisibleTimes;/gi, VISIBLE_MULTIPLICATION_DOT)
+
+const isMathMLElement = (node: Node, tagName: string): node is Element =>
+  node.nodeType === Node.ELEMENT_NODE && (node as Element).tagName.toLowerCase() === tagName
+
+const normalizePiecewiseTables = (root: ParentNode, doc: Document, namespace: string) => {
+  const mathTables = Array.from(root.querySelectorAll('mtable'))
+
+  mathTables.forEach((table) => {
+    const rows = Array.from(table.children).filter((child) => child.tagName.toLowerCase() === 'mtr')
+    if (!rows.length) return
+
+    let hasPiecewiseRows = false
+
+    rows.forEach((row) => {
+      const rowCells = Array.from(row.children).filter((child) => child.tagName.toLowerCase() === 'mtd')
+      if (rowCells.length !== 1) return
+
+      const [singleCell] = rowCells
+      if (!singleCell) return
+
+      const cellNodes = Array.from(singleCell.childNodes)
+      const keywordIndex = cellNodes.findIndex(
+        (node) =>
+          isMathMLElement(node, 'mtext') &&
+          PIECEWISE_KEYWORDS.has((node.textContent || '').trim().toLowerCase()),
+      )
+
+      if (keywordIndex <= 0) return
+
+      hasPiecewiseRows = true
+
+      const expressionCell = doc.createElementNS(namespace, 'mtd')
+      expressionCell.setAttribute('data-math-piecewise', 'expression')
+
+      cellNodes.slice(0, keywordIndex).forEach((node) => {
+        expressionCell.appendChild(node)
+      })
+
+      const keywordCell = doc.createElementNS(namespace, 'mtd')
+      keywordCell.setAttribute('data-math-piecewise', 'keyword')
+
+      const keywordNode = cellNodes[keywordIndex]
+      const keywordText = (keywordNode?.textContent || '').trim().toLowerCase()
+      if (keywordText) {
+        keywordCell.setAttribute('data-math-piecewise-keyword', keywordText)
+      }
+      if (keywordNode) {
+        keywordCell.appendChild(keywordNode)
+      }
+
+      const conditionCell = doc.createElementNS(namespace, 'mtd')
+      conditionCell.setAttribute('data-math-piecewise', 'condition')
+      cellNodes.slice(keywordIndex + 1).forEach((node) => {
+        conditionCell.appendChild(node)
+      })
+
+      while (row.firstChild) {
+        row.removeChild(row.firstChild)
+      }
+
+      row.appendChild(expressionCell)
+      row.appendChild(keywordCell)
+      row.appendChild(conditionCell)
+    })
+
+    if (hasPiecewiseRows) {
+      table.setAttribute('data-math-piecewise', 'true')
+      table.setAttribute('columnalign', 'right left left')
+    }
+  })
+}
 
 /**
  * Injects the necessary CSS for polyfills into the document head.
@@ -138,6 +210,8 @@ export const formatMathMLTable = (rawMathML: string): string => {
 
       math.appendChild(mtable)
     }
+
+    normalizePiecewiseTables(math, doc, NS)
   })
 
   return normalizeInvisibleTimesSeparators(doc.body.innerHTML)

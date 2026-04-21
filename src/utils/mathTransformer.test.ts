@@ -147,6 +147,40 @@ describe('formatMathMLTable', () => {
     </mrow>
   </math>`
 
+  const piecewiseEquation = `<math xmlns="http://www.w3.org/1998/Math/MathML">
+    <mrow>
+      <mi>GKr</mi>
+      <mo>=</mo>
+      <mtable>
+        <mtr>
+          <mtd>
+            <mrow><mi>GKr_b</mi><mo>·</mo><mn>1.3</mn></mrow>
+            <mspace width="0.3em"></mspace>
+            <mtext>if</mtext>
+            <mspace width="0.3em"></mspace>
+            <mrow><mi>celltype</mi><mo>=</mo><mn>1</mn></mrow>
+          </mtd>
+        </mtr>
+        <mtr>
+          <mtd>
+            <mrow><mi>GKr_b</mi><mo>·</mo><mn>0.8</mn></mrow>
+            <mspace width="0.3em"></mspace>
+            <mtext>if</mtext>
+            <mspace width="0.3em"></mspace>
+            <mrow><mi>celltype</mi><mo>=</mo><mn>2</mn></mrow>
+          </mtd>
+        </mtr>
+        <mtr>
+          <mtd>
+            <mi>GKr_b</mi>
+            <mspace width="0.3em"></mspace>
+            <mtext>otherwise</mtext>
+          </mtd>
+        </mtr>
+      </mtable>
+    </mrow>
+  </math>`
+
   it('wraps multiple rows in an mtable', () => {
     const result = formatMathMLTable(multiRowEquation)
 
@@ -225,6 +259,18 @@ describe('formatMathMLTable', () => {
 
     expect(result).toContain('<mo>·</mo>')
     expect(result).not.toContain('\u2062')
+  })
+
+  it('splits piecewise inner tables into aligned expression, keyword, and condition columns', () => {
+    const result = formatMathMLTable(piecewiseEquation)
+
+    expect(result).toContain('data-math-piecewise="true"')
+    expect(result).toContain('data-math-piecewise="expression"')
+    expect(result).toContain('data-math-piecewise="keyword"')
+    expect(result).toContain('data-math-piecewise="condition"')
+    expect(result).toContain('data-math-piecewise-keyword="if"')
+    expect(result).toContain('data-math-piecewise-keyword="otherwise"')
+    expect(result).toContain('columnalign="right left left"')
   })
 })
 

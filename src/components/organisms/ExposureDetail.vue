@@ -953,5 +953,23 @@ onMounted(async () => {
     text-align: left;
     padding-left: 0.5em;
   }
+
+  & :deep(mtable[data-math-piecewise='true']) {
+    border-spacing: 0.5em 0.35em;
+  }
+
+  & :deep(mtable[data-math-piecewise='true'] > mtr > mtd[data-math-piecewise='expression']) {
+    white-space: nowrap;
+  }
+
+  & :deep(mtable[data-math-piecewise='true'] > mtr > mtd[data-math-piecewise='keyword']) {
+    white-space: nowrap;
+    padding-left: 0.15em;
+    padding-right: 0.35em;
+  }
+
+  & :deep(mtable[data-math-piecewise='true'] > mtr > mtd[data-math-piecewise='condition']) {
+    white-space: nowrap;
+  }
 }
 </style>
