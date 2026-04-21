@@ -100,13 +100,14 @@ const toggleCodeWrap = () => {
 
 onMounted(async () => {
   try {
-    // Fetch images, SVGs, and PDFs as blobs.
+    const blob = await getWorkspaceService().getRawFileBlob(
+      props.alias,
+      props.commitId,
+      props.path,
+    )
+
+    // Image-like previews use an object URL from the blob.
     if (isImage.value || isSvg.value || isPDF.value) {
-      const blob = await getWorkspaceService().getRawFileBlob(
-        props.alias,
-        props.commitId,
-        props.path,
-      )
       fileBlob.value = blob
       fileBlobUrl.value = URL.createObjectURL(blob)
 
@@ -115,12 +116,7 @@ onMounted(async () => {
         fileContent.value = await blob.text()
       }
     } else {
-      // Fetch text files through blob endpoint and decode to text.
-      const blob = await getWorkspaceService().getRawFileBlob(
-        props.alias,
-        props.commitId,
-        props.path,
-      )
+      // Text-like previews decode the fetched blob into a string.
       fileContent.value = await blob.text()
     }
   } catch (err) {
