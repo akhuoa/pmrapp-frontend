@@ -13,7 +13,7 @@ import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { getWorkspaceService } from '@/services'
-import { downloadFileFromBlob, downloadFileFromContent } from '@/utils/download'
+import { downloadFileFromBlob } from '@/utils/download'
 import { isCodeFile, isImageFile, isMarkdownFile, isPdfFile, isSvgFile } from '@/utils/file'
 import { renderMarkdown } from '@/utils/markdown'
 import ActionButton from '../atoms/ActionButton.vue'
@@ -83,11 +83,7 @@ const imageDataUrl = computed(() => {
 const isTooLargeForPreview = computed(() => fileSizeBytes.value > MAX_PREVIEW_FILE_SIZE_BYTES)
 
 const downloadFile = () => {
-  if (isImage.value || isSvg.value || isPDF.value || isTooLargeForPreview.value) {
-    downloadFileFromBlob(fileBlob.value, filename.value)
-  } else {
-    downloadFileFromContent(fileContent.value, filename.value)
-  }
+  downloadFileFromBlob(fileBlob.value, filename.value)
 }
 
 const toggleCodeView = () => {
