@@ -1,20 +1,5 @@
 import { vi } from 'vitest'
 
-// jsdom does not provide ResizeObserver, but the vendored MathML polyfills
-// instantiate it at module load time.
-if (!globalThis.ResizeObserver) {
-  class MockResizeObserver implements ResizeObserver {
-    observe = vi.fn()
-    unobserve = vi.fn()
-    disconnect = vi.fn()
-  }
-
-  Object.defineProperty(globalThis, 'ResizeObserver', {
-    writable: true,
-    value: MockResizeObserver,
-  })
-}
-
 // Check if cookieStore exists (to avoid overwriting if a polyfill is added later).
 if (!globalThis.cookieStore) {
   Object.defineProperty(globalThis, 'cookieStore', {
