@@ -919,7 +919,7 @@ onMounted(async () => {
 }
 
 .math-view {
-  @apply p-2 text-center text-sm overflow-auto;
+  @apply p-2 text-center text-base overflow-auto;
 
   & :deep(math > mtable) {
     border-spacing: 0.5em 0.75em;
