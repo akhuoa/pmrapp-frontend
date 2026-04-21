@@ -26,18 +26,20 @@ const darkThemeMediaQuery = ref<MediaQueryList | null>(null)
 const isWrapped = ref(false)
 let observer: ResizeObserver | null = null
 
-const preformatClass = [
-  'line-numbers',
-  'bg-gray-50',
-  'dark:bg-gray-900',
-  'rounded',
-  'overflow-x-auto',
-  'text-sm!',
-  'm-0!',
-  'transition-all',
-  'duration-200',
-  'ease-in-out',
-].join(' ')
+const preformatClass = computed(() =>
+  [
+    'line-numbers',
+    'bg-gray-50',
+    'dark:bg-gray-900',
+    'rounded',
+    'overflow-x-auto',
+    'text-sm!',
+    'm-0!',
+    'transition-all',
+    'duration-200',
+    'ease-in-out',
+  ].join(' '),
+)
 
 const detectedLanguage = computed(() => {
   const ext = props.filename.split('.').pop()?.toLowerCase()
@@ -100,6 +102,9 @@ const syncWrapAndLineNumbers = async () => {
   codeBlock.value.classList.toggle('!whitespace-pre-wrap', isWrapped.value)
 
   await nextTick()
+
+  // Re-check refs after await in case the component was unmounted.
+  if (!preBlock.value) return
 
   if (!isWrapped.value) {
     const lineSpans = preBlock.value.querySelectorAll('.line-numbers-rows > span')
@@ -202,15 +207,13 @@ watch(
 </script>
 
 <template>
-  <div>
-    <pre
-      ref="preBlock"
-      :class="preformatClass"
-    ><code
-      ref="codeBlock"
-      :class="`language-${detectedLanguage}`"
-    >{{ code }}</code></pre>
-  </div>
+  <pre
+    ref="preBlock"
+    :class="preformatClass"
+  ><code
+    ref="codeBlock"
+    :class="`language-${detectedLanguage}`"
+  >{{ code }}</code></pre>
 </template>
 
 <style scoped>
