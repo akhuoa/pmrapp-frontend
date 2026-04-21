@@ -933,6 +933,15 @@ onMounted(async () => {
     padding-right: 0.05em;
   }
 
+  & :deep(math mfrac > :first-child),
+  & :deep(math mfrac > :nth-child(2)) {
+    font-size: 0.95em;
+  }
+
+  & :deep(math :is(msub, msup, msubsup, mmultiscripts, munder, mover, munderover) > :not(:first-child)) {
+    font-size: 0.95em;
+  }
+
   & :deep(math > mtable > mtr + mtr > mtd) {
     padding-top: 0.5em;
   }
