@@ -54,6 +54,7 @@ const smallCode = 'const x = 1'
 
 describe('CodeBlock', () => {
   afterEach(() => {
+    vi.unstubAllGlobals()
     vi.clearAllMocks()
   })
 
