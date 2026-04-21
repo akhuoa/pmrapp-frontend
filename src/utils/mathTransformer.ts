@@ -20,6 +20,8 @@ const OPEN_TO_CLOSE_FENCE: Record<string, string> = {
   '⌊': '⌋',
   '⌈': '⌉',
 }
+const INVISIBLE_TIMES_CHAR = '\u2062'
+const VISIBLE_MULTIPLICATION_DOT = '·'
 
 const isFenceOperator = (element: Element): element is HTMLElement =>
   element.tagName.toLowerCase() === 'mo' && element.getAttribute('fence') === 'true'
@@ -48,6 +50,11 @@ const fixMismatchedFencePairs = (root: ParentNode) => {
     }
   })
 }
+
+const normalizeInvisibleTimesSeparators = (mathml: string): string =>
+  mathml
+    .replaceAll(INVISIBLE_TIMES_CHAR, VISIBLE_MULTIPLICATION_DOT)
+    .replaceAll(/&#8290;|&#x2062;|&InvisibleTimes;/gi, VISIBLE_MULTIPLICATION_DOT)
 
 /**
  * Injects the necessary CSS for polyfills into the document head.
@@ -80,7 +87,7 @@ export function transformMathString(rawMathML: string): string {
 
   mathPolyfills?.transform(container)
 
-  return container.innerHTML
+  return normalizeInvisibleTimesSeparators(container.innerHTML)
 }
 
 /**
@@ -133,5 +140,5 @@ export const formatMathMLTable = (rawMathML: string): string => {
     }
   })
 
-  return doc.body.innerHTML
+  return normalizeInvisibleTimesSeparators(doc.body.innerHTML)
 }
