@@ -25,6 +25,7 @@ import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
+import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
 import { buildSearchQuery, isValidTerm } from '@/utils/search'
 import TermButton from '../atoms/TermButton.vue'
 
@@ -247,6 +248,8 @@ const toggleCodeWrap = () => {
 const generateMath = async () => {
   error.value = null
 
+  await initMathPolyfills()
+
   try {
     const response = await exposureStore.getExposureRawContent(
       exposureId.value,
@@ -260,7 +263,11 @@ const generateMath = async () => {
           (value): value is [string, string[]] => Array.isArray(value[1]) && value[1].length > 0,
         )
       : []
-    mathsJSON.value = filteredMathsJSON
+    const transformedMathsJSON = filteredMathsJSON.map((entry): [string, string[]] => {
+      const mathMLArray = entry[1].map((mathML) => formatMathMLTable(transformMathString(mathML)))
+      return [entry[0], mathMLArray]
+    })
+    mathsJSON.value = transformedMathsJSON
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Failed to parse mathematics data.'
     error.value = {
@@ -914,8 +921,37 @@ onMounted(async () => {
 .math-view {
   @apply p-2 text-center text-sm overflow-auto;
 
-  & :deep(math) {
-    @apply flex flex-col gap-4;
+  & :deep(math > mtable) {
+    border-spacing: 0.5em 0.75em;
+  }
+
+  & :deep(math mi),
+  & :deep(math mo),
+  & :deep(math mn) {
+    line-height: 1.4;
+    padding-left: 0.05em;
+    padding-right: 0.05em;
+  }
+
+  & :deep(math > mtable > mtr + mtr > mtd) {
+    padding-top: 0.5em;
+  }
+
+  & :deep(math > mtable > mtr > mtd:nth-child(1)) {
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 0.5em;
+  }
+
+  & :deep(math > mtable > mtr > mtd[data-math-operator='equals']) {
+    text-align: center;
+    padding-left: 0.25em;
+    padding-right: 0.25em;
+  }
+
+  & :deep(math > mtable > mtr > mtd:nth-child(3)) {
+    text-align: left;
+    padding-left: 0.5em;
   }
 }
 </style>
