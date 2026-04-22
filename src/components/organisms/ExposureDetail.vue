@@ -937,9 +937,10 @@ onMounted(async () => {
     font-style: italic;
   }
 
+  /* Keep first-level fraction content at the parent math font size. */
   & :deep(math mfrac > :first-child),
   & :deep(math mfrac > :nth-child(2)) {
-    font-size: 0.95em;
+    font-size: 1em;
   }
 
   & :deep(math mfrac > :first-child) {
@@ -948,10 +949,6 @@ onMounted(async () => {
 
   & :deep(math mfrac > :nth-child(2)) {
     padding-top: 0.14em;
-  }
-
-  & :deep(math :is(msub, msup, msubsup, mmultiscripts, munder, mover, munderover) > :not(:first-child)) {
-    font-size: 0.95em;
   }
 
   & :deep(math > mtable > mtr + mtr > mtd) {
