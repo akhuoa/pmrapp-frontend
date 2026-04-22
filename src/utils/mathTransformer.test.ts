@@ -272,6 +272,22 @@ describe('formatMathMLTable', () => {
     expect(result).toContain('data-math-piecewise-keyword="otherwise"')
     expect(result).toContain('columnalign="right left left"')
   })
+
+  it('converts underscore-delimited identifiers into nested subscripts', () => {
+    const underscoredIdentifierEquation = `<math xmlns="http://www.w3.org/1998/Math/MathML">
+      <mrow>
+        <mi>i_Stim_Amplitude</mi>
+      </mrow>
+    </math>`
+
+    const result = formatMathMLTable(underscoredIdentifierEquation)
+
+    const subscriptMatches = result.match(/<msub/g) || []
+    expect(subscriptMatches.length).toBe(2)
+    expect(result).toContain('<mi>i</mi>')
+    expect(result).toContain('<mi>Stim</mi>')
+    expect(result).toContain('<mi>Amplitude</mi>')
+  })
 })
 
 describe('mathTransformer integration', () => {

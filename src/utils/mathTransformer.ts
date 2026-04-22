@@ -57,6 +57,50 @@ const normalizeInvisibleTimesSeparators = (mathml: string): string =>
     .replaceAll(INVISIBLE_TIMES_CHAR, VISIBLE_MULTIPLICATION_DOT)
     .replaceAll(/&#8290;|&#x2062;|&InvisibleTimes;/gi, VISIBLE_MULTIPLICATION_DOT)
 
+const copyElementAttributes = (from: Element, to: Element) => {
+  Array.from(from.attributes).forEach((attribute) => {
+    to.setAttribute(attribute.name, attribute.value)
+  })
+}
+
+const normalizeUnderscoreIdentifiers = (root: ParentNode) => {
+  const identifiers = Array.from(root.querySelectorAll('mi'))
+
+  identifiers.forEach((identifier) => {
+    if (identifier.children.length > 0) return
+
+    const rawText = (identifier.textContent || '').trim()
+    if (!rawText.includes('_')) return
+
+    const parts = rawText.split('_').map((part) => part.trim()).filter(Boolean)
+    if (parts.length < 2) return
+
+    const doc = identifier.ownerDocument
+    const namespace = identifier.namespaceURI || 'http://www.w3.org/1998/Math/MathML'
+    const createIdentifier = (text: string) => {
+      const mi = doc.createElementNS(namespace, 'mi')
+      mi.textContent = text
+      return mi
+    }
+
+    const baseIdentifier = createIdentifier(parts[0] || '')
+    copyElementAttributes(identifier, baseIdentifier)
+
+    let current: Element = doc.createElementNS(namespace, 'msub')
+    current.appendChild(baseIdentifier)
+    current.appendChild(createIdentifier(parts[1] || ''))
+
+    parts.slice(2).forEach((part) => {
+      const next = doc.createElementNS(namespace, 'msub')
+      next.appendChild(current)
+      next.appendChild(createIdentifier(part))
+      current = next
+    })
+
+    identifier.replaceWith(current)
+  })
+}
+
 const isMathMLElement = (node: Node, tagName: string): node is Element =>
   node.nodeType === Node.ELEMENT_NODE && (node as Element).tagName.toLowerCase() === tagName
 
@@ -177,6 +221,7 @@ export const formatMathMLTable = (rawMathML: string): string => {
 
   mathBlocks.forEach((math) => {
     fixMismatchedFencePairs(math)
+    normalizeUnderscoreIdentifiers(math)
 
     const rows = Array.from(math.children).filter((child) => child.tagName.toLowerCase() === 'mrow')
 
