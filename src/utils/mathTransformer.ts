@@ -108,7 +108,10 @@ const normaliseUnderscoreIdentifiers = (root: ParentNode) => {
     const rawText = (identifier.textContent || '').trim()
     if (!rawText.includes('_')) return
 
-    const parts = rawText.split('_').map((part) => part.trim()).filter(Boolean)
+    const parts = rawText
+      .split('_')
+      .map((part) => part.trim())
+      .filter(Boolean)
     if (parts.length < 2) return
 
     const doc = identifier.ownerDocument
@@ -249,7 +252,9 @@ const normalisePiecewiseTables = (root: ParentNode, doc: Document, namespace: st
     let hasPiecewiseRows = false
 
     rows.forEach((row) => {
-      const rowCells = Array.from(row.children).filter((child) => child.tagName.toLowerCase() === 'mtd')
+      const rowCells = Array.from(row.children).filter(
+        (child) => child.tagName.toLowerCase() === 'mtd',
+      )
       if (rowCells.length !== 1) return
 
       const [singleCell] = rowCells
