@@ -1,4 +1,5 @@
 import { _MathTransforms as mathPolyfills } from '../vendor/mathml-polyfills/all-polyfills-bundle.js'
+import { formatNumber } from './format'
 
 let sharedDOMParser: DOMParser | null = null
 
@@ -119,6 +120,22 @@ const normalizeLogicalOperators = (root: ParentNode) => {
     if (!replacement) return
 
     operator.textContent = replacement
+  })
+}
+
+const normalizeNumericLiterals = (root: ParentNode) => {
+  const numerals = Array.from(root.querySelectorAll('mn'))
+
+  numerals.forEach((numeral) => {
+    if (numeral.children.length > 0) return
+
+    const rawText = (numeral.textContent || '').trim()
+    if (!/^-?\d+$/.test(rawText)) return
+
+    const parsed = Number(rawText)
+    if (!Number.isInteger(parsed) || Math.abs(parsed) < 1000) return
+
+    numeral.textContent = formatNumber(parsed)
   })
 }
 
@@ -244,6 +261,7 @@ export const formatMathMLTable = (rawMathML: string): string => {
     fixMismatchedFencePairs(math)
     normalizeUnderscoreIdentifiers(math)
     normalizeLogicalOperators(math)
+    normalizeNumericLiterals(math)
 
     const rows = Array.from(math.children).filter((child) => child.tagName.toLowerCase() === 'mrow')
 

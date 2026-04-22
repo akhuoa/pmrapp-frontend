@@ -207,7 +207,21 @@ describe('formatMathMLTable', () => {
 
     expect(result).toContain('vcell')
     expect(result).toContain('Ageo')
-    expect(result).toContain('1000')
+    expect(result).toContain('1,000')
+  })
+
+  it('formats large integer numerals with thousands separators', () => {
+    const numberFormattingEquation = `<math xmlns="http://www.w3.org/1998/Math/MathML">
+      <mrow>
+        <mn>1000</mn><mo>+</mo><mn>2500000</mn><mo>+</mo><mn>999</mn>
+      </mrow>
+    </math>`
+
+    const result = formatMathMLTable(numberFormattingEquation)
+
+    expect(result).toContain('<mn>1,000</mn>')
+    expect(result).toContain('<mn>2,500,000</mn>')
+    expect(result).toContain('<mn>999</mn>')
   })
 
   it('handles MathML containing fenced expressions', () => {
