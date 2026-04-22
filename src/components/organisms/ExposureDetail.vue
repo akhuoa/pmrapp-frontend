@@ -981,6 +981,7 @@ onMounted(async () => {
   }
 
   & :deep(mtable[data-math-piecewise='true'] > mtr > mtd[data-math-piecewise='keyword']) {
+    text-align: left;
     white-space: nowrap;
     padding-left: 0.15em;
     padding-right: 0.35em;
