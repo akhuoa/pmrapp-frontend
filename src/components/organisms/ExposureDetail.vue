@@ -937,6 +937,17 @@ onMounted(async () => {
     font-style: italic;
   }
 
+  /* Override sup and sub script text size for nested levels. */
+  & :deep(math msub > msub > :nth-child(2)),
+  & :deep(math msup > :nth-child(2)) {
+    font-size: 0.7rem;
+  }
+
+  & :deep(math msub > msub + mi),
+  & :deep(math msup msup > :nth-child(2)) {
+    font-size: 0.58rem;
+  }
+
   /* Keep first-level fraction content at the parent math font size. */
   & :deep(math mfrac > :first-child),
   & :deep(math mfrac > :nth-child(2)) {
