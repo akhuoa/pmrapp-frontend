@@ -333,6 +333,23 @@ describe('formatMathMLTable', () => {
     expect(result).not.toContain('⊻')
     expect(result).not.toContain('¬')
   })
+
+  it('converts named Greek identifiers into Greek symbols', () => {
+    const greekIdentifiersEquation = `<math xmlns="http://www.w3.org/1998/Math/MathML">
+      <mrow>
+        <mi>alpha</mi><mo>+</mo><mi>beta</mi><mo>+</mo><mi>Gamma</mi>
+      </mrow>
+    </math>`
+
+    const result = formatMathMLTable(greekIdentifiersEquation)
+
+    expect(result).toContain('<mi>α</mi>')
+    expect(result).toContain('<mi>β</mi>')
+    expect(result).toContain('<mi>γ</mi>')
+    expect(result).not.toContain('<mi>alpha</mi>')
+    expect(result).not.toContain('<mi>beta</mi>')
+    expect(result).not.toContain('<mi>Gamma</mi>')
+  })
 })
 
 describe('mathTransformer integration', () => {

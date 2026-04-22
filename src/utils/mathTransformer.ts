@@ -32,6 +32,32 @@ const LOGICAL_OPERATOR_LABELS: Record<string, string> = {
   '⊕': 'xor',
   '¬': 'not',
 }
+const GREEK_IDENTIFIER_SYMBOLS: Record<string, string> = {
+  alpha: 'α',
+  beta: 'β',
+  gamma: 'γ',
+  delta: 'δ',
+  epsilon: 'ε',
+  zeta: 'ζ',
+  eta: 'η',
+  theta: 'θ',
+  iota: 'ι',
+  kappa: 'κ',
+  lambda: 'λ',
+  mu: 'μ',
+  nu: 'ν',
+  xi: 'ξ',
+  omicron: 'ο',
+  pi: 'π',
+  rho: 'ρ',
+  sigma: 'σ',
+  tau: 'τ',
+  upsilon: 'υ',
+  phi: 'φ',
+  chi: 'χ',
+  psi: 'ψ',
+  omega: 'ω',
+}
 
 const isFenceOperator = (element: Element): element is HTMLElement =>
   element.tagName.toLowerCase() === 'mo' && element.getAttribute('fence') === 'true'
@@ -138,6 +164,22 @@ const normalizeNumericLiterals = (root: ParentNode) => {
     if (!Number.isInteger(parsed) || Math.abs(parsed) < 1000) return
 
     numeral.textContent = formatNumber(parsed)
+  })
+}
+
+const normalizeNamedGreekIdentifiers = (root: ParentNode) => {
+  const identifiers = Array.from(root.querySelectorAll('mi'))
+
+  identifiers.forEach((identifier) => {
+    if (identifier.children.length > 0) return
+
+    const rawText = (identifier.textContent || '').trim()
+    if (!rawText) return
+
+    const replacement = GREEK_IDENTIFIER_SYMBOLS[rawText.toLowerCase()]
+    if (!replacement) return
+
+    identifier.textContent = replacement
   })
 }
 
@@ -264,6 +306,7 @@ export const formatMathMLTable = (rawMathML: string): string => {
     normalizeUnderscoreIdentifiers(math)
     normalizeLogicalOperators(math)
     normalizeNumericLiterals(math)
+    normalizeNamedGreekIdentifiers(math)
 
     const rows = Array.from(math.children).filter((child) => child.tagName.toLowerCase() === 'mrow')
 
