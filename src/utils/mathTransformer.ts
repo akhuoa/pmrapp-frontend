@@ -23,6 +23,7 @@ const OPEN_TO_CLOSE_FENCE: Record<string, string> = {
 }
 const INVISIBLE_TIMES_CHAR = '\u2062'
 const VISIBLE_MULTIPLICATION_DOT = '·'
+const EXPONENTIAL_E_CHAR = 'ⅇ'
 const PIECEWISE_KEYWORDS = new Set(['if', 'otherwise'])
 const LOGICAL_OPERATOR_LABELS: Record<string, string> = {
   '∧': 'and',
@@ -63,6 +64,7 @@ const fixMismatchedFencePairs = (root: ParentNode) => {
 const normalizeInvisibleTimesSeparators = (mathml: string): string =>
   mathml
     .replaceAll(INVISIBLE_TIMES_CHAR, VISIBLE_MULTIPLICATION_DOT)
+    .replaceAll(EXPONENTIAL_E_CHAR, 'e')
     .replaceAll(/&#8290;|&#x2062;|&InvisibleTimes;/gi, VISIBLE_MULTIPLICATION_DOT)
 
 const copyElementAttributes = (from: Element, to: Element) => {

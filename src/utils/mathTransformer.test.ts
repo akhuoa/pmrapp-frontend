@@ -105,6 +105,15 @@ describe('transformMathString', () => {
     expect(result).not.toContain('&#8290;')
     expect(result).not.toContain('\u2062')
   })
+
+  it('replaces the exponential glyph with plain e', () => {
+    const equationWithExponentialGlyph = `<math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>ⅇ</mi><mo>^</mo><mi>x</mi></mrow></math>`
+
+    const result = transformMathString(equationWithExponentialGlyph)
+
+    expect(result).toContain('<mi>e</mi>')
+    expect(result).not.toContain('ⅇ')
+  })
 })
 
 describe('formatMathMLTable', () => {
