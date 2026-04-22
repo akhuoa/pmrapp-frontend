@@ -275,7 +275,7 @@ describe('formatMathMLTable', () => {
     expect(result).toContain('data-math-operator="equals"')
   })
 
-  it('normalizes invisible times separators in formatted output', () => {
+  it('normalises invisible times separators in formatted output', () => {
     const equationWithInvisibleTimes = `<math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>a</mi><mo>\u2062</mo><mi>b</mi></mrow></math>`
 
     const result = formatMathMLTable(equationWithInvisibleTimes)

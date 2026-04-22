@@ -87,7 +87,7 @@ const fixMismatchedFencePairs = (root: ParentNode) => {
   })
 }
 
-const normalizeInvisibleTimesSeparators = (mathml: string): string =>
+const normaliseInvisibleTimesSeparators = (mathml: string): string =>
   mathml
     .replaceAll(INVISIBLE_TIMES_CHAR, VISIBLE_MULTIPLICATION_DOT)
     .replaceAll(EXPONENTIAL_E_CHAR, 'e')
@@ -99,7 +99,7 @@ const copyElementAttributes = (from: Element, to: Element) => {
   })
 }
 
-const normalizeUnderscoreIdentifiers = (root: ParentNode) => {
+const normaliseUnderscoreIdentifiers = (root: ParentNode) => {
   const identifiers = Array.from(root.querySelectorAll('mi'))
 
   identifiers.forEach((identifier) => {
@@ -137,21 +137,21 @@ const normalizeUnderscoreIdentifiers = (root: ParentNode) => {
   })
 }
 
-const normalizeLogicalOperators = (root: ParentNode) => {
+const normaliseLogicalOperators = (root: ParentNode) => {
   const operators = Array.from(root.querySelectorAll('mo'))
 
   operators.forEach((operator) => {
     if (operator.children.length > 0) return
 
-    const normalizedText = (operator.textContent || '').trim()
-    const replacement = LOGICAL_OPERATOR_LABELS[normalizedText]
+    const normalisedText = (operator.textContent || '').trim()
+    const replacement = LOGICAL_OPERATOR_LABELS[normalisedText]
     if (!replacement) return
 
     operator.textContent = replacement
   })
 }
 
-const normalizeNumericLiterals = (root: ParentNode) => {
+const normaliseNumericLiterals = (root: ParentNode) => {
   const numerals = Array.from(root.querySelectorAll('mn'))
 
   numerals.forEach((numeral) => {
@@ -170,7 +170,7 @@ const normalizeNumericLiterals = (root: ParentNode) => {
 const isNumberToken = (value: string): boolean => /^[-+]?\d*\.?\d+$/.test(value)
 const isIntegerToken = (value: string): boolean => /^[-+]?\d+$/.test(value)
 
-const normalizeScientificENotation = (root: ParentNode) => {
+const normaliseScientificENotation = (root: ParentNode) => {
   const rows = Array.from(root.querySelectorAll('mrow'))
 
   rows.forEach((row) => {
@@ -220,7 +220,7 @@ const normalizeScientificENotation = (root: ParentNode) => {
   })
 }
 
-const normalizeNamedGreekIdentifiers = (root: ParentNode) => {
+const normaliseNamedGreekIdentifiers = (root: ParentNode) => {
   const identifiers = Array.from(root.querySelectorAll('mi'))
 
   identifiers.forEach((identifier) => {
@@ -239,7 +239,7 @@ const normalizeNamedGreekIdentifiers = (root: ParentNode) => {
 const isMathMLElement = (node: Node, tagName: string): node is Element =>
   node.nodeType === Node.ELEMENT_NODE && (node as Element).tagName.toLowerCase() === tagName
 
-const normalizePiecewiseTables = (root: ParentNode, doc: Document, namespace: string) => {
+const normalisePiecewiseTables = (root: ParentNode, doc: Document, namespace: string) => {
   const mathTables = Array.from(root.querySelectorAll('mtable'))
 
   mathTables.forEach((table) => {
@@ -338,7 +338,7 @@ export function transformMathString(rawMathML: string): string {
 
   mathPolyfills?.transform(container)
 
-  return normalizeInvisibleTimesSeparators(container.innerHTML)
+  return normaliseInvisibleTimesSeparators(container.innerHTML)
 }
 
 /**
@@ -356,11 +356,11 @@ export const formatMathMLTable = (rawMathML: string): string => {
 
   mathBlocks.forEach((math) => {
     fixMismatchedFencePairs(math)
-    normalizeUnderscoreIdentifiers(math)
-    normalizeLogicalOperators(math)
-    normalizeNumericLiterals(math)
-    normalizeScientificENotation(math)
-    normalizeNamedGreekIdentifiers(math)
+    normaliseUnderscoreIdentifiers(math)
+    normaliseLogicalOperators(math)
+    normaliseNumericLiterals(math)
+    normaliseScientificENotation(math)
+    normaliseNamedGreekIdentifiers(math)
 
     const rows = Array.from(math.children).filter((child) => child.tagName.toLowerCase() === 'mrow')
 
@@ -395,8 +395,8 @@ export const formatMathMLTable = (rawMathML: string): string => {
       math.appendChild(mtable)
     }
 
-    normalizePiecewiseTables(math, doc, NS)
+    normalisePiecewiseTables(math, doc, NS)
   })
 
-  return normalizeInvisibleTimesSeparators(doc.body.innerHTML)
+  return normaliseInvisibleTimesSeparators(doc.body.innerHTML)
 }
