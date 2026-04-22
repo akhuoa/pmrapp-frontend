@@ -288,6 +288,28 @@ describe('formatMathMLTable', () => {
     expect(result).toContain('<mi>Stim</mi>')
     expect(result).toContain('<mi>Amplitude</mi>')
   })
+
+  it('replaces logical operator symbols with text labels', () => {
+    const logicalOperatorsEquation = `<math xmlns="http://www.w3.org/1998/Math/MathML">
+      <mrow>
+        <mi>a</mi><mo>∧</mo><mi>b</mi>
+        <mo>∨</mo><mi>c</mi>
+        <mo>⊻</mo><mi>d</mi>
+        <mo>¬</mo><mi>e</mi>
+      </mrow>
+    </math>`
+
+    const result = formatMathMLTable(logicalOperatorsEquation)
+
+    expect(result).toContain('<mo>and</mo>')
+    expect(result).toContain('<mo>or</mo>')
+    expect(result).toContain('<mo>xor</mo>')
+    expect(result).toContain('<mo>not</mo>')
+    expect(result).not.toContain('∧')
+    expect(result).not.toContain('∨')
+    expect(result).not.toContain('⊻')
+    expect(result).not.toContain('¬')
+  })
 })
 
 describe('mathTransformer integration', () => {

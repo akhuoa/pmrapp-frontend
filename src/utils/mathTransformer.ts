@@ -23,6 +23,13 @@ const OPEN_TO_CLOSE_FENCE: Record<string, string> = {
 const INVISIBLE_TIMES_CHAR = '\u2062'
 const VISIBLE_MULTIPLICATION_DOT = '·'
 const PIECEWISE_KEYWORDS = new Set(['if', 'otherwise'])
+const LOGICAL_OPERATOR_LABELS: Record<string, string> = {
+  '∧': 'and',
+  '∨': 'or',
+  '⊻': 'xor',
+  '⊕': 'xor',
+  '¬': 'not',
+}
 
 const isFenceOperator = (element: Element): element is HTMLElement =>
   element.tagName.toLowerCase() === 'mo' && element.getAttribute('fence') === 'true'
@@ -98,6 +105,20 @@ const normalizeUnderscoreIdentifiers = (root: ParentNode) => {
     })
 
     identifier.replaceWith(current)
+  })
+}
+
+const normalizeLogicalOperators = (root: ParentNode) => {
+  const operators = Array.from(root.querySelectorAll('mo'))
+
+  operators.forEach((operator) => {
+    if (operator.children.length > 0) return
+
+    const normalizedText = (operator.textContent || '').trim()
+    const replacement = LOGICAL_OPERATOR_LABELS[normalizedText]
+    if (!replacement) return
+
+    operator.textContent = replacement
   })
 }
 
@@ -222,6 +243,7 @@ export const formatMathMLTable = (rawMathML: string): string => {
   mathBlocks.forEach((math) => {
     fixMismatchedFencePairs(math)
     normalizeUnderscoreIdentifiers(math)
+    normalizeLogicalOperators(math)
 
     const rows = Array.from(math.children).filter((child) => child.tagName.toLowerCase() === 'mrow')
 
