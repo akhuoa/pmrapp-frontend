@@ -167,6 +167,59 @@ const normalizeNumericLiterals = (root: ParentNode) => {
   })
 }
 
+const isNumberToken = (value: string): boolean => /^[-+]?\d*\.?\d+$/.test(value)
+const isIntegerToken = (value: string): boolean => /^[-+]?\d+$/.test(value)
+
+const normalizeScientificENotation = (root: ParentNode) => {
+  const rows = Array.from(root.querySelectorAll('mrow'))
+
+  rows.forEach((row) => {
+    const children = Array.from(row.children)
+    if (children.length < 3) return
+
+    for (let i = 0; i <= children.length - 3; i += 1) {
+      const baseNode = children[i]
+      const eNode = children[i + 1]
+      const exponentNode = children[i + 2]
+      if (!baseNode || !eNode || !exponentNode) continue
+
+      if (
+        baseNode.tagName.toLowerCase() !== 'mn' ||
+        eNode.tagName.toLowerCase() !== 'mo' ||
+        exponentNode.tagName.toLowerCase() !== 'mn'
+      ) {
+        continue
+      }
+
+      const baseText = (baseNode.textContent || '').trim()
+      const eText = (eNode.textContent || '').trim().toLowerCase()
+      const exponentText = (exponentNode.textContent || '').trim()
+      if (eText !== 'e' || !isNumberToken(baseText) || !isIntegerToken(exponentText)) {
+        continue
+      }
+
+      const doc = row.ownerDocument
+      const namespace = row.namespaceURI || 'http://www.w3.org/1998/Math/MathML'
+      const multiplication = doc.createElementNS(namespace, 'mo')
+      multiplication.textContent = VISIBLE_MULTIPLICATION_DOT
+
+      const msup = doc.createElementNS(namespace, 'msup')
+      const ten = doc.createElementNS(namespace, 'mn')
+      ten.textContent = '10'
+      const exponent = doc.createElementNS(namespace, 'mn')
+      exponent.textContent = exponentText
+      msup.appendChild(ten)
+      msup.appendChild(exponent)
+
+      const afterExponent = exponentNode.nextSibling
+      row.insertBefore(multiplication, eNode)
+      row.insertBefore(msup, afterExponent)
+      row.removeChild(eNode)
+      row.removeChild(exponentNode)
+    }
+  })
+}
+
 const normalizeNamedGreekIdentifiers = (root: ParentNode) => {
   const identifiers = Array.from(root.querySelectorAll('mi'))
 
@@ -306,6 +359,7 @@ export const formatMathMLTable = (rawMathML: string): string => {
     normalizeUnderscoreIdentifiers(math)
     normalizeLogicalOperators(math)
     normalizeNumericLiterals(math)
+    normalizeScientificENotation(math)
     normalizeNamedGreekIdentifiers(math)
 
     const rows = Array.from(math.children).filter((child) => child.tagName.toLowerCase() === 'mrow')

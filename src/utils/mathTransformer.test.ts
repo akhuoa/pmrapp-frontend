@@ -350,6 +350,23 @@ describe('formatMathMLTable', () => {
     expect(result).not.toContain('<mi>beta</mi>')
     expect(result).not.toContain('<mi>Gamma</mi>')
   })
+
+  it('converts scientific e-notation tokens into multiplication by 10 to an exponent', () => {
+    const scientificNotationEquation = `<math xmlns="http://www.w3.org/1998/Math/MathML">
+      <mrow>
+        <mn>3.1</mn>
+        <mo>e</mo>
+        <mn>5</mn>
+      </mrow>
+    </math>`
+
+    const result = formatMathMLTable(scientificNotationEquation)
+
+    expect(result).toContain('<mn>3.1</mn>')
+    expect(result).toContain('<mo>·</mo>')
+    expect(result).toContain('<msup><mn>10</mn><mn>5</mn></msup>')
+    expect(result).not.toContain('<mo>e</mo>')
+  })
 })
 
 describe('mathTransformer integration', () => {
