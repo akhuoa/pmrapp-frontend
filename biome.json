@@ -5,6 +5,9 @@
       "tailwindDirectives": true
     }
   },
+  "files": {
+    "includes": ["**", "!src/vendor"]
+  },
   "formatter": {
     "indentStyle": "space",
     "lineWidth": 100,

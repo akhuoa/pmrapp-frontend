@@ -21,6 +21,13 @@ vi.mock('@/utils/analytics', () => ({
   trackButtonClick: vi.fn(),
 }))
 
+// Mock MathML transformer to avoid loading the vendored polyfill bundle in tests.
+vi.mock('@/utils/mathTransformer', () => ({
+  initMathPolyfills: vi.fn().mockResolvedValue(undefined),
+  transformMathString: (s: string) => s,
+  formatMathMLTable: (s: string) => s,
+}))
+
 describe('ExposureDetail', () => {
   let exposureStore: ReturnType<typeof useExposureStore>
   let searchStore: ReturnType<typeof useSearchStore>
