@@ -1,11 +1,10 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import BackButton from '@/components/atoms/BackButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
+import Breadcrumbs from '@/components/molecules/Breadcrumbs.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
-import { useBackNavigation } from '@/composables/useBackNavigation'
 import { useExposureStore } from '@/stores/exposure'
 import type { ExposureFileInfo } from '@/types/exposure'
 
@@ -18,7 +17,12 @@ const exposureStore = useExposureStore()
 const exposureFileInfo = ref<ExposureFileInfo | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
-const { goBack } = useBackNavigation(`/exposures/${props.alias}`)
+
+const breadcrumbItems = [
+  { label: 'Exposures', to: '/exposures' },
+  { label: props.alias, to: `/exposures/${props.alias}` },
+  { label: props.file },
+]
 
 onMounted(async () => {
   try {
@@ -35,11 +39,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <BackButton
-    label="Back"
-    content-section="Exposure File Detail"
-    :on-click="goBack"
-  />
+  <Breadcrumbs :items="breadcrumbItems" />
 
   <ErrorBlock
     v-if="error"
