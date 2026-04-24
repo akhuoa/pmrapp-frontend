@@ -14,10 +14,13 @@ import type { BreadcrumbItem } from '@/components/molecules/Breadcrumbs.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { getWorkspaceService } from '@/services'
-import { downloadFileFromBlob, downloadFileFromContent } from '@/utils/download'
+import { downloadFileFromBlob } from '@/utils/download'
 import { isCodeFile, isImageFile, isMarkdownFile, isPdfFile, isSvgFile } from '@/utils/file'
 import { renderMarkdown } from '@/utils/markdown'
 import ActionButton from '../atoms/ActionButton.vue'
+
+// Files with size above this threshold are not rendered in the preview to prevent browser freeze.
+const MAX_PREVIEW_FILE_SIZE_BYTES = 500 * 1024 // ~500 KB
 
 const props = defineProps<{
   alias: string
@@ -28,6 +31,7 @@ const props = defineProps<{
 const fileContent = ref<string>('')
 const fileBlob = ref<Blob>(new Blob())
 const fileBlobUrl = ref<string>('')
+const fileSizeBytes = ref(0)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 const showCode = ref(false)
@@ -93,12 +97,11 @@ const imageDataUrl = computed(() => {
   return fileBlobUrl.value
 })
 
+// Fast guard: avoid rendering very large payloads in the browser preview.
+const isTooLargeForPreview = computed(() => fileSizeBytes.value > MAX_PREVIEW_FILE_SIZE_BYTES)
+
 const downloadFile = () => {
-  if (isImage.value || isSvg.value || isPDF.value) {
-    downloadFileFromBlob(fileBlob.value, filename.value)
-  } else {
-    downloadFileFromContent(fileContent.value, filename.value)
-  }
+  downloadFileFromBlob(fileBlob.value, filename.value)
 }
 
 const toggleCodeView = () => {
@@ -111,14 +114,12 @@ const toggleCodeWrap = () => {
 
 onMounted(async () => {
   try {
-    // Fetch images, SVGs, and PDFs as blobs.
+    const blob = await getWorkspaceService().getRawFileBlob(props.alias, props.commitId, props.path)
+    fileBlob.value = blob
+    fileSizeBytes.value = blob.size
+
+    // Image-like previews use an object URL from the blob.
     if (isImage.value || isSvg.value || isPDF.value) {
-      const blob = await getWorkspaceService().getRawFileBlob(
-        props.alias,
-        props.commitId,
-        props.path,
-      )
-      fileBlob.value = blob
       fileBlobUrl.value = URL.createObjectURL(blob)
 
       // For SVG, also get text content for code view.
@@ -126,12 +127,10 @@ onMounted(async () => {
         fileContent.value = await blob.text()
       }
     } else {
-      // Fetch text files as text.
-      fileContent.value = await getWorkspaceService().getRawFile(
-        props.alias,
-        props.commitId,
-        props.path,
-      )
+      // Skip text decode for oversized code-like previews; download remains available via blob.
+      if (!isTooLargeForPreview.value || isMarkdown.value) {
+        fileContent.value = await blob.text()
+      }
     }
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to load file.'
@@ -176,13 +175,13 @@ onBeforeUnmount(() => {
             {{ showCode ? 'Preview' : 'Code' }}
           </button>
           <WrapButton
-            v-if="shouldShowAsText"
+            v-if="shouldShowAsText && !isTooLargeForPreview"
             :disabled="(isSvg || isMarkdown) ? !showCode : false"
             :active="codeBlockRef?.isWrapped"
             @click="toggleCodeWrap"
           />
           <CopyButton
-            v-if="shouldShowAsText"
+            v-if="shouldShowAsText && !isTooLargeForPreview"
             :text="fileContent"
             title="Copy code"
           />
@@ -217,6 +216,20 @@ onBeforeUnmount(() => {
       <!-- PDF View -->
       <div v-else-if="isPDF" class="flex justify-center">
         <embed :src="fileBlobUrl" type="application/pdf" width="100%" height="800px" />
+      </div>
+
+      <!-- Code/Text View (Too Large) -->
+      <div v-else-if="shouldShowAsText && isTooLargeForPreview" class="text-center py-8 text-gray-500 dark:text-gray-400">
+        <p class="mb-4">This file is too large to preview in the browser.</p>
+        <ActionButton
+          variant="primary"
+          size="lg"
+          @click="downloadFile"
+          content-section="Workspace File Detail"
+        >
+          <DownloadIcon class="w-4 h-4" />
+          Download
+        </ActionButton>
       </div>
 
       <!-- Code/Text View -->

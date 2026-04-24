@@ -25,6 +25,7 @@ import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
+import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
 import { buildSearchQuery, isValidTerm } from '@/utils/search'
 import TermButton from '../atoms/TermButton.vue'
 
@@ -267,6 +268,8 @@ const toggleCodeWrap = () => {
 const generateMath = async () => {
   error.value = null
 
+  await initMathPolyfills()
+
   try {
     const response = await exposureStore.getExposureRawContent(
       exposureId.value,
@@ -280,7 +283,11 @@ const generateMath = async () => {
           (value): value is [string, string[]] => Array.isArray(value[1]) && value[1].length > 0,
         )
       : []
-    mathsJSON.value = filteredMathsJSON
+    const transformedMathsJSON = filteredMathsJSON.map((entry): [string, string[]] => {
+      const mathMLArray = entry[1].map((mathML) => formatMathMLTable(transformMathString(mathML)))
+      return [entry[0], mathMLArray]
+    })
+    mathsJSON.value = transformedMathsJSON
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Failed to parse mathematics data.'
     error.value = {
@@ -560,7 +567,7 @@ onMounted(async () => {
             class="mb-6 pb-6 last:mb-0 last:pb-0 border-b border-gray-200 dark:border-gray-700 last:border-0"
           >
             <h4 class="font-semibold mb-4">{{ value[0] }}</h4>
-            <div v-for="math in value[1]" :key="math">
+            <div v-for="(math, mathIndex) in value[1]" :key="`${value[0]}-${mathIndex}`">
               <div v-html="math" class="math-view"></div>
             </div>
           </div>
@@ -928,10 +935,87 @@ onMounted(async () => {
 }
 
 .math-view {
-  @apply p-2 text-center text-sm overflow-auto;
+  @apply p-2 text-center text-base overflow-auto;
 
-  & :deep(math) {
-    @apply flex flex-col gap-4;
+  & :deep(math > mtable) {
+    border-spacing: 0.5em 0.75em;
+  }
+
+  & :deep(math mi),
+  & :deep(math mo),
+  & :deep(math mn) {
+    line-height: 1.4;
+    padding-left: 0.05em;
+    padding-right: 0.05em;
+  }
+
+  & :deep(math mi) {
+    font-style: italic;
+  }
+
+  /* Override sup and sub script text size for nested levels. */
+  & :deep(math msub > msub > :nth-child(2)),
+  & :deep(math msup > :nth-child(2)) {
+    font-size: 0.7rem;
+  }
+
+  & :deep(math msub > msub + mi),
+  & :deep(math msup msup > :nth-child(2)) {
+    font-size: 0.58rem;
+  }
+
+  /* Keep first-level fraction content at the parent math font size. */
+  & :deep(math mfrac > :first-child),
+  & :deep(math mfrac > :nth-child(2)) {
+    font-size: 1em;
+  }
+
+  & :deep(math mfrac > :first-child) {
+    padding-bottom: 0.14em;
+  }
+
+  & :deep(math mfrac > :nth-child(2)) {
+    padding-top: 0.14em;
+  }
+
+  & :deep(math > mtable > mtr + mtr > mtd) {
+    padding-top: 0.5em;
+  }
+
+  & :deep(math > mtable > mtr > mtd:nth-child(1)) {
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 0.5em;
+  }
+
+  & :deep(math > mtable > mtr > mtd[data-math-operator='equals']) {
+    text-align: center;
+    padding-left: 0.25em;
+    padding-right: 0.25em;
+  }
+
+  & :deep(math > mtable > mtr > mtd:nth-child(3)) {
+    text-align: left;
+    padding-left: 0.5em;
+  }
+
+  & :deep(mtable[data-math-piecewise='true']) {
+    border-spacing: 0.5em 0.35em;
+  }
+
+  & :deep(mtable[data-math-piecewise='true'] > mtr > mtd[data-math-piecewise='expression']) {
+    white-space: nowrap;
+  }
+
+  & :deep(mtable[data-math-piecewise='true'] > mtr > mtd[data-math-piecewise='keyword']) {
+    text-align: left;
+    white-space: nowrap;
+    padding-left: 0.15em;
+    padding-right: 0.35em;
+  }
+
+  & :deep(mtable[data-math-piecewise='true'] > mtr > mtd[data-math-piecewise='condition']) {
+    white-space: nowrap;
   }
 }
 </style>
