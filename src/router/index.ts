@@ -55,7 +55,9 @@ const router = createRouter({
       component: WorkspaceDetailView,
       alias: [
         '/workspaces/:alias/file',
+        '/workspaces/:alias/@@file',
         '/workspace/:alias/file',
+        '/workspace/:alias/@@file',
         '/workspace/:alias',
       ],
       meta: { title: `Workspace Detail – ${title}` },
@@ -66,8 +68,12 @@ const router = createRouter({
       component: WorkspaceDetailView,
       alias: [
         '/workspaces/:alias/file/:commitId',
+        '/workspaces/:alias/@@file/:commitId',
         '/workspace/:alias/file/:commitId',
+        '/workspace/:alias/@@file/:commitId',
         '/workspace/:alias/file/:commitId/:path(.+)',
+        '/workspace/:alias/@@file/:commitId/:path(.+)',
+        '/workspaces/:alias/@@file/:commitId/:path(.+)',
       ],
       meta: { title: `Workspace File – ${title}` },
     },
