@@ -55,7 +55,7 @@ const router = createRouter({
       path: '/exposures/:alias',
       name: 'exposure-detail',
       component: ExposureDetailView,
-      alias: ['/exposure/:alias', '/exposure/:alias/view', '/e/:alias/view'],
+      alias: ['/exposure/:alias', '/exposure/:alias/view', '/e/:alias', '/e/:alias/view'],
       meta: { title: `Exposure Detail – ${title}` },
     },
     {
