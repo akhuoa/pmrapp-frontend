@@ -9,6 +9,38 @@ import WorkspaceDetailView from '@/views/WorkspaceDetailView.vue'
 import WorkspaceView from '@/views/WorkspaceView.vue'
 
 const title = 'Physiome Model Repository'
+const workspaceAliasBases = ['/workspace']
+const workspaceDetailRouteSuffixes = ['/:alias', '/:alias/file', '/:alias/@@file']
+const workspaceFileRouteSuffixes = [
+  '/:alias/file/:commitId/:path(.+)',
+  '/:alias/file/:commitId',
+  '/:alias/@@file/:commitId/:path(.+)',
+  '/:alias/@@file/:commitId',
+]
+const exposureAliasBases = ['/exposure', '/e']
+const exposureFileRouteSuffixes = [
+  '/:alias/:file',
+  '/:alias/experiments/cell/:file',
+  '/:alias/experiments/channel/:file',
+  '/:alias/models/channels/:file',
+  '/:alias/models/:file',
+]
+const exposureFileViewRouteSuffixes = [
+  '/:alias/:file/:view',
+  '/:alias/experiments/cell/:file/:view',
+  '/:alias/experiments/channel/:file/:view',
+  '/:alias/models/channels/:file/:view',
+  '/:alias/models/:file/:view',
+]
+
+const createAliases = (bases: string[], ...suffixes: string[]) =>
+  bases.flatMap((base) => suffixes.map((suffix) => `${base}${suffix}`))
+
+const createPluralRouteAliases = (pluralBase: string, aliasBases: string[], suffixes: string[]) => [
+  ...suffixes.slice(1).map((suffix) => `${pluralBase}${suffix}`),
+  ...createAliases(aliasBases, ...suffixes),
+]
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   scrollBehavior(_to, _from, savedPosition) {
@@ -34,41 +66,60 @@ const router = createRouter({
       path: '/workspaces/:alias',
       name: 'workspace-detail',
       component: WorkspaceDetailView,
-      alias: ['/workspace/:alias'],
+      alias: createPluralRouteAliases(
+        '/workspaces',
+        workspaceAliasBases,
+        workspaceDetailRouteSuffixes,
+      ),
       meta: { title: `Workspace Detail – ${title}` },
     },
     {
       path: '/workspaces/:alias/file/:commitId/:path(.+)',
       name: 'workspace-file-detail',
       component: WorkspaceDetailView,
-      alias: ['/workspace/:alias/file/:commitId/:path(.+)'],
+      alias: createPluralRouteAliases(
+        '/workspaces',
+        workspaceAliasBases,
+        workspaceFileRouteSuffixes,
+      ),
       meta: { title: `Workspace File – ${title}` },
     },
     {
       path: '/exposures',
       name: 'exposures',
       component: ExposureView,
+      alias: createAliases(exposureAliasBases, ''),
       meta: { title: `Exposures – ${title}` },
     },
     {
       path: '/exposures/:alias',
       name: 'exposure-detail',
       component: ExposureDetailView,
-      alias: ['/exposure/:alias'],
+      alias: createAliases(exposureAliasBases, '/:alias', '/:alias/view'),
       meta: { title: `Exposure Detail – ${title}` },
     },
     {
       path: '/exposures/:alias/:file',
       name: 'exposure-file-detail',
       component: ExposureDetailView,
-      alias: ['/exposure/:alias/:file'],
+      // biome-ignore format: keep the formatting for readability
+      alias: createPluralRouteAliases(
+        '/exposures',
+        exposureAliasBases,
+        exposureFileRouteSuffixes
+      ),
       meta: { title: `Exposure File – ${title}` },
     },
     {
       path: '/exposures/:alias/:file/:view',
       name: 'exposure-file-detail-view',
       component: ExposureDetailView,
-      alias: ['/exposure/:alias/:file/:view'],
+      // biome-ignore format: keep the formatting for readability
+      alias: createPluralRouteAliases(
+        '/exposures',
+        exposureAliasBases,
+        exposureFileViewRouteSuffixes
+      ),
       meta: { title: `Exposure File – ${title}` },
     },
     {
