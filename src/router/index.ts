@@ -9,6 +9,18 @@ import WorkspaceDetailView from '@/views/WorkspaceDetailView.vue'
 import WorkspaceView from '@/views/WorkspaceView.vue'
 
 const title = 'Physiome Model Repository'
+const workspaceAliasBases = ['/workspace']
+const workspaceDetailRouteSuffixes = [
+  '/:alias',
+  '/:alias/file',
+  '/:alias/@@file',
+]
+const workspaceFileRouteSuffixes = [
+  '/:alias/file/:commitId/:path(.+)',
+  '/:alias/file/:commitId',
+  '/:alias/@@file/:commitId/:path(.+)',
+  '/:alias/@@file/:commitId',
+]
 const exposureAliasBases = ['/exposure', '/e']
 const exposureFileRouteSuffixes = [
   '/:alias/:file',
@@ -24,6 +36,9 @@ const exposureFileViewRouteSuffixes = [
   '/:alias/models/channels/:file/:view',
   '/:alias/models/:file/:view',
 ]
+
+const createWorkspaceAliases = (...suffixes: string[]) =>
+  workspaceAliasBases.flatMap((base) => suffixes.map((suffix) => `${base}${suffix}`))
 
 const createExposureAliases = (...suffixes: string[]) =>
   exposureAliasBases.flatMap((base) => suffixes.map((suffix) => `${base}${suffix}`))
@@ -54,11 +69,8 @@ const router = createRouter({
       name: 'workspace-detail',
       component: WorkspaceDetailView,
       alias: [
-        '/workspaces/:alias/file',
-        '/workspaces/:alias/@@file',
-        '/workspace/:alias/file',
-        '/workspace/:alias/@@file',
-        '/workspace/:alias',
+        ...workspaceDetailRouteSuffixes.slice(1).map((suffix) => `/workspaces${suffix}`),
+        ...createWorkspaceAliases(...workspaceDetailRouteSuffixes),
       ],
       meta: { title: `Workspace Detail – ${title}` },
     },
@@ -67,13 +79,8 @@ const router = createRouter({
       name: 'workspace-file-detail',
       component: WorkspaceDetailView,
       alias: [
-        '/workspaces/:alias/file/:commitId',
-        '/workspaces/:alias/@@file/:commitId',
-        '/workspace/:alias/file/:commitId',
-        '/workspace/:alias/@@file/:commitId',
-        '/workspace/:alias/file/:commitId/:path(.+)',
-        '/workspace/:alias/@@file/:commitId/:path(.+)',
-        '/workspaces/:alias/@@file/:commitId/:path(.+)',
+        ...workspaceFileRouteSuffixes.slice(1).map((suffix) => `/workspaces${suffix}`),
+        ...createWorkspaceAliases(...workspaceFileRouteSuffixes),
       ],
       meta: { title: `Workspace File – ${title}` },
     },
