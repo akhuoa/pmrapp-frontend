@@ -102,7 +102,11 @@ const router = createRouter({
       path: '/exposures/:alias/:file',
       name: 'exposure-file-detail',
       component: ExposureDetailView,
-      alias: createPluralRouteAliases('/exposures', exposureAliasBases, exposureFileRouteSuffixes),
+      alias: createPluralRouteAliases(
+        '/exposures',
+        exposureAliasBases,
+        exposureFileRouteSuffixes
+      ),
       meta: { title: `Exposure File – ${title}` },
     },
     {
