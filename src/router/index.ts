@@ -10,6 +10,20 @@ import WorkspaceView from '@/views/WorkspaceView.vue'
 
 const title = 'Physiome Model Repository'
 const exposureAliasBases = ['/exposure', '/e']
+const exposureFileRouteSuffixes = [
+  '/:alias/:file',
+  '/:alias/experiments/cell/:file',
+  '/:alias/experiments/channel/:file',
+  '/:alias/models/channels/:file',
+  '/:alias/models/:file',
+]
+const exposureFileViewRouteSuffixes = [
+  '/:alias/:file/:view',
+  '/:alias/experiments/cell/:file/:view',
+  '/:alias/experiments/channel/:file/:view',
+  '/:alias/models/channels/:file/:view',
+  '/:alias/models/:file/:view',
+]
 
 const createExposureAliases = (...suffixes: string[]) =>
   exposureAliasBases.flatMap((base) => suffixes.map((suffix) => `${base}${suffix}`))
@@ -67,14 +81,20 @@ const router = createRouter({
       path: '/exposures/:alias/:file',
       name: 'exposure-file-detail',
       component: ExposureDetailView,
-      alias: createExposureAliases('/:alias/:file'),
+      alias: [
+        ...exposureFileRouteSuffixes.slice(1).map((suffix) => `/exposures${suffix}`),
+        ...createExposureAliases(...exposureFileRouteSuffixes),
+      ],
       meta: { title: `Exposure File – ${title}` },
     },
     {
       path: '/exposures/:alias/:file/:view',
       name: 'exposure-file-detail-view',
       component: ExposureDetailView,
-      alias: createExposureAliases('/:alias/:file/:view'),
+      alias: [
+        ...exposureFileViewRouteSuffixes.slice(1).map((suffix) => `/exposures${suffix}`),
+        ...createExposureAliases(...exposureFileViewRouteSuffixes),
+      ],
       meta: { title: `Exposure File – ${title}` },
     },
     {
