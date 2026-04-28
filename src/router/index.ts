@@ -102,6 +102,7 @@ const router = createRouter({
       path: '/exposures/:alias/:file',
       name: 'exposure-file-detail',
       component: ExposureDetailView,
+      // biome-ignore format: keep the formatting for readability
       alias: createPluralRouteAliases(
         '/exposures',
         exposureAliasBases,
@@ -113,10 +114,11 @@ const router = createRouter({
       path: '/exposures/:alias/:file/:view',
       name: 'exposure-file-detail-view',
       component: ExposureDetailView,
+      // biome-ignore format: keep the formatting for readability
       alias: createPluralRouteAliases(
         '/exposures',
         exposureAliasBases,
-        exposureFileViewRouteSuffixes,
+        exposureFileViewRouteSuffixes
       ),
       meta: { title: `Exposure File – ${title}` },
     },
