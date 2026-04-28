@@ -37,11 +37,17 @@ const exposureFileViewRouteSuffixes = [
   '/:alias/models/:file/:view',
 ]
 
-const createWorkspaceAliases = (...suffixes: string[]) =>
-  workspaceAliasBases.flatMap((base) => suffixes.map((suffix) => `${base}${suffix}`))
+const createAliases = (bases: string[], ...suffixes: string[]) =>
+  bases.flatMap((base) => suffixes.map((suffix) => `${base}${suffix}`))
 
-const createExposureAliases = (...suffixes: string[]) =>
-  exposureAliasBases.flatMap((base) => suffixes.map((suffix) => `${base}${suffix}`))
+const createPluralRouteAliases = (
+  pluralBase: string,
+  aliasBases: string[],
+  suffixes: string[],
+) => [
+  ...suffixes.slice(1).map((suffix) => `${pluralBase}${suffix}`),
+  ...createAliases(aliasBases, ...suffixes),
+]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -68,54 +74,58 @@ const router = createRouter({
       path: '/workspaces/:alias',
       name: 'workspace-detail',
       component: WorkspaceDetailView,
-      alias: [
-        ...workspaceDetailRouteSuffixes.slice(1).map((suffix) => `/workspaces${suffix}`),
-        ...createWorkspaceAliases(...workspaceDetailRouteSuffixes),
-      ],
+      alias: createPluralRouteAliases(
+        '/workspaces',
+        workspaceAliasBases,
+        workspaceDetailRouteSuffixes,
+      ),
       meta: { title: `Workspace Detail – ${title}` },
     },
     {
       path: '/workspaces/:alias/file/:commitId/:path(.+)',
       name: 'workspace-file-detail',
       component: WorkspaceDetailView,
-      alias: [
-        ...workspaceFileRouteSuffixes.slice(1).map((suffix) => `/workspaces${suffix}`),
-        ...createWorkspaceAliases(...workspaceFileRouteSuffixes),
-      ],
+      alias: createPluralRouteAliases(
+        '/workspaces',
+        workspaceAliasBases,
+        workspaceFileRouteSuffixes,
+      ),
       meta: { title: `Workspace File – ${title}` },
     },
     {
       path: '/exposures',
       name: 'exposures',
       component: ExposureView,
-      alias: createExposureAliases(''),
+      alias: createAliases(exposureAliasBases, ''),
       meta: { title: `Exposures – ${title}` },
     },
     {
       path: '/exposures/:alias',
       name: 'exposure-detail',
       component: ExposureDetailView,
-      alias: createExposureAliases('/:alias', '/:alias/view'),
+      alias: createAliases(exposureAliasBases, '/:alias', '/:alias/view'),
       meta: { title: `Exposure Detail – ${title}` },
     },
     {
       path: '/exposures/:alias/:file',
       name: 'exposure-file-detail',
       component: ExposureDetailView,
-      alias: [
-        ...exposureFileRouteSuffixes.slice(1).map((suffix) => `/exposures${suffix}`),
-        ...createExposureAliases(...exposureFileRouteSuffixes),
-      ],
+      alias: createPluralRouteAliases(
+        '/exposures',
+        exposureAliasBases,
+        exposureFileRouteSuffixes,
+      ),
       meta: { title: `Exposure File – ${title}` },
     },
     {
       path: '/exposures/:alias/:file/:view',
       name: 'exposure-file-detail-view',
       component: ExposureDetailView,
-      alias: [
-        ...exposureFileViewRouteSuffixes.slice(1).map((suffix) => `/exposures${suffix}`),
-        ...createExposureAliases(...exposureFileViewRouteSuffixes),
-      ],
+      alias: createPluralRouteAliases(
+        '/exposures',
+        exposureAliasBases,
+        exposureFileViewRouteSuffixes,
+      ),
       meta: { title: `Exposure File – ${title}` },
     },
     {
