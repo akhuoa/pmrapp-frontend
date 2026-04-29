@@ -445,15 +445,15 @@ describe('ExposureDetail', () => {
     })
   })
 
-  it('renders "How to cite" section with formatted citation', async () => {
+  it('renders "Cite this model" section with formatted citation', async () => {
     const wrapper = await mountComponent()
 
     const sectionHeading = wrapper
       .findAll('h4')
-      .find((heading) => heading.text().trim() === 'How to cite')
+      .find((heading) => heading.text().trim() === 'Cite this model')
 
     expect(sectionHeading?.exists()).toBe(true)
-    expect(sectionHeading?.text()).toBe('How to cite')
+    expect(sectionHeading?.text()).toBe('Cite this model')
 
     const sectionContent = sectionHeading?.element.nextElementSibling
     expect(sectionContent).toBeDefined()
