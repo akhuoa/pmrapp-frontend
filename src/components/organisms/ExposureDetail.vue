@@ -421,7 +421,7 @@ const loadInitialView = async () => {
   const filesWithViews = exposureInfo.value.exposure?.files?.filter(
     (file) => file.views && file.views.length > 0,
   )
-  let fileWithViews = filesWithViews?.[0]
+  let fileWithViews = filesWithViews?.find((file) => file.workspace_file_path.endsWith('.cellml'))
 
   if (props.file) {
     fileWithViews = filesWithViews?.find((file) => file.workspace_file_path === props.file)
@@ -437,9 +437,12 @@ const loadInitialView = async () => {
 
     const viewEntry = fileWithViews.views.find((v) => v.view_key === 'view')
     const licenseEntry = fileWithViews.views.find((v) => v.view_key === 'license_citation')
+    const metaEntry = fileWithViews.views.find((v) => v.view_key === 'cellml_metadata')
 
     // Show metadata onload.
-    await generateMetadata()
+    if (metaEntry) {
+      await generateMetadata()
+    }
     await checkOtherRelatedModels()
 
     if (viewEntry) {
