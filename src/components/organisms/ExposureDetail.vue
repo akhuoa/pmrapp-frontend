@@ -176,10 +176,15 @@ const handleDownloadCOMBINEArchive = async () => {
 }
 
 const getOpenCORFilesToOpen = (files: ExposureFileEntry[]) => {
+  let openCORFilesToOpen = files
   const selectedCellmlFile =
     props.file?.endsWith('.cellml') ? files.find((entry) => entry[0] === props.file) : undefined
 
-  return selectedCellmlFile ? [selectedCellmlFile] : files
+  if (selectedCellmlFile) {
+    openCORFilesToOpen = [selectedCellmlFile]
+  }
+
+  return openCORFilesToOpen
 }
 
 const getOrder = (filename: string) => {
