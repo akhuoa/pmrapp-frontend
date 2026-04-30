@@ -693,6 +693,7 @@ onMounted(async () => {
                 :content-section="`Exposure Detail - ${pageTitle}`"
               >
                 Open with OpenCOR's Web app
+                <ExternalLinkIcon class="w-4 h-4" />
               </ActionButton>
             </li>
             <li

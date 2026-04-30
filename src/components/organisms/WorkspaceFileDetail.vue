@@ -8,18 +8,20 @@ import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import WrapButton from '@/components/atoms/WrapButton.vue'
 import CodeIcon from '@/components/icons/CodeIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
+import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
 import PreviewIcon from '@/components/icons/PreviewIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { getWorkspaceService } from '@/services'
 import { downloadFileFromBlob } from '@/utils/download'
-import { isCodeFile, isImageFile, isMarkdownFile, isPdfFile, isSvgFile } from '@/utils/file'
+import { isCodeFile, isImageFile, isMarkdownFile, isOpenCORFile, isPdfFile, isSvgFile } from '@/utils/file'
 import { renderMarkdown } from '@/utils/markdown'
 import ActionButton from '../atoms/ActionButton.vue'
 
 // Files with size above this threshold are not rendered in the preview to prevent browser freeze.
 const MAX_PREVIEW_FILE_SIZE_BYTES = 500 * 1024 // ~500 KB
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 const props = defineProps<{
   alias: string
@@ -60,6 +62,14 @@ const isPDF = computed(() => isPdfFile(props.path))
 const isSvg = computed(() => isSvgFile(props.path))
 const isMarkdown = computed(() => isMarkdownFile(props.path))
 const isCode = computed(() => isCodeFile(props.path))
+const isOpenCOR = computed(() => isOpenCORFile(props.path))
+
+const openCORFileURL = computed(() => {
+  // TODO: to fix API_BASE_URL
+  const rawFileURL = `${API_BASE_URL}/api/workspace/${props.alias}/rawfile/${props.commitId}/${props.path}`
+  const opencorLink = `opencor://openFile/${rawFileURL}`
+  return `//opencor.ws/app/?${opencorLink}`
+})
 
 const shouldShowAsText = computed(() => {
   return isCode.value || (isSvg.value && showCode.value) || (isMarkdown.value && showCode.value)
@@ -151,6 +161,18 @@ onBeforeUnmount(() => {
     <div class="box p-0! overflow-hidden">
       <div class="flex items-center justify-end px-4 py-3 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center gap-2">
+          <ActionButton
+            v-if="isOpenCOR"
+            variant="secondary"
+            size="sm"
+            content-section="Workspace File Detail"
+            :href="openCORFileURL"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span>Open with OpenCOR's Web app</span>
+            <ExternalLinkIcon class="w-4 h-4" />
+          </ActionButton>
           <button
             v-if="isSvg || isMarkdown"
             @click="toggleCodeView"
