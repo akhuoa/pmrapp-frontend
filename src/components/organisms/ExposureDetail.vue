@@ -9,8 +9,8 @@ import CopyButton from '@/components/atoms/CopyButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import WrapButton from '@/components/atoms/WrapButton.vue'
 import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
-import CodeIcon from '@/components/icons/CodeIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
+import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import LoadingIcon from '@/components/icons/LoadingIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
@@ -605,7 +605,7 @@ onMounted(async () => {
                   :tooltip="`Open ${entry[0]} with OpenCOR`"
                   :aria-label="`Open ${entry[0]} with OpenCOR`"
                 >
-                  <CodeIcon class="w-4 h-4" />
+                  <ExternalLinkIcon class="w-4 h-4" />
                   <span class="sr-only">Open with OpenCOR {{ entry[0] }}</span>
                 </ActionButton>
                 <ActionButton
