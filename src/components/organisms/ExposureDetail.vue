@@ -9,6 +9,7 @@ import CopyButton from '@/components/atoms/CopyButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import WrapButton from '@/components/atoms/WrapButton.vue'
 import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
+import CodeIcon from '@/components/icons/CodeIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import LoadingIcon from '@/components/icons/LoadingIcon.vue'
@@ -123,10 +124,13 @@ const openCORFiles = computed(() => {
   if (!exposureInfo.value) return []
 
   return exposureInfo.value.files.filter((entry) => {
-    const filename = entry[0]
-    return filename.endsWith('.omex') || filename.endsWith('.cellml') || filename.endsWith('.sedml')
+    return isOpenCORFile(entry[0])
   })
 })
+
+const isOpenCORFile = (filename: string) => {
+  return filename.endsWith('.omex') || filename.endsWith('.cellml') || filename.endsWith('.sedml')
+}
 
 const navigationFiles = computed(() => {
   if (!exposureInfo.value) return []
@@ -173,12 +177,18 @@ const handleDownloadCOMBINEArchive = async () => {
   }
 }
 
-const buildOpenCORURL = (option?: string) => {
+const buildOpenCORURL = (option?: string, targetFile?: string) => {
   if (!exposureInfo.value || openCORFiles.value.length === 0) return ''
 
   const baseURL = `${exposureInfo.value.workspace.url}rawfile/${exposureInfo.value.exposure.commit_id}`
 
-  const sortedFiles = [...openCORFiles.value].sort((a, b) => {
+  const filesToOpen = targetFile
+    ? openCORFiles.value.filter((entry) => entry[0] === targetFile)
+    : openCORFiles.value
+
+  if (filesToOpen.length === 0) return ''
+
+  const sortedFiles = [...filesToOpen].sort((a, b) => {
     const getOrder = (filename: string) => {
       if (filename.endsWith('.cellml')) return 1
       if (filename.endsWith('.sedml')) return 2
@@ -588,6 +598,19 @@ onMounted(async () => {
                 </RouterLink>
               </div>
               <div class="flex items-center gap-2 ml-4 flex-shrink-0">
+                <ActionButton
+                  v-if="isOpenCORFile(entry[0])"
+                  variant="icon"
+                  :href="buildOpenCORURL(undefined, entry[0])"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  content-section="Exposure Detail"
+                  :tooltip="`Open ${entry[0]} with OpenCOR`"
+                  :aria-label="`Open ${entry[0]} with OpenCOR`"
+                >
+                  <CodeIcon class="w-4 h-4" />
+                  <span class="sr-only">Open with OpenCOR {{ entry[0] }}</span>
+                </ActionButton>
                 <ActionButton
                   @click="downloadFile(entry[0])"
                   variant="icon"
