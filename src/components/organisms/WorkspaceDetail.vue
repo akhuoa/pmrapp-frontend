@@ -6,6 +6,7 @@ import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
+import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import FolderIcon from '@/components/icons/FolderIcon.vue'
 import LoadingIcon from '@/components/icons/LoadingIcon.vue'
@@ -16,6 +17,7 @@ import { useWorkspaceStore } from '@/stores/workspace'
 import type { ErrorInfo } from '@/types/error'
 import type { WorkspaceInfo } from '@/types/workspace'
 import { downloadWorkspaceFile } from '@/utils/download'
+import { isOpenCORFile } from '@/utils/file'
 import { formatFileCount } from '@/utils/format'
 
 const props = defineProps<{
@@ -108,6 +110,16 @@ const downloadFile = async (filename: string) => {
   const fullFilename = (props.path ? `${props.path}/` : '') + filename
   if (!commitId) return
   await downloadWorkspaceFile(alias, commitId, fullFilename)
+}
+
+const buildOpenCORURL = (filename: string) => {
+  if (!workspaceInfo.value) return ''
+
+  const fullFilename = (props.path ? `${props.path}/` : '') + filename
+  const baseURL = `${workspaceInfo.value.workspace.url}rawfile/${workspaceInfo.value.commit.commit_id}`
+  const opencorLink = `opencor://openFile/${baseURL}/${fullFilename}`
+
+  return `//opencor.ws/app/?${opencorLink}`
 }
 
 const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
@@ -268,17 +280,32 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
                 {{ entry.name }}
               </RouterLink>
             </div>
-            <ActionButton
-              v-if="entry.kind !== 'tree'"
-              variant="icon"
-              content-section="Workspace Detail"
-              @click="downloadFile(entry.name)"
-              :tooltip="`Download ${entry.name}`"
-              :aria-label="`Download ${entry.name}`"
-            >
-              <DownloadIcon class="w-4 h-4" />
-              <span class="sr-only">Download {{ entry.name }}</span>
-            </ActionButton>
+            <div class="flex items-center gap-2 ml-4 flex-shrink-0">
+              <ActionButton
+                v-if="entry.kind !== 'tree' && isOpenCORFile(entry.name)"
+                variant="icon"
+                :href="buildOpenCORURL(entry.name)"
+                target="_blank"
+                rel="noopener noreferrer"
+                content-section="Workspace Detail"
+                :tooltip="`Open ${entry.name} with OpenCOR`"
+                :aria-label="`Open ${entry.name} with OpenCOR`"
+              >
+                <ExternalLinkIcon class="w-4 h-4" />
+                <span class="sr-only">Open with OpenCOR {{ entry.name }}</span>
+              </ActionButton>
+              <ActionButton
+                v-if="entry.kind !== 'tree'"
+                variant="icon"
+                content-section="Workspace Detail"
+                @click="downloadFile(entry.name)"
+                :tooltip="`Download ${entry.name}`"
+                :aria-label="`Download ${entry.name}`"
+              >
+                <DownloadIcon class="w-4 h-4" />
+                <span class="sr-only">Download {{ entry.name }}</span>
+              </ActionButton>
+            </div>
           </div>
         </li>
       </ul>
