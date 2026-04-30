@@ -15,7 +15,14 @@ import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { getWorkspaceService } from '@/services'
 import { downloadFileFromBlob } from '@/utils/download'
-import { isCodeFile, isImageFile, isMarkdownFile, isOpenCORFile, isPdfFile, isSvgFile } from '@/utils/file'
+import {
+  isCodeFile,
+  isImageFile,
+  isMarkdownFile,
+  isOpenCORFile,
+  isPdfFile,
+  isSvgFile,
+} from '@/utils/file'
 import { renderMarkdown } from '@/utils/markdown'
 import ActionButton from '../atoms/ActionButton.vue'
 
@@ -114,7 +121,11 @@ const loadWorkspaceURLForOpenCOR = async () => {
 
   isOpenCORURLLoading.value = true
   try {
-    const workspaceInfo = await getWorkspaceService().getWorkspaceInfo(props.alias, props.commitId, '')
+    const workspaceInfo = await getWorkspaceService().getWorkspaceInfo(
+      props.alias,
+      props.commitId,
+      '',
+    )
     workspaceURL.value = workspaceInfo.workspace.url
   } catch (workspaceErr) {
     console.error('Error loading workspace URL for OpenCOR link:', workspaceErr)
