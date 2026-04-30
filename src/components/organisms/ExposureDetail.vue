@@ -713,7 +713,7 @@ onMounted(async () => {
                 class="inline-flex items-center gap-2 break-all transition-colors"
                 :class="
                   props.file === entry[0]
-                    ? 'text-blue-600 dark:text-primary cursor-default'
+                    ? 'text-foreground dark:text-primary cursor-default'
                     : 'text-link'
                 "
               >
