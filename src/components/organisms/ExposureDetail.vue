@@ -178,7 +178,14 @@ const buildOpenCORURL = (option?: string) => {
 
   const baseURL = `${exposureInfo.value.workspace.url}rawfile/${exposureInfo.value.exposure.commit_id}`
 
-  const sortedFiles = [...openCORFiles.value].sort((a, b) => {
+  const selectedCellmlFile =
+    props.file && props.file.endsWith('.cellml')
+      ? openCORFiles.value.find((entry) => entry[0] === props.file)
+      : undefined
+
+  const filesToOpen = selectedCellmlFile ? [selectedCellmlFile] : openCORFiles.value
+
+  const sortedFiles = [...filesToOpen].sort((a, b) => {
     const getOrder = (filename: string) => {
       if (filename.endsWith('.cellml')) return 1
       if (filename.endsWith('.sedml')) return 2
