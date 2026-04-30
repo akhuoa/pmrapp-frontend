@@ -187,6 +187,17 @@ const sortOpenCORFiles = (files: ExposureFileEntry[]) => {
   return [...files].sort((a, b) => getOrder(a[0]) - getOrder(b[0]))
 }
 
+const generateOpenCORLink = (files: ExposureFileEntry[], baseURL: string, option?: string) => {
+  const fileURLs = files.map((entry) => `${baseURL}/${entry[0]}`).join('%7C')
+  const command = files.length > 1 ? 'openFiles' : 'openFile'
+  const opencorLink = `opencor://${command}/${fileURLs}`
+
+  if (option !== 'desktop') {
+    return `//opencor.ws/app/?${opencorLink}`
+  }
+  return opencorLink
+}
+
 const buildOpenCORURL = (option?: string, targetFile?: string) => {
   if (!exposureInfo.value || openCORFiles.value.length === 0) return ''
 
@@ -200,14 +211,7 @@ const buildOpenCORURL = (option?: string, targetFile?: string) => {
 
   const sortedFiles = sortOpenCORFiles(filesToOpen)
 
-  const fileURLs = sortedFiles.map((entry) => `${baseURL}/${entry[0]}`).join('%7C')
-  const command = sortedFiles.length > 1 ? 'openFiles' : 'openFile'
-
-  const opencorLink = `opencor://${command}/${fileURLs}`
-  if (option !== 'desktop') {
-    return `//opencor.ws/app/?${opencorLink}`
-  }
-  return opencorLink
+  return generateOpenCORLink(sortedFiles, baseURL, option)
 }
 
 const convertFirstTextNodeToTitle = () => {
