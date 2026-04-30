@@ -21,7 +21,6 @@ import ActionButton from '../atoms/ActionButton.vue'
 
 // Files with size above this threshold are not rendered in the preview to prevent browser freeze.
 const MAX_PREVIEW_FILE_SIZE_BYTES = 500 * 1024 // ~500 KB
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 const props = defineProps<{
   alias: string
@@ -33,6 +32,7 @@ const fileContent = ref<string>('')
 const fileBlob = ref<Blob>(new Blob())
 const fileBlobUrl = ref<string>('')
 const fileSizeBytes = ref(0)
+const workspaceURL = ref<string>('')
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 const showCode = ref(false)
@@ -65,8 +65,9 @@ const isCode = computed(() => isCodeFile(props.path))
 const isOpenCOR = computed(() => isOpenCORFile(props.path))
 
 const openCORFileURL = computed(() => {
-  // TODO: to fix API_BASE_URL
-  const rawFileURL = `${API_BASE_URL}/api/workspace/${props.alias}/rawfile/${props.commitId}/${props.path}`
+  if (!workspaceURL.value) return ''
+
+  const rawFileURL = `${workspaceURL.value}rawfile/${props.commitId}/${props.path}`
   const opencorLink = `opencor://openFile/${rawFileURL}`
   return `//opencor.ws/app/?${opencorLink}`
 })
@@ -106,6 +107,14 @@ const toggleCodeWrap = () => {
 
 onMounted(async () => {
   try {
+    // TODO: to refactor
+    try {
+      const workspaceInfo = await getWorkspaceService().getWorkspaceInfo(props.alias, props.commitId, '')
+      workspaceURL.value = workspaceInfo.workspace.url
+    } catch (workspaceErr) {
+      console.error('Error loading workspace URL for OpenCOR link:', workspaceErr)
+    }
+
     const blob = await getWorkspaceService().getRawFileBlob(props.alias, props.commitId, props.path)
     fileBlob.value = blob
     fileSizeBytes.value = blob.size
@@ -162,7 +171,7 @@ onBeforeUnmount(() => {
       <div class="flex items-center justify-end px-4 py-3 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center gap-2">
           <ActionButton
-            v-if="isOpenCOR"
+            v-if="isOpenCOR && openCORFileURL"
             variant="secondary"
             size="sm"
             content-section="Workspace File Detail"
