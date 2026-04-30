@@ -24,6 +24,7 @@ import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
 import { formatCitation, formatCitationAuthor } from '@/utils/citation'
 import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
+import { isOpenCORFile } from '@/utils/file'
 import { formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
 import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
@@ -127,10 +128,6 @@ const openCORFiles = computed(() => {
     return isOpenCORFile(entry[0])
   })
 })
-
-const isOpenCORFile = (filename: string) => {
-  return filename.endsWith('.omex') || filename.endsWith('.cellml') || filename.endsWith('.sedml')
-}
 
 const navigationFiles = computed(() => {
   if (!exposureInfo.value) return []

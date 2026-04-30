@@ -42,6 +42,14 @@ export const isPdfFile = (filename: string): boolean => {
 }
 
 /**
+ * Check if file is compatible to open with OpenCOR.
+ */
+export const isOpenCORFile = (filename: string): boolean => {
+  const extension = getFileExtension(filename)
+  return ['omex', 'cellml', 'sedml'].includes(extension)
+}
+
+/**
  * Check if file is a markdown file.
  */
 export const isMarkdownFile = (filename: string): boolean => {
