@@ -175,12 +175,14 @@ const handleDownloadCOMBINEArchive = async () => {
   }
 }
 
-const getOpenCORFilesToOpen = (files: ExposureFileEntry[]) => {
+const getOpenCORFilesToOpen = (files: ExposureFileEntry[], targetFile?: string) => {
   let openCORFilesToOpen = files
   const selectedCellmlFile =
     props.file?.endsWith('.cellml') ? files.find((entry) => entry[0] === props.file) : undefined
 
-  if (selectedCellmlFile) {
+  if (targetFile) {
+    openCORFilesToOpen = files.filter((entry) => entry[0] === targetFile)
+  } else if (selectedCellmlFile) {
     openCORFilesToOpen = [selectedCellmlFile]
   }
 
@@ -209,11 +211,11 @@ const generateOpenCORLink = (files: ExposureFileEntry[], baseURL: string, option
   return opencorLink
 }
 
-const buildOpenCORURL = (option?: string) => {
+const buildOpenCORURL = (option?: string, targetFile?: string) => {
   if (!exposureInfo.value || openCORFiles.value.length === 0) return ''
 
   const baseURL = `${exposureInfo.value.workspace.url}rawfile/${exposureInfo.value.exposure.commit_id}`
-  const filesToOpen = getOpenCORFilesToOpen(openCORFiles.value)
+  const filesToOpen = getOpenCORFilesToOpen(openCORFiles.value, targetFile)
   const sortedFiles = sortOpenCORFiles(filesToOpen)
 
   return generateOpenCORLink(sortedFiles, baseURL, option)
