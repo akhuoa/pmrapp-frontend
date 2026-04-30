@@ -710,7 +710,12 @@ onMounted(async () => {
             >
               <RouterLink
                 :to="`/exposures/${props.alias}/${entry[0]}`"
-                class="text-link inline-flex items-center gap-2 break-all"
+                class="inline-flex items-center gap-2 break-all transition-colors"
+                :class="
+                  props.file === entry[0]
+                    ? 'text-foreground cursor-default'
+                    : 'text-link'
+                "
               >
                 <span class="text-foreground">›</span>
                 {{ entry[0] }}
