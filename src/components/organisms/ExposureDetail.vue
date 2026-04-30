@@ -29,6 +29,8 @@ import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/uti
 import { buildSearchQuery, isValidTerm } from '@/utils/search'
 import TermButton from '../atoms/TermButton.vue'
 
+type ExposureFileEntry = ExposureInfo['files'][number]
+
 const props = defineProps<{
   alias: string
   file: string
@@ -173,6 +175,17 @@ const handleDownloadCOMBINEArchive = async () => {
   }
 }
 
+const getOrder = (filename: string) => {
+  if (filename.endsWith('.cellml')) return 1
+  if (filename.endsWith('.sedml')) return 2
+  if (filename.endsWith('.omex')) return 3
+  return 4
+}
+
+const sortOpenCORFiles = (files: ExposureFileEntry[]) => {
+  return [...files].sort((a, b) => getOrder(a[0]) - getOrder(b[0]))
+}
+
 const buildOpenCORURL = (option?: string) => {
   if (!exposureInfo.value || openCORFiles.value.length === 0) return ''
 
@@ -184,16 +197,7 @@ const buildOpenCORURL = (option?: string) => {
       : undefined
 
   const filesToOpen = selectedCellmlFile ? [selectedCellmlFile] : openCORFiles.value
-
-  const sortedFiles = [...filesToOpen].sort((a, b) => {
-    const getOrder = (filename: string) => {
-      if (filename.endsWith('.cellml')) return 1
-      if (filename.endsWith('.sedml')) return 2
-      if (filename.endsWith('.omex')) return 3
-      return 4
-    }
-    return getOrder(a[0]) - getOrder(b[0])
-  })
+  const sortedFiles = sortOpenCORFiles(filesToOpen)
 
   const fileURLs = sortedFiles.map((entry) => `${baseURL}/${entry[0]}`).join('%7C')
   const command = sortedFiles.length > 1 ? 'openFiles' : 'openFile'
