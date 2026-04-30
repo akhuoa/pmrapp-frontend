@@ -33,6 +33,7 @@ const fileBlob = ref<Blob>(new Blob())
 const fileBlobUrl = ref<string>('')
 const fileSizeBytes = ref(0)
 const workspaceURL = ref<string>('')
+const isOpenCORURLLoading = ref(false)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 const showCode = ref(false)
@@ -63,6 +64,9 @@ const isSvg = computed(() => isSvgFile(props.path))
 const isMarkdown = computed(() => isMarkdownFile(props.path))
 const isCode = computed(() => isCodeFile(props.path))
 const isOpenCOR = computed(() => isOpenCORFile(props.path))
+const canShowOpenCORButton = computed(
+  () => isOpenCOR.value && !isOpenCORURLLoading.value && !!openCORFileURL.value,
+)
 
 const openCORFileURL = computed(() => {
   if (!workspaceURL.value) return ''
@@ -105,16 +109,25 @@ const toggleCodeWrap = () => {
   codeBlockRef.value?.toggleWrap()
 }
 
-onMounted(async () => {
-  try {
-    // TODO: to refactor
-    try {
-      const workspaceInfo = await getWorkspaceService().getWorkspaceInfo(props.alias, props.commitId, '')
-      workspaceURL.value = workspaceInfo.workspace.url
-    } catch (workspaceErr) {
-      console.error('Error loading workspace URL for OpenCOR link:', workspaceErr)
-    }
+const loadWorkspaceURLForOpenCOR = async () => {
+  if (!isOpenCOR.value) return
 
+  isOpenCORURLLoading.value = true
+  try {
+    const workspaceInfo = await getWorkspaceService().getWorkspaceInfo(props.alias, props.commitId, '')
+    workspaceURL.value = workspaceInfo.workspace.url
+  } catch (workspaceErr) {
+    console.error('Error loading workspace URL for OpenCOR link:', workspaceErr)
+  } finally {
+    isOpenCORURLLoading.value = false
+  }
+}
+
+onMounted(async () => {
+  // OpenCOR link data loads separately so file preview is not blocked.
+  void loadWorkspaceURLForOpenCOR()
+
+  try {
     const blob = await getWorkspaceService().getRawFileBlob(props.alias, props.commitId, props.path)
     fileBlob.value = blob
     fileSizeBytes.value = blob.size
@@ -171,7 +184,7 @@ onBeforeUnmount(() => {
       <div class="flex items-center justify-end px-4 py-3 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center gap-2">
           <ActionButton
-            v-if="isOpenCOR && openCORFileURL"
+            v-if="canShowOpenCORButton"
             variant="secondary"
             size="sm"
             content-section="Workspace File Detail"
