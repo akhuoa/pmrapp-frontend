@@ -179,7 +179,7 @@ const buildOpenCORURL = (option?: string) => {
   const baseURL = `${exposureInfo.value.workspace.url}rawfile/${exposureInfo.value.exposure.commit_id}`
 
   const selectedCellmlFile =
-    props.file && props.file.endsWith('.cellml')
+    props.file?.endsWith('.cellml')
       ? openCORFiles.value.find((entry) => entry[0] === props.file)
       : undefined
 
