@@ -14,6 +14,7 @@ import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { getWorkspaceService } from '@/services'
+import { useWorkspaceStore } from '@/stores/workspace'
 import { downloadFileFromBlob } from '@/utils/download'
 import {
   isCodeFile,
@@ -64,6 +65,7 @@ const backPath = computed(() => {
 })
 
 const { goBack } = useBackNavigation(backPath.value)
+const workspaceStore = useWorkspaceStore()
 
 const isImage = computed(() => isImageFile(props.path))
 const isPDF = computed(() => isPdfFile(props.path))
@@ -121,7 +123,7 @@ const loadWorkspaceURLForOpenCOR = async () => {
 
   isOpenCORURLLoading.value = true
   try {
-    const workspaceInfo = await getWorkspaceService().getWorkspaceInfo(
+    const workspaceInfo = await workspaceStore.getWorkspaceInfo(
       props.alias,
       props.commitId,
       '',
