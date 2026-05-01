@@ -559,7 +559,7 @@ onMounted(async () => {
                 size="sm"
                 content-section="Exposure Detail"
                 tooltip="Download"
-                aria-label="Download"
+                :aria-label="`Download ${generatedCodeFilename}`"
               >
                 <DownloadIcon class="w-4 h-4" />
                 <span class="sr-only">Download {{ generatedCodeFilename }}</span>
@@ -624,7 +624,7 @@ onMounted(async () => {
                   rel="noopener noreferrer"
                   content-section="Exposure Detail"
                   tooltip="Open with OpenCOR's Web app"
-                  aria-label="Open with OpenCOR's Web app"
+                  :aria-label="`Open ${entry[0]} with OpenCOR's Web app`"
                 >
                   <ExternalLinkIcon class="w-4 h-4" />
                   <span class="sr-only">Open {{ entry[0] }} with OpenCOR's Web app</span>
@@ -635,7 +635,7 @@ onMounted(async () => {
                   size="sm"
                   content-section="Exposure Detail"
                   tooltip="Download"
-                  aria-label="Download"
+                  :aria-label="`Download ${entry[0]}`"
                 >
                   <DownloadIcon class="w-4 h-4" />
                   <span class="sr-only">Download {{ entry[0] }}</span>
