@@ -29,6 +29,8 @@ import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/uti
 import { buildSearchQuery, isValidTerm } from '@/utils/search'
 import TermButton from '../atoms/TermButton.vue'
 
+type ExposureFileEntry = ExposureInfo['files'][number]
+
 const props = defineProps<{
   alias: string
   file: string
@@ -173,29 +175,50 @@ const handleDownloadCOMBINEArchive = async () => {
   }
 }
 
-const buildOpenCORURL = (option?: string) => {
-  if (!exposureInfo.value || openCORFiles.value.length === 0) return ''
+const getOpenCORFilesToOpen = (files: ExposureFileEntry[], targetFile?: string) => {
+  let openCORFilesToOpen = files
+  const selectedCellmlFile =
+    props.file?.endsWith('.cellml') ? files.find((entry) => entry[0] === props.file) : undefined
 
-  const baseURL = `${exposureInfo.value.workspace.url}rawfile/${exposureInfo.value.exposure.commit_id}`
+  if (targetFile) {
+    openCORFilesToOpen = files.filter((entry) => entry[0] === targetFile)
+  } else if (selectedCellmlFile) {
+    openCORFilesToOpen = [selectedCellmlFile]
+  }
 
-  const sortedFiles = [...openCORFiles.value].sort((a, b) => {
-    const getOrder = (filename: string) => {
-      if (filename.endsWith('.cellml')) return 1
-      if (filename.endsWith('.sedml')) return 2
-      if (filename.endsWith('.omex')) return 3
-      return 4
-    }
-    return getOrder(a[0]) - getOrder(b[0])
-  })
+  return openCORFilesToOpen
+}
 
-  const fileURLs = sortedFiles.map((entry) => `${baseURL}/${entry[0]}`).join('%7C')
-  const command = sortedFiles.length > 1 ? 'openFiles' : 'openFile'
+const getOrder = (filename: string) => {
+  if (filename.endsWith('.cellml')) return 1
+  if (filename.endsWith('.sedml')) return 2
+  if (filename.endsWith('.omex')) return 3
+  return 4
+}
 
+const sortOpenCORFiles = (files: ExposureFileEntry[]) => {
+  return [...files].sort((a, b) => getOrder(a[0]) - getOrder(b[0]))
+}
+
+const generateOpenCORLink = (files: ExposureFileEntry[], baseURL: string, option?: string) => {
+  const fileURLs = files.map((entry) => `${baseURL}/${entry[0]}`).join('%7C')
+  const command = files.length > 1 ? 'openFiles' : 'openFile'
   const opencorLink = `opencor://${command}/${fileURLs}`
+
   if (option !== 'desktop') {
     return `//opencor.ws/app/?${opencorLink}`
   }
   return opencorLink
+}
+
+const buildOpenCORURL = (option?: string, targetFile?: string) => {
+  if (!exposureInfo.value || openCORFiles.value.length === 0) return ''
+
+  const baseURL = `${exposureInfo.value.workspace.url}rawfile/${exposureInfo.value.exposure.commit_id}`
+  const filesToOpen = getOpenCORFilesToOpen(openCORFiles.value, targetFile)
+  const sortedFiles = sortOpenCORFiles(filesToOpen)
+
+  return generateOpenCORLink(sortedFiles, baseURL, option)
 }
 
 const convertFirstTextNodeToTitle = () => {
@@ -703,7 +726,12 @@ onMounted(async () => {
             >
               <RouterLink
                 :to="`/exposures/${props.alias}/${entry[0]}`"
-                class="text-link inline-flex items-center gap-2 break-all"
+                class="inline-flex items-center gap-2 break-all transition-colors"
+                :class="
+                  props.file === entry[0]
+                    ? 'text-foreground dark:text-primary cursor-default'
+                    : 'text-link'
+                "
               >
                 <span class="text-foreground">›</span>
                 {{ entry[0] }}
