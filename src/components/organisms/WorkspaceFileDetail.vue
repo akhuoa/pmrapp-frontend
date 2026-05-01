@@ -198,15 +198,17 @@ onBeforeUnmount(() => {
         <div class="flex items-center gap-2">
           <ActionButton
             v-if="canShowOpenCORButton"
-            variant="secondary"
+            variant="icon"
             size="sm"
             content-section="Workspace File Detail"
             :href="openCORFileURL"
             target="_blank"
             rel="noopener noreferrer"
+            tooltip="Open with OpenCOR's Web app"
+            aria-label="Open with OpenCOR's Web app"
           >
-            <span>Open with OpenCOR's Web app</span>
-            <ExternalLinkIcon class="w-4 h-4" />
+          <ExternalLinkIcon class="w-4 h-4" />
+          <span class="sr-only">Open with OpenCOR's Web app</span>
           </ActionButton>
           <button
             v-if="isSvg || isMarkdown"
@@ -230,10 +232,11 @@ onBeforeUnmount(() => {
           />
           <ActionButton
             variant="icon"
+            size="sm"
             content-section="Workspace File Detail"
             @click="downloadFile"
             tooltip="Download"
-            :aria-label="'Download'"
+            aria-label="Download"
           >
             <DownloadIcon class="w-4 h-4" />
             <span class="sr-only">Download</span>
