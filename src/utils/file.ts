@@ -42,7 +42,7 @@ export const isPdfFile = (filename: string): boolean => {
 }
 
 /**
- * Check if file is compatible to open with OpenCOR.
+ * Check if a file can be opened with OpenCOR.
  */
 export const isOpenCORFile = (filename: string): boolean => {
   const extension = getFileExtension(filename)
