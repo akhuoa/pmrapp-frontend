@@ -5,6 +5,7 @@ import {
   isCodeFile,
   isImageFile,
   isMarkdownFile,
+  isOpenCORFile,
   isPdfFile,
   isSvgFile,
 } from '@/utils/file'
@@ -57,6 +58,26 @@ describe('isPdfFile', () => {
 
   it('returns false for non-pdf files', () => {
     expect(isPdfFile('doc.txt')).toBe(false)
+  })
+})
+
+describe('isOpenCORFile', () => {
+  it('returns true for OpenCOR-compatible extensions', () => {
+    for (const ext of ['cellml', 'sedml', 'omex']) {
+      expect(isOpenCORFile(`file.${ext}`)).toBe(true)
+    }
+  })
+
+  it('returns true for OpenCOR-compatible extensions regardless of case', () => {
+    expect(isOpenCORFile('model.CELLML')).toBe(true)
+    expect(isOpenCORFile('simulation.SEDML')).toBe(true)
+    expect(isOpenCORFile('archive.OMEX')).toBe(true)
+  })
+
+  it('returns false for non-OpenCOR files', () => {
+    expect(isOpenCORFile('file.txt')).toBe(false)
+    expect(isOpenCORFile('image.png')).toBe(false)
+    expect(isOpenCORFile('README')).toBe(false)
   })
 })
 

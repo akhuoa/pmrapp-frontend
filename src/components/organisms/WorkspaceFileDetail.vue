@@ -8,13 +8,22 @@ import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import WrapButton from '@/components/atoms/WrapButton.vue'
 import CodeIcon from '@/components/icons/CodeIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
+import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
 import PreviewIcon from '@/components/icons/PreviewIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { getWorkspaceService } from '@/services'
+import { useWorkspaceStore } from '@/stores/workspace'
 import { downloadFileFromBlob } from '@/utils/download'
-import { isCodeFile, isImageFile, isMarkdownFile, isPdfFile, isSvgFile } from '@/utils/file'
+import {
+  isCodeFile,
+  isImageFile,
+  isMarkdownFile,
+  isOpenCORFile,
+  isPdfFile,
+  isSvgFile,
+} from '@/utils/file'
 import { renderMarkdown } from '@/utils/markdown'
 import ActionButton from '../atoms/ActionButton.vue'
 
@@ -31,6 +40,8 @@ const fileContent = ref<string>('')
 const fileBlob = ref<Blob>(new Blob())
 const fileBlobUrl = ref<string>('')
 const fileSizeBytes = ref(0)
+const workspaceURL = ref<string>('')
+const isOpenCORURLLoading = ref(false)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 const showCode = ref(false)
@@ -54,12 +65,25 @@ const backPath = computed(() => {
 })
 
 const { goBack } = useBackNavigation(backPath.value)
+const workspaceStore = useWorkspaceStore()
 
 const isImage = computed(() => isImageFile(props.path))
 const isPDF = computed(() => isPdfFile(props.path))
 const isSvg = computed(() => isSvgFile(props.path))
 const isMarkdown = computed(() => isMarkdownFile(props.path))
 const isCode = computed(() => isCodeFile(props.path))
+const isOpenCOR = computed(() => isOpenCORFile(props.path))
+const canShowOpenCORButton = computed(
+  () => isOpenCOR.value && !isOpenCORURLLoading.value && !!openCORFileURL.value,
+)
+
+const openCORFileURL = computed(() => {
+  if (!workspaceURL.value) return ''
+
+  const rawFileURL = `${workspaceURL.value}rawfile/${props.commitId}/${props.path}`
+  const opencorLink = `opencor://openFile/${rawFileURL}`
+  return `//opencor.ws/app/?${opencorLink}`
+})
 
 const shouldShowAsText = computed(() => {
   return isCode.value || (isSvg.value && showCode.value) || (isMarkdown.value && showCode.value)
@@ -94,7 +118,24 @@ const toggleCodeWrap = () => {
   codeBlockRef.value?.toggleWrap()
 }
 
+const loadWorkspaceURLForOpenCOR = async () => {
+  if (!isOpenCOR.value) return
+
+  isOpenCORURLLoading.value = true
+  try {
+    const workspaceInfo = await workspaceStore.getWorkspaceInfo(props.alias, props.commitId, '')
+    workspaceURL.value = workspaceInfo.workspace.url
+  } catch (workspaceErr) {
+    console.error('Error loading workspace URL for OpenCOR link:', workspaceErr)
+  } finally {
+    isOpenCORURLLoading.value = false
+  }
+}
+
 onMounted(async () => {
+  // OpenCOR link data loads separately so file preview is not blocked.
+  void loadWorkspaceURLForOpenCOR()
+
   try {
     const blob = await getWorkspaceService().getRawFileBlob(props.alias, props.commitId, props.path)
     fileBlob.value = blob
@@ -172,11 +213,26 @@ onBeforeUnmount(() => {
             title="Copy code"
           />
           <ActionButton
+            v-if="canShowOpenCORButton"
             variant="icon"
+            size="sm"
+            content-section="Workspace File Detail"
+            :href="openCORFileURL"
+            target="_blank"
+            rel="noopener noreferrer"
+            tooltip="Open with OpenCOR's Web app"
+            aria-label="Open with OpenCOR's Web app"
+          >
+            <ExternalLinkIcon class="w-4 h-4" />
+            <span class="sr-only">Open with OpenCOR's Web app</span>
+          </ActionButton>
+          <ActionButton
+            variant="icon"
+            size="sm"
             content-section="Workspace File Detail"
             @click="downloadFile"
             tooltip="Download"
-            :aria-label="'Download'"
+            aria-label="Download"
           >
             <DownloadIcon class="w-4 h-4" />
             <span class="sr-only">Download</span>

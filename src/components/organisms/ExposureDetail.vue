@@ -10,6 +10,7 @@ import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import WrapButton from '@/components/atoms/WrapButton.vue'
 import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
+import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import LoadingIcon from '@/components/icons/LoadingIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
@@ -23,6 +24,7 @@ import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
 import { formatCitation, formatCitationAuthor } from '@/utils/citation'
 import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
+import { getFileExtension, isOpenCORFile } from '@/utils/file'
 import { formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
 import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
@@ -125,8 +127,7 @@ const openCORFiles = computed(() => {
   if (!exposureInfo.value) return []
 
   return exposureInfo.value.files.filter((entry) => {
-    const filename = entry[0]
-    return filename.endsWith('.omex') || filename.endsWith('.cellml') || filename.endsWith('.sedml')
+    return isOpenCORFile(entry[0])
   })
 })
 
@@ -177,8 +178,9 @@ const handleDownloadCOMBINEArchive = async () => {
 
 const getOpenCORFilesToOpen = (files: ExposureFileEntry[], targetFile?: string) => {
   let openCORFilesToOpen = files
-  const selectedCellmlFile =
-    props.file?.endsWith('.cellml') ? files.find((entry) => entry[0] === props.file) : undefined
+  const selectedCellmlFile = props.file?.endsWith('.cellml')
+    ? files.find((entry) => entry[0] === props.file)
+    : undefined
 
   if (targetFile) {
     openCORFilesToOpen = files.filter((entry) => entry[0] === targetFile)
@@ -190,9 +192,11 @@ const getOpenCORFilesToOpen = (files: ExposureFileEntry[], targetFile?: string) 
 }
 
 const getOrder = (filename: string) => {
-  if (filename.endsWith('.cellml')) return 1
-  if (filename.endsWith('.sedml')) return 2
-  if (filename.endsWith('.omex')) return 3
+  const extension = getFileExtension(filename)
+
+  if (extension === 'cellml') return 1
+  if (extension === 'sedml') return 2
+  if (extension === 'omex') return 3
   return 4
 }
 
@@ -553,12 +557,13 @@ onMounted(async () => {
               <ActionButton
                 @click="downloadCode"
                 variant="icon"
+                size="sm"
                 content-section="Exposure Detail"
                 tooltip="Download"
-                aria-label="Download"
+                :aria-label="`Download ${generatedCodeFilename}`"
               >
                 <DownloadIcon class="w-4 h-4" />
-                <span class="sr-only">Download</span>
+                <span class="sr-only">Download {{ generatedCodeFilename }}</span>
               </ActionButton>
             </div>
           </div>
@@ -612,10 +617,25 @@ onMounted(async () => {
               </div>
               <div class="flex items-center gap-2 ml-4 flex-shrink-0">
                 <ActionButton
+                  v-if="isOpenCORFile(entry[0])"
+                  variant="icon"
+                  size="sm"
+                  :href="buildOpenCORURL(undefined, entry[0])"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  content-section="Exposure Detail"
+                  tooltip="Open with OpenCOR's Web app"
+                  :aria-label="`Open ${entry[0]} with OpenCOR's Web app`"
+                >
+                  <ExternalLinkIcon class="w-4 h-4" />
+                  <span class="sr-only">Open {{ entry[0] }} with OpenCOR's Web app</span>
+                </ActionButton>
+                <ActionButton
                   @click="downloadFile(entry[0])"
                   variant="icon"
+                  size="sm"
                   content-section="Exposure Detail"
-                  :tooltip="`Download ${entry[0]}`"
+                  tooltip="Download"
                   :aria-label="`Download ${entry[0]}`"
                 >
                   <DownloadIcon class="w-4 h-4" />
@@ -696,6 +716,7 @@ onMounted(async () => {
                 :content-section="`Exposure Detail - ${pageTitle}`"
               >
                 Open with OpenCOR's Web app
+                <ExternalLinkIcon class="w-4 h-4" />
               </ActionButton>
             </li>
             <li
