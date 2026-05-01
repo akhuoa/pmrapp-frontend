@@ -123,11 +123,7 @@ const loadWorkspaceURLForOpenCOR = async () => {
 
   isOpenCORURLLoading.value = true
   try {
-    const workspaceInfo = await workspaceStore.getWorkspaceInfo(
-      props.alias,
-      props.commitId,
-      '',
-    )
+    const workspaceInfo = await workspaceStore.getWorkspaceInfo(props.alias, props.commitId, '')
     workspaceURL.value = workspaceInfo.workspace.url
   } catch (workspaceErr) {
     console.error('Error loading workspace URL for OpenCOR link:', workspaceErr)
