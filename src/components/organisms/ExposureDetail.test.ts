@@ -37,6 +37,7 @@ describe('ExposureDetail', () => {
     stubs = {},
     generatedCode = '',
     mathsJSON = '[]',
+    exposureInfo = mockExposureInfo,
   }: {
     props?: Partial<{
       alias: string
@@ -46,8 +47,9 @@ describe('ExposureDetail', () => {
     stubs?: Record<string, unknown>
     generatedCode?: string
     mathsJSON?: string
+    exposureInfo?: typeof mockExposureInfo
   } = {}) => {
-    vi.spyOn(exposureStore, 'getExposureInfo').mockResolvedValue(mockExposureInfo)
+    vi.spyOn(exposureStore, 'getExposureInfo').mockResolvedValue(exposureInfo)
     vi.spyOn(exposureStore, 'getExposureSafeHTML').mockImplementation(
       async (_id, _fileId, _view, filename) => {
         if (filename === 'index.html') return '<h4>Model Status</h4>'
@@ -369,6 +371,39 @@ describe('ExposureDetail', () => {
     expect(openCorLink?.exists()).toBe(true)
     expect(openCorLink?.attributes('target')).toBe('_blank')
     expect(openCorLink?.attributes('rel')).toBe('noopener noreferrer')
+  })
+
+  it('orders OpenCOR files case-insensitively as .cellml, .sedml, then .omex', async () => {
+    const exposureInfoWithMixedCaseOpenCORFiles = {
+      ...mockExposureInfo,
+      files: [
+        ['ARCHIVE.OMEX', true],
+        ['protocol.SEDML', true],
+        ['model.CELLML', true],
+        ['preview.png', false],
+      ] as typeof mockExposureInfo.files,
+    }
+
+    const wrapper = await mountComponent({
+      exposureInfo: exposureInfoWithMixedCaseOpenCORFiles,
+    })
+
+    const openCorLink = wrapper
+      .findAll('a')
+      .find((link) => link.text().includes("Open with OpenCOR's Web app"))
+
+    expect(openCorLink?.exists()).toBe(true)
+
+    const href = openCorLink?.attributes('href') || ''
+    const cellmlIndex = href.indexOf('/model.CELLML')
+    const sedmlIndex = href.indexOf('/protocol.SEDML')
+    const omexIndex = href.indexOf('/ARCHIVE.OMEX')
+
+    expect(cellmlIndex).toBeGreaterThan(-1)
+    expect(sedmlIndex).toBeGreaterThan(-1)
+    expect(omexIndex).toBeGreaterThan(-1)
+    expect(cellmlIndex).toBeLessThan(sedmlIndex)
+    expect(sedmlIndex).toBeLessThan(omexIndex)
   })
 
   it('renders "Navigation" section', async () => {

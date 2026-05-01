@@ -24,7 +24,7 @@ import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
 import { formatCitation, formatCitationAuthor } from '@/utils/citation'
 import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
-import { isOpenCORFile } from '@/utils/file'
+import { getFileExtension, isOpenCORFile } from '@/utils/file'
 import { formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
 import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
@@ -187,9 +187,11 @@ const getOpenCORFilesToOpen = (files: ExposureFileEntry[], targetFile?: string) 
 }
 
 const getOrder = (filename: string) => {
-  if (filename.endsWith('.cellml')) return 1
-  if (filename.endsWith('.sedml')) return 2
-  if (filename.endsWith('.omex')) return 3
+  const extension = getFileExtension(filename)
+
+  if (extension === 'cellml') return 1
+  if (extension === 'sedml') return 2
+  if (extension === 'omex') return 3
   return 4
 }
 
