@@ -196,20 +196,6 @@ onBeforeUnmount(() => {
     <div class="box p-0! overflow-hidden">
       <div class="flex items-center justify-end px-4 py-3 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center gap-2">
-          <ActionButton
-            v-if="canShowOpenCORButton"
-            variant="icon"
-            size="sm"
-            content-section="Workspace File Detail"
-            :href="openCORFileURL"
-            target="_blank"
-            rel="noopener noreferrer"
-            tooltip="Open with OpenCOR's Web app"
-            aria-label="Open with OpenCOR's Web app"
-          >
-          <ExternalLinkIcon class="w-4 h-4" />
-          <span class="sr-only">Open with OpenCOR's Web app</span>
-          </ActionButton>
           <button
             v-if="isSvg || isMarkdown"
             @click="toggleCodeView"
@@ -230,6 +216,20 @@ onBeforeUnmount(() => {
             :text="fileContent"
             title="Copy code"
           />
+          <ActionButton
+            v-if="canShowOpenCORButton"
+            variant="icon"
+            size="sm"
+            content-section="Workspace File Detail"
+            :href="openCORFileURL"
+            target="_blank"
+            rel="noopener noreferrer"
+            tooltip="Open with OpenCOR's Web app"
+            aria-label="Open with OpenCOR's Web app"
+          >
+            <ExternalLinkIcon class="w-4 h-4" />
+            <span class="sr-only">Open with OpenCOR's Web app</span>
+          </ActionButton>
           <ActionButton
             variant="icon"
             size="sm"
