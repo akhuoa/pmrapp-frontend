@@ -562,7 +562,7 @@ onMounted(async () => {
                 aria-label="Download"
               >
                 <DownloadIcon class="w-4 h-4" />
-                <span class="sr-only">Download</span>
+                <span class="sr-only">Download {{ generatedCodeFilename }}</span>
               </ActionButton>
             </div>
           </div>
@@ -623,19 +623,19 @@ onMounted(async () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   content-section="Exposure Detail"
-                  :tooltip="`Open ${entry[0]} with OpenCOR`"
-                  :aria-label="`Open ${entry[0]} with OpenCOR`"
+                  tooltip="Open with OpenCOR's Web app"
+                  aria-label="Open with OpenCOR's Web app"
                 >
                   <ExternalLinkIcon class="w-4 h-4" />
-                  <span class="sr-only">Open with OpenCOR {{ entry[0] }}</span>
+                  <span class="sr-only">Open {{ entry[0] }} with OpenCOR's Web app</span>
                 </ActionButton>
                 <ActionButton
                   @click="downloadFile(entry[0])"
                   variant="icon"
                   size="sm"
                   content-section="Exposure Detail"
-                  :tooltip="`Download ${entry[0]}`"
-                  :aria-label="`Download ${entry[0]}`"
+                  tooltip="Download"
+                  aria-label="Download"
                 >
                   <DownloadIcon class="w-4 h-4" />
                   <span class="sr-only">Download {{ entry[0] }}</span>

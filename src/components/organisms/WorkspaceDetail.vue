@@ -289,11 +289,11 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
                 target="_blank"
                 rel="noopener noreferrer"
                 content-section="Workspace Detail"
-                :tooltip="`Open ${entry.name} with OpenCOR`"
-                :aria-label="`Open ${entry.name} with OpenCOR`"
+                tooltip="Open with OpenCOR's Web app"
+                aria-label="Open with OpenCOR's Web app"
               >
                 <ExternalLinkIcon class="w-4 h-4" />
-                <span class="sr-only">Open with OpenCOR {{ entry.name }}</span>
+                <span class="sr-only">Open {{ entry.name }} with OpenCOR's Web app</span>
               </ActionButton>
               <ActionButton
                 v-if="entry.kind !== 'tree'"
@@ -301,8 +301,8 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
                 size="sm"
                 content-section="Workspace Detail"
                 @click="downloadFile(entry.name)"
-                :tooltip="`Download ${entry.name}`"
-                :aria-label="`Download ${entry.name}`"
+                tooltip="Download"
+                aria-label="Download"
               >
                 <DownloadIcon class="w-4 h-4" />
                 <span class="sr-only">Download {{ entry.name }}</span>
