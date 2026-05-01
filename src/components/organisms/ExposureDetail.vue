@@ -556,6 +556,7 @@ onMounted(async () => {
               <ActionButton
                 @click="downloadCode"
                 variant="icon"
+                size="sm"
                 content-section="Exposure Detail"
                 tooltip="Download"
                 aria-label="Download"
@@ -617,6 +618,7 @@ onMounted(async () => {
                 <ActionButton
                   v-if="isOpenCORFile(entry[0])"
                   variant="icon"
+                  size="sm"
                   :href="buildOpenCORURL(undefined, entry[0])"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -630,6 +632,7 @@ onMounted(async () => {
                 <ActionButton
                   @click="downloadFile(entry[0])"
                   variant="icon"
+                  size="sm"
                   content-section="Exposure Detail"
                   :tooltip="`Download ${entry[0]}`"
                   :aria-label="`Download ${entry[0]}`"

@@ -284,6 +284,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
               <ActionButton
                 v-if="entry.kind !== 'tree' && isOpenCORFile(entry.name)"
                 variant="icon"
+                size="sm"
                 :href="buildOpenCORURL(entry.name)"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -297,6 +298,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
               <ActionButton
                 v-if="entry.kind !== 'tree'"
                 variant="icon"
+                size="sm"
                 content-section="Workspace Detail"
                 @click="downloadFile(entry.name)"
                 :tooltip="`Download ${entry.name}`"
