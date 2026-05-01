@@ -373,6 +373,82 @@ describe('ExposureDetail', () => {
     expect(openCorLink?.attributes('rel')).toBe('noopener noreferrer')
   })
 
+  describe('buildOpenCORURL', () => {
+    it('builds an openFiles OpenCOR web URL when multiple OpenCOR files are available', async () => {
+      const wrapper = await mountComponent()
+
+      const openCorLink = wrapper
+        .findAll('a')
+        .find((link) => link.text().trim() === "Open with OpenCOR's Web app")
+
+      expect(openCorLink?.exists()).toBe(true)
+
+      const href = openCorLink?.attributes('href')
+      expect(href).toBeTruthy()
+      expect(href).toContain('//opencor.ws/app/?opencor://openFiles/')
+      expect(href).toContain('baylor_hollingworth_chandler_2002_a.cellml')
+      expect(href).toContain('%7C')
+      expect(href).toContain('baylor_hollingworth_chandler_2002_f.cellml')
+    })
+
+    it('builds an openFile OpenCOR web URL for the selected .cellml route file', async () => {
+      const selectedFile = 'baylor_hollingworth_chandler_2002_c.cellml'
+      const wrapper = await mountComponent({
+        props: {
+          file: selectedFile,
+        },
+      })
+
+      const openCorLink = wrapper
+        .findAll('a')
+        .find((link) => link.text().trim() === "Open with OpenCOR's Web app")
+
+      expect(openCorLink?.exists()).toBe(true)
+
+      const href = openCorLink?.attributes('href')
+      expect(href).toBeTruthy()
+      expect(href).toContain('//opencor.ws/app/?opencor://openFile/')
+      expect(href).toContain(selectedFile)
+      expect(href).not.toContain('openFiles')
+      expect(href).not.toContain('%7C')
+    })
+
+    it('orders OpenCOR files as .cellml, .sedml, then .omex', async () => {
+      const exposureInfoWithMixedOpenCORFiles = {
+        ...mockExposureInfo,
+        files: [
+          ['archive.omex', true],
+          ['protocol.sedml', true],
+          ['model.cellml', true],
+          ['preview.png', false],
+        ] as typeof mockExposureInfo.files,
+      }
+
+      const wrapper = await mountComponent({
+        exposureInfo: exposureInfoWithMixedOpenCORFiles,
+      })
+
+      const openCorLink = wrapper
+        .findAll('a')
+        .find((link) => link.text().trim() === "Open with OpenCOR's Web app")
+
+      expect(openCorLink?.exists()).toBe(true)
+
+      const href = openCorLink?.attributes('href') || ''
+      expect(href).toContain('//opencor.ws/app/?opencor://openFiles/')
+
+      const cellmlIndex = href.indexOf('/model.cellml')
+      const sedmlIndex = href.indexOf('/protocol.sedml')
+      const omexIndex = href.indexOf('/archive.omex')
+
+      expect(cellmlIndex).toBeGreaterThan(-1)
+      expect(sedmlIndex).toBeGreaterThan(-1)
+      expect(omexIndex).toBeGreaterThan(-1)
+      expect(cellmlIndex).toBeLessThan(sedmlIndex)
+      expect(sedmlIndex).toBeLessThan(omexIndex)
+    })
+  })
+
   it('renders "Navigation" section', async () => {
     const wrapper = await mountComponent()
 

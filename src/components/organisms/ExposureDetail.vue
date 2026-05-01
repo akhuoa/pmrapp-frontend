@@ -178,9 +178,13 @@ const handleDownloadCOMBINEArchive = async () => {
 
 const getOpenCORFilesToOpen = (files: ExposureFileEntry[], targetFile?: string) => {
   let openCORFilesToOpen = files
+  const selectedCellmlFile =
+    props.file?.endsWith('.cellml') ? files.find((entry) => entry[0] === props.file) : undefined
 
   if (targetFile) {
     openCORFilesToOpen = files.filter((entry) => entry[0] === targetFile)
+  } else if (selectedCellmlFile) {
+    openCORFilesToOpen = [selectedCellmlFile]
   }
 
   return openCORFilesToOpen
@@ -739,7 +743,12 @@ onMounted(async () => {
             >
               <RouterLink
                 :to="`/exposures/${props.alias}/${entry[0]}`"
-                class="text-link inline-flex items-center gap-2 break-all"
+                class="inline-flex items-center gap-2 break-all transition-colors"
+                :class="
+                  props.file === entry[0]
+                    ? 'text-foreground dark:text-primary cursor-default'
+                    : 'text-link'
+                "
               >
                 <span class="text-foreground">›</span>
                 {{ entry[0] }}
