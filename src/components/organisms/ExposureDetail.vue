@@ -23,7 +23,7 @@ import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
 import { formatCitation, formatCitationAuthor } from '@/utils/citation'
 import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
-import { formatFileCount } from '@/utils/format'
+import { formatAccessDate, formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
 import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
 import { buildSearchQuery, isValidTerm } from '@/utils/search'
@@ -94,6 +94,7 @@ const licenseInfo = ref<string>(DEFAULT_LICENSE)
 const availableViews = ref<ViewEntry[]>([])
 const isCitationDetailsOpen = ref(false)
 const hasOtherRelatedModels = ref(false)
+const accessDate = ref<Date>(new Date())
 const isDownloadingWorkspaceZip = ref(false)
 const isDownloadingWorkspaceTgz = ref(false)
 const isDownloadingCOMBINE = ref(false)
@@ -361,6 +362,52 @@ const filteredKeywords = computed(() => {
     )
     .map((keywordTuple) => keywordTuple[1] || '')
 })
+
+const howToCiteFirstLine = computed(() => {
+  const authors = metadataJSON.value.citation_authors
+  let authorYearPart = ''
+  const year = metadataJSON.value.citation_issued?.split('-')[0]
+
+  if (authors && authors.length > 0) {
+    let authorStr = ''
+    if (authors.length === 1) {
+      authorStr = authors[0][0] || ''
+    } else if (authors.length === 2) {
+      authorStr = `${authors[0][0] || ''} and ${authors[1][0] || ''}`
+    } else {
+      authorStr = `${authors[0][0] || ''} et al.`
+    }
+
+    authorYearPart = year ? ` ${authorStr} ${year}.` : ` ${authorStr}.`
+  } else if (year) {
+    authorYearPart = ` ${year}.`
+  }
+
+  const title = metadataJSON.value.citation_title
+  if (title) {
+    return `${title}.${authorYearPart}`
+  }
+  return authorYearPart.trim()
+})
+
+const formattedAccessDate = computed(() => {
+  return formatAccessDate(accessDate.value)
+})
+
+const howToCiteText = computed(() => {
+  const lines: string[] = []
+  if (howToCiteFirstLine.value) {
+    lines.push(howToCiteFirstLine.value)
+  }
+  lines.push(exposureUrl.value)
+  lines.push(formattedAccessDate.value)
+  if (metadataJSON.value.model_author) {
+    lines.push(`CellML author(s): ${metadataJSON.value.model_author}`)
+  }
+  return lines.join('\n')
+})
+
+const exposureUrl = computed(() => window.location.href)
 
 const checkOtherRelatedModels = async () => {
   const term = metadataJSON.value.citation_id
@@ -868,6 +915,21 @@ onMounted(async () => {
               <dd>{{ metadataJSON.citation_bibliographicCitation }}</dd>
             </div>
           </dl>
+        </div>
+      </section>
+      <section v-if="howToCiteFirstLine || metadataJSON.model_author" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+        <h4 class="text-lg font-semibold mb-3">Cite this model</h4>
+        <div class="group p-4 pr-8 bg-gray-50 dark:bg-gray-800 rounded-md relative text-sm leading-relaxed space-y-1">
+          <p v-if="howToCiteFirstLine">{{ howToCiteFirstLine }}</p>
+          <p class="break-all">{{ exposureUrl }}</p>
+          <p>{{ formattedAccessDate }}</p>
+          <p v-if="metadataJSON.model_author">CellML author(s): {{ metadataJSON.model_author }}</p>
+          <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <CopyButton
+              :text="howToCiteText"
+              title="Copy citation"
+            />
+          </div>
         </div>
       </section>
       <section v-if="licenseInfo" class="pt-6 border-t border-gray-200 dark:border-gray-700">
