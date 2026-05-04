@@ -6,19 +6,15 @@ import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
-import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
-import FileIcon from '@/components/icons/FileIcon.vue'
-import FolderIcon from '@/components/icons/FolderIcon.vue'
-import GitIcon from '@/components/icons/GitIcon.vue'
 import LoadingIcon from '@/components/icons/LoadingIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
+import WorkspaceFileBrowser from '@/components/molecules/WorkspaceFileBrowser.vue'
 import { downloadWorkspaceArchive } from '@/services/downloadUrlService'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { ErrorInfo } from '@/types/error'
 import type { WorkspaceInfo } from '@/types/workspace'
 import { downloadWorkspaceFile } from '@/utils/download'
-import { isOpenCORFile } from '@/utils/file'
 import { formatFileCount } from '@/utils/format'
 
 const props = defineProps<{
@@ -257,71 +253,15 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
       </div>
     </div>
 
-    <div class="box p-0! overflow-hidden">
-      <div class="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-        <span class="text-gray-600 dark:text-gray-400">
-          {{ fileCountText }}
-        </span>
-      </div>
-      <ul class="divide-y divide-gray-200 dark:divide-gray-700">
-        <li
-          v-for="entry in sortedEntries"
-          :key="entry.id"
-          class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-        >
-          <div class="px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center gap-3 flex-1 min-w-0">
-              <FolderIcon v-if="entry.kind === 'tree'" class="text-gray-500 dark:text-gray-400 flex-shrink-0 w-4 h-4" />
-              <GitIcon v-else-if="entry.kind === 'commit'" class="text-gray-500 dark:text-gray-400 flex-shrink-0 w-4 h-4" />
-              <FileIcon v-else class="text-gray-500 dark:text-gray-400 flex-shrink-0 w-4 h-4" />
-
-              <RouterLink
-                v-if="entry.kind === 'commit'"
-                :to="`/workspaces/${entry.name}/file/${entry.id}`"
-                class="text-link font-medium truncate"
-              >
-                {{ entry.name }}
-              </RouterLink>
-              <RouterLink
-                v-else
-                :to="`/workspaces/${props.alias}/file/${workspaceInfo.commit.commit_id}/${(props.path ? props.path + '/' : '') + entry.name}`"
-                class="text-link font-medium truncate"
-              >
-                {{ entry.name }}
-              </RouterLink>
-            </div>
-            <div class="flex items-center gap-2 ml-4 flex-shrink-0">
-              <ActionButton
-                v-if="entry.kind !== 'tree' && isOpenCORFile(entry.name)"
-                variant="icon"
-                size="sm"
-                :href="buildOpenCORURL(entry.name)"
-                target="_blank"
-                rel="noopener noreferrer"
-                content-section="Workspace Detail"
-                tooltip="Open with OpenCOR's Web app"
-                aria-label="Open with OpenCOR's Web app"
-              >
-                <ExternalLinkIcon class="w-4 h-4" />
-                <span class="sr-only">Open {{ entry.name }} with OpenCOR's Web app</span>
-              </ActionButton>
-              <ActionButton
-                v-if="entry.kind !== 'tree' && entry.kind !== 'commit'"
-                variant="icon"
-                size="sm"
-                content-section="Workspace Detail"
-                @click="downloadFile(entry.name)"
-                tooltip="Download"
-                aria-label="Download"
-              >
-                <DownloadIcon class="w-4 h-4" />
-                <span class="sr-only">Download {{ entry.name }}</span>
-              </ActionButton>
-            </div>
-          </div>
-        </li>
-      </ul>
-    </div>
+    <WorkspaceFileBrowser
+      :entries="sortedEntries"
+      :alias="props.alias"
+      :commit-id="workspaceInfo.commit.commit_id"
+      :path="props.path"
+      :file-count-text="fileCountText"
+      :build-open-cor-url="buildOpenCORURL"
+      @download="downloadFile"
+    />
   </div>
 </template>
 
