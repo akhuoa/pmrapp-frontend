@@ -9,6 +9,7 @@ import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import FolderIcon from '@/components/icons/FolderIcon.vue'
+import GitIcon from '@/components/icons/GitIcon.vue'
 import LoadingIcon from '@/components/icons/LoadingIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
@@ -271,6 +272,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
           <div class="px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-3 flex-1 min-w-0">
               <FolderIcon v-if="entry.kind === 'tree'" class="text-gray-500 dark:text-gray-400 flex-shrink-0 w-4 h-4" />
+              <GitIcon v-else-if="entry.kind === 'commit'" class="text-gray-500 dark:text-gray-400 flex-shrink-0 w-4 h-4" />
               <FileIcon v-else class="text-gray-500 dark:text-gray-400 flex-shrink-0 w-4 h-4" />
 
               <RouterLink
