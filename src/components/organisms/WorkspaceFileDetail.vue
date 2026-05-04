@@ -1,7 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import BackButton from '@/components/atoms/BackButton.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
@@ -11,6 +10,8 @@ import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
 import PreviewIcon from '@/components/icons/PreviewIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
+import Breadcrumbs from '@/components/molecules/Breadcrumbs.vue'
+import type { BreadcrumbItem } from '@/components/molecules/Breadcrumbs.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { getWorkspaceService } from '@/services'
@@ -66,6 +67,23 @@ const backPath = computed(() => {
 
 const { goBack } = useBackNavigation(backPath.value)
 const workspaceStore = useWorkspaceStore()
+
+const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
+  const parts = props.path.split('/')
+  const items: BreadcrumbItem[] = [
+    { label: 'Workspaces', to: '/workspaces' },
+    { label: props.alias, to: `/workspaces/${props.alias}` },
+  ]
+  parts.forEach((part, index) => {
+    const isLast = index === parts.length - 1
+    const partialPath = parts.slice(0, index + 1).join('/')
+    items.push({
+      label: part,
+      to: isLast ? undefined : `/workspaces/${props.alias}/file/${props.commitId}/${partialPath}`,
+    })
+  })
+  return items
+})
 
 const isImage = computed(() => isImageFile(props.path))
 const isPDF = computed(() => isPdfFile(props.path))
@@ -172,11 +190,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <BackButton
-    label="Back"
-    content-section="Workspace File Detail"
-    :on-click="goBack"
-  />
+  <Breadcrumbs :items="breadcrumbItems" />
 
   <ErrorBlock
     v-if="error"
