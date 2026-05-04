@@ -276,6 +276,14 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
               <FileIcon v-else class="text-gray-500 dark:text-gray-400 flex-shrink-0 w-4 h-4" />
 
               <RouterLink
+                v-if="entry.kind === 'commit'"
+                :to="`/workspaces/${entry.name}/file/${entry.id}`"
+                class="text-link font-medium truncate"
+              >
+                {{ entry.name }}
+              </RouterLink>
+              <RouterLink
+                v-else
                 :to="`/workspaces/${props.alias}/file/${workspaceInfo.commit.commit_id}/${(props.path ? props.path + '/' : '') + entry.name}`"
                 class="text-link font-medium truncate"
               >
