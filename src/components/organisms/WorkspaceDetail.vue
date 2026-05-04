@@ -298,7 +298,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
                 <span class="sr-only">Open {{ entry.name }} with OpenCOR's Web app</span>
               </ActionButton>
               <ActionButton
-                v-if="entry.kind !== 'tree'"
+                v-if="entry.kind !== 'tree' && entry.kind !== 'commit'"
                 variant="icon"
                 size="sm"
                 content-section="Workspace Detail"
