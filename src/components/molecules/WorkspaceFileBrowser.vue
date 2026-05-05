@@ -85,7 +85,7 @@ const loadWorkspaceInfo = async () => {
     const workspaceData = await workspaceStore.getWorkspaceInfo(
       props.alias,
       props.commitId || '',
-      props.path || ''
+      props.path || '',
     )
 
     if (currentRequest === requestCounter.value) {

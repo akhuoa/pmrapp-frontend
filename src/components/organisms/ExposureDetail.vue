@@ -11,10 +11,10 @@ import WrapButton from '@/components/atoms/WrapButton.vue'
 import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
-import FileIcon from '@/components/icons/FileIcon.vue'
 import LoadingIcon from '@/components/icons/LoadingIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
+import WorkspaceFileBrowser from '@/components/molecules/WorkspaceFileBrowser.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { downloadCOMBINEArchive, downloadWorkspaceArchive } from '@/services/downloadUrlService'
 import { useExposureStore } from '@/stores/exposure'
@@ -22,10 +22,9 @@ import { useSearchStore } from '@/stores/search'
 import type { ErrorInfo } from '@/types/error'
 import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
 import { formatCitation, formatCitationAuthor } from '@/utils/citation'
-import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
+import { downloadFileFromContent } from '@/utils/download'
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { getFileExtension, isOpenCORFile } from '@/utils/file'
-import { formatFileCount } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
 import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
 import { buildSearchQuery, isValidTerm } from '@/utils/search'
@@ -238,20 +237,6 @@ const convertFirstTextNodeToTitle = () => {
     }
   }
 }
-
-const downloadFile = async (filename: string) => {
-  if (!exposureInfo.value) return
-
-  const alias = exposureInfo.value.workspace_alias
-  const commitId = exposureInfo.value.exposure.commit_id
-  if (!commitId) return
-  await downloadWorkspaceFile(alias, commitId, filename)
-}
-
-const fileCountText = computed(() => {
-  const count = exposureInfo.value?.files?.length
-  return formatFileCount(count)
-})
 
 const generateCode = async (langPath: string, fileName: string) => {
   const code = await exposureStore.getExposureRawContent(
@@ -593,59 +578,10 @@ onMounted(async () => {
         <div ref="htmlViewRef" v-html="detailHTML" class="html-view"></div>
       </div>
 
-      <div class="box p-0! overflow-hidden">
-        <div class="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-          <span class="text-gray-600 dark:text-gray-400">
-            {{ fileCountText }}
-          </span>
-        </div>
-        <ul class="divide-y divide-gray-200 dark:divide-gray-700">
-          <li
-            v-for="entry in exposureInfo.files"
-            :key="entry[0]"
-            class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-          >
-            <div class="px-4 py-3 flex items-center justify-between">
-              <div class="flex items-center gap-3 flex-1 min-w-0">
-                <FileIcon class="text-gray-500 dark:text-gray-400 flex-shrink-0 w-4 h-4" />
-                <RouterLink
-                  :to="`/workspaces/${exposureInfo.workspace_alias}/file/${exposureInfo.exposure.commit_id}/${entry[0]}`"
-                  class="text-link font-medium truncate"
-                >
-                  {{ entry[0] }}
-                </RouterLink>
-              </div>
-              <div class="flex items-center gap-2 ml-4 flex-shrink-0">
-                <ActionButton
-                  v-if="isOpenCORFile(entry[0])"
-                  variant="icon"
-                  size="sm"
-                  :href="buildOpenCORURL(undefined, entry[0])"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  content-section="Exposure Detail"
-                  tooltip="Open with OpenCOR's Web app"
-                  :aria-label="`Open ${entry[0]} with OpenCOR's Web app`"
-                >
-                  <ExternalLinkIcon class="w-4 h-4" />
-                  <span class="sr-only">Open {{ entry[0] }} with OpenCOR's Web app</span>
-                </ActionButton>
-                <ActionButton
-                  @click="downloadFile(entry[0])"
-                  variant="icon"
-                  size="sm"
-                  content-section="Exposure Detail"
-                  tooltip="Download"
-                  :aria-label="`Download ${entry[0]}`"
-                >
-                  <DownloadIcon class="w-4 h-4" />
-                  <span class="sr-only">Download {{ entry[0] }}</span>
-                </ActionButton>
-              </div>
-            </div>
-          </li>
-        </ul>
-      </div>
+      <WorkspaceFileBrowser
+        :alias="exposureInfo.workspace_alias"
+        :commit-id="exposureInfo.exposure.commit_id"
+      />
     </article>
     <aside class="w-full lg:w-70 xl:w-80 lg:flex-shrink-0">
       <section class="pb-6">
