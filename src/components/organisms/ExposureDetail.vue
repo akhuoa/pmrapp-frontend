@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
@@ -101,7 +101,19 @@ const isDownloadingCOMBINE = ref(false)
 const { goBack } = useBackNavigation('/exposures')
 
 const router = useRouter()
+const route = useRoute()
 const searchStore = useSearchStore()
+
+const fileBrowserPath = computed(() => {
+  const p = route.query.path
+  return typeof p === 'string' ? p : undefined
+})
+
+const handleFileBrowserFolderClick = (name: string) => {
+  const currentPath = fileBrowserPath.value
+  const newPath = currentPath ? `${currentPath}/${name}` : name
+  router.push({ query: { ...route.query, path: newPath } })
+}
 
 // This route path is used to fix relative paths in the HTML content.
 // It is not a part of the API request parameters.
@@ -581,6 +593,8 @@ onMounted(async () => {
       <WorkspaceFileBrowser
         :alias="exposureInfo.workspace_alias"
         :commit-id="exposureInfo.exposure.commit_id"
+        :path="fileBrowserPath"
+        :on-folder-click="handleFileBrowserFolderClick"
       />
     </article>
     <aside class="w-full lg:w-70 xl:w-80 lg:flex-shrink-0">

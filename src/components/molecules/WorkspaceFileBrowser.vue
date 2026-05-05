@@ -19,6 +19,7 @@ const props = defineProps<{
   alias: string
   commitId: string
   path?: string
+  onFolderClick?: (name: string) => void
 }>()
 
 const workspaceStore = useWorkspaceStore()
@@ -147,6 +148,13 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
             >
               {{ entry.name }}
             </RouterLink>
+            <button
+              v-else-if="entry.kind === 'tree' && onFolderClick"
+              class="text-link font-medium truncate text-left cursor-pointer"
+              @click="onFolderClick(entry.name)"
+            >
+              {{ entry.name }}
+            </button>
             <RouterLink
               v-else
               :to="`/workspaces/${alias}/file/${workspaceInfo?.commit.commit_id}/${(path ? path + '/' : '') + entry.name}`"
