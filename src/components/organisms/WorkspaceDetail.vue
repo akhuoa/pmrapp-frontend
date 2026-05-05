@@ -14,8 +14,6 @@ import { downloadWorkspaceArchive } from '@/services/downloadUrlService'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { ErrorInfo } from '@/types/error'
 import type { WorkspaceInfo } from '@/types/workspace'
-import { downloadWorkspaceFile } from '@/utils/download'
-import { formatFileCount } from '@/utils/format'
 
 const props = defineProps<{
   alias: string
@@ -67,57 +65,6 @@ const goBack = () => {
 const backButtonText = computed(() => {
   return !props.path ? 'Back to workspaces' : `Back to ${props.path}`
 })
-
-const fileCountText = computed(() => {
-  const count = workspaceInfo.value?.target?.TreeInfo?.filecount
-  return formatFileCount(count)
-})
-
-const sortedEntries = computed(() => {
-  if (!workspaceInfo.value) return []
-
-  const treeInfo = workspaceInfo.value.target?.TreeInfo
-  if (!treeInfo?.entries) return []
-
-  const entries = [...treeInfo.entries]
-
-  return entries.sort((a, b) => {
-    // Folders first.
-    if (a.kind === 'tree' && b.kind !== 'tree') return -1
-    if (a.kind !== 'tree' && b.kind === 'tree') return 1
-
-    // Both folders or both files - sort by name.
-    // Dotfiles (starting with ".") come before other files.
-    const aIsDotfile = a.name.startsWith('.')
-    const bIsDotfile = b.name.startsWith('.')
-
-    if (aIsDotfile && !bIsDotfile) return -1
-    if (!aIsDotfile && bIsDotfile) return 1
-
-    // Alphabetically (case-insensitive, but capitals before lowercase for same letter).
-    return a.name.localeCompare(b.name, 'en', { numeric: true })
-  })
-})
-
-const downloadFile = async (filename: string) => {
-  if (!workspaceInfo.value) return
-
-  const alias = props.alias
-  const commitId = workspaceInfo.value?.commit.commit_id
-  const fullFilename = (props.path ? `${props.path}/` : '') + filename
-  if (!commitId) return
-  await downloadWorkspaceFile(alias, commitId, fullFilename)
-}
-
-const buildOpenCORURL = (filename: string) => {
-  if (!workspaceInfo.value) return ''
-
-  const fullFilename = (props.path ? `${props.path}/` : '') + filename
-  const baseURL = `${workspaceInfo.value.workspace.url}rawfile/${workspaceInfo.value.commit.commit_id}`
-  const opencorLink = `opencor://openFile/${baseURL}/${fullFilename}`
-
-  return `//opencor.ws/app/?${opencorLink}`
-}
 
 const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
   if (!workspaceInfo.value) return
@@ -254,13 +201,9 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
     </div>
 
     <WorkspaceFileBrowser
-      :entries="sortedEntries"
       :alias="props.alias"
       :commit-id="workspaceInfo.commit.commit_id"
       :path="props.path"
-      :file-count-text="fileCountText"
-      :build-open-cor-url="buildOpenCORURL"
-      @download="downloadFile"
     />
   </div>
 </template>

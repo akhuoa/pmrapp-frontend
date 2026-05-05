@@ -1,29 +1,128 @@
 <script setup lang="ts">
+import { computed, onMounted, ref, watch } from 'vue'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import FolderIcon from '@/components/icons/FolderIcon.vue'
 import GitIcon from '@/components/icons/GitIcon.vue'
-import type { WorkspaceFileEntry } from '@/types/workspace'
+import LoadingBox from '@/components/atoms/LoadingBox.vue'
+import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
+import type { ErrorInfo } from '@/types/error'
+import type { WorkspaceInfo } from '@/types/workspace'
 import { isOpenCORFile } from '@/utils/file'
+import { formatFileCount } from '@/utils/format'
+import { downloadWorkspaceFile } from '@/utils/download'
+import { useWorkspaceStore } from '@/stores/workspace'
 
 const props = defineProps<{
-  entries: WorkspaceFileEntry[]
   alias: string
   commitId: string
   path?: string
-  fileCountText: string
-  buildOpenCorUrl: (filename: string) => string
 }>()
 
-const emit = defineEmits<{
-  download: [filename: string]
-}>()
+const workspaceStore = useWorkspaceStore()
+const workspaceInfo = ref<WorkspaceInfo | null>(null)
+const error = ref<ErrorInfo | null>(null)
+const isLoading = ref(true)
+const requestCounter = ref(0)
+
+const fileCountText = computed(() => {
+  const count = workspaceInfo.value?.target?.TreeInfo?.filecount
+  return formatFileCount(count)
+})
+
+const sortedEntries = computed(() => {
+  if (!workspaceInfo.value) return []
+
+  const treeInfo = workspaceInfo.value.target?.TreeInfo
+  if (!treeInfo?.entries) return []
+
+  const entries = [...treeInfo.entries]
+
+  return entries.sort((a, b) => {
+    // Folders first.
+    if (a.kind === 'tree' && b.kind !== 'tree') return -1
+    if (a.kind !== 'tree' && b.kind === 'tree') return 1
+
+    // Both folders or both files - sort by name.
+    // Dotfiles (starting with ".") come before other files.
+    const aIsDotfile = a.name.startsWith('.')
+    const bIsDotfile = b.name.startsWith('.')
+
+    if (aIsDotfile && !bIsDotfile) return -1
+    if (!aIsDotfile && bIsDotfile) return 1
+
+    // Alphabetically (case-insensitive, but capitals before lowercase for same letter).
+    return a.name.localeCompare(b.name, 'en', { numeric: true })
+  })
+})
+
+const buildOpenCorUrl = (filename: string): string => {
+  if (!workspaceInfo.value) return ''
+
+  const fullFilename = (props.path ? `${props.path}/` : '') + filename
+  const baseURL = `${workspaceInfo.value.workspace.url}rawfile/${workspaceInfo.value.commit.commit_id}`
+  const opencorLink = `opencor://openFile/${baseURL}/${fullFilename}`
+
+  return `//opencor.ws/app/?${opencorLink}`
+}
+
+const downloadFile = async (filename: string) => {
+  if (!workspaceInfo.value) return
+
+  const fullFilename = (props.path ? `${props.path}/` : '') + filename
+  await downloadWorkspaceFile(props.alias, workspaceInfo.value.commit.commit_id, fullFilename)
+}
+
+const loadWorkspaceInfo = async () => {
+  isLoading.value = true
+  error.value = null
+
+  const currentRequest = ++requestCounter.value
+
+  try {
+    const workspaceData = await workspaceStore.getWorkspaceInfo(
+      props.alias,
+      props.commitId || '',
+      props.path || ''
+    )
+
+    if (currentRequest === requestCounter.value) {
+      workspaceInfo.value = workspaceData
+    }
+  } catch (err) {
+    if (currentRequest === requestCounter.value) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load workspace.'
+      error.value = {
+        title: 'Error loading files',
+        message: errorMessage,
+      }
+      console.error('Error loading workspace:', err)
+    }
+  } finally {
+    if (currentRequest === requestCounter.value) {
+      isLoading.value = false
+    }
+  }
+}
+
+onMounted(loadWorkspaceInfo)
+
+// Watch for changes in props to reload data when navigating between folders.
+watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
 </script>
 
 <template>
-  <div class="box p-0! overflow-hidden">
+  <ErrorBlock
+    v-if="error"
+    :title="error.title"
+    :error="error.message"
+  />
+
+  <LoadingBox v-else-if="isLoading" message="Loading files..." />
+
+  <div v-else class="box p-0! overflow-hidden">
     <div class="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
       <span class="text-gray-600 dark:text-gray-400">
         {{ fileCountText }}
@@ -31,7 +130,7 @@ const emit = defineEmits<{
     </div>
     <ul class="divide-y divide-gray-200 dark:divide-gray-700">
       <li
-        v-for="entry in props.entries"
+        v-for="entry in sortedEntries"
         :key="entry.id"
         class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
       >
@@ -50,7 +149,7 @@ const emit = defineEmits<{
             </RouterLink>
             <RouterLink
               v-else
-              :to="`/workspaces/${props.alias}/file/${props.commitId}/${(props.path ? props.path + '/' : '') + entry.name}`"
+              :to="`/workspaces/${alias}/file/${workspaceInfo?.commit.commit_id}/${(path ? path + '/' : '') + entry.name}`"
               class="text-link font-medium truncate"
             >
               {{ entry.name }}
@@ -61,7 +160,7 @@ const emit = defineEmits<{
               v-if="entry.kind !== 'tree' && entry.kind !== 'commit' && isOpenCORFile(entry.name)"
               variant="icon"
               size="sm"
-              :href="props.buildOpenCorUrl(entry.name)"
+              :href="buildOpenCorUrl(entry.name)"
               target="_blank"
               rel="noopener noreferrer"
               content-section="Workspace Detail"
@@ -76,7 +175,7 @@ const emit = defineEmits<{
               variant="icon"
               size="sm"
               content-section="Workspace Detail"
-              @click="emit('download', entry.name)"
+              @click="downloadFile(entry.name)"
               tooltip="Download"
               aria-label="Download"
             >
