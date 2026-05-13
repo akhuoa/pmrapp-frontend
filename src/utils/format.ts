@@ -36,3 +36,17 @@ export function formatFileCount(count: number | undefined | null): string {
   const formatted = formatNumber(count)
   return `${formatted} ${count === 1 ? 'item' : 'items'}`
 }
+
+/**
+ * Escape a string for safe HTML rendering.
+ * @param value - Raw string value.
+ * @returns HTML-escaped string.
+ */
+export function escapeHtml(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
+}
