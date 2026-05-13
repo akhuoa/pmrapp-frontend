@@ -4,6 +4,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
+import FormattedEmailText from '@/components/atoms/FormattedEmailText.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import LoadingIcon from '@/components/icons/LoadingIcon.vue'
@@ -12,7 +13,6 @@ import PageHeader from '@/components/molecules/PageHeader.vue'
 import WorkspaceFileBrowser from '@/components/molecules/WorkspaceFileBrowser.vue'
 import { downloadWorkspaceArchive } from '@/services/downloadUrlService'
 import { useWorkspaceStore } from '@/stores/workspace'
-import { escapeHtml } from '@/utils/format'
 import type { ErrorInfo } from '@/types/error'
 import type { WorkspaceInfo } from '@/types/workspace'
 
@@ -66,16 +66,6 @@ const goBack = () => {
 const backButtonText = computed(() => {
   return !props.path ? 'Back to workspaces' : `Back to ${props.path}`
 })
-
-const formatEmail = (author: string): string => {
-  const safeAuthor = escapeHtml(author)
-  const emailRegex = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g
-
-  return safeAuthor.replace(
-    emailRegex,
-    email => `<a href="mailto:${email}" class="text-link">${email}</a>`,
-  )
-}
 
 const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
   if (!workspaceInfo.value) return
@@ -179,7 +169,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
 
       <div class="flex flex-col lg:flex-row items-start lg:items-center gap-2" v-if="workspaceInfo.commit.author">
         <span class="font-bold text-gray-600 dark:text-gray-400">Author:</span>
-        <span v-html="formatEmail(workspaceInfo.commit.author)" />
+        <FormattedEmailText :text="workspaceInfo.commit.author" />
       </div>
 
       <div class="flex flex-col lg:flex-row items-start lg:items-center gap-2">
