@@ -52,3 +52,7 @@ const pathSegments = computed(() => props.path.split('/').filter(Boolean))
     </template>
   </nav>
 </template>
+
+<style scoped>
+@import '@/assets/text-link.css';
+</style>

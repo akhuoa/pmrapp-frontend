@@ -205,3 +205,8 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
     </ul>
   </div>
 </template>
+
+<style scoped>
+@import '@/assets/text-link.css';
+@import '@/assets/box.css';
+</style>
