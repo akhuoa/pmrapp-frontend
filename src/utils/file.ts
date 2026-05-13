@@ -85,6 +85,7 @@ export const isCodeFile = (filename: string): boolean => {
     'go',
     'gradle',
     'h',
+    'hgsub',
     'hpp',
     'html',
     'ini',
@@ -114,6 +115,7 @@ export const isCodeFile = (filename: string): boolean => {
     'ts',
     'txt',
     'xml',
+    'xul',
     'yaml',
     'yml',
   ]

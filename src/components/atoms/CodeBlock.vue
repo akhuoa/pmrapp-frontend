@@ -74,6 +74,7 @@ const detectedLanguage = computed(() => {
     ts: 'javascript',
     tsx: 'javascript',
     xml: 'markup',
+    xul: 'markup',
   }
 
   return ext ? languageMap[ext] || 'plaintext' : 'none'
