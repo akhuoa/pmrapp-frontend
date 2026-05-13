@@ -8,6 +8,7 @@ import FolderIcon from '@/components/icons/FolderIcon.vue'
 import GitIcon from '@/components/icons/GitIcon.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
+import FileBrowserBreadcrumb from '@/components/molecules/FileBrowserBreadcrumb.vue'
 import type { ErrorInfo } from '@/types/error'
 import type { WorkspaceInfo } from '@/types/workspace'
 import { isOpenCORFile } from '@/utils/file'
@@ -20,6 +21,7 @@ const props = defineProps<{
   commitId: string
   path?: string
   onFolderClick?: (name: string) => void
+  onPathChange?: (path: string | undefined) => void
 }>()
 
 const workspaceStore = useWorkspaceStore()
@@ -124,8 +126,15 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
   <LoadingBox v-else-if="isLoading" message="Loading files..." />
 
   <div v-else class="box p-0! overflow-hidden">
-    <div class="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-      <span class="text-gray-600 dark:text-gray-400">
+    <div class="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between gap-4">
+      <FileBrowserBreadcrumb
+        v-if="props.path"
+        :alias="alias"
+        :commit-id="props.commitId"
+        :path="props.path"
+        :on-path-change="onPathChange"
+      />
+      <span class="text-gray-600 dark:text-gray-400 shrink-0">
         {{ fileCountText }}
       </span>
     </div>
@@ -144,7 +153,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
             <RouterLink
               v-if="entry.kind === 'commit'"
               :to="`/workspaces/${entry.name}/file/${entry.id}`"
-              class="text-link font-medium truncate"
+              class="text-link font-medium truncate text-left cursor-pointer"
             >
               {{ entry.name }}
             </RouterLink>
@@ -158,7 +167,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
             <RouterLink
               v-else
               :to="`/workspaces/${alias}/file/${workspaceInfo?.commit.commit_id}/${(path ? path + '/' : '') + entry.name}`"
-              class="text-link font-medium truncate"
+              class="text-link font-medium truncate text-left cursor-pointer"
             >
               {{ entry.name }}
             </RouterLink>

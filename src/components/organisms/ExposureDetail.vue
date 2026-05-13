@@ -115,6 +115,11 @@ const handleFileBrowserFolderClick = (name: string) => {
   router.push({ query: { ...route.query, path: newPath } })
 }
 
+const handleFileBrowserPathChange = (newPath: string | undefined) => {
+  const { path: _removed, ...restQuery } = route.query
+  router.push({ query: newPath ? { ...restQuery, path: newPath } : restQuery })
+}
+
 // This route path is used to fix relative paths in the HTML content.
 // It is not a part of the API request parameters.
 // Note: Keep as "exposure" (singular) to match server file paths, not the router path.
@@ -595,6 +600,7 @@ onMounted(async () => {
         :commit-id="exposureInfo.exposure.commit_id"
         :path="fileBrowserPath"
         :on-folder-click="handleFileBrowserFolderClick"
+        :on-path-change="handleFileBrowserPathChange"
       />
     </article>
     <aside class="w-full lg:w-70 xl:w-80 lg:flex-shrink-0">
