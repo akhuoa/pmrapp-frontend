@@ -103,4 +103,20 @@ describe('CodeBlock', () => {
     expect(wrapper.find('code').text()).toBe('new code')
     wrapper.unmount()
   })
+
+  it('applies the correct language class for .neon files', () => {
+    const wrapper = mount(CodeBlock, {
+      props: { code: smallCode, filename: 'generated.neon' },
+    })
+    expect(wrapper.find('code').classes()).toContain('language-json')
+    wrapper.unmount()
+  })
+
+  it('applies the correct language class for .xul files', () => {
+    const wrapper = mount(CodeBlock, {
+      props: { code: smallCode, filename: 'model.xul' },
+    })
+    expect(wrapper.find('code').classes()).toContain('language-markup')
+    wrapper.unmount()
+  })
 })
