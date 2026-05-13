@@ -7,52 +7,56 @@ const props = defineProps<{
 
 type Segment = {
   value: string
-  isEmail: boolean
+  email: string
+  isLinked: boolean
 }
 
 const segments = computed<Segment[]>(() => {
   const input = props.text || ''
   if (!input) return []
 
-  const emailRegex = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g
-  const result: Segment[] = []
-  let lastIndex = 0
+  const trimmedInput = input.trim()
+  const emailRegex = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/
 
-  for (const match of input.matchAll(emailRegex)) {
-    const email = match[0]
-    const startIndex = match.index ?? -1
-    if (startIndex < 0) continue
+  // Preferred format: "Author Name <author@email.com>".
+  const authorEmailMatch = trimmedInput.match(
+    /^(.*?)\s*<\s*([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})\s*>$/,
+  )
+  if (authorEmailMatch) {
+    const authorName = authorEmailMatch[1].trim()
+    const email = authorEmailMatch[2].trim()
 
-    if (startIndex > lastIndex) {
-      result.push({
-        value: input.slice(lastIndex, startIndex),
-        isEmail: false,
-      })
-    }
-
-    result.push({
-      value: email,
-      isEmail: true,
-    })
-
-    lastIndex = startIndex + email.length
+    return [
+      {
+        value: authorName || email,
+        email,
+        isLinked: true,
+      },
+    ]
   }
 
-  if (lastIndex < input.length) {
-    result.push({
-      value: input.slice(lastIndex),
-      isEmail: false,
-    })
+  // Fallback for strings that still contain an email in another layout.
+  const emailMatch = trimmedInput.match(emailRegex)
+  if (emailMatch) {
+    const email = emailMatch[0]
+    const textWithoutEmail = trimmedInput.replace(email, '').replace(/[<>]/g, '').trim()
+
+    return [
+      {
+        value: textWithoutEmail || email,
+        email,
+        isLinked: true,
+      },
+    ]
   }
 
-  if (result.length === 0) {
-    result.push({
+  return [
+    {
       value: input,
-      isEmail: false,
-    })
-  }
-
-  return result
+      email: '',
+      isLinked: false,
+    },
+  ]
 })
 </script>
 
@@ -63,8 +67,8 @@ const segments = computed<Segment[]>(() => {
       :key="`${index}-${segment.value}`"
     >
       <a
-        v-if="segment.isEmail"
-        :href="`mailto:${segment.value}`"
+        v-if="segment.isLinked"
+        :href="`mailto:${segment.email}`"
         class="text-link"
       >
         {{ segment.value }}
