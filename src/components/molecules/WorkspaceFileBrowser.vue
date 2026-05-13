@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import ActionButton from '@/components/atoms/ActionButton.vue'
+import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import FolderIcon from '@/components/icons/FolderIcon.vue'
 import GitIcon from '@/components/icons/GitIcon.vue'
-import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import FileBrowserBreadcrumb from '@/components/molecules/FileBrowserBreadcrumb.vue'
+import { useWorkspaceStore } from '@/stores/workspace'
 import type { ErrorInfo } from '@/types/error'
 import type { WorkspaceInfo } from '@/types/workspace'
+import { downloadWorkspaceFile } from '@/utils/download'
 import { isOpenCORFile } from '@/utils/file'
 import { formatFileCount } from '@/utils/format'
-import { downloadWorkspaceFile } from '@/utils/download'
-import { useWorkspaceStore } from '@/stores/workspace'
 
 const props = defineProps<{
   alias: string
