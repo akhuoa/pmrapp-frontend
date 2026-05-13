@@ -16,27 +16,37 @@ const segments = computed<Segment[]>(() => {
   if (!input) return []
 
   const trimmedInput = input.trim()
-  const emailRegex = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/
+  const validEmailRegex = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/
+  const bracketedEmailRegex = /^(.*?)\s*<\s*([^<>@\s]+@[^<>\s]+)\s*>$/
 
   // Preferred format: "Author Name <author@email.com>".
-  const authorEmailMatch = trimmedInput.match(
-    /^(.*?)\s*<\s*([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})\s*>$/,
-  )
+  const authorEmailMatch = trimmedInput.match(bracketedEmailRegex)
   if (authorEmailMatch) {
     const authorName = authorEmailMatch[1].trim()
     const email = authorEmailMatch[2].trim()
 
+    if (validEmailRegex.test(email)) {
+      return [
+        {
+          value: authorName || email,
+          email,
+          isLinked: true,
+        },
+      ]
+    }
+
+    // For invalid bracketed emails (e.g. user@localhost), keep only the name.
     return [
       {
-        value: authorName || email,
-        email,
-        isLinked: true,
+        value: authorName || input,
+        email: '',
+        isLinked: false,
       },
     ]
   }
 
   // Fallback for strings that still contain an email in another layout.
-  const emailMatch = trimmedInput.match(emailRegex)
+  const emailMatch = trimmedInput.match(validEmailRegex)
   if (emailMatch) {
     const email = emailMatch[0]
     const textWithoutEmail = trimmedInput.replace(email, '').replace(/[<>]/g, '').trim()
