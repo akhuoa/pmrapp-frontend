@@ -50,3 +50,16 @@ export function escapeHtml(value: string): string {
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;')
 }
+
+/**
+ * Remove common formatting artifacts after extracting/removing an email from text.
+ * @param value - String that may contain leftover wrappers or extra whitespace.
+ * @returns Cleaned-up string.
+ */
+export function normalizeTextWithoutEmail(value: string): string {
+  return value
+    .replace(/[<>]/g, '')
+    .replace(/\(\s*\)/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+}

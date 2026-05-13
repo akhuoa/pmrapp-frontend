@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { normalizeTextWithoutEmail } from '@/utils/format'
 
 const props = defineProps<{
   text: string
@@ -9,14 +10,6 @@ type Segment = {
   value: string
   email: string
   isLinked: boolean
-}
-
-const normalizeTextWithoutEmail = (value: string) => {
-  return value
-    .replace(/[<>]/g, '')
-    .replace(/\(\s*\)/g, '')
-    .replace(/\s{2,}/g, ' ')
-    .trim()
 }
 
 const segments = computed<Segment[]>(() => {
