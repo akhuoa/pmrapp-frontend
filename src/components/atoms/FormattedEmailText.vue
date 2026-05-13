@@ -11,19 +11,28 @@ type Segment = {
   isLinked: boolean
 }
 
+const normalizeTextWithoutEmail = (value: string) => {
+  return value
+    .replace(/[<>]/g, '')
+    .replace(/\(\s*\)/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+}
+
 const segments = computed<Segment[]>(() => {
   const input = props.text || ''
   if (!input) return []
 
   const trimmedInput = input.trim()
   const validEmailRegex = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/
-  const bracketedEmailRegex = /^(.*?)\s*<\s*([^<>@\s]+@[^<>\s]+)\s*>$/
+  const wrappedEmailRegex =
+    /^(.*?)\s*(?:<\s*([^<>@\s]+@[^<>\s]+)\s*>|\(\s*([^()@\s]+@[^()\s]+)\s*\))$/
 
-  // Preferred format: "Author Name <author@email.com>".
-  const authorEmailMatch = trimmedInput.match(bracketedEmailRegex)
-  if (authorEmailMatch) {
-    const authorName = authorEmailMatch[1].trim()
-    const email = authorEmailMatch[2].trim()
+  // Handles both: "Author Name <author@email.com>" and "Author Name (author@email.com)".
+  const wrappedEmailMatch = trimmedInput.match(wrappedEmailRegex)
+  if (wrappedEmailMatch) {
+    const authorName = wrappedEmailMatch[1].trim()
+    const email = (wrappedEmailMatch[2] || wrappedEmailMatch[3] || '').trim()
 
     if (validEmailRegex.test(email)) {
       return [
@@ -49,7 +58,7 @@ const segments = computed<Segment[]>(() => {
   const emailMatch = trimmedInput.match(validEmailRegex)
   if (emailMatch) {
     const email = emailMatch[0]
-    const textWithoutEmail = trimmedInput.replace(email, '').replace(/[<>]/g, '').trim()
+    const textWithoutEmail = normalizeTextWithoutEmail(trimmedInput.replace(email, ''))
 
     return [
       {
