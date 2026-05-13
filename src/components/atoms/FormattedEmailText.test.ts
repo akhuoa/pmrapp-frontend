@@ -68,7 +68,12 @@ const cases: Case[] = [
 ]
 
 describe('FormattedEmailText', () => {
-  it.each(cases)('renders "$input" correctly', ({ input, expectedText, expectedLinked, expectedHref }) => {
+  it.each(cases)('renders "$input" correctly', ({
+    input,
+    expectedText,
+    expectedLinked,
+    expectedHref,
+  }) => {
     const wrapper = mount(FormattedEmailText, {
       props: {
         text: input,
