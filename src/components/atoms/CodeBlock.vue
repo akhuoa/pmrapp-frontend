@@ -63,6 +63,7 @@ const detectedLanguage = computed(() => {
     markdown: 'markdown',
     matlab: 'matlab',
     md: 'markdown',
+    neon: 'json',
     py: 'python',
     python: 'python',
     rdf: 'markup',
@@ -73,6 +74,7 @@ const detectedLanguage = computed(() => {
     ts: 'javascript',
     tsx: 'javascript',
     xml: 'markup',
+    xul: 'markup',
   }
 
   return ext ? languageMap[ext] || 'plaintext' : 'none'
