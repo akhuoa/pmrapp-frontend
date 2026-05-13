@@ -38,23 +38,10 @@ export function formatFileCount(count: number | undefined | null): string {
 }
 
 /**
- * Escape a string for safe HTML rendering.
- * @param value - Raw string value.
- * @returns HTML-escaped string.
- */
-export function escapeHtml(value: string): string {
-  return value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;')
-}
-
-/**
  * Remove common formatting artifacts after extracting/removing an email from text.
  * @param value - String that may contain leftover wrappers or extra whitespace.
  * @returns Cleaned-up string.
+ * @example normalizeTextWithoutEmail('Author <>') // "Author".
  */
 export function normalizeTextWithoutEmail(value: string): string {
   return value
