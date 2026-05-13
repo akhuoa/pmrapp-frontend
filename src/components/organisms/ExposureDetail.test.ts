@@ -9,10 +9,17 @@ import { useSearchStore } from '@/stores/search'
 
 // Mock Vue Router.
 vi.mock('vue-router', () => ({
-  useRoute: () => ({}),
+  useRoute: () => ({
+    query: {},
+  }),
   useRouter: () => ({
     push: vi.fn(),
     back: vi.fn(),
+    currentRoute: {
+      value: {
+        query: {},
+      },
+    },
   }),
 }))
 
@@ -284,18 +291,24 @@ describe('ExposureDetail', () => {
     expect(toggleWrapMock).toHaveBeenCalledTimes(1)
   })
 
-  it('renders files list with 7 items', async () => {
-    const wrapper = await mountComponent()
+  it('renders WorkspaceFileBrowser with the exposure workspace and commit', async () => {
+    const wrapper = await mountComponent({
+      stubs: {
+        WorkspaceFileBrowser: {
+          name: 'WorkspaceFileBrowser',
+          props: ['alias', 'commitId', 'path', 'onFolderClick', 'onPathChange'],
+          template: '<div class="workspace-file-browser-stub" />',
+        },
+      },
+    })
 
-    const filesList = wrapper.find('ul.divide-y')
-    expect(filesList.exists()).toBe(true)
-
-    const listItems = filesList.findAll('li')
-    expect(listItems).toHaveLength(7)
-
-    const fileCountText = wrapper.find('.text-gray-600')
-    expect(fileCountText.exists()).toBe(true)
-    expect(fileCountText.text()).toContain('7 items')
+    const fileBrowser = wrapper.findComponent({ name: 'WorkspaceFileBrowser' })
+    expect(fileBrowser.exists()).toBe(true)
+    expect(fileBrowser.props('alias')).toBe(mockExposureInfo.workspace_alias)
+    expect(fileBrowser.props('commitId')).toBe(mockExposureInfo.exposure.commit_id)
+    expect(fileBrowser.props('path')).toBeUndefined()
+    expect(typeof fileBrowser.props('onFolderClick')).toBe('function')
+    expect(typeof fileBrowser.props('onPathChange')).toBe('function')
   })
 
   it('renders "Source" section with correct content', async () => {

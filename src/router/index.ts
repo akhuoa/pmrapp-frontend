@@ -43,9 +43,13 @@ const createPluralRouteAliases = (pluralBase: string, aliasBases: string[], suff
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  scrollBehavior(_to, _from, savedPosition) {
+  scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
       return savedPosition
+    }
+    // Don't scroll when only the query changes (same route path).
+    if (to.path === from.path) {
+      return false
     }
     return { top: 0 }
   },
