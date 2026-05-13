@@ -95,6 +95,7 @@ export const isCodeFile = (filename: string): boolean => {
     'matlab',
     'maven',
     'md',
+    'neon',
     'php',
     'prettierrc',
     'proj',

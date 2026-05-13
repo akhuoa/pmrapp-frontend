@@ -12,6 +12,7 @@ import 'prismjs/components/prism-json'
 import 'prismjs/components/prism-python'
 import 'prismjs/components/prism-markdown'
 import 'prismjs/components/prism-matlab'
+import 'prismjs/components/prism-neon'
 import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
 import 'prismjs/plugins/line-numbers/prism-line-numbers'
 
@@ -63,6 +64,7 @@ const detectedLanguage = computed(() => {
     markdown: 'markdown',
     matlab: 'matlab',
     md: 'markdown',
+    neon: 'neon',
     py: 'python',
     python: 'python',
     rdf: 'markup',
