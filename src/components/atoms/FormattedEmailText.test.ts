@@ -17,6 +17,12 @@ const cases: Case[] = [
     expectedHref: 'mailto:authorname@gmail.com',
   },
   {
+    input: 'Author Name<123+author.name456@users.noreply.github.com>',
+    expectedText: 'Author Name',
+    expectedLinked: true,
+    expectedHref: 'mailto:123+author.name456@users.noreply.github.com',
+  },
+  {
     input: 'Author Name <authorname@localhost>',
     expectedText: 'Author Name',
     expectedLinked: false,
