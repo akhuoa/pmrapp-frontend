@@ -111,6 +111,23 @@ describe('isCodeFile', () => {
     expect(isCodeFile('metadata.rdf')).toBe(true)
   })
 
+  it('returns true for text-based files', () => {
+    expect(isCodeFile('transformed.exelem')).toBe(true)
+    expect(isCodeFile('transformed.exnode')).toBe(true)
+  })
+
+  it('returns true for .neon files', () => {
+    expect(isCodeFile('generated.neon')).toBe(true)
+  })
+
+  it('returns true for .xul files', () => {
+    expect(isCodeFile('model.xul')).toBe(true)
+  })
+
+  it('returns true for .hgsub dotfile', () => {
+    expect(isCodeFile('.hgsub')).toBe(true)
+  })
+
   it('returns true for extensionless known filenames', () => {
     expect(isCodeFile('Makefile')).toBe(true)
     expect(isCodeFile('Dockerfile')).toBe(true)
