@@ -89,7 +89,35 @@ const detailHTML = ref<string>('')
 const generatedCode = ref<string>('')
 const generatedCodeFilename = ref<string>('')
 const codeBlockRef = ref<InstanceType<typeof CodeBlock> | null>(null)
-const mathsJSON = ref<[string, string[]][]>([])
+const rawMathsData = ref<[string, string[]][]>([])
+const transformMaths = ref(false)
+const mathFormatOptions = ref<MathMLFormatOptions>({
+  subscript: false,
+  numberFormat: false,
+  greekSymbols: false,
+  scientificENotation: false,
+})
+const mathsJSON = computed<[string, string[]][]>(() => {
+  if (!transformMaths.value) {
+    mathFormatOptions.value = {
+      subscript: false,
+      numberFormat: false,
+      greekSymbols: false,
+      scientificENotation: false,
+    }
+  }
+  return rawMathsData.value.map((entry): [string, string[]] => {
+    const mathMLArray = entry[1].map((mathML) =>
+      formatMathMLTable(mathML, {
+        subscript: mathFormatOptions.value.subscript,
+        numberFormat: mathFormatOptions.value.numberFormat,
+        greekSymbols: mathFormatOptions.value.greekSymbols,
+        scientificENotation: mathFormatOptions.value.scientificENotation,
+      }),
+    )
+    return [entry[0], mathMLArray]
+  })
+})
 const metadataJSON = ref<Metadata>({})
 const htmlViewRef = ref<HTMLElement | null>(null)
 const licenseInfo = ref<string>(DEFAULT_LICENSE)
@@ -293,20 +321,10 @@ const generateMath = async () => {
           (value): value is [string, string[]] => Array.isArray(value[1]) && value[1].length > 0,
         )
       : []
-    const formattedMathsJSON = filteredMathsJSON.map((entry): [string, string[]] => {
-      const mathMLArray = entry[1].map((mathML) => {
-        const transformed = transformMathString(mathML)
-        const options: MathMLFormatOptions = {
-          subscript: true,
-          numberFormat: true,
-          greekSymbols: true,
-          scientificENotation: true,
-        }
-        return formatMathMLTable(transformed, options)
-      })
+    rawMathsData.value = filteredMathsJSON.map((entry): [string, string[]] => {
+      const mathMLArray = entry[1].map((mathML) => transformMathString(mathML))
       return [entry[0], mathMLArray]
     })
-    mathsJSON.value = formattedMathsJSON
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Failed to parse mathematics data.'
     error.value = {
@@ -588,6 +606,50 @@ onMounted(async () => {
       </div>
 
       <div v-else-if="props.view === 'cellml_math'" class="box">
+        <div v-if="rawMathsData.length" class="flex items-center justify-end gap-1.5 mb-4 pb-3 border-b border-gray-200 dark:border-gray-700 flex-wrap">
+          <ActionButton
+            size="sm"
+            :variant="transformMaths ? 'primary' : 'secondary'"
+            content-section="Exposure Detail - Mathematics"
+            @click="transformMaths = !transformMaths"
+          >
+            Transform maths
+          </ActionButton>
+          <template v-if="transformMaths">
+            <ActionButton
+              size="sm"
+              :variant="mathFormatOptions.subscript ? 'primary' : 'secondary'"
+              content-section="Exposure Detail - Mathematics"
+              @click="mathFormatOptions.subscript = !mathFormatOptions.subscript"
+            >
+              Subscript
+            </ActionButton>
+            <ActionButton
+              size="sm"
+              :variant="mathFormatOptions.numberFormat ? 'primary' : 'secondary'"
+              content-section="Exposure Detail - Mathematics"
+              @click="mathFormatOptions.numberFormat = !mathFormatOptions.numberFormat"
+            >
+              Number format
+            </ActionButton>
+            <ActionButton
+              size="sm"
+              :variant="mathFormatOptions.greekSymbols ? 'primary' : 'secondary'"
+              content-section="Exposure Detail - Mathematics"
+              @click="mathFormatOptions.greekSymbols = !mathFormatOptions.greekSymbols"
+            >
+              Greek symbols
+            </ActionButton>
+            <ActionButton
+              size="sm"
+              :variant="mathFormatOptions.scientificENotation ? 'primary' : 'secondary'"
+              content-section="Exposure Detail - Mathematics"
+              @click="mathFormatOptions.scientificENotation = !mathFormatOptions.scientificENotation"
+            >
+              Scientific notation
+            </ActionButton>
+          </template>
+        </div>
         <p v-if="!mathsJSON.length" class="text-sm text-gray-500 dark:text-gray-400">No mathematics content available.</p>
         <template v-else>
           <div v-for="value in mathsJSON" :key="value[0]"
