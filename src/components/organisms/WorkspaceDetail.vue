@@ -4,6 +4,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
+import FormattedEmailText from '@/components/atoms/FormattedEmailText.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import LoadingIcon from '@/components/icons/LoadingIcon.vue'
@@ -168,7 +169,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
 
       <div class="flex flex-col lg:flex-row items-start lg:items-center gap-2" v-if="workspaceInfo.commit.author">
         <span class="font-bold text-gray-600 dark:text-gray-400">Author:</span>
-        <span>{{ workspaceInfo.commit.author }}</span>
+        <FormattedEmailText :text="workspaceInfo.commit.author" />
       </div>
 
       <div class="flex flex-col lg:flex-row items-start lg:items-center gap-2">
