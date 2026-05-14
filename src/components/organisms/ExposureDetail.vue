@@ -13,6 +13,7 @@ import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
 import LoadingIcon from '@/components/icons/LoadingIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
+import MathTransformOptions from '@/components/molecules/MathTransformOptions.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import WorkspaceFileBrowser from '@/components/molecules/WorkspaceFileBrowser.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
@@ -606,49 +607,14 @@ onMounted(async () => {
       </div>
 
       <div v-else-if="props.view === 'cellml_math'" class="box">
-        <div v-if="rawMathsData.length" class="flex items-center justify-end gap-1.5 mb-4 pb-3 border-b border-gray-200 dark:border-gray-700 flex-wrap">
-          <ActionButton
-            size="sm"
-            :variant="transformMaths ? 'primary' : 'secondary'"
-            content-section="Exposure Detail - Mathematics"
-            @click="transformMaths = !transformMaths"
-          >
-            Transform maths
-          </ActionButton>
-          <template v-if="transformMaths">
-            <ActionButton
-              size="sm"
-              :variant="mathFormatOptions.subscript ? 'primary' : 'secondary'"
-              content-section="Exposure Detail - Mathematics"
-              @click="mathFormatOptions.subscript = !mathFormatOptions.subscript"
-            >
-              Subscript
-            </ActionButton>
-            <ActionButton
-              size="sm"
-              :variant="mathFormatOptions.numberFormat ? 'primary' : 'secondary'"
-              content-section="Exposure Detail - Mathematics"
-              @click="mathFormatOptions.numberFormat = !mathFormatOptions.numberFormat"
-            >
-              Number format
-            </ActionButton>
-            <ActionButton
-              size="sm"
-              :variant="mathFormatOptions.greekSymbols ? 'primary' : 'secondary'"
-              content-section="Exposure Detail - Mathematics"
-              @click="mathFormatOptions.greekSymbols = !mathFormatOptions.greekSymbols"
-            >
-              Greek symbols
-            </ActionButton>
-            <ActionButton
-              size="sm"
-              :variant="mathFormatOptions.scientificENotation ? 'primary' : 'secondary'"
-              content-section="Exposure Detail - Mathematics"
-              @click="mathFormatOptions.scientificENotation = !mathFormatOptions.scientificENotation"
-            >
-              Scientific notation
-            </ActionButton>
-          </template>
+        <div v-if="rawMathsData.length" class="mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
+          <MathTransformOptions
+            :has-maths-data="rawMathsData.length > 0"
+            :transform-maths="transformMaths"
+            :options="mathFormatOptions"
+            @update:transform-maths="transformMaths = $event"
+            @update:options="mathFormatOptions = $event"
+          />
         </div>
         <p v-if="!mathsJSON.length" class="text-sm text-gray-500 dark:text-gray-400">No mathematics content available.</p>
         <template v-else>
