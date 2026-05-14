@@ -1,5 +1,6 @@
 import { _MathTransforms as mathPolyfills } from '../vendor/mathml-polyfills/all-polyfills-bundle.js'
 import { formatNumber } from './format'
+import type { MathMLFormatOptions } from '@/types/mathml'
 
 let sharedDOMParser: DOMParser | null = null
 
@@ -351,8 +352,15 @@ export function transformMathString(rawMathML: string): string {
  * @param rawMathML The string containing updated <math> tags.
  * @returns The formatted MathML string.
  */
-export const formatMathMLTable = (rawMathML: string): string => {
+export const formatMathMLTable = (rawMathML: string, options?: MathMLFormatOptions): string => {
   if (typeof document === 'undefined') return rawMathML
+
+  const {
+    subscript = true,
+    numberFormat = true,
+    greekSymbols = true,
+    scientificENotation = true,
+  }: MathMLFormatOptions = options ?? {}
 
   const parser = getDOMParser()
   const doc = parser.parseFromString(rawMathML, 'text/html')
@@ -361,11 +369,19 @@ export const formatMathMLTable = (rawMathML: string): string => {
 
   mathBlocks.forEach((math) => {
     fixMismatchedFencePairs(math)
-    normaliseUnderscoreIdentifiers(math)
+    if (subscript) {
+      normaliseUnderscoreIdentifiers(math)
+    }
     normaliseLogicalOperators(math)
-    normaliseNumericLiterals(math)
-    normaliseScientificENotation(math)
-    normaliseNamedGreekIdentifiers(math)
+    if (numberFormat) {
+      normaliseNumericLiterals(math)
+    }
+    if (scientificENotation) {
+      normaliseScientificENotation(math)
+    }
+    if (greekSymbols) {
+      normaliseNamedGreekIdentifiers(math)
+    }
 
     const rows = Array.from(math.children).filter((child) => child.tagName.toLowerCase() === 'mrow')
 

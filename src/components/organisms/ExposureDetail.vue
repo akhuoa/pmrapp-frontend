@@ -21,6 +21,7 @@ import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
 import type { ErrorInfo } from '@/types/error'
 import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
+import type { MathMLFormatOptions } from '@/types/mathml'
 import { formatCitation, formatCitationAuthor } from '@/utils/citation'
 import { downloadFileFromContent } from '@/utils/download'
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
@@ -295,7 +296,13 @@ const generateMath = async () => {
     const formattedMathsJSON = filteredMathsJSON.map((entry): [string, string[]] => {
       const mathMLArray = entry[1].map((mathML) => {
         const transformed = transformMathString(mathML)
-        return formatMathMLTable(transformed)
+        const options: MathMLFormatOptions = {
+          subscript: false,
+          numberFormat: true,
+          greekSymbols: true,
+          scientificENotation: false,
+        }
+        return formatMathMLTable(transformed, options)
       })
       return [entry[0], mathMLArray]
     })
