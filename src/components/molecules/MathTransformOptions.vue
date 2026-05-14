@@ -45,15 +45,22 @@ const optionItems = [
 ] as const
 
 const toggleTransformMaths = () => {
-  const nextValue = !props.transformMaths
+  if (props.transformMaths) {
+    emit('update:transformMaths', false)
+    return
+  }
 
-  emit('update:transformMaths', nextValue)
-  emit('update:options', {
-    subscript: nextValue,
-    numberFormat: nextValue,
-    greekSymbols: nextValue,
-    scientificENotation: nextValue,
-  })
+  const hasEnabledOption = Object.values(props.options).some(Boolean)
+  if (!hasEnabledOption) {
+    emit('update:options', {
+      subscript: true,
+      numberFormat: true,
+      greekSymbols: true,
+      scientificENotation: true,
+    })
+  }
+
+  emit('update:transformMaths', true)
 }
 
 const toggleOption = (key: keyof MathMLFormatOptions) => {

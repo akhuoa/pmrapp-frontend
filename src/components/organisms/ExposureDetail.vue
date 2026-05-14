@@ -101,21 +101,15 @@ const rawMathsData = ref<[string, string[]][]>([])
 const transformMaths = ref(false)
 const mathFormatOptions = ref<MathMLFormatOptions>({ ...DEFAULT_MATH_FORMAT_OPTIONS })
 const mathsJSON = computed<[string, string[]][]>(() => {
-  if (!transformMaths.value) {
-    mathFormatOptions.value = {
-      subscript: false,
-      numberFormat: false,
-      greekSymbols: false,
-      scientificENotation: false,
-    }
-  }
+  const appliedOptions = transformMaths.value ? mathFormatOptions.value : DEFAULT_MATH_FORMAT_OPTIONS
+
   return rawMathsData.value.map((entry): [string, string[]] => {
     const mathMLArray = entry[1].map((mathML) =>
       formatMathMLTable(mathML, {
-        subscript: mathFormatOptions.value.subscript,
-        numberFormat: mathFormatOptions.value.numberFormat,
-        greekSymbols: mathFormatOptions.value.greekSymbols,
-        scientificENotation: mathFormatOptions.value.scientificENotation,
+        subscript: appliedOptions.subscript,
+        numberFormat: appliedOptions.numberFormat,
+        greekSymbols: appliedOptions.greekSymbols,
+        scientificENotation: appliedOptions.scientificENotation,
       }),
     )
     return [entry[0], mathMLArray]
