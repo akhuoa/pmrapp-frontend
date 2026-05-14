@@ -350,17 +350,18 @@ export function transformMathString(rawMathML: string): string {
 /**
  * Formats a MathML string into a table structure for better rendering.
  * @param rawMathML The string containing updated <math> tags.
+ * @param options Configuration options to control which normalisation steps are applied.
  * @returns The formatted MathML string.
  */
-export const formatMathMLTable = (rawMathML: string, options?: MathMLFormatOptions): string => {
+export const formatMathMLTable = (rawMathML: string, options: MathMLFormatOptions): string => {
   if (typeof document === 'undefined') return rawMathML
 
   const {
-    subscript = true,
-    numberFormat = true,
-    greekSymbols = true,
-    scientificENotation = true,
-  }: MathMLFormatOptions = options ?? {}
+    subscript = false,
+    numberFormat = false,
+    greekSymbols = false,
+    scientificENotation = false,
+  }: MathMLFormatOptions = options
 
   const parser = getDOMParser()
   const doc = parser.parseFromString(rawMathML, 'text/html')

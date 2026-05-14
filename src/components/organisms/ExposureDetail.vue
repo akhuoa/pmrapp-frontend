@@ -297,10 +297,10 @@ const generateMath = async () => {
       const mathMLArray = entry[1].map((mathML) => {
         const transformed = transformMathString(mathML)
         const options: MathMLFormatOptions = {
-          subscript: false,
+          subscript: true,
           numberFormat: true,
           greekSymbols: true,
-          scientificENotation: false,
+          scientificENotation: true,
         }
         return formatMathMLTable(transformed, options)
       })
