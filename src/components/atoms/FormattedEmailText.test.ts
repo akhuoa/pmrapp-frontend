@@ -11,6 +11,11 @@ type Case = {
 
 const cases: Case[] = [
   {
+    input: '  ',
+    expectedText: '',
+    expectedLinked: false,
+  },
+  {
     input: 'Author Name <authorname@gmail.com>',
     expectedText: 'Author Name',
     expectedLinked: true,
