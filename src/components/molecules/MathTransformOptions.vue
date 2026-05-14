@@ -39,7 +39,7 @@ const optionItems = [
   },
   {
     key: 'scientificENotation',
-    label: 'Scientific Notation',
+    label: 'Format E-notation',
     preview: '10ⁿ',
   },
 ] as const
