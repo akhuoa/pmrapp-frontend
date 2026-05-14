@@ -18,6 +18,7 @@ import PageHeader from '@/components/molecules/PageHeader.vue'
 import WorkspaceFileBrowser from '@/components/molecules/WorkspaceFileBrowser.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { downloadCOMBINEArchive, downloadWorkspaceArchive } from '@/services/downloadUrlService'
+import { getMathFormatOptionsStorageService } from '@/services'
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
 import type { ErrorInfo } from '@/types/error'
@@ -78,6 +79,12 @@ const CODEGEN_LANGUAGES = [
     fileName: 'code.py',
   },
 ]
+const DEFAULT_MATH_FORMAT_OPTIONS: Required<MathMLFormatOptions> = {
+  subscript: false,
+  numberFormat: false,
+  greekSymbols: false,
+  scientificENotation: false,
+}
 
 const exposureStore = useExposureStore()
 const exposureInfo = ref<ExposureInfo | null>(null)
@@ -92,12 +99,7 @@ const generatedCodeFilename = ref<string>('')
 const codeBlockRef = ref<InstanceType<typeof CodeBlock> | null>(null)
 const rawMathsData = ref<[string, string[]][]>([])
 const transformMaths = ref(false)
-const mathFormatOptions = ref<MathMLFormatOptions>({
-  subscript: false,
-  numberFormat: false,
-  greekSymbols: false,
-  scientificENotation: false,
-})
+const mathFormatOptions = ref<MathMLFormatOptions>({ ...DEFAULT_MATH_FORMAT_OPTIONS })
 const mathsJSON = computed<[string, string[]][]>(() => {
   if (!transformMaths.value) {
     mathFormatOptions.value = {
@@ -495,6 +497,14 @@ watch(detailHTML, async () => {
 })
 
 watch(
+  [transformMaths, mathFormatOptions],
+  ([transformMathsEnabled, options]) => {
+    getMathFormatOptionsStorageService().save(transformMathsEnabled, options)
+  },
+  { deep: true },
+)
+
+watch(
   () => props.file,
   async (newFile, oldFile) => {
     if (newFile === oldFile) return
@@ -516,6 +526,12 @@ watch(
 )
 
 onMounted(async () => {
+  const savedMathFormatState = getMathFormatOptionsStorageService().load()
+  if (savedMathFormatState) {
+    transformMaths.value = savedMathFormatState.transformMaths
+    mathFormatOptions.value = { ...savedMathFormatState.options }
+  }
+
   error.value = null
 
   try {
