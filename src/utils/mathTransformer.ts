@@ -1,6 +1,6 @@
+import type { MathMLFormatOptions } from '@/types/mathml'
 import { _MathTransforms as mathPolyfills } from '../vendor/mathml-polyfills/all-polyfills-bundle.js'
 import { formatNumber } from './format'
-import type { MathMLFormatOptions } from '@/types/mathml'
 
 let sharedDOMParser: DOMParser | null = null
 
