@@ -91,10 +91,9 @@ onUnmounted(() => {
 <template>
   <div
     v-if="hasMathsData"
-    ref="dropdownRef"
     class="sticky top-24 z-30 flex justify-end mb-4"
   >
-    <div class="relative inline-block">
+    <div class="relative inline-block" ref="dropdownRef">
       <ActionButton
         variant="secondary"
         customClasses="shadow-sm hover:shadow-none active:shadow-none"
