@@ -19,6 +19,7 @@ interface Props {
   target?: string
   rel?: string
   tooltip?: string
+  customClasses?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -78,7 +79,7 @@ const buttonClasses = 'inline-flex items-center justify-center gap-2 cursor-poin
     v-if="href"
     ref="buttonEl"
     :href="href"
-    :class="[variantClasses[variant], sizeClasses[size], disabledClasses[variant], buttonClasses]"
+    :class="[variantClasses[variant], sizeClasses[size], disabledClasses[variant], buttonClasses, customClasses]"
     :download="download || undefined"
     :target="target"
     :rel="rel"
@@ -94,7 +95,7 @@ const buttonClasses = 'inline-flex items-center justify-center gap-2 cursor-poin
   <RouterLink
     v-else-if="to"
     :to="to"
-    :class="[variantClasses[variant], sizeClasses[size], buttonClasses]"
+    :class="[variantClasses[variant], sizeClasses[size], buttonClasses, customClasses]"
     @click="handleClick"
   >
     <slot />
@@ -102,7 +103,7 @@ const buttonClasses = 'inline-flex items-center justify-center gap-2 cursor-poin
   <button
     v-else
     ref="buttonEl"
-    :class="[variantClasses[variant], sizeClasses[size], disabledClasses[variant], buttonClasses]"
+    :class="[variantClasses[variant], sizeClasses[size], disabledClasses[variant], buttonClasses, customClasses]"
     :type="type"
     :disabled="disabled"
     @click="handleClick"

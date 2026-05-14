@@ -85,11 +85,12 @@ onUnmounted(() => {
   <div
     v-if="hasMathsData"
     ref="dropdownRef"
-    class="sticky top-22 z-30 flex justify-end mb-4"
+    class="sticky top-24 z-30 flex justify-end mb-4"
   >
     <div class="relative inline-block">
       <ActionButton
         variant="secondary"
+        customClasses="shadow-sm hover:shadow-none active:shadow-none"
         size="md"
         aria-haspopup="menu"
         :aria-expanded="isOpen"
@@ -119,7 +120,7 @@ onUnmounted(() => {
             <div class="flex items-center justify-between gap-4 rounded-md bg-gray-50 px-3 py-3 dark:bg-gray-800/70">
               <div class="min-w-0">
                 <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Enable formatting</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Turn on MathML formatting controls.</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Format mathematical expressions.</p>
               </div>
               <button
                 type="button"
