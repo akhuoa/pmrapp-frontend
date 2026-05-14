@@ -23,14 +23,14 @@ const dropdownRef = ref<HTMLDivElement | null>(null)
 
 const optionItems = [
   {
-    key: 'subscript',
-    label: 'Subscript',
-    preview: 'xₙ',
-  },
-  {
     key: 'numberFormat',
     label: 'Digit Separators',
     preview: '#,###',
+  },
+  {
+    key: 'scientificENotation',
+    label: 'Format E-notation',
+    preview: '10ⁿ',
   },
   {
     key: 'greekSymbols',
@@ -38,9 +38,9 @@ const optionItems = [
     preview: 'α β',
   },
   {
-    key: 'scientificENotation',
-    label: 'Format E-notation',
-    preview: '10ⁿ',
+    key: 'subscript',
+    label: 'Subscript',
+    preview: 'xₙ',
   },
 ] as const
 
