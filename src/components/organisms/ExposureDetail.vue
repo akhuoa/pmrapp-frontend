@@ -607,15 +607,13 @@ onMounted(async () => {
       </div>
 
       <div v-else-if="props.view === 'cellml_math'" class="box">
-        <div v-if="rawMathsData.length" class="mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
-          <MathTransformOptions
-            :has-maths-data="rawMathsData.length > 0"
-            :transform-maths="transformMaths"
-            :options="mathFormatOptions"
-            @update:transform-maths="transformMaths = $event"
-            @update:options="mathFormatOptions = $event"
-          />
-        </div>
+        <MathTransformOptions
+          :has-maths-data="rawMathsData.length > 0"
+          :transform-maths="transformMaths"
+          :options="mathFormatOptions"
+          @update:transform-maths="transformMaths = $event"
+          @update:options="mathFormatOptions = $event"
+        />
         <p v-if="!mathsJSON.length" class="text-sm text-gray-500 dark:text-gray-400">No mathematics content available.</p>
         <template v-else>
           <div v-for="value in mathsJSON" :key="value[0]"
