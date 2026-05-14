@@ -28,6 +28,16 @@ const cases: Case[] = [
     expectedLinked: false,
   },
   {
+    input: 'Name <foo@bar@example.com>',
+    expectedText: 'Name',
+    expectedLinked: false,
+  },
+  {
+    input: 'Name <user@example.com.>',
+    expectedText: 'Name',
+    expectedLinked: false,
+  },
+  {
     input: 'author name',
     expectedText: 'author name',
     expectedLinked: false,

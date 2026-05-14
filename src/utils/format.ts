@@ -36,17 +36,3 @@ export function formatFileCount(count: number | undefined | null): string {
   const formatted = formatNumber(count)
   return `${formatted} ${count === 1 ? 'item' : 'items'}`
 }
-
-/**
- * Remove common formatting artifacts after extracting/removing an email from text.
- * @param value - String that may contain leftover wrappers or extra whitespace.
- * @returns Cleaned-up string.
- * @example normalizeTextWithoutEmail('Author <>') // "Author".
- */
-export function normalizeTextWithoutEmail(value: string): string {
-  return value
-    .replace(/[<>]/g, '')
-    .replace(/\(\s*\)/g, '')
-    .replace(/\s{2,}/g, ' ')
-    .trim()
-}

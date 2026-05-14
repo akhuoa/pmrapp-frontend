@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { normalizeTextWithoutEmail } from '@/utils/format'
 
 const props = defineProps<{
   text: string
@@ -17,7 +16,7 @@ const segments = computed<Segment[]>(() => {
   if (!input) return []
 
   const trimmedInput = input.trim()
-  const validEmailRegex = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/
+  const validEmailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
   const wrappedEmailRegex =
     /^(.*?)\s*(?:<\s*([^<>@\s]+@[^<>\s]+)\s*>|\(\s*([^()@\s]+@[^()\s]+)\s*\))$/
 
@@ -47,16 +46,12 @@ const segments = computed<Segment[]>(() => {
     ]
   }
 
-  // Fallback for strings that still contain an email in another layout.
-  const emailMatch = trimmedInput.match(validEmailRegex)
-  if (emailMatch) {
-    const email = emailMatch[0]
-    const textWithoutEmail = normalizeTextWithoutEmail(trimmedInput.replace(email, ''))
-
+  // Fallback: the entire input is a plain email address.
+  if (validEmailRegex.test(trimmedInput)) {
     return [
       {
-        value: textWithoutEmail || email,
-        email,
+        value: trimmedInput,
+        email: trimmedInput,
         isLinked: true,
       },
     ]
