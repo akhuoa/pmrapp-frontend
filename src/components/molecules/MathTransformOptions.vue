@@ -90,15 +90,15 @@ onUnmounted(() => {
     <div class="relative inline-block">
       <ActionButton
         variant="secondary"
-        size="sm"
+        size="md"
         aria-haspopup="menu"
         :aria-expanded="isOpen"
-        aria-label="View math options"
+        aria-label="View math display options"
         content-section="Exposure Detail - Mathematics"
         @click="isOpen = !isOpen"
       >
         <SettingsIcon class="w-4 h-4" />
-        <span>View options</span>
+        <span>Display options</span>
         <ChevronDownIcon class="w-4 h-4" />
       </ActionButton>
 

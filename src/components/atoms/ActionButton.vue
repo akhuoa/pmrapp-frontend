@@ -53,7 +53,7 @@ const disabledClasses = {
   icon: 'disabled:opacity-60 disabled:cursor-not-allowed',
 }
 
-const secondaryLightModeClasses = 'border-gray-300 bg-gray-100/50 hover:bg-gray-100'
+const secondaryLightModeClasses = 'border-gray-300 bg-gray-100 hover:bg-gray-100'
 const secondaryDarkModeClasses = 'dark:border-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700'
 
 const variantClasses = {
