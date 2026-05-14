@@ -101,7 +101,9 @@ const rawMathsData = ref<[string, string[]][]>([])
 const transformMaths = ref(false)
 const mathFormatOptions = ref<MathMLFormatOptions>({ ...DEFAULT_MATH_FORMAT_OPTIONS })
 const mathsJSON = computed<[string, string[]][]>(() => {
-  const appliedOptions = transformMaths.value ? mathFormatOptions.value : DEFAULT_MATH_FORMAT_OPTIONS
+  const appliedOptions = transformMaths.value
+    ? mathFormatOptions.value
+    : DEFAULT_MATH_FORMAT_OPTIONS
 
   return rawMathsData.value.map((entry): [string, string[]] => {
     const mathMLArray = entry[1].map((mathML) =>
