@@ -233,6 +233,24 @@ const normaliseNamedGreekIdentifiers = (root: ParentNode) => {
     const rawText = (identifier.textContent || '').trim()
     if (!rawText) return
 
+    if (rawText.includes('_')) {
+      const parts = rawText.split('_')
+      let hasReplacement = false
+
+      const normalisedParts = parts.map((part) => {
+        const replacement = GREEK_IDENTIFIER_SYMBOLS[part.trim().toLowerCase()]
+        if (!replacement) return part
+
+        hasReplacement = true
+        return replacement
+      })
+
+      if (hasReplacement) {
+        identifier.textContent = normalisedParts.join('_')
+      }
+      return
+    }
+
     const replacement = GREEK_IDENTIFIER_SYMBOLS[rawText.toLowerCase()]
     if (!replacement) return
 

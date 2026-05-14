@@ -351,6 +351,26 @@ describe('formatMathMLTable', () => {
     expect(result).not.toContain('<mi>Gamma</mi>')
   })
 
+  it('converts Greek names inside underscore identifiers when only greekSymbols is enabled', () => {
+    const greekWithUnderscoreEquation = `<math xmlns="http://www.w3.org/1998/Math/MathML">
+      <mrow>
+        <mi>alpha_2</mi><mo>+</mo><mi>beta_tau</mi>
+      </mrow>
+    </math>`
+
+    const result = formatMathMLTable(greekWithUnderscoreEquation, {
+      subscript: false,
+      numberFormat: false,
+      greekSymbols: true,
+      scientificENotation: false,
+    })
+
+    expect(result).toContain('<mi>α_2</mi>')
+    expect(result).toContain('<mi>β_τ</mi>')
+    expect(result).not.toContain('<mi>alpha_2</mi>')
+    expect(result).not.toContain('<mi>beta_tau</mi>')
+  })
+
   it('converts scientific e-notation tokens into multiplication by 10 to an exponent', () => {
     const scientificNotationEquation = `<math xmlns="http://www.w3.org/1998/Math/MathML">
       <mrow>
