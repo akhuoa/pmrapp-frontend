@@ -4,6 +4,8 @@ const MATH_FORMAT_OPTIONS_STORAGE_KEY = 'math_format_options_v1'
 
 type NormalisedMathFormatOptions = Required<MathMLFormatOptions>
 
+const normaliseOptionFlag = (value: unknown): boolean => value === true
+
 export type SavedMathFormatState = {
   transformMaths: boolean
   options: NormalisedMathFormatOptions
@@ -12,10 +14,10 @@ export type SavedMathFormatState = {
 const normaliseMathFormatOptions = (
   options: Partial<MathMLFormatOptions> | null | undefined,
 ): NormalisedMathFormatOptions => ({
-  subscript: Boolean(options?.subscript),
-  numberFormat: Boolean(options?.numberFormat),
-  greekSymbols: Boolean(options?.greekSymbols),
-  scientificENotation: Boolean(options?.scientificENotation),
+  subscript: normaliseOptionFlag(options?.subscript),
+  numberFormat: normaliseOptionFlag(options?.numberFormat),
+  greekSymbols: normaliseOptionFlag(options?.greekSymbols),
+  scientificENotation: normaliseOptionFlag(options?.scientificENotation),
 })
 
 export const mathFormatOptionsStorageService = {
