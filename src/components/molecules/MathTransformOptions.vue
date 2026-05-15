@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
 import SettingsIcon from '@/components/icons/SettingsIcon.vue'
@@ -20,6 +20,7 @@ const props = defineProps<Props>()
 
 const isOpen = ref(false)
 const dropdownRef = ref<HTMLDivElement | null>(null)
+const hasActiveFormatting = computed(() => props.transformMaths && Object.values(props.options).some(Boolean))
 
 const optionItems = [
   {
@@ -100,7 +101,7 @@ onUnmounted(() => {
         aria-haspopup="dialog"
         :aria-expanded="isOpen"
         aria-controls="math-format-options-panel"
-        aria-label="View math display options"
+        :aria-label="hasActiveFormatting ? 'View math display options. Mathematics formatting is active.' : 'View math display options. Mathematics formatting is inactive.'"
         content-section="Exposure Detail - Mathematics"
         @click="isOpen = !isOpen"
       >
@@ -182,7 +183,8 @@ onUnmounted(() => {
       <!-- Notification dot: shown when any option is enabled. -->
       <div
         class="absolute top-0 right-0 -mt-1 -mr-1 block h-3 w-3 rounded-full bg-error"
-        v-if="transformMaths && Object.values(options).some(Boolean)"
+        v-if="hasActiveFormatting"
+        aria-hidden="true"
       ></div>
     </div>
   </div>
