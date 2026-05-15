@@ -97,8 +97,9 @@ onUnmounted(() => {
         variant="secondary"
         customClasses="shadow-sm hover:shadow-none active:shadow-none"
         size="md"
-        aria-haspopup="menu"
+        aria-haspopup="dialog"
         :aria-expanded="isOpen"
+        aria-controls="math-format-options-panel"
         aria-label="View math display options"
         content-section="Exposure Detail - Mathematics"
         @click="isOpen = !isOpen"
@@ -118,7 +119,10 @@ onUnmounted(() => {
       >
         <div
           v-if="isOpen"
-          role="menu"
+          id="math-format-options-panel"
+          role="dialog"
+          aria-modal="false"
+          aria-label="Math display options"
           class="absolute top-full right-0 mt-2 w-80 rounded-md border border-gray-200 bg-white shadow-lg z-50 dark:border-gray-700 dark:bg-background"
         >
           <div class="p-3 space-y-3">
