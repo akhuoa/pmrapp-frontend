@@ -85,6 +85,7 @@ describe('mathFormatOptionsStorageService', () => {
       localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify({
+          transformMaths: true,
           options: {
             subscript: false,
             numberFormat: false,
