@@ -175,6 +175,12 @@ onUnmounted(() => {
           </div>
         </div>
       </transition>
+
+      <!-- Notification dot: shown when any option is enabled. -->
+      <div
+        class="absolute top-0 right-0 -mt-1 -mr-1 block h-3 w-3 rounded-full bg-error"
+        v-if="transformMaths && Object.values(options).some(Boolean)"
+      ></div>
     </div>
   </div>
 </template>
