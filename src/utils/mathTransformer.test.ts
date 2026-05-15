@@ -8,6 +8,34 @@ const ENABLE_ALL_OPTIONS = {
   scientificENotation: true,
 }
 
+const ENABLE_SUBSCRIPT_ONLY = {
+  subscript: true,
+  numberFormat: false,
+  greekSymbols: false,
+  scientificENotation: false,
+}
+
+const ENABLE_NUMBER_FORMAT_ONLY = {
+  subscript: false,
+  numberFormat: true,
+  greekSymbols: false,
+  scientificENotation: false,
+}
+
+const ENABLE_GREEK_SYMBOLS_ONLY = {
+  subscript: false,
+  numberFormat: false,
+  greekSymbols: true,
+  scientificENotation: false,
+}
+
+const ENABLE_SCIENTIFIC_E_NOTATION_ONLY = {
+  subscript: false,
+  numberFormat: false,
+  greekSymbols: false,
+  scientificENotation: true,
+}
+
 /**
  * Tests for MathML transformation utilities.
  *
@@ -319,6 +347,36 @@ describe('formatMathMLTable', () => {
     expect(result).toContain('<mi>Amplitude</mi>')
   })
 
+  it('applies subscript formatting when only subscript option is enabled', () => {
+    const underscoredIdentifierEquation = `<math xmlns="http://www.w3.org/1998/Math/MathML">
+      <mrow>
+        <mi>V_m_steady</mi>
+      </mrow>
+    </math>`
+
+    const result = formatMathMLTable(underscoredIdentifierEquation, ENABLE_SUBSCRIPT_ONLY)
+
+    const subscriptMatches = result.match(/<msub/g) || []
+    expect(subscriptMatches.length).toBe(2)
+    expect(result).toContain('<mi>V</mi>')
+    expect(result).toContain('<mi>m</mi>')
+    expect(result).toContain('<mi>steady</mi>')
+  })
+
+  it('applies digit separator formatting when only numberFormat option is enabled', () => {
+    const numberFormattingEquation = `<math xmlns="http://www.w3.org/1998/Math/MathML">
+      <mrow>
+        <mn>1000</mn><mo>+</mo><mn>2500000</mn><mo>+</mo><mn>10</mn>
+      </mrow>
+    </math>`
+
+    const result = formatMathMLTable(numberFormattingEquation, ENABLE_NUMBER_FORMAT_ONLY)
+
+    expect(result).toContain('<mn>1,000</mn>')
+    expect(result).toContain('<mn>2,500,000</mn>')
+    expect(result).toContain('<mn>10</mn>')
+  })
+
   it('replaces logical operator symbols with text labels', () => {
     const logicalOperatorsEquation = `<math xmlns="http://www.w3.org/1998/Math/MathML">
       <mrow>
@@ -358,6 +416,21 @@ describe('formatMathMLTable', () => {
     expect(result).not.toContain('<mi>Gamma</mi>')
   })
 
+  it('applies greek symbol formatting when only greekSymbols option is enabled', () => {
+    const greekIdentifiersEquation = `<math xmlns="http://www.w3.org/1998/Math/MathML">
+      <mrow>
+        <mi>alpha</mi><mo>+</mo><mi>beta_tau</mi>
+      </mrow>
+    </math>`
+
+    const result = formatMathMLTable(greekIdentifiersEquation, ENABLE_GREEK_SYMBOLS_ONLY)
+
+    expect(result).toContain('<mi>α</mi>')
+    expect(result).toContain('<mi>β_τ</mi>')
+    expect(result).not.toContain('<mi>alpha</mi>')
+    expect(result).not.toContain('<mi>beta_tau</mi>')
+  })
+
   it('converts Greek names inside underscore identifiers when only greekSymbols is enabled', () => {
     const greekWithUnderscoreEquation = `<math xmlns="http://www.w3.org/1998/Math/MathML">
       <mrow>
@@ -392,6 +465,23 @@ describe('formatMathMLTable', () => {
     expect(result).toContain('<mn>3.1</mn>')
     expect(result).toContain('<mo>·</mo>')
     expect(result).toContain('<msup><mn>10</mn><mn>5</mn></msup>')
+    expect(result).not.toContain('<mo>e</mo>')
+  })
+
+  it('applies scientific e-notation formatting when only scientificENotation option is enabled', () => {
+    const scientificNotationEquation = `<math xmlns="http://www.w3.org/1998/Math/MathML">
+      <mrow>
+        <mn>6.2</mn>
+        <mo>e</mo>
+        <mn>-3</mn>
+      </mrow>
+    </math>`
+
+    const result = formatMathMLTable(scientificNotationEquation, ENABLE_SCIENTIFIC_E_NOTATION_ONLY)
+
+    expect(result).toContain('<mn>6.2</mn>')
+    expect(result).toContain('<mo>·</mo>')
+    expect(result).toContain('<msup><mn>10</mn><mn>-3</mn></msup>')
     expect(result).not.toContain('<mo>e</mo>')
   })
 })
