@@ -81,7 +81,7 @@ const CODEGEN_LANGUAGES = [
 ]
 const DEFAULT_MATH_FORMAT_OPTIONS: Required<MathMLFormatOptions> = {
   subscript: false,
-  numberFormat: false,
+  digitGrouping: false,
   greekSymbols: false,
 }
 
@@ -108,7 +108,7 @@ const mathsJSON = computed<[string, string[]][]>(() => {
     const mathMLArray = entry[1].map((mathML) =>
       formatMathMLTable(mathML, {
         subscript: appliedOptions.subscript,
-        numberFormat: appliedOptions.numberFormat,
+        digitGrouping: appliedOptions.digitGrouping,
         greekSymbols: appliedOptions.greekSymbols,
       }),
     )

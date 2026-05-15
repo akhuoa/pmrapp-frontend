@@ -3,25 +3,25 @@ import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/uti
 
 const ENABLE_ALL_OPTIONS = {
   subscript: true,
-  numberFormat: true,
+  digitGrouping: true,
   greekSymbols: true,
 }
 
 const ENABLE_SUBSCRIPT_ONLY = {
   subscript: true,
-  numberFormat: false,
+  digitGrouping: false,
   greekSymbols: false,
 }
 
-const ENABLE_NUMBER_FORMAT_ONLY = {
+const ENABLE_DIGIT_GROUPING_ONLY = {
   subscript: false,
-  numberFormat: true,
+  digitGrouping: true,
   greekSymbols: false,
 }
 
 const ENABLE_GREEK_SYMBOLS_ONLY = {
   subscript: false,
-  numberFormat: false,
+  digitGrouping: false,
   greekSymbols: true,
 }
 
@@ -244,13 +244,13 @@ describe('formatMathMLTable', () => {
   })
 
   it('formats large integer numerals with thousands separators', () => {
-    const numberFormattingEquation = `<math xmlns="http://www.w3.org/1998/Math/MathML">
+    const digitGroupingEquation = `<math xmlns="http://www.w3.org/1998/Math/MathML">
       <mrow>
         <mn>1000</mn><mo>+</mo><mn>2500000</mn><mo>+</mo><mn>999</mn>
       </mrow>
     </math>`
 
-    const result = formatMathMLTable(numberFormattingEquation, ENABLE_ALL_OPTIONS)
+    const result = formatMathMLTable(digitGroupingEquation, ENABLE_ALL_OPTIONS)
 
     expect(result).toContain('<mn>1,000</mn>')
     expect(result).toContain('<mn>2,500,000</mn>')
@@ -352,14 +352,14 @@ describe('formatMathMLTable', () => {
     expect(result).toContain('<mi>steady</mi>')
   })
 
-  it('applies digit separator formatting when only numberFormat option is enabled', () => {
-    const numberFormattingEquation = `<math xmlns="http://www.w3.org/1998/Math/MathML">
+  it('applies digit group formatting when only digitGrouping option is enabled', () => {
+    const digitGroupingEquation = `<math xmlns="http://www.w3.org/1998/Math/MathML">
       <mrow>
         <mn>1000</mn><mo>+</mo><mn>2500000</mn><mo>+</mo><mn>10</mn>
       </mrow>
     </math>`
 
-    const result = formatMathMLTable(numberFormattingEquation, ENABLE_NUMBER_FORMAT_ONLY)
+    const result = formatMathMLTable(digitGroupingEquation, ENABLE_DIGIT_GROUPING_ONLY)
 
     expect(result).toContain('<mn>1,000</mn>')
     expect(result).toContain('<mn>2,500,000</mn>')
@@ -429,7 +429,7 @@ describe('formatMathMLTable', () => {
 
     const result = formatMathMLTable(greekWithUnderscoreEquation, {
       subscript: false,
-      numberFormat: false,
+      digitGrouping: false,
       greekSymbols: true,
     })
 

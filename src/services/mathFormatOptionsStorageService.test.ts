@@ -21,7 +21,7 @@ describe('mathFormatOptionsStorageService', () => {
           transformMaths: true,
           options: {
             subscript: true,
-            numberFormat: false,
+            digitGrouping: false,
             greekSymbols: true,
           },
         }),
@@ -31,7 +31,7 @@ describe('mathFormatOptionsStorageService', () => {
         transformMaths: true,
         options: {
           subscript: true,
-          numberFormat: false,
+          digitGrouping: false,
           greekSymbols: true,
         },
       })
@@ -52,7 +52,7 @@ describe('mathFormatOptionsStorageService', () => {
         transformMaths: false,
         options: {
           subscript: true,
-          numberFormat: false,
+          digitGrouping: false,
           greekSymbols: false,
         },
       })
@@ -65,7 +65,7 @@ describe('mathFormatOptionsStorageService', () => {
           transformMaths: true,
           options: {
             subscript: 'true',
-            numberFormat: 1,
+            digitGrouping: 1,
             greekSymbols: null,
           },
         }),
@@ -75,7 +75,7 @@ describe('mathFormatOptionsStorageService', () => {
         transformMaths: true,
         options: {
           subscript: false,
-          numberFormat: false,
+          digitGrouping: false,
           greekSymbols: false,
         },
       })
@@ -88,7 +88,7 @@ describe('mathFormatOptionsStorageService', () => {
           transformMaths: true,
           options: {
             subscript: false,
-            numberFormat: false,
+            digitGrouping: false,
             greekSymbols: false,
           },
         }),
@@ -98,7 +98,7 @@ describe('mathFormatOptionsStorageService', () => {
         transformMaths: true,
         options: {
           subscript: false,
-          numberFormat: false,
+          digitGrouping: false,
           greekSymbols: false,
         },
       })
@@ -123,7 +123,7 @@ describe('mathFormatOptionsStorageService', () => {
     it('writes normalised state to localStorage', () => {
       mathFormatOptionsStorageService.save(true, {
         subscript: true,
-        numberFormat: false,
+        digitGrouping: false,
         greekSymbols: true,
       })
 
@@ -132,7 +132,7 @@ describe('mathFormatOptionsStorageService', () => {
           transformMaths: true,
           options: {
             subscript: true,
-            numberFormat: false,
+            digitGrouping: false,
             greekSymbols: true,
           },
         }),
@@ -147,7 +147,7 @@ describe('mathFormatOptionsStorageService', () => {
       expect(() =>
         mathFormatOptionsStorageService.save(false, {
           subscript: false,
-          numberFormat: false,
+          digitGrouping: false,
           greekSymbols: false,
         }),
       ).not.toThrow()

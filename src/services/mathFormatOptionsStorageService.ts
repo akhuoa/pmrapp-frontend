@@ -15,7 +15,7 @@ const normaliseMathFormatOptions = (
   options: Partial<MathMLFormatOptions> | null | undefined,
 ): NormalisedMathFormatOptions => ({
   subscript: normaliseOptionFlag(options?.subscript),
-  numberFormat: normaliseOptionFlag(options?.numberFormat),
+  digitGrouping: normaliseOptionFlag(options?.digitGrouping),
   greekSymbols: normaliseOptionFlag(options?.greekSymbols),
 })
 

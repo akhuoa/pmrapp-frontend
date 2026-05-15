@@ -31,7 +31,7 @@ const formattingOptionsAriaLabel = computed(() =>
 
 const optionItems = [
   {
-    key: 'numberFormat',
+    key: 'digitGrouping',
     label: 'Digit Grouping',
   },
   {
@@ -54,7 +54,7 @@ const toggleTransformMaths = () => {
   if (!hasEnabledOption) {
     emit('update:options', {
       subscript: true,
-      numberFormat: true,
+      digitGrouping: true,
       greekSymbols: true,
     })
   }
@@ -167,7 +167,7 @@ onUnmounted(() => {
                     aria-hidden="true"
                   >
                     <span v-if="option.key === 'subscript'">x<sub class="text-[0.7em] leading-none">n</sub></span>
-                    <span v-else-if="option.key === 'numberFormat'">#,###</span>
+                    <span v-else-if="option.key === 'digitGrouping'">#,###</span>
                     <span v-else-if="option.key === 'greekSymbols'">α β</span>
                     <span v-else>10<sup class="text-[0.7em] leading-none">n</sup></span>
                   </span>

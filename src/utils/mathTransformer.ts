@@ -376,7 +376,7 @@ export const formatMathMLTable = (rawMathML: string, options: MathMLFormatOption
 
   const {
     subscript = false,
-    numberFormat = false,
+    digitGrouping = false,
     greekSymbols = false,
   }: MathMLFormatOptions = options
 
@@ -392,7 +392,7 @@ export const formatMathMLTable = (rawMathML: string, options: MathMLFormatOption
     }
     normaliseLogicalOperators(math)
     normaliseScientificENotation(math)
-    if (numberFormat) {
+    if (digitGrouping) {
       normaliseNumericLiterals(math)
     }
     if (greekSymbols) {
