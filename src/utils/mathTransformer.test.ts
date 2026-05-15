@@ -25,12 +25,6 @@ const ENABLE_GREEK_SYMBOLS_ONLY = {
   greekSymbols: true,
 }
 
-const ENABLE_SCIENTIFIC_E_NOTATION_ONLY = {
-  subscript: false,
-  numberFormat: false,
-  greekSymbols: false,
-}
-
 /**
  * Tests for MathML transformation utilities.
  *
