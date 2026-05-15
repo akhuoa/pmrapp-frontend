@@ -375,9 +375,9 @@ export const formatMathMLTable = (rawMathML: string, options: MathMLFormatOption
   if (typeof document === 'undefined') return rawMathML
 
   const {
-    subscripts = false,
     digitGrouping = false,
     greekSymbols = false,
+    subscripts = false,
   }: MathMLFormatOptions = options
 
   const parser = getDOMParser()

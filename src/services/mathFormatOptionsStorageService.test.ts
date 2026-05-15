@@ -20,9 +20,9 @@ describe('mathFormatOptionsStorageService', () => {
         JSON.stringify({
           transformMaths: true,
           options: {
-            subscripts: true,
             digitGrouping: false,
             greekSymbols: true,
+            subscripts: true,
           },
         }),
       )
@@ -30,9 +30,9 @@ describe('mathFormatOptionsStorageService', () => {
       expect(mathFormatOptionsStorageService.load()).toEqual({
         transformMaths: true,
         options: {
-          subscripts: true,
           digitGrouping: false,
           greekSymbols: true,
+          subscripts: true,
         },
       })
     })
@@ -51,9 +51,9 @@ describe('mathFormatOptionsStorageService', () => {
       expect(mathFormatOptionsStorageService.load()).toEqual({
         transformMaths: false,
         options: {
-          subscripts: true,
           digitGrouping: false,
           greekSymbols: false,
+          subscripts: true,
         },
       })
     })
@@ -64,9 +64,9 @@ describe('mathFormatOptionsStorageService', () => {
         JSON.stringify({
           transformMaths: true,
           options: {
-            subscripts: 'true',
             digitGrouping: 1,
             greekSymbols: null,
+            subscripts: 'true',
           },
         }),
       )
@@ -74,9 +74,9 @@ describe('mathFormatOptionsStorageService', () => {
       expect(mathFormatOptionsStorageService.load()).toEqual({
         transformMaths: true,
         options: {
-          subscripts: false,
           digitGrouping: false,
           greekSymbols: false,
+          subscripts: false,
         },
       })
     })
@@ -87,9 +87,9 @@ describe('mathFormatOptionsStorageService', () => {
         JSON.stringify({
           transformMaths: true,
           options: {
-            subscripts: false,
             digitGrouping: false,
             greekSymbols: false,
+            subscripts: false,
           },
         }),
       )
@@ -97,9 +97,9 @@ describe('mathFormatOptionsStorageService', () => {
       expect(mathFormatOptionsStorageService.load()).toEqual({
         transformMaths: true,
         options: {
-          subscripts: false,
           digitGrouping: false,
           greekSymbols: false,
+          subscripts: false,
         },
       })
     })
@@ -122,18 +122,18 @@ describe('mathFormatOptionsStorageService', () => {
   describe('save', () => {
     it('writes normalised state to localStorage', () => {
       mathFormatOptionsStorageService.save(true, {
-        subscripts: true,
         digitGrouping: false,
         greekSymbols: true,
+        subscripts: true,
       })
 
       expect(localStorage.getItem(STORAGE_KEY)).toBe(
         JSON.stringify({
           transformMaths: true,
           options: {
-            subscripts: true,
             digitGrouping: false,
             greekSymbols: true,
+            subscripts: true,
           },
         }),
       )
@@ -146,9 +146,9 @@ describe('mathFormatOptionsStorageService', () => {
 
       expect(() =>
         mathFormatOptionsStorageService.save(false, {
-          subscripts: false,
           digitGrouping: false,
           greekSymbols: false,
+          subscripts: false,
         }),
       ).not.toThrow()
     })

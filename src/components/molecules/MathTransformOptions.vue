@@ -53,9 +53,9 @@ const toggleTransformMaths = () => {
   const hasEnabledOption = Object.values(props.options).some(Boolean)
   if (!hasEnabledOption) {
     emit('update:options', {
-      subscripts: true,
       digitGrouping: true,
       greekSymbols: true,
+      subscripts: true,
     })
   }
 
@@ -166,10 +166,9 @@ onUnmounted(() => {
                     class="inline-flex shrink-0 items-center rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[11px] font-medium tracking-wide text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
                     aria-hidden="true"
                   >
-                    <span v-if="option.key === 'subscripts'">x<sub class="text-[0.7em] leading-none">n</sub></span>
-                    <span v-else-if="option.key === 'digitGrouping'">#,###</span>
+                    <span v-if="option.key === 'digitGrouping'">#,###</span>
                     <span v-else-if="option.key === 'greekSymbols'">α β</span>
-                    <span v-else>10<sup class="text-[0.7em] leading-none">n</sup></span>
+                    <span v-else-if="option.key === 'subscripts'">x<sub class="text-[0.7em] leading-none">n</sub></span>
                   </span>
                 </span>
               </label>

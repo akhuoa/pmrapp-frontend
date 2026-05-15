@@ -2,27 +2,27 @@ import { describe, expect, it, vi } from 'vitest'
 import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
 
 const ENABLE_ALL_OPTIONS = {
-  subscripts: true,
   digitGrouping: true,
   greekSymbols: true,
+  subscripts: true,
 }
 
 const ENABLE_SUBSCRIPT_ONLY = {
-  subscripts: true,
   digitGrouping: false,
   greekSymbols: false,
+  subscripts: true,
 }
 
 const ENABLE_DIGIT_GROUPING_ONLY = {
-  subscripts: false,
   digitGrouping: true,
   greekSymbols: false,
+  subscripts: false,
 }
 
 const ENABLE_GREEK_SYMBOLS_ONLY = {
-  subscripts: false,
   digitGrouping: false,
   greekSymbols: true,
+  subscripts: false,
 }
 
 /**
@@ -428,9 +428,9 @@ describe('formatMathMLTable', () => {
     </math>`
 
     const result = formatMathMLTable(greekWithUnderscoreEquation, {
-      subscripts: false,
       digitGrouping: false,
       greekSymbols: true,
+      subscripts: false,
     })
 
     expect(result).toContain('<mi>α_2</mi>')
