@@ -1,5 +1,5 @@
 export type MathMLFormatOptions = {
-  subscript?: boolean
+  subscripts?: boolean
   digitGrouping?: boolean
   greekSymbols?: boolean
 }

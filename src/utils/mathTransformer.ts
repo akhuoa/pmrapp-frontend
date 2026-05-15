@@ -375,7 +375,7 @@ export const formatMathMLTable = (rawMathML: string, options: MathMLFormatOption
   if (typeof document === 'undefined') return rawMathML
 
   const {
-    subscript = false,
+    subscripts = false,
     digitGrouping = false,
     greekSymbols = false,
   }: MathMLFormatOptions = options
@@ -387,7 +387,7 @@ export const formatMathMLTable = (rawMathML: string, options: MathMLFormatOption
 
   mathBlocks.forEach((math) => {
     fixMismatchedFencePairs(math)
-    if (subscript) {
+    if (subscripts) {
       normaliseUnderscoreIdentifiers(math)
     }
     normaliseLogicalOperators(math)

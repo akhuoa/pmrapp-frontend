@@ -14,7 +14,7 @@ export type SavedMathFormatState = {
 const normaliseMathFormatOptions = (
   options: Partial<MathMLFormatOptions> | null | undefined,
 ): NormalisedMathFormatOptions => ({
-  subscript: normaliseOptionFlag(options?.subscript),
+  subscripts: normaliseOptionFlag(options?.subscripts),
   digitGrouping: normaliseOptionFlag(options?.digitGrouping),
   greekSymbols: normaliseOptionFlag(options?.greekSymbols),
 })

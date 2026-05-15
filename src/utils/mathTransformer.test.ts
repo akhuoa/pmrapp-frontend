@@ -2,25 +2,25 @@ import { describe, expect, it, vi } from 'vitest'
 import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
 
 const ENABLE_ALL_OPTIONS = {
-  subscript: true,
+  subscripts: true,
   digitGrouping: true,
   greekSymbols: true,
 }
 
 const ENABLE_SUBSCRIPT_ONLY = {
-  subscript: true,
+  subscripts: true,
   digitGrouping: false,
   greekSymbols: false,
 }
 
 const ENABLE_DIGIT_GROUPING_ONLY = {
-  subscript: false,
+  subscripts: false,
   digitGrouping: true,
   greekSymbols: false,
 }
 
 const ENABLE_GREEK_SYMBOLS_ONLY = {
-  subscript: false,
+  subscripts: false,
   digitGrouping: false,
   greekSymbols: true,
 }
@@ -336,7 +336,7 @@ describe('formatMathMLTable', () => {
     expect(result).toContain('<mi>Amplitude</mi>')
   })
 
-  it('applies subscript formatting when only subscript option is enabled', () => {
+  it('applies subscripts formatting when only subscripts option is enabled', () => {
     const underscoredIdentifierEquation = `<math xmlns="http://www.w3.org/1998/Math/MathML">
       <mrow>
         <mi>V_m_steady</mi>
@@ -428,7 +428,7 @@ describe('formatMathMLTable', () => {
     </math>`
 
     const result = formatMathMLTable(greekWithUnderscoreEquation, {
-      subscript: false,
+      subscripts: false,
       digitGrouping: false,
       greekSymbols: true,
     })
