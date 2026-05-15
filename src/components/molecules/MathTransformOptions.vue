@@ -31,22 +31,18 @@ const optionItems = [
   {
     key: 'numberFormat',
     label: 'Digit Separators',
-    preview: '#,###',
   },
   {
     key: 'scientificENotation',
     label: 'Format E-notation',
-    preview: '10ⁿ',
   },
   {
     key: 'greekSymbols',
     label: 'Greek Symbols',
-    preview: 'α β',
   },
   {
     key: 'subscript',
     label: 'Subscript',
-    preview: 'xₙ',
   },
 ] as const
 
