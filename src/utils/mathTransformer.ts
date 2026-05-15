@@ -392,11 +392,11 @@ export const formatMathMLTable = (rawMathML: string, options: MathMLFormatOption
       normaliseUnderscoreIdentifiers(math)
     }
     normaliseLogicalOperators(math)
-    if (numberFormat) {
-      normaliseNumericLiterals(math)
-    }
     if (scientificENotation) {
       normaliseScientificENotation(math)
+    }
+    if (numberFormat) {
+      normaliseNumericLiterals(math)
     }
     if (greekSymbols) {
       normaliseNamedGreekIdentifiers(math)
