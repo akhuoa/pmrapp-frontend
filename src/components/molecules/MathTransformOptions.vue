@@ -32,7 +32,7 @@ const formattingOptionsAriaLabel = computed(() =>
 const optionItems = [
   {
     key: 'numberFormat',
-    label: 'Digit Separators',
+    label: 'Digit Grouping',
   },
   {
     key: 'greekSymbols',
