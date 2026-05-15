@@ -13,14 +13,17 @@ import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
 import LoadingIcon from '@/components/icons/LoadingIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
+import MathTransformOptions from '@/components/molecules/MathTransformOptions.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import WorkspaceFileBrowser from '@/components/molecules/WorkspaceFileBrowser.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
+import { getMathFormatOptionsStorageService } from '@/services'
 import { downloadCOMBINEArchive, downloadWorkspaceArchive } from '@/services/downloadUrlService'
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
 import type { ErrorInfo } from '@/types/error'
 import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
+import type { MathMLFormatOptions } from '@/types/mathml'
 import { formatCitation, formatCitationAuthor } from '@/utils/citation'
 import { downloadFileFromContent } from '@/utils/download'
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
@@ -76,6 +79,11 @@ const CODEGEN_LANGUAGES = [
     fileName: 'code.py',
   },
 ]
+const DEFAULT_MATH_FORMAT_OPTIONS: Required<MathMLFormatOptions> = {
+  digitGrouping: false,
+  greekSymbols: false,
+  subscripts: false,
+}
 
 const exposureStore = useExposureStore()
 const exposureInfo = ref<ExposureInfo | null>(null)
@@ -88,7 +96,25 @@ const detailHTML = ref<string>('')
 const generatedCode = ref<string>('')
 const generatedCodeFilename = ref<string>('')
 const codeBlockRef = ref<InstanceType<typeof CodeBlock> | null>(null)
-const mathsJSON = ref<[string, string[]][]>([])
+const rawMathsData = ref<[string, string[]][]>([])
+const transformMaths = ref(false)
+const mathFormatOptions = ref<MathMLFormatOptions>({ ...DEFAULT_MATH_FORMAT_OPTIONS })
+const mathsJSON = computed<[string, string[]][]>(() => {
+  const appliedOptions = transformMaths.value
+    ? mathFormatOptions.value
+    : DEFAULT_MATH_FORMAT_OPTIONS
+
+  return rawMathsData.value.map((entry): [string, string[]] => {
+    const mathMLArray = entry[1].map((mathML) =>
+      formatMathMLTable(mathML, {
+        digitGrouping: appliedOptions.digitGrouping,
+        greekSymbols: appliedOptions.greekSymbols,
+        subscripts: appliedOptions.subscripts,
+      }),
+    )
+    return [entry[0], mathMLArray]
+  })
+})
 const metadataJSON = ref<Metadata>({})
 const htmlViewRef = ref<HTMLElement | null>(null)
 const licenseInfo = ref<string>(DEFAULT_LICENSE)
@@ -292,11 +318,10 @@ const generateMath = async () => {
           (value): value is [string, string[]] => Array.isArray(value[1]) && value[1].length > 0,
         )
       : []
-    const transformedMathsJSON = filteredMathsJSON.map((entry): [string, string[]] => {
-      const mathMLArray = entry[1].map((mathML) => formatMathMLTable(transformMathString(mathML)))
+    rawMathsData.value = filteredMathsJSON.map((entry): [string, string[]] => {
+      const mathMLArray = entry[1].map((mathML) => transformMathString(mathML))
       return [entry[0], mathMLArray]
     })
-    mathsJSON.value = transformedMathsJSON
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Failed to parse mathematics data.'
     error.value = {
@@ -466,6 +491,14 @@ watch(detailHTML, async () => {
 })
 
 watch(
+  [transformMaths, mathFormatOptions],
+  ([transformMathsEnabled, options]) => {
+    getMathFormatOptionsStorageService().save(transformMathsEnabled, options)
+  },
+  { deep: true },
+)
+
+watch(
   () => props.file,
   async (newFile, oldFile) => {
     if (newFile === oldFile) return
@@ -487,6 +520,12 @@ watch(
 )
 
 onMounted(async () => {
+  const savedMathFormatState = getMathFormatOptionsStorageService().load()
+  if (savedMathFormatState) {
+    transformMaths.value = savedMathFormatState.transformMaths
+    mathFormatOptions.value = { ...savedMathFormatState.options }
+  }
+
   error.value = null
 
   try {
@@ -578,6 +617,13 @@ onMounted(async () => {
       </div>
 
       <div v-else-if="props.view === 'cellml_math'" class="box">
+        <MathTransformOptions
+          :has-maths-data="rawMathsData.length > 0"
+          :transform-maths="transformMaths"
+          :options="mathFormatOptions"
+          @update:transform-maths="transformMaths = $event"
+          @update:options="mathFormatOptions = $event"
+        />
         <p v-if="!mathsJSON.length" class="text-sm text-gray-500 dark:text-gray-400">No mathematics content available.</p>
         <template v-else>
           <div v-for="value in mathsJSON" :key="value[0]"

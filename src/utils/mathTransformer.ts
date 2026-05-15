@@ -1,3 +1,4 @@
+import type { MathMLFormatOptions } from '@/types/mathml'
 import { _MathTransforms as mathPolyfills } from '../vendor/mathml-polyfills/all-polyfills-bundle.js'
 import { formatNumber } from './format'
 
@@ -232,6 +233,24 @@ const normaliseNamedGreekIdentifiers = (root: ParentNode) => {
     const rawText = (identifier.textContent || '').trim()
     if (!rawText) return
 
+    if (rawText.includes('_')) {
+      const parts = rawText.split('_')
+      let hasReplacement = false
+
+      const normalisedParts = parts.map((part) => {
+        const replacement = GREEK_IDENTIFIER_SYMBOLS[part.trim().toLowerCase()]
+        if (!replacement) return part
+
+        hasReplacement = true
+        return replacement
+      })
+
+      if (hasReplacement) {
+        identifier.textContent = normalisedParts.join('_')
+      }
+      return
+    }
+
     const replacement = GREEK_IDENTIFIER_SYMBOLS[rawText.toLowerCase()]
     if (!replacement) return
 
@@ -349,10 +368,17 @@ export function transformMathString(rawMathML: string): string {
 /**
  * Formats a MathML string into a table structure for better rendering.
  * @param rawMathML The string containing updated <math> tags.
+ * @param options Configuration options to control which normalisation steps are applied.
  * @returns The formatted MathML string.
  */
-export const formatMathMLTable = (rawMathML: string): string => {
+export const formatMathMLTable = (rawMathML: string, options: MathMLFormatOptions): string => {
   if (typeof document === 'undefined') return rawMathML
+
+  const {
+    digitGrouping = false,
+    greekSymbols = false,
+    subscripts = false,
+  }: MathMLFormatOptions = options
 
   const parser = getDOMParser()
   const doc = parser.parseFromString(rawMathML, 'text/html')
@@ -361,11 +387,17 @@ export const formatMathMLTable = (rawMathML: string): string => {
 
   mathBlocks.forEach((math) => {
     fixMismatchedFencePairs(math)
-    normaliseUnderscoreIdentifiers(math)
+    if (subscripts) {
+      normaliseUnderscoreIdentifiers(math)
+    }
     normaliseLogicalOperators(math)
-    normaliseNumericLiterals(math)
     normaliseScientificENotation(math)
-    normaliseNamedGreekIdentifiers(math)
+    if (digitGrouping) {
+      normaliseNumericLiterals(math)
+    }
+    if (greekSymbols) {
+      normaliseNamedGreekIdentifiers(math)
+    }
 
     const rows = Array.from(math.children).filter((child) => child.tagName.toLowerCase() === 'mrow')
 
