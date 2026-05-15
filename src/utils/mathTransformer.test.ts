@@ -1,6 +1,13 @@
 import { describe, expect, it, vi } from 'vitest'
 import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
 
+const ENABLE_ALL_OPTIONS = {
+  subscript: true,
+  numberFormat: true,
+  greekSymbols: true,
+  scientificENotation: true,
+}
+
 /**
  * Tests for MathML transformation utilities.
  *
@@ -191,7 +198,7 @@ describe('formatMathMLTable', () => {
   </math>`
 
   it('wraps multiple rows in an mtable', () => {
-    const result = formatMathMLTable(multiRowEquation)
+    const result = formatMathMLTable(multiRowEquation, ENABLE_ALL_OPTIONS)
 
     expect(result).toContain('mtable')
     expect(result).toContain('mtr')
@@ -199,20 +206,20 @@ describe('formatMathMLTable', () => {
   })
 
   it('sets the correct attributes on the mtable', () => {
-    const result = formatMathMLTable(multiRowEquation)
+    const result = formatMathMLTable(multiRowEquation, ENABLE_ALL_OPTIONS)
 
     expect(result).toContain('columnalign="right center left"')
     expect(result).toContain('rowspacing="0.75em"')
   })
 
   it('marks equals operators with the data-math-operator attribute', () => {
-    const result = formatMathMLTable(multiRowEquation)
+    const result = formatMathMLTable(multiRowEquation, ENABLE_ALL_OPTIONS)
 
     expect(result).toContain('data-math-operator="equals"')
   })
 
   it('preserves the MathML structure in table cells', () => {
-    const result = formatMathMLTable(multiRowEquation)
+    const result = formatMathMLTable(multiRowEquation, ENABLE_ALL_OPTIONS)
 
     expect(result).toContain('vcell')
     expect(result).toContain('Ageo')
@@ -226,7 +233,7 @@ describe('formatMathMLTable', () => {
       </mrow>
     </math>`
 
-    const result = formatMathMLTable(numberFormattingEquation)
+    const result = formatMathMLTable(numberFormattingEquation, ENABLE_ALL_OPTIONS)
 
     expect(result).toContain('<mn>1,000</mn>')
     expect(result).toContain('<mn>2,500,000</mn>')
@@ -234,7 +241,7 @@ describe('formatMathMLTable', () => {
   })
 
   it('handles MathML containing fenced expressions', () => {
-    const result = formatMathMLTable(equationWithFence)
+    const result = formatMathMLTable(equationWithFence, ENABLE_ALL_OPTIONS)
 
     expect(result).toContain('mtable')
     expect(result).toContain('mfenced')
@@ -245,14 +252,14 @@ describe('formatMathMLTable', () => {
     // @ts-expect-error
     delete globalThis.document
 
-    const result = formatMathMLTable(multiRowEquation)
+    const result = formatMathMLTable(multiRowEquation, ENABLE_ALL_OPTIONS)
     expect(result).toBe(multiRowEquation)
 
     globalThis.document = originalDocument
   })
 
   it('handles an empty MathML string', () => {
-    const result = formatMathMLTable('')
+    const result = formatMathMLTable('', ENABLE_ALL_OPTIONS)
     expect(result).toBe('')
   })
 
@@ -261,13 +268,13 @@ describe('formatMathMLTable', () => {
       <mi>x</mi>
     </math>`
 
-    const result = formatMathMLTable(noRowsEquation)
+    const result = formatMathMLTable(noRowsEquation, ENABLE_ALL_OPTIONS)
 
     expect(result).not.toContain('mtable')
   })
 
   it('removes a mismatched closing fence from an mrow element', () => {
-    const result = formatMathMLTable(mismatchedFenceEquation)
+    const result = formatMathMLTable(mismatchedFenceEquation, ENABLE_ALL_OPTIONS)
 
     // The mismatched closing fence '>' should be removed, leaving only the opening '('.
     expect(result).toContain('mtable')
@@ -278,14 +285,14 @@ describe('formatMathMLTable', () => {
   it('normalises invisible times separators in formatted output', () => {
     const equationWithInvisibleTimes = `<math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>a</mi><mo>\u2062</mo><mi>b</mi></mrow></math>`
 
-    const result = formatMathMLTable(equationWithInvisibleTimes)
+    const result = formatMathMLTable(equationWithInvisibleTimes, ENABLE_ALL_OPTIONS)
 
     expect(result).toContain('<mo>·</mo>')
     expect(result).not.toContain('\u2062')
   })
 
   it('splits piecewise inner tables into aligned expression, keyword, and condition columns', () => {
-    const result = formatMathMLTable(piecewiseEquation)
+    const result = formatMathMLTable(piecewiseEquation, ENABLE_ALL_OPTIONS)
 
     expect(result).toContain('data-math-piecewise="true"')
     expect(result).toContain('data-math-piecewise="expression"')
@@ -303,7 +310,7 @@ describe('formatMathMLTable', () => {
       </mrow>
     </math>`
 
-    const result = formatMathMLTable(underscoredIdentifierEquation)
+    const result = formatMathMLTable(underscoredIdentifierEquation, ENABLE_ALL_OPTIONS)
 
     const subscriptMatches = result.match(/<msub/g) || []
     expect(subscriptMatches.length).toBe(2)
@@ -322,7 +329,7 @@ describe('formatMathMLTable', () => {
       </mrow>
     </math>`
 
-    const result = formatMathMLTable(logicalOperatorsEquation)
+    const result = formatMathMLTable(logicalOperatorsEquation, ENABLE_ALL_OPTIONS)
 
     expect(result).toContain('<mo>and</mo>')
     expect(result).toContain('<mo>or</mo>')
@@ -341,7 +348,7 @@ describe('formatMathMLTable', () => {
       </mrow>
     </math>`
 
-    const result = formatMathMLTable(greekIdentifiersEquation)
+    const result = formatMathMLTable(greekIdentifiersEquation, ENABLE_ALL_OPTIONS)
 
     expect(result).toContain('<mi>α</mi>')
     expect(result).toContain('<mi>β</mi>')
@@ -380,7 +387,7 @@ describe('formatMathMLTable', () => {
       </mrow>
     </math>`
 
-    const result = formatMathMLTable(scientificNotationEquation)
+    const result = formatMathMLTable(scientificNotationEquation, ENABLE_ALL_OPTIONS)
 
     expect(result).toContain('<mn>3.1</mn>')
     expect(result).toContain('<mo>·</mo>')
@@ -411,7 +418,7 @@ describe('mathTransformer integration', () => {
     </math>`
 
     const transformed = transformMathString(equation)
-    const formatted = formatMathMLTable(transformed)
+    const formatted = formatMathMLTable(transformed, ENABLE_ALL_OPTIONS)
 
     expect(formatted).toContain('mtable')
     expect(formatted).toContain('data-math-operator="equals"')
@@ -434,7 +441,7 @@ describe('mathTransformer integration', () => {
       </mrow>
     </math>`
 
-    const result = formatMathMLTable(complexEquation)
+    const result = formatMathMLTable(complexEquation, ENABLE_ALL_OPTIONS)
 
     expect(result).toContain('mtable')
     expect(result).toContain('mfrac')
