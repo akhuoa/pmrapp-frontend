@@ -70,7 +70,6 @@ const toggleOption = (key: keyof MathMLFormatOptions) => {
   }
 
   emit('update:options', nextOptions)
-  emit('update:transformMaths', Object.values(nextOptions).some(Boolean))
 }
 
 const handleClickOutside = (event: MouseEvent) => {
