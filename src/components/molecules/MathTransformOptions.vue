@@ -21,6 +21,11 @@ const props = defineProps<Props>()
 const isOpen = ref(false)
 const dropdownRef = ref<HTMLDivElement | null>(null)
 const hasActiveFormatting = computed(() => props.transformMaths && Object.values(props.options).some(Boolean))
+const displayOptionsAriaLabel = computed(() =>
+  hasActiveFormatting.value
+    ? 'View math display options. Mathematics formatting is active.'
+    : 'View math display options. Mathematics formatting is inactive.',
+)
 
 const optionItems = [
   {
@@ -101,7 +106,7 @@ onUnmounted(() => {
         aria-haspopup="dialog"
         :aria-expanded="isOpen"
         aria-controls="math-format-options-panel"
-        :aria-label="hasActiveFormatting ? 'View math display options. Mathematics formatting is active.' : 'View math display options. Mathematics formatting is inactive.'"
+        :aria-label="displayOptionsAriaLabel"
         content-section="Exposure Detail - Mathematics"
         @click="isOpen = !isOpen"
       >
