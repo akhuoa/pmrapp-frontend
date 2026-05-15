@@ -5,35 +5,30 @@ const ENABLE_ALL_OPTIONS = {
   subscript: true,
   numberFormat: true,
   greekSymbols: true,
-  scientificENotation: true,
 }
 
 const ENABLE_SUBSCRIPT_ONLY = {
   subscript: true,
   numberFormat: false,
   greekSymbols: false,
-  scientificENotation: false,
 }
 
 const ENABLE_NUMBER_FORMAT_ONLY = {
   subscript: false,
   numberFormat: true,
   greekSymbols: false,
-  scientificENotation: false,
 }
 
 const ENABLE_GREEK_SYMBOLS_ONLY = {
   subscript: false,
   numberFormat: false,
   greekSymbols: true,
-  scientificENotation: false,
 }
 
 const ENABLE_SCIENTIFIC_E_NOTATION_ONLY = {
   subscript: false,
   numberFormat: false,
   greekSymbols: false,
-  scientificENotation: true,
 }
 
 /**
@@ -442,7 +437,6 @@ describe('formatMathMLTable', () => {
       subscript: false,
       numberFormat: false,
       greekSymbols: true,
-      scientificENotation: false,
     })
 
     expect(result).toContain('<mi>α_2</mi>')
@@ -465,23 +459,6 @@ describe('formatMathMLTable', () => {
     expect(result).toContain('<mn>3.1</mn>')
     expect(result).toContain('<mo>·</mo>')
     expect(result).toContain('<msup><mn>10</mn><mn>5</mn></msup>')
-    expect(result).not.toContain('<mo>e</mo>')
-  })
-
-  it('applies scientific e-notation formatting when only scientificENotation option is enabled', () => {
-    const scientificNotationEquation = `<math xmlns="http://www.w3.org/1998/Math/MathML">
-      <mrow>
-        <mn>6.2</mn>
-        <mo>e</mo>
-        <mn>-3</mn>
-      </mrow>
-    </math>`
-
-    const result = formatMathMLTable(scientificNotationEquation, ENABLE_SCIENTIFIC_E_NOTATION_ONLY)
-
-    expect(result).toContain('<mn>6.2</mn>')
-    expect(result).toContain('<mo>·</mo>')
-    expect(result).toContain('<msup><mn>10</mn><mn>-3</mn></msup>')
     expect(result).not.toContain('<mo>e</mo>')
   })
 })

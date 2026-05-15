@@ -378,7 +378,6 @@ export const formatMathMLTable = (rawMathML: string, options: MathMLFormatOption
     subscript = false,
     numberFormat = false,
     greekSymbols = false,
-    scientificENotation = false,
   }: MathMLFormatOptions = options
 
   const parser = getDOMParser()
@@ -392,9 +391,7 @@ export const formatMathMLTable = (rawMathML: string, options: MathMLFormatOption
       normaliseUnderscoreIdentifiers(math)
     }
     normaliseLogicalOperators(math)
-    if (scientificENotation) {
-      normaliseScientificENotation(math)
-    }
+    normaliseScientificENotation(math)
     if (numberFormat) {
       normaliseNumericLiterals(math)
     }

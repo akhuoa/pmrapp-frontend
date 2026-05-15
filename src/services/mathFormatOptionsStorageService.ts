@@ -17,7 +17,6 @@ const normaliseMathFormatOptions = (
   subscript: normaliseOptionFlag(options?.subscript),
   numberFormat: normaliseOptionFlag(options?.numberFormat),
   greekSymbols: normaliseOptionFlag(options?.greekSymbols),
-  scientificENotation: normaliseOptionFlag(options?.scientificENotation),
 })
 
 export const mathFormatOptionsStorageService = {

@@ -33,10 +33,6 @@ const optionItems = [
     label: 'Digit Separators',
   },
   {
-    key: 'scientificENotation',
-    label: 'Format E-notation',
-  },
-  {
     key: 'greekSymbols',
     label: 'Greek Symbols',
   },
@@ -58,7 +54,6 @@ const toggleTransformMaths = () => {
       subscript: true,
       numberFormat: true,
       greekSymbols: true,
-      scientificENotation: true,
     })
   }
 

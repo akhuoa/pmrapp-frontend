@@ -83,7 +83,6 @@ const DEFAULT_MATH_FORMAT_OPTIONS: Required<MathMLFormatOptions> = {
   subscript: false,
   numberFormat: false,
   greekSymbols: false,
-  scientificENotation: false,
 }
 
 const exposureStore = useExposureStore()
@@ -111,7 +110,6 @@ const mathsJSON = computed<[string, string[]][]>(() => {
         subscript: appliedOptions.subscript,
         numberFormat: appliedOptions.numberFormat,
         greekSymbols: appliedOptions.greekSymbols,
-        scientificENotation: appliedOptions.scientificENotation,
       }),
     )
     return [entry[0], mathMLArray]

@@ -23,7 +23,6 @@ describe('mathFormatOptionsStorageService', () => {
             subscript: true,
             numberFormat: false,
             greekSymbols: true,
-            scientificENotation: false,
           },
         }),
       )
@@ -34,7 +33,6 @@ describe('mathFormatOptionsStorageService', () => {
           subscript: true,
           numberFormat: false,
           greekSymbols: true,
-          scientificENotation: false,
         },
       })
     })
@@ -56,7 +54,6 @@ describe('mathFormatOptionsStorageService', () => {
           subscript: true,
           numberFormat: false,
           greekSymbols: false,
-          scientificENotation: false,
         },
       })
     })
@@ -70,7 +67,6 @@ describe('mathFormatOptionsStorageService', () => {
             subscript: 'true',
             numberFormat: 1,
             greekSymbols: null,
-            scientificENotation: 'yes',
           },
         }),
       )
@@ -81,7 +77,6 @@ describe('mathFormatOptionsStorageService', () => {
           subscript: false,
           numberFormat: false,
           greekSymbols: false,
-          scientificENotation: false,
         },
       })
     })
@@ -94,7 +89,6 @@ describe('mathFormatOptionsStorageService', () => {
             subscript: false,
             numberFormat: false,
             greekSymbols: false,
-            scientificENotation: true,
           },
         }),
       )
@@ -105,7 +99,6 @@ describe('mathFormatOptionsStorageService', () => {
           subscript: false,
           numberFormat: false,
           greekSymbols: false,
-          scientificENotation: true,
         },
       })
     })
@@ -131,7 +124,6 @@ describe('mathFormatOptionsStorageService', () => {
         subscript: true,
         numberFormat: false,
         greekSymbols: true,
-        scientificENotation: false,
       })
 
       expect(localStorage.getItem(STORAGE_KEY)).toBe(
@@ -141,7 +133,6 @@ describe('mathFormatOptionsStorageService', () => {
             subscript: true,
             numberFormat: false,
             greekSymbols: true,
-            scientificENotation: false,
           },
         }),
       )
@@ -157,7 +148,6 @@ describe('mathFormatOptionsStorageService', () => {
           subscript: false,
           numberFormat: false,
           greekSymbols: false,
-          scientificENotation: false,
         }),
       ).not.toThrow()
     })
