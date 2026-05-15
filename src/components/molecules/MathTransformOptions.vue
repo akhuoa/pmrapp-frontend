@@ -183,7 +183,7 @@ onUnmounted(() => {
 
       <!-- Notification dot: shown when any option is enabled. -->
       <div
-        class="absolute top-0 right-0 -mt-1 -mr-1 block h-3 w-3 rounded-full bg-error"
+        class="pointer-events-none absolute top-0 right-0 -mt-1 -mr-1 block h-3 w-3 rounded-full bg-error"
         v-if="hasActiveFormatting"
         aria-hidden="true"
       ></div>
