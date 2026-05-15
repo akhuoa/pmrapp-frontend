@@ -20,7 +20,9 @@ const props = defineProps<Props>()
 
 const isOpen = ref(false)
 const dropdownRef = ref<HTMLDivElement | null>(null)
-const hasActiveFormatting = computed(() => props.transformMaths && Object.values(props.options).some(Boolean))
+const hasActiveFormatting = computed(
+  () => props.transformMaths && Object.values(props.options).some(Boolean),
+)
 const formattingOptionsAriaLabel = computed(() =>
   hasActiveFormatting.value
     ? 'View math formatting options. Mathematics formatting is active.'
