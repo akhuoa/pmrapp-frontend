@@ -483,6 +483,11 @@ const loadInitialView = async () => {
   }
 }
 
+const openCitationInstructions = () => {
+  // TODO:
+  // - create a modal with the citation instructions content
+}
+
 watch(detailHTML, async () => {
   if (detailHTML.value) {
     await nextTick()
@@ -893,7 +898,7 @@ onMounted(async () => {
           </dl>
         </div>
       </section>
-      <section v-if="licenseInfo" class="pt-6 border-t border-gray-200 dark:border-gray-700">
+      <section v-if="licenseInfo" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Licence</h4>
         <nav>
           <ul class="space-y-2">
@@ -901,6 +906,23 @@ onMounted(async () => {
               <a :href="licenseInfo" class="text-link" target="_blank" rel="noopener noreferrer">
                 {{ formatLicenseUrl(licenseInfo) }}
               </a>
+            </li>
+          </ul>
+        </nav>
+      </section>
+      <section class="pt-6 border-t border-gray-200 dark:border-gray-700">
+        <h4 class="text-lg font-semibold mb-3">Citation</h4>
+        <nav>
+          <ul class="space-y-2">
+            <li class="text-sm">
+              <ActionButton
+                variant="secondary"
+                size="sm"
+                content-section="Exposure Detail"
+                @click="openCitationInstructions"
+              >
+                Citation Instructions
+              </ActionButton>
             </li>
           </ul>
         </nav>
