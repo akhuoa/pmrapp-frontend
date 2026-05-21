@@ -138,7 +138,7 @@ const handleRefresh = async () => {
       class="flex-1 w-full sm:w-auto"
       ref="searchInputRef"
       :initial-kind="kind"
-      :initial-term="term"
+      :initial-term="searchQueryParam || term"
       @search="handleSearch"
     />
     <SortDropdown
