@@ -50,4 +50,20 @@ export const searchService = {
 
     return await response.json()
   },
+
+  async searchQuery(query: string): Promise<unknown> {
+    const response = await fetch(`${API_BASE_URL}/api/search`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Request failed: ${response.status}`)
+    }
+
+    return await response.json()
+  },
 }
