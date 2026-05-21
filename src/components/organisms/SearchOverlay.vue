@@ -59,6 +59,11 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
   emit('close')
 }
 
+const handleQuerySearch = (query: string) => {
+  router.push({ path: '/search', query: { query } })
+  emit('close')
+}
+
 const getInitialTerm = (): string => {
   const filterQuery = route.query.filter
   const termQuery = route.query.term
@@ -105,6 +110,7 @@ const getInitialKind = (): string => {
           :initial-kind="getInitialKind()"
           :initial-term="getInitialTerm()"
           @search="handleSearch"
+          @querySearch="handleQuerySearch"
           @close="emit('close')"
         />
       </div>
