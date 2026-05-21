@@ -27,6 +27,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'search', searchKind: string, searchTerm: string): void
+  (e: 'querySearch', query: string): void
   (e: 'close'): void
 }>()
 
@@ -226,6 +227,15 @@ const handleKeyDown = (event: KeyboardEvent) => {
 
 // Handle Tab/Shift+Tab key to cycle focus between search input and term buttons.
 const handleSearchInputKeyDown = async (event: KeyboardEvent) => {
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    const searchQuery = searchInput.value.trim()
+    if (searchQuery) {
+      emit('querySearch', searchQuery)
+    }
+    return
+  }
+
   if (event.key === 'Tab' && hasResults.value) {
     event.preventDefault()
     await nextTick()

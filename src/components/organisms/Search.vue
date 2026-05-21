@@ -123,6 +123,12 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
   router.push({ path: '/search', query })
 }
 
+const handleQuerySearch = (query: string) => {
+  const searchQuery: Record<string, string> = { query }
+  if (sortBy.value !== DEFAULT_SORT_OPTION) searchQuery.sort = sortBy.value
+  router.push({ path: '/search', query: searchQuery })
+}
+
 const sortedResults = computed(() => sortSearchResults(searchResults.value, sortBy.value))
 
 const hasResults = computed(() => searchResults.value.length > 0)
@@ -140,6 +146,7 @@ const handleRefresh = async () => {
       :initial-kind="kind"
       :initial-term="searchQueryParam || term"
       @search="handleSearch"
+      @querySearch="handleQuerySearch"
     />
     <SortDropdown
       v-if="hasResults || isLoading"
