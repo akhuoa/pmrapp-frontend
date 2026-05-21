@@ -19,12 +19,19 @@ export interface SearchResultCache {
   timestamp: number
 }
 
+export interface SearchQueryCache {
+  query: string
+  results: SearchResult[]
+  timestamp: number
+}
+
 export const useSearchStore = defineStore('search', () => {
   const categories = ref<CategoryData[]>([])
   const lastFetchTime = ref<number | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const searchResultsCache = ref<Map<string, SearchResultCache>>(new Map())
+  const searchQueryCache = ref<Map<string, SearchQueryCache>>(new Map())
 
   const isCacheValid = (): boolean => {
     if (!lastFetchTime.value) return false
@@ -132,11 +139,40 @@ export const useSearchStore = defineStore('search', () => {
     }
   }
 
+  const searchQuery = async (query: string, forceRefresh = false): Promise<SearchResult[]> => {
+    const cacheKey = query
+    const cached = searchQueryCache.value.get(cacheKey)
+
+    // Return cached results if valid.
+    if (!forceRefresh && cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      return cached.results
+    }
+
+    try {
+      const searchService = getSearchService()
+      const response = await searchService.searchQuery(query)
+      const results = response?.results || []
+
+      // Cache the results.
+      searchQueryCache.value.set(cacheKey, {
+        query,
+        results,
+        timestamp: Date.now(),
+      })
+
+      return results
+    } catch (err) {
+      console.error('Search query error:', err)
+      throw err
+    }
+  }
+
   return {
     categories,
     isLoading,
     error,
     fetchCategories,
     searchIndexTerm,
+    searchQuery,
   }
 })
