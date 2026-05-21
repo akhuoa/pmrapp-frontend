@@ -25,6 +25,7 @@ const globalState = useGlobalStateStore()
 
 const kind = computed(() => (route.query.kind as string) || '')
 const term = computed(() => (route.query.term as string) || '')
+const searchQueryParam = computed(() => (route.query.query as string) || '')
 const searchResults = ref<SearchResult[]>([])
 const isLoading = ref(false)
 const resultsError = ref<string | null>(null)
@@ -58,11 +59,15 @@ watch(
 
 // Sync sort with URL query parameters whilst preserving the kind and term params.
 watch(sortBy, (newSort) => {
-  const query: Record<string, string> = {}
-  if (kind.value) query.kind = kind.value
-  if (term.value) query.term = term.value
-  if (newSort !== DEFAULT_SORT_OPTION) query.sort = newSort
-  router.replace({ query })
+  const nextQuery: Record<string, string> = {}
+  if (searchQueryParam.value) {
+    nextQuery.query = searchQueryParam.value
+  } else {
+    if (kind.value) nextQuery.kind = kind.value
+    if (term.value) nextQuery.term = term.value
+  }
+  if (newSort !== DEFAULT_SORT_OPTION) nextQuery.sort = newSort
+  router.replace({ query: nextQuery })
 })
 
 onMounted(async () => {
@@ -70,11 +75,28 @@ onMounted(async () => {
 })
 
 // Watch for route param changes to reload results.
-watch([kind, term], async () => {
+watch([kind, term, searchQueryParam], async () => {
   await loadResults()
 })
 
 const loadResults = async (forceRefresh = false) => {
+  if (searchQueryParam.value) {
+    isLoading.value = true
+    resultsError.value = null
+    searchResults.value = []
+
+    try {
+      searchResults.value = await searchStore.searchQuery(searchQueryParam.value, forceRefresh)
+    } catch (err) {
+      resultsError.value = err instanceof Error ? err.message : 'Failed to load search results'
+      console.error('Failed to load search results by query:', err)
+    } finally {
+      isLoading.value = false
+    }
+
+    return
+  }
+
   if (!kind.value || !term.value) {
     // If no search parameters are provided, do not redirect.
     // Simply return without loading results to avoid confusing UX.
