@@ -1,4 +1,9 @@
-import type { IndexesResponse, IndexKindResponse, IndexSearchResult } from '@/types/search'
+import type {
+  IndexesResponse,
+  IndexKindResponse,
+  IndexSearchResult,
+  SearchQueryResponse,
+} from '@/types/search'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
@@ -51,7 +56,7 @@ export const searchService = {
     return await response.json()
   },
 
-  async searchQuery(query: string): Promise<unknown> {
+  async searchQuery(query: string): Promise<SearchQueryResponse> {
     const response = await fetch(`${API_BASE_URL}/api/search`, {
       method: 'POST',
       headers: {

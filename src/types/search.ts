@@ -38,6 +38,10 @@ export interface IndexSearchResult {
   term: string
 }
 
+export interface SearchQueryResponse {
+  results: SearchResult[]
+}
+
 export interface TextSegment {
   text: string
   highlighted: boolean
