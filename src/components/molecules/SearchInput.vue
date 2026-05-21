@@ -323,7 +323,7 @@ defineExpose({
         </div>
         <div v-else-if="!hasResults" class="p-4">
           <p class="text-gray-500 dark:text-gray-400">
-            No matching results found for "{{ searchInput }}".
+            No suggestions found for ‘{{ searchInput }}’. Press Enter to search.
           </p>
         </div>
         <div v-else class="max-h-96 overflow-y-auto scrollbar-thin group/results">
