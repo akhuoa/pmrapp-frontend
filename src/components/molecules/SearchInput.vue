@@ -37,6 +37,8 @@ const searchStore = useSearchStore()
 const exposureStore = useExposureStore()
 const workspaceStore = useWorkspaceStore()
 
+const MAX_TERMS_PER_CATEGORY = 10
+
 const searchInput = ref<string>(props.initialTerm)
 
 watch(
@@ -102,7 +104,7 @@ const filteredSearchTermsByCategory = computed(() => {
     return {
       kind: category.value,
       label: category.label,
-      terms: filteredTerms,
+      terms: filteredTerms.slice(0, MAX_TERMS_PER_CATEGORY),
     }
   }).filter((group) => group.terms.length > 0)
 })
