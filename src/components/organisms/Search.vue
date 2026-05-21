@@ -167,6 +167,7 @@ const handleRefresh = async () => {
         :error="resultsError"
         :term="term"
         :kind="kind"
+        :query="searchQueryParam"
       />
     </main>
   </div>

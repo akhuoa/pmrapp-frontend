@@ -17,6 +17,7 @@ interface Props {
   error: string | null
   term: string
   kind: string
+  query?: string
 }
 
 const props = defineProps<Props>()
@@ -51,11 +52,22 @@ const isIdActive = (ids: string[] | undefined) => {
 <template>
   <div>
     <p class="mb-4" v-if="!isLoading && !error">
-      <template v-if="!hasResults && term.trim() === ''">
+      <template v-if="!hasResults && !term.trim() && !query?.trim()">
         Perform a search to see results.
+      </template>
+      <template v-else-if="!hasResults && query?.trim()">
+        No results for <strong>"{{ query }}"</strong>
       </template>
       <template v-else-if="!hasResults">
         No results for <strong>"{{ term }}"</strong> in <strong>{{ kindLabel }}</strong>
+      </template>
+      <template v-else-if="query?.trim()">
+        <template v-if="resultsCount === 1">
+          <strong>1 result</strong> for <strong>"{{ query }}"</strong>
+        </template>
+        <template v-else>
+          <strong>{{ formatNumber(resultsCount) }} results</strong> for <strong>"{{ query }}"</strong>
+        </template>
       </template>
       <template v-else-if="resultsCount === 1">
         <strong>1 result</strong> for <strong>"{{ term }}"</strong> in <strong>{{ kindLabel }}</strong>
