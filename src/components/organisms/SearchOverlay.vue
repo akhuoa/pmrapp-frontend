@@ -97,7 +97,7 @@ const getInitialKind = (): string => {
         <h2 class="text-lg font-semibold">Search</h2>
         <CloseButton @click="emit('close')" />
       </div>
-      <div class="my-4 text-sm text-gray-400 dark:text-gray-400">
+      <div class="my-4 text-sm text-gray-500 dark:text-gray-400">
         Search by author, CellML keyword, publication, or free text.
         Type to see suggestions or press <em>Enter</em> to search.
       </div>
