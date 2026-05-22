@@ -158,6 +158,11 @@ const isIdActive = (ids: string[] | undefined) => {
               </template>
             </small>
           </div>
+
+          <div v-if="item.data._brief" v-html="item.data._brief[0]"
+            class="mt-2 text-sm text-gray-600 dark:text-gray-400"
+          ></div>
+
           <div v-if="item.data.cellml_keyword?.length" class="flex flex-wrap gap-2 mt-2">
             <TermButton
               v-for="keyword in item.data.cellml_keyword.filter(k => k.trim())"
