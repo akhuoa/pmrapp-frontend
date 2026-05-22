@@ -233,6 +233,7 @@ const handleSearchInputKeyDown = async (event: KeyboardEvent) => {
     event.preventDefault()
     const searchQuery = searchInput.value.trim()
     if (searchQuery) {
+      searchInputRef.value?.inputRef?.blur()
       isSearchFocused.value = false
       emit('querySearch', searchQuery)
     }
