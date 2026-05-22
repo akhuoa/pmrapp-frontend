@@ -182,5 +182,4 @@ const isIdActive = (ids: string[] | undefined) => {
 
 <style scoped>
 @import '@/assets/box.css';
-@import '@/assets/text-highlight.css';
 </style>

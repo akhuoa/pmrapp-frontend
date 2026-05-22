@@ -153,7 +153,3 @@ watch(
     </template>
   </ListContent>
 </template>
-
-<style scoped>
-@import '@/assets/text-highlight.css';
-</style>
