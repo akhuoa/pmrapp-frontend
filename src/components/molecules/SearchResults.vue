@@ -17,6 +17,7 @@ interface Props {
   error: string | null
   term: string
   kind: string
+  query?: string
 }
 
 const props = defineProps<Props>()
@@ -51,11 +52,22 @@ const isIdActive = (ids: string[] | undefined) => {
 <template>
   <div>
     <p class="mb-4" v-if="!isLoading && !error">
-      <template v-if="!hasResults && term.trim() === ''">
+      <template v-if="!hasResults && !term.trim() && !query?.trim()">
         Perform a search to see results.
+      </template>
+      <template v-else-if="!hasResults && query?.trim()">
+        No results for <strong>"{{ query }}"</strong>
       </template>
       <template v-else-if="!hasResults">
         No results for <strong>"{{ term }}"</strong> in <strong>{{ kindLabel }}</strong>
+      </template>
+      <template v-else-if="query?.trim()">
+        <template v-if="resultsCount === 1">
+          <strong>1 result</strong> for <strong>"{{ query }}"</strong>
+        </template>
+        <template v-else>
+          <strong>{{ formatNumber(resultsCount) }} results</strong> for <strong>"{{ query }}"</strong>
+        </template>
       </template>
       <template v-else-if="resultsCount === 1">
         <strong>1 result</strong> for <strong>"{{ term }}"</strong> in <strong>{{ kindLabel }}</strong>
@@ -76,7 +88,7 @@ const isIdActive = (ids: string[] | undefined) => {
         <ListItem
           v-for="item in results"
           :key="item.resource_path"
-          :title="item.data.description?.[0] || item.resource_path"
+          :title="item.data._title?.[0] || item.data.description?.[0] || item.resource_path"
           :link="item.data.aliased_uri?.[0] || ''"
         >
           <div class="text-gray-600 dark:text-gray-400">
@@ -146,6 +158,13 @@ const isIdActive = (ids: string[] | undefined) => {
               </template>
             </small>
           </div>
+
+          <div
+            v-if="item.data._brief?.length"
+            v-html="item.data._brief[0]"
+            class="mt-2 text-sm text-gray-600 dark:text-gray-400"
+          ></div>
+
           <div v-if="item.data.cellml_keyword?.length" class="flex flex-wrap gap-2 mt-2">
             <TermButton
               v-for="keyword in item.data.cellml_keyword.filter(k => k.trim())"
@@ -163,5 +182,4 @@ const isIdActive = (ids: string[] | undefined) => {
 
 <style scoped>
 @import '@/assets/box.css';
-@import '@/assets/text-highlight.css';
 </style>

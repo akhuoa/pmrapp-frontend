@@ -27,6 +27,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'search', searchKind: string, searchTerm: string): void
+  (e: 'querySearch', query: string): void
   (e: 'close'): void
 }>()
 
@@ -35,6 +36,8 @@ const route = useRoute()
 const searchStore = useSearchStore()
 const exposureStore = useExposureStore()
 const workspaceStore = useWorkspaceStore()
+
+const MAX_TERMS_PER_CATEGORY = 10
 
 const searchInput = ref<string>(props.initialTerm)
 
@@ -101,7 +104,7 @@ const filteredSearchTermsByCategory = computed(() => {
     return {
       kind: category.value,
       label: category.label,
-      terms: filteredTerms,
+      terms: filteredTerms.slice(0, MAX_TERMS_PER_CATEGORY),
     }
   }).filter((group) => group.terms.length > 0)
 })
@@ -226,6 +229,17 @@ const handleKeyDown = (event: KeyboardEvent) => {
 
 // Handle Tab/Shift+Tab key to cycle focus between search input and term buttons.
 const handleSearchInputKeyDown = async (event: KeyboardEvent) => {
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    const searchQuery = searchInput.value.trim()
+    if (searchQuery) {
+      searchInputRef.value?.inputRef?.blur()
+      isSearchFocused.value = false
+      emit('querySearch', searchQuery)
+    }
+    return
+  }
+
   if (event.key === 'Tab' && hasResults.value) {
     event.preventDefault()
     await nextTick()
@@ -312,7 +326,7 @@ defineExpose({
         </div>
         <div v-else-if="!hasResults" class="p-4">
           <p class="text-gray-500 dark:text-gray-400">
-            No matching results found for "{{ searchInput }}".
+            No suggestions found for ‘{{ searchInput }}’. Press Enter to search.
           </p>
         </div>
         <div v-else class="max-h-96 overflow-y-auto scrollbar-thin group/results">

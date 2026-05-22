@@ -48,6 +48,11 @@
   .scrollbar-thin {
     scrollbar-width: thin;
   }
+
+  .text-highlight,
+  mark {
+    @apply bg-amber-200 dark:bg-amber-400 text-accent;
+  }
 }
 
 :root {

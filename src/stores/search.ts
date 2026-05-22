@@ -4,6 +4,8 @@ import { getSearchService } from '@/services'
 import type { IndexKindResponse, SearchResult } from '@/types/search'
 
 const CACHE_TTL = 30 * 60 * 1000 // 30 minutes in milliseconds
+const SEARCH_RESULTS_CACHE_MAX_SIZE = 200 // Keep up to 200 cached kind/term search entries.
+const SEARCH_QUERY_CACHE_MAX_SIZE = 200 // Keep up to 200 cached free-text query entries.
 
 export interface CategoryData {
   kind: string
@@ -19,12 +21,46 @@ export interface SearchResultCache {
   timestamp: number
 }
 
+export interface SearchQueryCache {
+  query: string
+  results: SearchResult[]
+  timestamp: number
+}
+
+interface TimedCacheEntry {
+  timestamp: number
+}
+
 export const useSearchStore = defineStore('search', () => {
   const categories = ref<CategoryData[]>([])
   const lastFetchTime = ref<number | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const searchResultsCache = ref<Map<string, SearchResultCache>>(new Map())
+  const searchQueryCache = ref<Map<string, SearchQueryCache>>(new Map())
+
+  const pruneExpiredEntries = <T extends TimedCacheEntry>(cache: Map<string, T>, now: number) => {
+    for (const [key, entry] of cache.entries()) {
+      if (now - entry.timestamp >= CACHE_TTL) {
+        cache.delete(key)
+      }
+    }
+  }
+
+  const touchCacheEntry = <T>(cache: Map<string, T>, key: string, value: T) => {
+    cache.delete(key)
+    cache.set(key, value)
+  }
+
+  const enforceMaxCacheSize = <T>(cache: Map<string, T>, maxSize: number) => {
+    while (cache.size > maxSize) {
+      const oldestKey = cache.keys().next().value
+      if (oldestKey === undefined) {
+        break
+      }
+      cache.delete(oldestKey)
+    }
+  }
 
   const isCacheValid = (): boolean => {
     if (!lastFetchTime.value) return false
@@ -105,10 +141,13 @@ export const useSearchStore = defineStore('search', () => {
     forceRefresh = false,
   ): Promise<SearchResult[]> => {
     const cacheKey = `${kind}:${term}`
+    const now = Date.now()
+    pruneExpiredEntries(searchResultsCache.value, now)
     const cached = searchResultsCache.value.get(cacheKey)
 
     // Return cached results if valid.
-    if (!forceRefresh && cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    if (!forceRefresh && cached) {
+      touchCacheEntry(searchResultsCache.value, cacheKey, cached)
       return cached.results
     }
 
@@ -118,16 +157,49 @@ export const useSearchStore = defineStore('search', () => {
       const results = response?.resource_paths || []
 
       // Cache the results.
-      searchResultsCache.value.set(cacheKey, {
+      touchCacheEntry(searchResultsCache.value, cacheKey, {
         kind,
         term,
         results,
         timestamp: Date.now(),
       })
+      enforceMaxCacheSize(searchResultsCache.value, SEARCH_RESULTS_CACHE_MAX_SIZE)
 
       return results
     } catch (err) {
       console.error('Search error:', err)
+      throw err
+    }
+  }
+
+  const searchQuery = async (query: string, forceRefresh = false): Promise<SearchResult[]> => {
+    const cacheKey = query
+    const now = Date.now()
+    pruneExpiredEntries(searchQueryCache.value, now)
+    const cached = searchQueryCache.value.get(cacheKey)
+
+    // Return cached results if valid.
+    if (!forceRefresh && cached) {
+      touchCacheEntry(searchQueryCache.value, cacheKey, cached)
+      return cached.results
+    }
+
+    try {
+      const searchService = getSearchService()
+      const response = await searchService.searchQuery(query)
+      const results = response?.results || []
+
+      // Cache the results.
+      touchCacheEntry(searchQueryCache.value, cacheKey, {
+        query,
+        results,
+        timestamp: Date.now(),
+      })
+      enforceMaxCacheSize(searchQueryCache.value, SEARCH_QUERY_CACHE_MAX_SIZE)
+
+      return results
+    } catch (err) {
+      console.error('Search query error:', err)
       throw err
     }
   }
@@ -138,5 +210,6 @@ export const useSearchStore = defineStore('search', () => {
     error,
     fetchCategories,
     searchIndexTerm,
+    searchQuery,
   }
 })

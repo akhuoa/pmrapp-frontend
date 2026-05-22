@@ -269,7 +269,44 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
     await input.trigger('focus')
     await nextTick()
 
-    expect(wrapper.text()).toContain('No matching results found')
+    expect(wrapper.text()).toContain('No suggestions found')
+
+    wrapper.unmount()
+  })
+
+  it('limits each category group to ten term suggestions', async () => {
+    mockSearchCategories.push({
+      kind: 'citation_author_family_name',
+      loading: false,
+      kindInfo: {
+        terms: [
+          'Noble 1',
+          'Noble 2',
+          'Noble 3',
+          'Noble 4',
+          'Noble 5',
+          'Noble 6',
+          'Noble 7',
+          'Noble 8',
+          'Noble 9',
+          'Noble 10',
+          'Noble 11',
+        ],
+      },
+    })
+
+    const wrapper = mountSearchInput()
+    await flushPromises()
+
+    const input = wrapper.find('input')
+    await input.setValue('Noble')
+    await input.trigger('focus')
+    await nextTick()
+
+    const termButtons = wrapper.findAll('button.term-button')
+    expect(termButtons).toHaveLength(10)
+    expect(wrapper.text()).toContain('Noble 10')
+    expect(wrapper.text()).not.toContain('Noble 11')
 
     wrapper.unmount()
   })

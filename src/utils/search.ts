@@ -53,6 +53,28 @@ export const buildSearchQuery = (
 }
 
 /**
+ * Builds a /search free-text query and preserves the current sort option
+ * when it is valid.
+ */
+export const buildQuerySearchQuery = (
+  queryText: string,
+  currentQuery: LocationQuery,
+): LocationQueryRaw => {
+  const query: LocationQueryRaw = { query: queryText }
+  const sortQuery = currentQuery.sort
+
+  if (
+    typeof sortQuery === 'string' &&
+    isValidSortOption(sortQuery) &&
+    sortQuery !== DEFAULT_SORT_OPTION
+  ) {
+    query.sort = sortQuery
+  }
+
+  return query
+}
+
+/**
  * Splits `original` into segments marking which parts match any of the given
  * `tokens`.
  *
