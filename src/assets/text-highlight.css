@@ -1,6 +1,7 @@
 @reference "tailwindcss";
 @reference "./main.css";
 
-.text-highlight {
+.text-highlight,
+:deep(mark) {
   @apply bg-amber-200 dark:bg-amber-400 text-accent;
 }

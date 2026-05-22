@@ -162,7 +162,7 @@ const isIdActive = (ids: string[] | undefined) => {
           <div
             v-if="item.data._brief?.length"
             v-html="item.data._brief[0]"
-            class="brief-content mt-2 text-sm text-gray-600 dark:text-gray-400"
+            class="mt-2 text-sm text-gray-600 dark:text-gray-400"
           ></div>
 
           <div v-if="item.data.cellml_keyword?.length" class="flex flex-wrap gap-2 mt-2">
@@ -183,8 +183,4 @@ const isIdActive = (ids: string[] | undefined) => {
 <style scoped>
 @import '@/assets/box.css';
 @import '@/assets/text-highlight.css';
-
-.brief-content :deep(mark) {
-  @apply bg-amber-200 dark:bg-amber-400 text-accent;
-}
 </style>
