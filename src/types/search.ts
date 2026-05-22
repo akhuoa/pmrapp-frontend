@@ -25,8 +25,8 @@ export interface SearchResult {
     citation_author_family_name: string[]
     citation_id: string[]
     model_author: string[]
-    _title: string[]
-    _brief: string[]
+    _title?: string[]
+    _brief?: string[]
   }
   resource_path: string
 }
