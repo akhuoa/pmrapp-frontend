@@ -79,6 +79,65 @@ describe('useSearchStore searchQuery', () => {
     expect(response).toEqual(results)
   })
 
+  it('omits empty query values before calling the service', async () => {
+    const store = useSearchStore()
+    const payload: SearchQueryRequest = {
+      query: '',
+      filters: [{ kind: 'model_author', term: 'Noble' }],
+    }
+    const results = [buildResult('/r/filters-only')]
+    mockSearchQuery.mockResolvedValue({ results })
+
+    const response = await store.searchQuery(payload)
+
+    expect(mockSearchQuery).toHaveBeenCalledTimes(1)
+    expect(mockSearchQuery).toHaveBeenCalledWith({
+      filters: [{ kind: 'model_author', term: 'Noble' }],
+    })
+    expect(response).toEqual(results)
+  })
+
+  it('omits whitespace-only query values before calling the service', async () => {
+    const store = useSearchStore()
+    const payload: SearchQueryRequest = {
+      query: '   ',
+      filters: [{ kind: 'model_author', term: 'Noble' }],
+    }
+    const results = [buildResult('/r/filters-only')]
+    mockSearchQuery.mockResolvedValue({ results })
+
+    const response = await store.searchQuery(payload)
+
+    expect(mockSearchQuery).toHaveBeenCalledTimes(1)
+    expect(mockSearchQuery).toHaveBeenCalledWith({
+      filters: [{ kind: 'model_author', term: 'Noble' }],
+    })
+    expect(response).toEqual(results)
+  })
+
+  it('filters out invalid filters before calling the service', async () => {
+    const store = useSearchStore()
+    const payload: SearchQueryRequest = {
+      query: 'valid query',
+      filters: [
+        { kind: 'model_author', term: 'Noble' },
+        { kind: '', term: 'invalid' },
+        { kind: 'invalid', term: '' },
+      ],
+    }
+    const results = [buildResult('/r/filtered-filters')]
+    mockSearchQuery.mockResolvedValue({ results })
+
+    const response = await store.searchQuery(payload)
+
+    expect(mockSearchQuery).toHaveBeenCalledTimes(1)
+    expect(mockSearchQuery).toHaveBeenCalledWith({
+      query: 'valid query',
+      filters: [{ kind: 'model_author', term: 'Noble' }],
+    })
+    expect(response).toEqual(results)
+  })
+
   it('uses separate cache entries for distinct filters', async () => {
     const store = useSearchStore()
     const resultA = [buildResult('/r/filter-a')]

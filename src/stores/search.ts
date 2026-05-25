@@ -68,24 +68,22 @@ export const useSearchStore = defineStore('search', () => {
     return now - lastFetchTime.value < CACHE_TTL
   }
 
+  // Removes empty query text and invalid filters
+  // before using the payload for cache keys and API calls.
   const normaliseSearchQueryRequest = (
     request: SearchQueryRequest
   ): SearchQueryRequest => {
-    // Create a new object to hold the cleaned data
     const normalisedRequest: SearchQueryRequest = {}
 
-    // 1. Handle the query: Only add it if it is defined and not just empty space
     if (typeof request.query === 'string' && request.query.trim() !== '') {
       normalisedRequest.query = request.query
     }
 
-    // 2. Handle the filters: Filter out any items with empty terms or values
     if (Array.isArray(request.filters)) {
       const validFilters = request.filters.filter(
         (filter) => filter.kind.trim() !== '' && filter.term.trim() !== ''
       )
 
-      // Only attach the filters array if there are valid filters left
       if (validFilters.length > 0) {
         normalisedRequest.filters = validFilters
       }
@@ -203,7 +201,6 @@ export const useSearchStore = defineStore('search', () => {
     forceRefresh = false,
   ): Promise<SearchResult[]> => {
     const normalisedRequest = normaliseSearchQueryRequest(searchQueryRequest)
-    console.log('normalisedRequest', normalisedRequest)
     const cacheKey = JSON.stringify(normalisedRequest)
     const now = Date.now()
     pruneExpiredEntries(searchQueryCache.value, now)
