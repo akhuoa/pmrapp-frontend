@@ -44,6 +44,16 @@ export interface SearchQueryResponse {
   results: SearchResult[]
 }
 
+export interface SearchFilter {
+  kind: string
+  term: string
+}
+
+export interface SearchQueryRequest {
+  query?: string
+  filters?: SearchFilter[]
+}
+
 export interface TextSegment {
   text: string
   highlighted: boolean

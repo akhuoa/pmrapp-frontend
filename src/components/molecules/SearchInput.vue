@@ -330,6 +330,11 @@ defineExpose({
           </p>
         </div>
         <div v-else class="max-h-96 overflow-y-auto scrollbar-thin group/results">
+          <div class="p-4 border-b border-gray-200 dark:border-gray-700" v-if="!props.inOverlay">
+            <p class="text-gray-500 dark:text-gray-400 text-sm">
+              Press Enter to search or click a suggestion below.
+            </p>
+          </div>
           <div
             v-for="(categoryGroup, groupIndex) in filteredSearchTermsByCategory"
             :key="categoryGroup.kind"

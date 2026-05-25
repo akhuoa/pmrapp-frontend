@@ -8,3 +8,5 @@ export const SEARCH_CATEGORIES = [
 export const SEARCH_KIND_LABEL_MAP: Record<string, string> = Object.fromEntries(
   SEARCH_CATEGORIES.map((cat) => [cat.value, cat.label]),
 )
+
+export const SEARCH_KIND_NAMES = SEARCH_CATEGORIES.map((c) => c.value) as readonly string[]

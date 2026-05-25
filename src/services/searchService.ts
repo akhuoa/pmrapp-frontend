@@ -2,6 +2,7 @@ import type {
   IndexesResponse,
   IndexKindResponse,
   IndexSearchResult,
+  SearchQueryRequest,
   SearchQueryResponse,
 } from '@/types/search'
 
@@ -56,13 +57,13 @@ export const searchService = {
     return await response.json()
   },
 
-  async searchQuery(query: string): Promise<SearchQueryResponse> {
+  async searchQuery(payload: SearchQueryRequest): Promise<SearchQueryResponse> {
     const response = await fetch(`${API_BASE_URL}/api/search`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ query }),
+      body: JSON.stringify(payload),
     })
 
     if (!response.ok) {

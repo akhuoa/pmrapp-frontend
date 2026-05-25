@@ -3,7 +3,8 @@ import { nextTick, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import CloseButton from '@/components/atoms/CloseButton.vue'
 import SearchInput from '@/components/molecules/SearchInput.vue'
-import { buildQuerySearchQuery, buildSearchQuery } from '@/utils/search'
+import { SEARCH_KIND_NAMES } from '@/constants/search'
+import { buildQuerySearchQuery, buildSearchQuery, parseQueryFiltersFromQuery } from '@/utils/search'
 
 const props = defineProps<{
   show: boolean
@@ -60,28 +61,31 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
 }
 
 const handleQuerySearch = (query: string) => {
-  router.push({ path: '/search', query: buildQuerySearchQuery(query, route.query) })
+  router.push({ path: '/search', query: buildQuerySearchQuery(query, [], route.query) })
   emit('close')
 }
 
 const getInitialTerm = (): string => {
   const filterQuery = route.query.filter
-  const termQuery = route.query.term
+  const queryParam = route.query.query
 
   if (typeof filterQuery === 'string') {
     return filterQuery
   }
 
-  if (typeof termQuery === 'string') {
-    return termQuery
+  if (typeof queryParam === 'string') {
+    return queryParam
   }
+
+  const firstFilter = parseQueryFiltersFromQuery(route.query, SEARCH_KIND_NAMES)[0]
+  if (firstFilter) return firstFilter.term
 
   return ''
 }
 
 const getInitialKind = (): string => {
-  const kindQuery = route.query.kind
-  return typeof kindQuery === 'string' ? kindQuery : ''
+  const firstFilter = parseQueryFiltersFromQuery(route.query, SEARCH_KIND_NAMES)[0]
+  return firstFilter?.kind ?? ''
 }
 </script>
 
