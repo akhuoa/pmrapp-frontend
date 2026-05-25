@@ -173,14 +173,12 @@ export const useSearchStore = defineStore('search', () => {
   }
 
   const searchQuery = async (
-    search: string | SearchQueryRequest,
+    searchQueryRequest: SearchQueryRequest,
     forceRefresh = false,
   ): Promise<SearchResult[]> => {
-    const normalisedSearch: SearchQueryRequest =
-      typeof search === 'string' ? { query: search } : search
     const cacheKey = JSON.stringify({
-      query: normalisedSearch.query ?? '',
-      filters: (normalisedSearch.filters ?? []).map(({ kind, term }) => ({ kind, term })),
+      query: searchQueryRequest.query ?? '',
+      filters: (searchQueryRequest.filters ?? []).map(({ kind, term }) => ({ kind, term })),
     })
     const now = Date.now()
     pruneExpiredEntries(searchQueryCache.value, now)
@@ -194,12 +192,12 @@ export const useSearchStore = defineStore('search', () => {
 
     try {
       const searchService = getSearchService()
-      const response = await searchService.searchQuery(normalisedSearch)
+      const response = await searchService.searchQuery(searchQueryRequest)
       const results = response?.results || []
 
       // Cache the results.
       touchCacheEntry(searchQueryCache.value, cacheKey, {
-        search: normalisedSearch,
+        search: searchQueryRequest,
         results,
         timestamp: Date.now(),
       })

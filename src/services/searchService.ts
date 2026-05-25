@@ -57,10 +57,7 @@ export const searchService = {
     return await response.json()
   },
 
-  async searchQuery(search: string | SearchQueryRequest): Promise<SearchQueryResponse> {
-    const payload: SearchQueryRequest =
-      typeof search === 'string' ? { query: search } : { query: search.query, filters: search.filters }
-
+  async searchQuery(payload: SearchQueryRequest): Promise<SearchQueryResponse> {
     const response = await fetch(`${API_BASE_URL}/api/search`, {
       method: 'POST',
       headers: {

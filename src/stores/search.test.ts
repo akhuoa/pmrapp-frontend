@@ -35,15 +35,16 @@ describe('useSearchStore searchQuery', () => {
     mockSearchQuery.mockReset()
   })
 
-  it('normalizes legacy string input to request payload', async () => {
+  it('supports query-only payloads', async () => {
     const store = useSearchStore()
-    const results = [buildResult('/r/legacy')]
+    const results = [buildResult('/r/query-only')]
     mockSearchQuery.mockResolvedValue({ results })
 
-    const response = await store.searchQuery('legacy query')
+    const payload: SearchQueryRequest = { query: 'query-only' }
+    const response = await store.searchQuery(payload)
 
     expect(mockSearchQuery).toHaveBeenCalledTimes(1)
-    expect(mockSearchQuery).toHaveBeenCalledWith({ query: 'legacy query' })
+    expect(mockSearchQuery).toHaveBeenCalledWith(payload)
     expect(response).toEqual(results)
   })
 

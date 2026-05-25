@@ -92,7 +92,7 @@ const loadResults = async (forceRefresh = false) => {
               query: searchQueryParam.value,
               filters: [{ kind: kind.value, term: term.value }],
             }
-          : searchQueryParam.value,
+          : { query: searchQueryParam.value },
         forceRefresh,
       )
     } catch (err) {
