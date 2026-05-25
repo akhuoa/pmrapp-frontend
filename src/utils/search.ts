@@ -31,25 +31,15 @@ export const normaliseSearchText = (text: string): string => {
 }
 
 /**
- * Builds a /search query and preserves the current sort option when it is valid.
+ * Builds a /search query for a single filter in flat format and preserves the
+ * current sort option when it is valid.
  */
 export const buildSearchQuery = (
   kind: string,
   term: string,
   currentQuery: LocationQuery,
 ): LocationQueryRaw => {
-  const query: LocationQueryRaw = { kind, term }
-  const sortQuery = currentQuery.sort
-
-  if (
-    typeof sortQuery === 'string' &&
-    isValidSortOption(sortQuery) &&
-    sortQuery !== DEFAULT_SORT_OPTION
-  ) {
-    query.sort = sortQuery
-  }
-
-  return query
+  return buildQuerySearchQuery('', [{ kind, term }], currentQuery)
 }
 
 export const buildQuerySearchQuery = (
@@ -65,9 +55,13 @@ export const buildQuerySearchQuery = (
 
   const termsByKind = new Map<string, string[]>()
   for (const filter of filters) {
-    const terms = termsByKind.get(filter.kind) ?? []
-    terms.push(filter.term)
-    termsByKind.set(filter.kind, terms)
+    const normalisedKind = filter.kind.trim()
+    const normalisedTerm = filter.term.trim()
+    if (!normalisedKind || !normalisedTerm) continue
+
+    const terms = termsByKind.get(normalisedKind) ?? []
+    terms.push(normalisedTerm)
+    termsByKind.set(normalisedKind, terms)
   }
 
   for (const [kind, terms] of termsByKind) {
@@ -96,20 +90,6 @@ const queryParamToStringArray = (value: LocationQuery[string]): string[] => {
   }
 
   return []
-}
-
-/**
- * Parses the single kind/term pair used for index API (api/index) searches.
- */
-export const parseIndexFilterFromQuery = (query: LocationQuery): SearchFilter | null => {
-  const kind = typeof query.kind === 'string' ? query.kind.trim() : ''
-  const term = typeof query.term === 'string' ? query.term.trim() : ''
-
-  if (kind && term) {
-    return { kind, term }
-  }
-
-  return null
 }
 
 /**

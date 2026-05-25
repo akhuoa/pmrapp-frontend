@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { exposures, workspaces } from '@/mocks/search'
 import {
+  buildSearchQuery,
   buildQuerySearchQuery,
   filterItemsByQuery,
   highlightTokens,
   isValidTerm,
   normaliseSearchText,
-  parseIndexFilterFromQuery,
   parseQueryFiltersFromQuery,
 } from './search'
 
@@ -217,34 +217,6 @@ describe('highlightTokens', () => {
   })
 })
 
-describe('parseIndexFilterFromQuery', () => {
-  it('returns a filter for a valid kind/term pair', () => {
-    const filter = parseIndexFilterFromQuery({ kind: 'model_author', term: 'Noble' })
-    expect(filter).toEqual({ kind: 'model_author', term: 'Noble' })
-  })
-
-  it('returns null when kind is missing', () => {
-    expect(parseIndexFilterFromQuery({ term: 'Noble' })).toBeNull()
-  })
-
-  it('returns null when term is missing', () => {
-    expect(parseIndexFilterFromQuery({ kind: 'model_author' })).toBeNull()
-  })
-
-  it('returns null for whitespace-only kind or term', () => {
-    expect(parseIndexFilterFromQuery({ kind: '   ', term: 'Noble' })).toBeNull()
-    expect(parseIndexFilterFromQuery({ kind: 'model_author', term: '   ' })).toBeNull()
-  })
-
-  it('ignores array values for kind and term', () => {
-    const filter = parseIndexFilterFromQuery({
-      kind: ['model_author', 'cellml_keyword'],
-      term: ['Noble', 'cardiac'],
-    })
-    expect(filter).toBeNull()
-  })
-})
-
 describe('parseQueryFiltersFromQuery', () => {
   const knownKinds = ['model_author', 'cellml_keyword', 'citation_author_family_name']
 
@@ -295,6 +267,26 @@ describe('parseQueryFiltersFromQuery', () => {
     const filters = parseQueryFiltersFromQuery({ query: 'heart', sort: 'relevance' }, knownKinds)
     expect(filters).toEqual([])
   })
+
+  it('ignores legacy kind/term params', () => {
+    const filters = parseQueryFiltersFromQuery(
+      { kind: 'model_author', term: 'Noble', model_author: 'Noble' },
+      knownKinds,
+    )
+    expect(filters).toEqual([{ kind: 'model_author', term: 'Noble' }])
+  })
+})
+
+describe('buildSearchQuery', () => {
+  it('builds a single-filter flat query', () => {
+    const result = buildSearchQuery('cellml_keyword', 'cardiac', {})
+    expect(result).toEqual({ cellml_keyword: 'cardiac' })
+  })
+
+  it('preserves valid non-default sort option', () => {
+    const result = buildSearchQuery('cellml_keyword', 'cardiac', { sort: 'date-desc' })
+    expect(result).toEqual({ cellml_keyword: 'cardiac', sort: 'date-desc' })
+  })
 })
 
 describe('buildQuerySearchQuery', () => {
@@ -330,5 +322,18 @@ describe('buildQuerySearchQuery', () => {
   it('omits whitespace-only query text', () => {
     const result = buildQuerySearchQuery('   ', [], {})
     expect(result).not.toHaveProperty('query')
+  })
+
+  it('omits invalid filters with empty kind or term', () => {
+    const result = buildQuerySearchQuery(
+      '',
+      [
+        { kind: 'cellml_keyword', term: 'cardiac' },
+        { kind: '   ', term: 'ignored' },
+        { kind: 'model_author', term: '   ' },
+      ],
+      {},
+    )
+    expect(result).toEqual({ cellml_keyword: 'cardiac' })
   })
 })

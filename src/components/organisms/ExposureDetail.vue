@@ -826,7 +826,7 @@ onMounted(async () => {
         </ul>
         <div v-if="hasOtherRelatedModels" class="mb-4">
           <RouterLink
-            :to="`/search?kind=citation_id&term=${metadataJSON.citation_id}`"
+            :to="{ path: '/search', query: { citation_id: metadataJSON.citation_id } }"
             class="text-link text-sm inline-flex items-center gap-2 break-all"
           >
             <span class="text-foreground">›</span>

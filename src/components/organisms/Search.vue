@@ -12,7 +12,7 @@ import { useGlobalStateStore } from '@/stores/globalState'
 import { useSearchStore } from '@/stores/search'
 import type { SortOption } from '@/types/common'
 import type { SearchResult } from '@/types/search'
-import { parseIndexFilterFromQuery, parseQueryFiltersFromQuery } from '@/utils/search'
+import { buildQuerySearchQuery, parseQueryFiltersFromQuery } from '@/utils/search'
 import {
   DEFAULT_SORT_OPTION,
   isValidSortOption,
@@ -25,10 +25,10 @@ const router = useRouter()
 const searchStore = useSearchStore()
 const globalState = useGlobalStateStore()
 
-const indexFilter = computed(() => parseIndexFilterFromQuery(route.query))
 const queryFilters = computed(() => parseQueryFiltersFromQuery(route.query, SEARCH_KIND_NAMES))
-const kind = computed(() => indexFilter.value?.kind || '')
-const term = computed(() => indexFilter.value?.term || '')
+const activeFilter = computed(() => queryFilters.value[0] ?? null)
+const kind = computed(() => activeFilter.value?.kind || '')
+const term = computed(() => activeFilter.value?.term || '')
 const searchQueryParam = computed(() => {
   const query = route.query.query
   if (Array.isArray(query)) {
@@ -74,11 +74,6 @@ watch(sortBy, (newSort) => {
 
   if (searchQueryParam.value) nextQuery.query = searchQueryParam.value
 
-  if (indexFilter.value) {
-    nextQuery.kind = indexFilter.value.kind
-    nextQuery.term = indexFilter.value.term
-  }
-
   for (const filter of queryFilters.value) {
     const existing = nextQuery[filter.kind]
     if (existing === undefined) {
@@ -108,10 +103,9 @@ watch(
 
 const loadResults = async (forceRefresh = false) => {
   const hasQuery = !!searchQueryParam.value
-  const hasIndexFilter = !!indexFilter.value
   const hasQueryFilters = queryFilters.value.length > 0
 
-  if (!hasQuery && !hasIndexFilter && !hasQueryFilters) {
+  if (!hasQuery && !hasQueryFilters) {
     // If no search parameters are provided, simply return to avoid an empty search.
     return
   }
@@ -120,43 +114,27 @@ const loadResults = async (forceRefresh = false) => {
   resultsError.value = null
   searchResults.value = []
 
-  if (hasQuery || hasQueryFilters) {
-    try {
-      searchResults.value = await searchStore.searchQuery(
-        {
-          query: searchQueryParam.value || undefined,
-          filters: queryFilters.value,
-        },
-        forceRefresh,
-      )
-    } catch (err) {
-      resultsError.value = err instanceof Error ? err.message : 'Failed to load search results'
-      console.error('Failed to load search results by query:', err)
-    } finally {
-      isLoading.value = false
-    }
-
-    return
-  }
-
   try {
-    searchResults.value = await searchStore.searchIndexTerm(
-      indexFilter.value!.kind,
-      indexFilter.value!.term,
+    searchResults.value = await searchStore.searchQuery(
+      {
+        query: searchQueryParam.value || undefined,
+        filters: queryFilters.value,
+      },
       forceRefresh,
     )
   } catch (err) {
     resultsError.value = err instanceof Error ? err.message : 'Failed to load search results'
-    console.error('Failed to load search results:', err)
+    console.error('Failed to load search results by query:', err)
   } finally {
     isLoading.value = false
   }
 }
 
 const handleSearch = (searchKind: string, searchTerm: string) => {
-  const query: Record<string, string> = { kind: searchKind, term: searchTerm }
-  if (sortBy.value !== DEFAULT_SORT_OPTION) query.sort = sortBy.value
-  router.push({ path: '/search', query })
+  router.push({
+    path: '/search',
+    query: buildQuerySearchQuery('', [{ kind: searchKind, term: searchTerm }], route.query),
+  })
 }
 
 const handleQuerySearch = (query: string) => {
