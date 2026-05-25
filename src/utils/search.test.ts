@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { exposures, workspaces } from '@/mocks/search'
 import {
-  buildSearchQuery,
   buildQuerySearchQuery,
+  buildSearchQuery,
   filterItemsByQuery,
   highlightTokens,
   isValidTerm,
