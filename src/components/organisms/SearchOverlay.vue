@@ -60,7 +60,7 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
 }
 
 const handleQuerySearch = (query: string) => {
-  router.push({ path: '/search', query: buildQuerySearchQuery(query, route.query) })
+  router.push({ path: '/search', query: buildQuerySearchQuery(query, [], route.query) })
   emit('close')
 }
 

@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { exposures, workspaces } from '@/mocks/search'
-import { filterItemsByQuery, highlightTokens, isValidTerm, normaliseSearchText } from './search'
+import {
+  buildQuerySearchQuery,
+  filterItemsByQuery,
+  highlightTokens,
+  isValidTerm,
+  normaliseSearchText,
+  parseIndexFilterFromQuery,
+  parseQueryFiltersFromQuery,
+} from './search'
 
 describe('filterItemsByQuery', () => {
   it('returns filtered workspace results by search text', () => {
@@ -206,5 +214,121 @@ describe('highlightTokens', () => {
   it('returns non-highlighted whole text when no token matches', () => {
     const segments = highlightTokens('Yasuhara', ['noble'])
     expect(segments).toEqual([{ text: 'Yasuhara', highlighted: false }])
+  })
+})
+
+describe('parseIndexFilterFromQuery', () => {
+  it('returns a filter for a valid kind/term pair', () => {
+    const filter = parseIndexFilterFromQuery({ kind: 'model_author', term: 'Noble' })
+    expect(filter).toEqual({ kind: 'model_author', term: 'Noble' })
+  })
+
+  it('returns null when kind is missing', () => {
+    expect(parseIndexFilterFromQuery({ term: 'Noble' })).toBeNull()
+  })
+
+  it('returns null when term is missing', () => {
+    expect(parseIndexFilterFromQuery({ kind: 'model_author' })).toBeNull()
+  })
+
+  it('returns null for whitespace-only kind or term', () => {
+    expect(parseIndexFilterFromQuery({ kind: '   ', term: 'Noble' })).toBeNull()
+    expect(parseIndexFilterFromQuery({ kind: 'model_author', term: '   ' })).toBeNull()
+  })
+
+  it('ignores array values for kind and term', () => {
+    const filter = parseIndexFilterFromQuery({
+      kind: ['model_author', 'cellml_keyword'],
+      term: ['Noble', 'cardiac'],
+    })
+    expect(filter).toBeNull()
+  })
+})
+
+describe('parseQueryFiltersFromQuery', () => {
+  const knownKinds = ['model_author', 'cellml_keyword', 'citation_author_family_name']
+
+  it('parses a single flat filter param', () => {
+    const filters = parseQueryFiltersFromQuery({ model_author: 'Noble' }, knownKinds)
+    expect(filters).toEqual([{ kind: 'model_author', term: 'Noble' }])
+  })
+
+  it('parses multiple different kind params', () => {
+    const filters = parseQueryFiltersFromQuery(
+      { model_author: 'Noble', cellml_keyword: 'cardiac' },
+      knownKinds,
+    )
+    expect(filters).toEqual([
+      { kind: 'model_author', term: 'Noble' },
+      { kind: 'cellml_keyword', term: 'cardiac' },
+    ])
+  })
+
+  it('parses repeated values for the same kind', () => {
+    const filters = parseQueryFiltersFromQuery(
+      { cellml_keyword: ['cardiac', 'electrophysiology'] },
+      knownKinds,
+    )
+    expect(filters).toEqual([
+      { kind: 'cellml_keyword', term: 'cardiac' },
+      { kind: 'cellml_keyword', term: 'electrophysiology' },
+    ])
+  })
+
+  it('ignores unknown param keys', () => {
+    const filters = parseQueryFiltersFromQuery(
+      { model_author: 'Noble', unknown_kind: 'foo' },
+      knownKinds,
+    )
+    expect(filters).toEqual([{ kind: 'model_author', term: 'Noble' }])
+  })
+
+  it('filters out whitespace-only terms', () => {
+    const filters = parseQueryFiltersFromQuery(
+      { model_author: '   ', cellml_keyword: 'cardiac' },
+      knownKinds,
+    )
+    expect(filters).toEqual([{ kind: 'cellml_keyword', term: 'cardiac' }])
+  })
+
+  it('returns empty array when no known kind params are present', () => {
+    const filters = parseQueryFiltersFromQuery({ query: 'heart', sort: 'relevance' }, knownKinds)
+    expect(filters).toEqual([])
+  })
+})
+
+describe('buildQuerySearchQuery', () => {
+  it('builds a query-only URL', () => {
+    const result = buildQuerySearchQuery('heart', [], {})
+    expect(result).toEqual({ query: 'heart' })
+  })
+
+  it('builds a URL with flat filter params', () => {
+    const result = buildQuerySearchQuery(
+      'heart',
+      [
+        { kind: 'cellml_keyword', term: 'cardiac' },
+        { kind: 'model_author', term: 'Noble' },
+      ],
+      {},
+    )
+    expect(result).toEqual({ query: 'heart', cellml_keyword: 'cardiac', model_author: 'Noble' })
+  })
+
+  it('builds repeated params for the same kind', () => {
+    const result = buildQuerySearchQuery(
+      '',
+      [
+        { kind: 'cellml_keyword', term: 'cardiac' },
+        { kind: 'cellml_keyword', term: 'electrophysiology' },
+      ],
+      {},
+    )
+    expect(result).toEqual({ cellml_keyword: ['cardiac', 'electrophysiology'] })
+  })
+
+  it('omits whitespace-only query text', () => {
+    const result = buildQuerySearchQuery('   ', [], {})
+    expect(result).not.toHaveProperty('query')
   })
 })

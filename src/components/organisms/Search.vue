@@ -11,6 +11,8 @@ import { useGlobalStateStore } from '@/stores/globalState'
 import { useSearchStore } from '@/stores/search'
 import type { SortOption } from '@/types/common'
 import type { SearchResult } from '@/types/search'
+import { SEARCH_KIND_NAMES } from '@/constants/search'
+import { parseIndexFilterFromQuery, parseQueryFiltersFromQuery } from '@/utils/search'
 import {
   DEFAULT_SORT_OPTION,
   isValidSortOption,
@@ -23,9 +25,18 @@ const router = useRouter()
 const searchStore = useSearchStore()
 const globalState = useGlobalStateStore()
 
-const kind = computed(() => (route.query.kind as string) || '')
-const term = computed(() => (route.query.term as string) || '')
-const searchQueryParam = computed(() => (route.query.query as string) || '')
+const indexFilter = computed(() => parseIndexFilterFromQuery(route.query))
+const queryFilters = computed(() => parseQueryFiltersFromQuery(route.query, SEARCH_KIND_NAMES))
+const kind = computed(() => indexFilter.value?.kind || '')
+const term = computed(() => indexFilter.value?.term || '')
+const searchQueryParam = computed(() => {
+  const query = route.query.query
+  if (Array.isArray(query)) {
+    return typeof query[0] === 'string' ? query[0] : ''
+  }
+
+  return typeof query === 'string' ? query : ''
+})
 const searchResults = ref<SearchResult[]>([])
 const isLoading = ref(false)
 const resultsError = ref<string | null>(null)
@@ -57,12 +68,28 @@ watch(
   },
 )
 
-// Sync sort with URL query parameters whilst preserving the kind and term params.
+// Sync sort with URL query parameters whilst preserving the current search params.
 watch(sortBy, (newSort) => {
-  const nextQuery: Record<string, string> = {}
+  const nextQuery: Record<string, string | string[]> = {}
+
   if (searchQueryParam.value) nextQuery.query = searchQueryParam.value
-  if (kind.value) nextQuery.kind = kind.value
-  if (term.value) nextQuery.term = term.value
+
+  if (indexFilter.value) {
+    nextQuery.kind = indexFilter.value.kind
+    nextQuery.term = indexFilter.value.term
+  }
+
+  for (const filter of queryFilters.value) {
+    const existing = nextQuery[filter.kind]
+    if (existing === undefined) {
+      nextQuery[filter.kind] = filter.term
+    } else if (Array.isArray(existing)) {
+      existing.push(filter.term)
+    } else {
+      nextQuery[filter.kind] = [existing, filter.term]
+    }
+  }
+
   if (newSort !== DEFAULT_SORT_OPTION) nextQuery.sort = newSort
   router.replace({ query: nextQuery })
 })
@@ -72,17 +99,17 @@ onMounted(async () => {
 })
 
 // Watch for route param changes to reload results.
-watch([kind, term, searchQueryParam], async () => {
+watch(() => route.query, async () => {
   await loadResults()
 })
 
 const loadResults = async (forceRefresh = false) => {
   const hasQuery = !!searchQueryParam.value
-  const hasFilter = !!kind.value && !!term.value
+  const hasIndexFilter = !!indexFilter.value
+  const hasQueryFilters = queryFilters.value.length > 0
 
-  if (!hasFilter) {
-    // If no search parameters are provided, do not redirect.
-    // Simply return without loading results to avoid confusing UX.
+  if (!hasQuery && !hasIndexFilter && !hasQueryFilters) {
+    // If no search parameters are provided, simply return to avoid an empty search.
     return
   }
 
@@ -90,15 +117,13 @@ const loadResults = async (forceRefresh = false) => {
   resultsError.value = null
   searchResults.value = []
 
-  if (hasQuery) {
+  if (hasQuery || hasQueryFilters) {
     try {
       searchResults.value = await searchStore.searchQuery(
-        hasFilter
-          ? {
-              query: searchQueryParam.value,
-              filters: [{ kind: kind.value, term: term.value }],
-            }
-          : { query: searchQueryParam.value },
+        {
+          query: searchQueryParam.value || undefined,
+          filters: queryFilters.value,
+        },
         forceRefresh,
       )
     } catch (err) {
@@ -112,7 +137,11 @@ const loadResults = async (forceRefresh = false) => {
   }
 
   try {
-    searchResults.value = await searchStore.searchIndexTerm(kind.value, term.value, forceRefresh)
+    searchResults.value = await searchStore.searchIndexTerm(
+      indexFilter.value!.kind,
+      indexFilter.value!.term,
+      forceRefresh,
+    )
   } catch (err) {
     resultsError.value = err instanceof Error ? err.message : 'Failed to load search results'
     console.error('Failed to load search results:', err)
