@@ -7,11 +7,11 @@ import RefreshIcon from '@/components/icons/RefreshIcon.vue'
 import SearchInput from '@/components/molecules/SearchInput.vue'
 import SearchResults from '@/components/molecules/SearchResults.vue'
 import SortDropdown from '@/components/molecules/SortDropdown.vue'
+import { SEARCH_KIND_NAMES } from '@/constants/search'
 import { useGlobalStateStore } from '@/stores/globalState'
 import { useSearchStore } from '@/stores/search'
 import type { SortOption } from '@/types/common'
 import type { SearchResult } from '@/types/search'
-import { SEARCH_KIND_NAMES } from '@/constants/search'
 import { parseIndexFilterFromQuery, parseQueryFiltersFromQuery } from '@/utils/search'
 import {
   DEFAULT_SORT_OPTION,
