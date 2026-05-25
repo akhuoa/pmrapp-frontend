@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { getSearchService } from '@/services'
-import type { IndexKindResponse, SearchResult } from '@/types/search'
+import type { IndexKindResponse, SearchQueryRequest, SearchResult } from '@/types/search'
 
 const CACHE_TTL = 30 * 60 * 1000 // 30 minutes in milliseconds
 const SEARCH_RESULTS_CACHE_MAX_SIZE = 200 // Keep up to 200 cached kind/term search entries.
@@ -22,7 +22,7 @@ export interface SearchResultCache {
 }
 
 export interface SearchQueryCache {
-  query: string
+  search: SearchQueryRequest
   results: SearchResult[]
   timestamp: number
 }
@@ -172,8 +172,16 @@ export const useSearchStore = defineStore('search', () => {
     }
   }
 
-  const searchQuery = async (query: string, forceRefresh = false): Promise<SearchResult[]> => {
-    const cacheKey = query
+  const searchQuery = async (
+    search: string | SearchQueryRequest,
+    forceRefresh = false,
+  ): Promise<SearchResult[]> => {
+    const normalisedSearch: SearchQueryRequest =
+      typeof search === 'string' ? { query: search } : search
+    const cacheKey = JSON.stringify({
+      query: normalisedSearch.query ?? '',
+      filters: (normalisedSearch.filters ?? []).map(({ kind, term }) => ({ kind, term })),
+    })
     const now = Date.now()
     pruneExpiredEntries(searchQueryCache.value, now)
     const cached = searchQueryCache.value.get(cacheKey)
@@ -186,12 +194,12 @@ export const useSearchStore = defineStore('search', () => {
 
     try {
       const searchService = getSearchService()
-      const response = await searchService.searchQuery(query)
+      const response = await searchService.searchQuery(normalisedSearch)
       const results = response?.results || []
 
       // Cache the results.
       touchCacheEntry(searchQueryCache.value, cacheKey, {
-        query,
+        search: normalisedSearch,
         results,
         timestamp: Date.now(),
       })

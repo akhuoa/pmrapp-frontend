@@ -60,12 +60,9 @@ watch(
 // Sync sort with URL query parameters whilst preserving the kind and term params.
 watch(sortBy, (newSort) => {
   const nextQuery: Record<string, string> = {}
-  if (searchQueryParam.value) {
-    nextQuery.query = searchQueryParam.value
-  } else {
-    if (kind.value) nextQuery.kind = kind.value
-    if (term.value) nextQuery.term = term.value
-  }
+  if (searchQueryParam.value) nextQuery.query = searchQueryParam.value
+  if (kind.value) nextQuery.kind = kind.value
+  if (term.value) nextQuery.term = term.value
   if (newSort !== DEFAULT_SORT_OPTION) nextQuery.sort = newSort
   router.replace({ query: nextQuery })
 })
@@ -80,13 +77,24 @@ watch([kind, term, searchQueryParam], async () => {
 })
 
 const loadResults = async (forceRefresh = false) => {
-  if (searchQueryParam.value) {
-    isLoading.value = true
-    resultsError.value = null
-    searchResults.value = []
+  const hasQuery = !!searchQueryParam.value
+  const hasFilter = !!kind.value && !!term.value
 
+  isLoading.value = true
+  resultsError.value = null
+  searchResults.value = []
+
+  if (hasQuery) {
     try {
-      searchResults.value = await searchStore.searchQuery(searchQueryParam.value, forceRefresh)
+      searchResults.value = await searchStore.searchQuery(
+        hasFilter
+          ? {
+              query: searchQueryParam.value,
+              filters: [{ kind: kind.value, term: term.value }],
+            }
+          : searchQueryParam.value,
+        forceRefresh,
+      )
     } catch (err) {
       resultsError.value = err instanceof Error ? err.message : 'Failed to load search results'
       console.error('Failed to load search results by query:', err)
@@ -97,15 +105,11 @@ const loadResults = async (forceRefresh = false) => {
     return
   }
 
-  if (!kind.value || !term.value) {
+  if (!hasFilter) {
     // If no search parameters are provided, do not redirect.
     // Simply return without loading results to avoid confusing UX.
     return
   }
-
-  isLoading.value = true
-  resultsError.value = null
-  searchResults.value = []
 
   try {
     searchResults.value = await searchStore.searchIndexTerm(kind.value, term.value, forceRefresh)
