@@ -80,6 +80,12 @@ const loadResults = async (forceRefresh = false) => {
   const hasQuery = !!searchQueryParam.value
   const hasFilter = !!kind.value && !!term.value
 
+  if (!hasFilter) {
+    // If no search parameters are provided, do not redirect.
+    // Simply return without loading results to avoid confusing UX.
+    return
+  }
+
   isLoading.value = true
   resultsError.value = null
   searchResults.value = []
@@ -102,12 +108,6 @@ const loadResults = async (forceRefresh = false) => {
       isLoading.value = false
     }
 
-    return
-  }
-
-  if (!hasFilter) {
-    // If no search parameters are provided, do not redirect.
-    // Simply return without loading results to avoid confusing UX.
     return
   }
 
