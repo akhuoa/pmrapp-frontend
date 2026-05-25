@@ -99,9 +99,12 @@ onMounted(async () => {
 })
 
 // Watch for route param changes to reload results.
-watch(() => route.query, async () => {
-  await loadResults()
-})
+watch(
+  () => route.query,
+  async () => {
+    await loadResults()
+  },
+)
 
 const loadResults = async (forceRefresh = false) => {
   const hasQuery = !!searchQueryParam.value
