@@ -68,6 +68,32 @@ export const useSearchStore = defineStore('search', () => {
     return now - lastFetchTime.value < CACHE_TTL
   }
 
+  const normaliseSearchQueryRequest = (
+    request: SearchQueryRequest
+  ): SearchQueryRequest => {
+    // Create a new object to hold the cleaned data
+    const normalisedRequest: SearchQueryRequest = {}
+
+    // 1. Handle the query: Only add it if it is defined and not just empty space
+    if (typeof request.query === 'string' && request.query.trim() !== '') {
+      normalisedRequest.query = request.query
+    }
+
+    // 2. Handle the filters: Filter out any items with empty terms or values
+    if (Array.isArray(request.filters)) {
+      const validFilters = request.filters.filter(
+        (filter) => filter.kind.trim() !== '' && filter.term.trim() !== ''
+      )
+
+      // Only attach the filters array if there are valid filters left
+      if (validFilters.length > 0) {
+        normalisedRequest.filters = validFilters
+      }
+    }
+
+    return normalisedRequest
+  }
+
   const fetchCategories = async (
     categoryIndexesOrForceRefresh?: string[] | boolean,
     forceRefreshParam?: boolean,
@@ -176,10 +202,9 @@ export const useSearchStore = defineStore('search', () => {
     searchQueryRequest: SearchQueryRequest,
     forceRefresh = false,
   ): Promise<SearchResult[]> => {
-    const cacheKey = JSON.stringify({
-      query: searchQueryRequest.query ?? '',
-      filters: (searchQueryRequest.filters ?? []).map(({ kind, term }) => ({ kind, term })),
-    })
+    const normalisedRequest = normaliseSearchQueryRequest(searchQueryRequest)
+    console.log('normalisedRequest', normalisedRequest)
+    const cacheKey = JSON.stringify(normalisedRequest)
     const now = Date.now()
     pruneExpiredEntries(searchQueryCache.value, now)
     const cached = searchQueryCache.value.get(cacheKey)
@@ -192,12 +217,12 @@ export const useSearchStore = defineStore('search', () => {
 
     try {
       const searchService = getSearchService()
-      const response = await searchService.searchQuery(searchQueryRequest)
+      const response = await searchService.searchQuery(normalisedRequest)
       const results = response?.results || []
 
       // Cache the results.
       touchCacheEntry(searchQueryCache.value, cacheKey, {
-        search: searchQueryRequest,
+        search: normalisedRequest,
         results,
         timestamp: Date.now(),
       })
