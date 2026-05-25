@@ -70,9 +70,7 @@ export const useSearchStore = defineStore('search', () => {
 
   // Removes empty query text and invalid filters
   // before using the payload for cache keys and API calls.
-  const normaliseSearchQueryRequest = (
-    request: SearchQueryRequest
-  ): SearchQueryRequest => {
+  const normaliseSearchQueryRequest = (request: SearchQueryRequest): SearchQueryRequest => {
     const normalisedRequest: SearchQueryRequest = {}
 
     if (typeof request.query === 'string' && request.query.trim() !== '') {
@@ -81,7 +79,7 @@ export const useSearchStore = defineStore('search', () => {
 
     if (Array.isArray(request.filters)) {
       const validFilters = request.filters.filter(
-        (filter) => filter.kind.trim() !== '' && filter.term.trim() !== ''
+        (filter) => filter.kind.trim() !== '' && filter.term.trim() !== '',
       )
 
       if (validFilters.length > 0) {
