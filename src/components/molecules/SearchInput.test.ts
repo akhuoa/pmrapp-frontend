@@ -349,44 +349,38 @@ describe('SearchInput.vue – getMatchingCount logic', () => {
     wrapper.unmount()
   })
 
-  it('uses valid initialKind as fallback search kind when no category matches are found', async () => {
+  it('emits querySearch when SearchField emits search', async () => {
     const wrapper = mountSearchInput('Noble', 'model_author')
     await flushPromises()
 
     wrapper.findComponent({ name: 'SearchField' }).vm.$emit('search')
     await nextTick()
 
-    expect(wrapper.emitted('search')?.[0]).toEqual(['model_author', 'Noble'])
+    expect(wrapper.emitted('querySearch')?.[0]).toEqual(['Noble'])
 
     wrapper.unmount()
   })
 
-  it('falls back to citation_id when initialKind is invalid and no category matches are found', async () => {
-    const wrapper = mountSearchInput('Noble', 'not_a_real_kind')
+  it('trims query text before emitting querySearch from SearchField search event', async () => {
+    const wrapper = mountSearchInput('  Noble  ', 'not_a_real_kind')
     await flushPromises()
 
     wrapper.findComponent({ name: 'SearchField' }).vm.$emit('search')
     await nextTick()
 
-    expect(wrapper.emitted('search')?.[0]).toEqual(['citation_id', 'Noble'])
+    expect(wrapper.emitted('querySearch')?.[0]).toEqual(['Noble'])
 
     wrapper.unmount()
   })
 
-  it('prefers the first matching category kind over initialKind', async () => {
-    mockSearchCategories.push({
-      kind: 'cellml_keyword',
-      loading: false,
-      kindInfo: { terms: ['Noble keyword'] },
-    })
-
-    const wrapper = mountSearchInput('Noble', 'model_author')
+  it('does not emit querySearch when SearchField emits search with empty query', async () => {
+    const wrapper = mountSearchInput('   ', 'model_author')
     await flushPromises()
 
     wrapper.findComponent({ name: 'SearchField' }).vm.$emit('search')
     await nextTick()
 
-    expect(wrapper.emitted('search')?.[0]).toEqual(['cellml_keyword', 'Noble'])
+    expect(wrapper.emitted('querySearch')).toBeUndefined()
 
     wrapper.unmount()
   })

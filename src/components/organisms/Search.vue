@@ -189,6 +189,7 @@ const handleRefresh = async () => {
         :term="term"
         :kind="kind"
         :query="searchQueryParam"
+        :filters="queryFilters"
       />
     </main>
   </div>
