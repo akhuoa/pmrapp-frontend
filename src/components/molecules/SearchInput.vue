@@ -138,28 +138,16 @@ const isSuggestionsVisible = computed(() => {
   return props.inOverlay ? true : isSearchFocused.value
 })
 
-const defaultSearchKind = computed(() => {
-  if (SEARCH_CATEGORIES.some((category) => category.value === props.initialKind)) {
-    return props.initialKind
-  }
-  return 'citation_id'
-})
-
-const handleSearch = () => {
-  const searchTerm = searchInput.value.trim()
-  if (searchTerm === '') {
+const handleQuerySearch = () => {
+  const searchQuery = searchInput.value.trim()
+  if (!searchQuery) {
     searchInputRef?.value?.inputRef?.focus()
     return
   }
 
-  // Use the first category kind that has matching results, otherwise prefer
-  // initialKind when valid, and finally fallback to citation_id.
-  const firstCategoryWithResults = filteredSearchTermsByCategory.value[0]
-  const searchKind = firstCategoryWithResults?.kind || defaultSearchKind.value
-
-  // Blur the input to close the dropdown.
-  // searchInputRef.value?.inputRef?.blur()
-  emit('search', searchKind, searchTerm)
+  searchInputRef.value?.inputRef?.blur()
+  isSearchFocused.value = false
+  emit('querySearch', searchQuery)
 }
 
 const handleSearchTermClick = (kind: string, term: string) => {
@@ -231,12 +219,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
 const handleSearchInputKeyDown = async (event: KeyboardEvent) => {
   if (event.key === 'Enter') {
     event.preventDefault()
-    const searchQuery = searchInput.value.trim()
-    if (searchQuery) {
-      searchInputRef.value?.inputRef?.blur()
-      isSearchFocused.value = false
-      emit('querySearch', searchQuery)
-    }
+    handleQuerySearch()
     return
   }
 
@@ -306,7 +289,7 @@ defineExpose({
         input-class="flex-1 min-w-0 outline-none focus:ring-0 px-4 py-2"
         @focus="isSearchFocused = true"
         @blur="isSearchFocused = false"
-        @search="handleSearch"
+        @search="handleQuerySearch"
         @keydown="handleSearchInputKeyDown"
       />
     </div>
