@@ -48,9 +48,10 @@ export const buildQuerySearchQuery = (
   currentQuery: LocationQuery,
 ): LocationQueryRaw => {
   const query: LocationQueryRaw = {}
+  const trimmedQueryText = queryText.trim()
 
-  if (queryText.trim()) {
-    query.query = queryText
+  if (trimmedQueryText) {
+    query.query = trimmedQueryText
   }
 
   const termsByKind = new Map<string, string[]>()
