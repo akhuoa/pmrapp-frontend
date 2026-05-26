@@ -5,7 +5,7 @@ import TermButton from '@/components/atoms/TermButton.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import ListContent from '@/components/molecules/ListContent.vue'
 import ListItem from '@/components/molecules/ListItem.vue'
-import { SEARCH_KIND_LABEL_MAP } from '@/constants/search'
+import { SEARCH_KIND_LABEL_MAP, SEARCH_KIND_LABEL_SINGULAR_MAP } from '@/constants/search'
 import type { SearchFilter, SearchResult } from '@/types/search'
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { formatDate, formatNumber } from '@/utils/format'
@@ -77,7 +77,7 @@ const isIdActive = (ids: string[] | undefined) => {
         <template v-if="query?.trim()"><strong>"{{ query }}"</strong></template>
         <template v-if="query?.trim() && groupedFilters.length"> with </template>
         <template v-for="(group, gi) in groupedFilters" :key="group.kind">
-          <strong>{{ SEARCH_KIND_LABEL_MAP[group.kind] || group.kind }}</strong>:
+          <strong>{{ group.terms.length === 1 ? (SEARCH_KIND_LABEL_SINGULAR_MAP[group.kind] || group.kind) : (SEARCH_KIND_LABEL_MAP[group.kind] || group.kind) }}</strong>:
           <template v-for="(term, ti) in group.terms" :key="term">
             "<strong>{{ term }}</strong>"
             <template v-if="ti < group.terms.length - 2">, </template>
@@ -93,7 +93,7 @@ const isIdActive = (ids: string[] | undefined) => {
         <template v-if="query?.trim() && groupedFilters.length"> with </template>
         <template v-else-if="!query?.trim() && groupedFilters.length"> for </template>
         <template v-for="(group, gi) in groupedFilters" :key="group.kind">
-          <strong>{{ SEARCH_KIND_LABEL_MAP[group.kind] || group.kind }}</strong>:
+          <strong>{{ group.terms.length === 1 ? (SEARCH_KIND_LABEL_SINGULAR_MAP[group.kind] || group.kind) : (SEARCH_KIND_LABEL_MAP[group.kind] || group.kind) }}</strong>:
           <template v-for="(term, ti) in group.terms" :key="term">
             "<strong>{{ term }}</strong>"
             <template v-if="ti < group.terms.length - 2">, </template>
