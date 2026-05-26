@@ -294,8 +294,8 @@ defineExpose({
       @click="handleBackdropClick"
     ></div>
     <div
-      class="flex items-center bg-background justify-between w-full border rounded-lg transition-all relative z-40"
-      :class="isSearchFocused ? 'ring-2 ring-primary border-transparent' : 'border-gray-200 dark:border-gray-700 overflow-hidden'"
+      class="flex items-center bg-background justify-between w-full border rounded-lg transition-all relative z-40 overflow-hidden"
+      :class="isSearchFocused ? 'ring-1 ring-primary border-primary' : 'border-gray-200 dark:border-gray-700'"
     >
       <SearchField
         ref="searchInputRef"

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import SearchIcon from '../icons/SearchIcon.vue'
 import CloseButton from './CloseButton.vue'
 
 interface Props {
@@ -35,6 +36,10 @@ const handleClear = () => {
   inputRef.value?.focus()
 }
 
+const handleSearchClick = () => {
+  emit('search')
+}
+
 const handleKeyup = (event: KeyboardEvent) => {
   emit('keyup', event)
   // TODO: Emit 'search' event when Enter is pressed once API is available.
@@ -58,7 +63,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="relative flex items-center">
+  <div class="relative flex items-center overflow-hidden">
     <input
       ref="inputRef"
       type="text"
@@ -73,21 +78,30 @@ defineExpose({
     />
     <div
       v-if="modelValue"
-      class="absolute right-2 flex items-center hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full cursor-pointer p-1"
+      class="absolute right-12 flex items-center hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full cursor-pointer p-1"
     >
       <CloseButton
         @click="handleClear"
         aria-label="Clear search"
       />
     </div>
+    <button
+      type="button"
+      class="absolute inset-y-0 right-0 flex items-center justify-center px-3 border-l border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-default disabled:hover:bg-transparent"
+      aria-label="Search"
+      :disabled="!modelValue"
+      @click="handleSearchClick"
+    >
+      <SearchIcon class="w-4 h-4" />
+    </button>
   </div>
 </template>
 
 <style scoped>
 @import '@/assets/input.css';
 
-/* Space for clear button */
+/* Space for clear and search buttons */
 input {
-  padding-right: 2.5rem !important;
+  padding-right: 5.5rem !important;
 }
 </style>
