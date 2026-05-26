@@ -93,7 +93,7 @@ export const useSearchStore = defineStore('search', () => {
     const protectedPlusPlaceholder = getProtectedPlusPlaceholder(trimmedQuery)
 
     return trimmedQuery
-      .replace(/([\p{L}\p{N}])\+(?=[\p{L}\p{N}]|\s|$)/gu, `$1${protectedPlusPlaceholder}`)
+      .replace(/([\p{L}\p{N}]{2,})\+(?=$|[^\p{L}\p{N}])/gu, `$1${protectedPlusPlaceholder}`)
       .replace(/[^\p{L}\p{N}\s]+/gu, ' ')
       .replace(/\s+/g, ' ')
       .trim()

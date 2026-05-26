@@ -102,6 +102,25 @@ describe('useSearchStore searchQuery', () => {
     expect(response).toEqual(results)
   })
 
+  it('preserves plus only for tokens with two or more characters', async () => {
+    const store = useSearchStore()
+    const payload: SearchQueryRequest = {
+      query: 'ca2+ ca+ c+ ca 2+ Ca+/K+',
+      filters: [{ kind: 'cellml_keyword', term: 'action-potential' }],
+    }
+    const results = [buildResult('/r/plus-token-length')]
+    mockSearchQuery.mockResolvedValue({ results })
+
+    const response = await store.searchQuery(payload)
+
+    expect(mockSearchQuery).toHaveBeenCalledTimes(1)
+    expect(mockSearchQuery).toHaveBeenCalledWith({
+      query: 'ca2+ ca+ c ca 2 Ca+ K',
+      filters: [{ kind: 'cellml_keyword', term: 'action-potential' }],
+    })
+    expect(response).toEqual(results)
+  })
+
   it('does not alter literal placeholder text in query values', async () => {
     const store = useSearchStore()
     const payload: SearchQueryRequest = {
