@@ -64,6 +64,25 @@ describe('useSearchStore searchQuery', () => {
     expect(response).toEqual(results)
   })
 
+  it('trims query and filter values before calling the service', async () => {
+    const store = useSearchStore()
+    const payload: SearchQueryRequest = {
+      query: '  combined query  ',
+      filters: [{ kind: '  cellml_keyword  ', term: '  action-potential  ' }],
+    }
+    const results = [buildResult('/r/trimmed')]
+    mockSearchQuery.mockResolvedValue({ results })
+
+    const response = await store.searchQuery(payload)
+
+    expect(mockSearchQuery).toHaveBeenCalledTimes(1)
+    expect(mockSearchQuery).toHaveBeenCalledWith({
+      query: 'combined query',
+      filters: [{ kind: 'cellml_keyword', term: 'action-potential' }],
+    })
+    expect(response).toEqual(results)
+  })
+
   it('supports filters-only payloads', async () => {
     const store = useSearchStore()
     const payload: SearchQueryRequest = {
@@ -167,5 +186,28 @@ describe('useSearchStore searchQuery', () => {
     expect(mockSearchQuery).toHaveBeenCalledTimes(2)
     expect(mockSearchQuery).toHaveBeenNthCalledWith(1, payloadA)
     expect(mockSearchQuery).toHaveBeenNthCalledWith(2, payloadB)
+  })
+
+  it('reuses the cache for semantically identical trimmed searches', async () => {
+    const store = useSearchStore()
+    const results = [buildResult('/r/trimmed-cache')]
+    mockSearchQuery.mockResolvedValue({ results })
+
+    const paddedPayload: SearchQueryRequest = {
+      query: '  same query  ',
+      filters: [{ kind: '  cellml_keyword  ', term: '  a  ' }],
+    }
+    const trimmedPayload: SearchQueryRequest = {
+      query: 'same query',
+      filters: [{ kind: 'cellml_keyword', term: 'a' }],
+    }
+
+    const first = await store.searchQuery(paddedPayload)
+    const second = await store.searchQuery(trimmedPayload)
+
+    expect(first).toEqual(results)
+    expect(second).toEqual(results)
+    expect(mockSearchQuery).toHaveBeenCalledTimes(1)
+    expect(mockSearchQuery).toHaveBeenCalledWith(trimmedPayload)
   })
 })

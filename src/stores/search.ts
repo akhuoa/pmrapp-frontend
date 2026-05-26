@@ -73,14 +73,20 @@ export const useSearchStore = defineStore('search', () => {
   const normaliseSearchQueryRequest = (request: SearchQueryRequest): SearchQueryRequest => {
     const normalisedRequest: SearchQueryRequest = {}
 
-    if (typeof request.query === 'string' && request.query.trim() !== '') {
-      normalisedRequest.query = request.query
+    if (typeof request.query === 'string') {
+      const trimmedQuery = request.query.trim()
+      if (trimmedQuery !== '') {
+        normalisedRequest.query = trimmedQuery
+      }
     }
 
     if (Array.isArray(request.filters)) {
-      const validFilters = request.filters.filter(
-        (filter) => filter.kind.trim() !== '' && filter.term.trim() !== '',
-      )
+      const validFilters = request.filters
+        .map((filter) => ({
+          kind: filter.kind.trim(),
+          term: filter.term.trim(),
+        }))
+        .filter((filter) => filter.kind !== '' && filter.term !== '')
 
       if (validFilters.length > 0) {
         normalisedRequest.filters = validFilters
