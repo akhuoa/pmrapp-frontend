@@ -287,6 +287,7 @@ defineExpose({
         aria-label="Search term"
         class="flex-1"
         input-class="flex-1 min-w-0 outline-none focus:ring-0 px-4 py-2"
+        :with-search-button="true"
         @focus="isSearchFocused = true"
         @blur="isSearchFocused = false"
         @search="handleQuerySearch"
