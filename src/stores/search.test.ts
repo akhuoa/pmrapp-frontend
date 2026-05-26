@@ -40,7 +40,7 @@ describe('useSearchStore searchQuery', () => {
     const results = [buildResult('/r/query-only')]
     mockSearchQuery.mockResolvedValue({ results })
 
-    const payload: SearchQueryRequest = { query: 'query-only' }
+    const payload: SearchQueryRequest = { query: 'query only' }
     const response = await store.searchQuery(payload)
 
     expect(mockSearchQuery).toHaveBeenCalledTimes(1)
@@ -83,6 +83,25 @@ describe('useSearchStore searchQuery', () => {
     expect(response).toEqual(results)
   })
 
+  it('replaces unsupported special characters in query values before calling the service', async () => {
+    const store = useSearchStore()
+    const payload: SearchQueryRequest = {
+      query: "  Noble (1962) Bhalla & Iyengar O'Hara-Rudy ca2+ ca2 +  ",
+      filters: [{ kind: '  cellml_keyword  ', term: '  action-potential  ' }],
+    }
+    const results = [buildResult('/r/sanitised-query')]
+    mockSearchQuery.mockResolvedValue({ results })
+
+    const response = await store.searchQuery(payload)
+
+    expect(mockSearchQuery).toHaveBeenCalledTimes(1)
+    expect(mockSearchQuery).toHaveBeenCalledWith({
+      query: 'Noble 1962 Bhalla Iyengar O Hara Rudy ca2+ ca2',
+      filters: [{ kind: 'cellml_keyword', term: 'action-potential' }],
+    })
+    expect(response).toEqual(results)
+  })
+
   it('supports filters-only payloads', async () => {
     const store = useSearchStore()
     const payload: SearchQueryRequest = {
@@ -120,6 +139,24 @@ describe('useSearchStore searchQuery', () => {
     const store = useSearchStore()
     const payload: SearchQueryRequest = {
       query: '   ',
+      filters: [{ kind: 'model_author', term: 'Noble' }],
+    }
+    const results = [buildResult('/r/filters-only')]
+    mockSearchQuery.mockResolvedValue({ results })
+
+    const response = await store.searchQuery(payload)
+
+    expect(mockSearchQuery).toHaveBeenCalledTimes(1)
+    expect(mockSearchQuery).toHaveBeenCalledWith({
+      filters: [{ kind: 'model_author', term: 'Noble' }],
+    })
+    expect(response).toEqual(results)
+  })
+
+  it('omits query values that become empty after sanitisation', async () => {
+    const store = useSearchStore()
+    const payload: SearchQueryRequest = {
+      query: ' () & - ',
       filters: [{ kind: 'model_author', term: 'Noble' }],
     }
     const results = [buildResult('/r/filters-only')]
@@ -209,5 +246,28 @@ describe('useSearchStore searchQuery', () => {
     expect(second).toEqual(results)
     expect(mockSearchQuery).toHaveBeenCalledTimes(1)
     expect(mockSearchQuery).toHaveBeenCalledWith(trimmedPayload)
+  })
+
+  it('reuses the cache for semantically identical sanitised queries', async () => {
+    const store = useSearchStore()
+    const results = [buildResult('/r/sanitised-cache')]
+    mockSearchQuery.mockResolvedValue({ results })
+
+    const unsanitisedPayload: SearchQueryRequest = {
+      query: "  Noble (1962)  ",
+      filters: [{ kind: 'cellml_keyword', term: 'a' }],
+    }
+    const sanitisedPayload: SearchQueryRequest = {
+      query: 'Noble 1962',
+      filters: [{ kind: 'cellml_keyword', term: 'a' }],
+    }
+
+    const first = await store.searchQuery(unsanitisedPayload)
+    const second = await store.searchQuery(sanitisedPayload)
+
+    expect(first).toEqual(results)
+    expect(second).toEqual(results)
+    expect(mockSearchQuery).toHaveBeenCalledTimes(1)
+    expect(mockSearchQuery).toHaveBeenCalledWith(sanitisedPayload)
   })
 })

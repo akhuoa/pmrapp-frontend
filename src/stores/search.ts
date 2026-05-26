@@ -31,6 +31,10 @@ interface TimedCacheEntry {
   timestamp: number
 }
 
+// Temporary token used while sanitising query text so attached plus signs
+// (for example, "ca2+") survive special-character replacement.
+const PROTECTED_PLUS_PLACEHOLDER = 'PMRSEARCHPLUSPLACEHOLDER'
+
 export const useSearchStore = defineStore('search', () => {
   const categories = ref<CategoryData[]>([])
   const lastFetchTime = ref<number | null>(null)
@@ -68,15 +72,26 @@ export const useSearchStore = defineStore('search', () => {
     return now - lastFetchTime.value < CACHE_TTL
   }
 
+  const normaliseSearchQueryText = (query: string): string => {
+    const trimmedQuery = query.trim()
+
+    return trimmedQuery
+      .replace(/([\p{L}\p{N}])\+(?=[\p{L}\p{N}]|\s|$)/gu, `$1${PROTECTED_PLUS_PLACEHOLDER}`)
+      .replace(/[^\p{L}\p{N}\s]+/gu, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replaceAll(PROTECTED_PLUS_PLACEHOLDER, '+')
+  }
+
   // Removes empty query text and invalid filters
   // before using the payload for cache keys and API calls.
   const normaliseSearchQueryRequest = (request: SearchQueryRequest): SearchQueryRequest => {
     const normalisedRequest: SearchQueryRequest = {}
 
     if (typeof request.query === 'string') {
-      const trimmedQuery = request.query.trim()
-      if (trimmedQuery !== '') {
-        normalisedRequest.query = trimmedQuery
+      const normalisedQuery = normaliseSearchQueryText(request.query)
+      if (normalisedQuery !== '') {
+        normalisedRequest.query = normalisedQuery
       }
     }
 
