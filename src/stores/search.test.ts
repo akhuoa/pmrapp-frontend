@@ -254,7 +254,7 @@ describe('useSearchStore searchQuery', () => {
     mockSearchQuery.mockResolvedValue({ results })
 
     const unsanitisedPayload: SearchQueryRequest = {
-      query: "  Noble (1962)  ",
+      query: '  Noble (1962)  ',
       filters: [{ kind: 'cellml_keyword', term: 'a' }],
     }
     const sanitisedPayload: SearchQueryRequest = {
