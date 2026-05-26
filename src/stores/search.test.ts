@@ -102,6 +102,25 @@ describe('useSearchStore searchQuery', () => {
     expect(response).toEqual(results)
   })
 
+  it('does not alter literal placeholder text in query values', async () => {
+    const store = useSearchStore()
+    const payload: SearchQueryRequest = {
+      query: 'PMRSEARCHPLUSPLACEHOLDER ca2+ ca2 +',
+      filters: [{ kind: 'cellml_keyword', term: 'action-potential' }],
+    }
+    const results = [buildResult('/r/placeholder-literal')]
+    mockSearchQuery.mockResolvedValue({ results })
+
+    const response = await store.searchQuery(payload)
+
+    expect(mockSearchQuery).toHaveBeenCalledTimes(1)
+    expect(mockSearchQuery).toHaveBeenCalledWith({
+      query: 'PMRSEARCHPLUSPLACEHOLDER ca2+ ca2',
+      filters: [{ kind: 'cellml_keyword', term: 'action-potential' }],
+    })
+    expect(response).toEqual(results)
+  })
+
   it('supports filters-only payloads', async () => {
     const store = useSearchStore()
     const payload: SearchQueryRequest = {

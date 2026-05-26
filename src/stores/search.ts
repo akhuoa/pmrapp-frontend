@@ -31,9 +31,9 @@ interface TimedCacheEntry {
   timestamp: number
 }
 
-// Temporary token used while sanitising query text so attached plus signs
+// Base token used to build a per-query placeholder so attached plus signs
 // (for example, "ca2+") survive special-character replacement.
-const PROTECTED_PLUS_PLACEHOLDER = 'PMRSEARCHPLUSPLACEHOLDER'
+const PROTECTED_PLUS_PLACEHOLDER_BASE = 'PMRSEARCHPLUSPLACEHOLDER'
 
 export const useSearchStore = defineStore('search', () => {
   const categories = ref<CategoryData[]>([])
@@ -72,15 +72,32 @@ export const useSearchStore = defineStore('search', () => {
     return now - lastFetchTime.value < CACHE_TTL
   }
 
+  const getProtectedPlusPlaceholder = (query: string): string => {
+    if (!query.includes(PROTECTED_PLUS_PLACEHOLDER_BASE)) {
+      return PROTECTED_PLUS_PLACEHOLDER_BASE
+    }
+
+    let suffix = 0
+    let placeholder = `${PROTECTED_PLUS_PLACEHOLDER_BASE}${suffix}`
+
+    while (query.includes(placeholder)) {
+      suffix += 1
+      placeholder = `${PROTECTED_PLUS_PLACEHOLDER_BASE}${suffix}`
+    }
+
+    return placeholder
+  }
+
   const normaliseSearchQueryText = (query: string): string => {
     const trimmedQuery = query.trim()
+    const protectedPlusPlaceholder = getProtectedPlusPlaceholder(trimmedQuery)
 
     return trimmedQuery
-      .replace(/([\p{L}\p{N}])\+(?=[\p{L}\p{N}]|\s|$)/gu, `$1${PROTECTED_PLUS_PLACEHOLDER}`)
+      .replace(/([\p{L}\p{N}])\+(?=[\p{L}\p{N}]|\s|$)/gu, `$1${protectedPlusPlaceholder}`)
       .replace(/[^\p{L}\p{N}\s]+/gu, ' ')
       .replace(/\s+/g, ' ')
       .trim()
-      .replaceAll(PROTECTED_PLUS_PLACEHOLDER, '+')
+      .replaceAll(protectedPlusPlaceholder, '+')
   }
 
   // Removes empty query text and invalid filters
