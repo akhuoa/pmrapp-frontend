@@ -40,7 +40,7 @@ describe('useSearchStore searchQuery', () => {
     const results = [buildResult('/r/query-only')]
     mockSearchQuery.mockResolvedValue({ results })
 
-    const payload: SearchQueryRequest = { query: 'query-only' }
+    const payload: SearchQueryRequest = { query: 'query only' }
     const response = await store.searchQuery(payload)
 
     expect(mockSearchQuery).toHaveBeenCalledTimes(1)
@@ -61,6 +61,44 @@ describe('useSearchStore searchQuery', () => {
 
     expect(mockSearchQuery).toHaveBeenCalledTimes(1)
     expect(mockSearchQuery).toHaveBeenCalledWith(payload)
+    expect(response).toEqual(results)
+  })
+
+  it('trims query and filter values before calling the service', async () => {
+    const store = useSearchStore()
+    const payload: SearchQueryRequest = {
+      query: '  combined query  ',
+      filters: [{ kind: '  cellml_keyword  ', term: '  action-potential  ' }],
+    }
+    const results = [buildResult('/r/trimmed')]
+    mockSearchQuery.mockResolvedValue({ results })
+
+    const response = await store.searchQuery(payload)
+
+    expect(mockSearchQuery).toHaveBeenCalledTimes(1)
+    expect(mockSearchQuery).toHaveBeenCalledWith({
+      query: 'combined query',
+      filters: [{ kind: 'cellml_keyword', term: 'action-potential' }],
+    })
+    expect(response).toEqual(results)
+  })
+
+  it('preserves special characters in query values after trimming', async () => {
+    const store = useSearchStore()
+    const payload: SearchQueryRequest = {
+      query: "  Noble (1962) Bhalla & Iyengar O'Hara-Rudy ca2+ ca2 +  ",
+      filters: [{ kind: '  cellml_keyword  ', term: '  action-potential  ' }],
+    }
+    const results = [buildResult('/r/special-characters')]
+    mockSearchQuery.mockResolvedValue({ results })
+
+    const response = await store.searchQuery(payload)
+
+    expect(mockSearchQuery).toHaveBeenCalledTimes(1)
+    expect(mockSearchQuery).toHaveBeenCalledWith({
+      query: "Noble (1962) Bhalla & Iyengar O'Hara-Rudy ca2+ ca2 +",
+      filters: [{ kind: 'cellml_keyword', term: 'action-potential' }],
+    })
     expect(response).toEqual(results)
   })
 
@@ -167,5 +205,62 @@ describe('useSearchStore searchQuery', () => {
     expect(mockSearchQuery).toHaveBeenCalledTimes(2)
     expect(mockSearchQuery).toHaveBeenNthCalledWith(1, payloadA)
     expect(mockSearchQuery).toHaveBeenNthCalledWith(2, payloadB)
+  })
+
+  it('reuses the cache for semantically identical trimmed searches', async () => {
+    const store = useSearchStore()
+    const results = [buildResult('/r/trimmed-cache')]
+    mockSearchQuery.mockResolvedValue({ results })
+
+    const paddedPayload: SearchQueryRequest = {
+      query: '  same query  ',
+      filters: [{ kind: '  cellml_keyword  ', term: '  a  ' }],
+    }
+    const trimmedPayload: SearchQueryRequest = {
+      query: 'same query',
+      filters: [{ kind: 'cellml_keyword', term: 'a' }],
+    }
+
+    const first = await store.searchQuery(paddedPayload)
+    const second = await store.searchQuery(trimmedPayload)
+
+    expect(first).toEqual(results)
+    expect(second).toEqual(results)
+    expect(mockSearchQuery).toHaveBeenCalledTimes(1)
+    expect(mockSearchQuery).toHaveBeenCalledWith(trimmedPayload)
+  })
+
+  it('uses separate cache entries for different query text values', async () => {
+    const store = useSearchStore()
+    const unsanitisedResults = [buildResult('/r/unsanitised')]
+    const trimmedResults = [buildResult('/r/trimmed')]
+
+    mockSearchQuery.mockImplementation(async (search) => {
+      if (search.query === 'Noble (1962)') {
+        return { results: unsanitisedResults }
+      }
+      return { results: trimmedResults }
+    })
+
+    const unsanitisedPayload: SearchQueryRequest = {
+      query: '  Noble (1962)  ',
+      filters: [{ kind: 'cellml_keyword', term: 'a' }],
+    }
+    const trimmedPayload: SearchQueryRequest = {
+      query: 'Noble 1962',
+      filters: [{ kind: 'cellml_keyword', term: 'a' }],
+    }
+
+    const first = await store.searchQuery(unsanitisedPayload)
+    const second = await store.searchQuery(trimmedPayload)
+
+    expect(first).toEqual(unsanitisedResults)
+    expect(second).toEqual(trimmedResults)
+    expect(mockSearchQuery).toHaveBeenCalledTimes(2)
+    expect(mockSearchQuery).toHaveBeenNthCalledWith(1, {
+      query: 'Noble (1962)',
+      filters: [{ kind: 'cellml_keyword', term: 'a' }],
+    })
+    expect(mockSearchQuery).toHaveBeenNthCalledWith(2, trimmedPayload)
   })
 })
