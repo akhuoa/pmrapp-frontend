@@ -303,10 +303,27 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
     await input.trigger('focus')
     await nextTick()
 
-    const termButtons = wrapper.findAll('button.term-button')
+    let termButtons = wrapper.findAll('button.term-button')
     expect(termButtons).toHaveLength(10)
     expect(wrapper.text()).toContain('Noble 10')
     expect(wrapper.text()).not.toContain('Noble 11')
+
+    const moreButton = wrapper.findAll('button').find((b) => b.text().trim() === '... more')
+    expect(moreButton).toBeDefined()
+    await moreButton?.trigger('click')
+    await nextTick()
+
+    termButtons = wrapper.findAll('button.term-button')
+    expect(termButtons).toHaveLength(11)
+
+    const lessButton = wrapper.findAll('button').find((b) => b.text().trim() === 'Show less')
+    expect(lessButton).toBeDefined()
+    await lessButton?.trigger('click')
+    await nextTick()
+
+    termButtons = wrapper.findAll('button.term-button')
+    expect(termButtons).toHaveLength(10)
+    expect(wrapper.findAll('button').some((b) => b.text().trim() === '... more')).toBe(true)
 
     wrapper.unmount()
   })

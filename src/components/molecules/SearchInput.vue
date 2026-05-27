@@ -111,15 +111,16 @@ const filteredSearchTermsByCategory = computed(() => {
       label: category.label,
       terms: isExpanded ? filteredTerms : filteredTerms.slice(0, MAX_TERMS_PER_CATEGORY),
       totalCount,
+      isExpanded,
       hasMore: totalCount > MAX_TERMS_PER_CATEGORY && !isExpanded,
     }
   }).filter((group) => group.terms.length > 0)
 })
 
-const handleShowMoreTerms = (kind: string) => {
+const handleToggleTerms = (kind: string) => {
   expandedCategoryKinds.value = {
     ...expandedCategoryKinds.value,
-    [kind]: true,
+    [kind]: !expandedCategoryKinds.value[kind],
   }
 }
 
@@ -368,9 +369,20 @@ defineExpose({
               :key="categoryGroup.kind"
               class="result-group"
             >
-              <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                {{ categoryGroup.label }}
-              </h4>
+              <div class="mb-3 flex items-start justify-between gap-3">
+                <h4 class="font-semibold text-gray-700 dark:text-gray-300">
+                  {{ categoryGroup.label }}
+                </h4>
+                <button
+                  v-if="categoryGroup.totalCount > MAX_TERMS_PER_CATEGORY"
+                  type="button"
+                  class="px-3 py-1 text-sm transition-colors relative focus:outline-none cursor-pointer text-primary hover:text-primary-hover bg-transparent"
+                  :aria-expanded="categoryGroup.isExpanded"
+                  @click="handleToggleTerms(categoryGroup.kind)"
+                >
+                  {{ categoryGroup.isExpanded ? 'Show less' : '... more' }}
+                </button>
+              </div>
               <div class="flex flex-row items-start justify-start flex-wrap gap-2">
                 <TermButton
                   v-for="(term, termIndex) in categoryGroup.terms"
@@ -379,14 +391,6 @@ defineExpose({
                   :term="term"
                   @click="handleSearchTermClick(categoryGroup.kind, term)"
                 />
-                <button
-                  v-if="categoryGroup.hasMore"
-                  type="button"
-                  class="px-3 py-1.5 rounded-md text-sm transition-colors relative focus:outline-none cursor-pointer text-primary hover:text-primary-hover border border-dashed border-gray-300 dark:border-gray-600 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-900/40 hover:border-gray-400 dark:hover:border-gray-500"
-                  @click="handleShowMoreTerms(categoryGroup.kind)"
-                >
-                  Show more
-                </button>
               </div>
             </div>
             <div
