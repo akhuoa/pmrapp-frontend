@@ -52,6 +52,7 @@ const searchInputRef = ref<InstanceType<typeof SearchField> | null>(null)
 const isSearchFocused = ref(false)
 const categoriesError = ref<string | null>(null)
 const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
+const toggleButtonRefs = ref<(HTMLButtonElement | null)[]>([])
 const exposuresButtonRef = ref<HTMLButtonElement | null>(null)
 const workspacesButtonRef = ref<HTMLButtonElement | null>(null)
 const expandedCategoryKinds = ref<Record<string, boolean>>({})
@@ -62,15 +63,35 @@ const setTermButtonRef = (el: Element | ComponentPublicInstance | null, index: n
   }
 }
 
+const setToggleButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
+  toggleButtonRefs.value[index] = el as HTMLButtonElement | null
+}
+
 // All focusable suggestion buttons in focus order: TermButtons first (rendered
-// per category group), then the Exposures button, then the Workspaces button.
-// This matches the DOM order used in the template.
+// per category group), then each category toggle (if shown), then the
+// Exposures button, then the Workspaces button.
 const allSuggestionButtons = computed<HTMLElement[]>(() => {
-  const termEls = termButtonRefs.value.map((ref) => ref?.$el ?? ref).filter(Boolean)
+  const groupedButtons: HTMLElement[] = []
+  let termOffset = 0
+
+  filteredSearchTermsByCategory.value.forEach((group, groupIndex) => {
+    const groupTermEls = termButtonRefs.value
+      .slice(termOffset, termOffset + group.terms.length)
+      .map((ref) => ref?.$el ?? ref)
+      .filter(Boolean) as HTMLElement[]
+    groupedButtons.push(...groupTermEls)
+    termOffset += group.terms.length
+
+    const toggleEl = toggleButtonRefs.value[groupIndex]
+    if (group.totalCount > MAX_TERMS_PER_CATEGORY && toggleEl) {
+      groupedButtons.push(toggleEl)
+    }
+  })
+
   const extras: HTMLElement[] = []
   if (exposuresButtonRef.value) extras.push(exposuresButtonRef.value)
   if (workspacesButtonRef.value) extras.push(workspacesButtonRef.value)
-  return [...termEls, ...extras]
+  return [...groupedButtons, ...extras]
 })
 
 onMounted(async () => {
@@ -111,16 +132,42 @@ const filteredSearchTermsByCategory = computed(() => {
       label: category.label,
       terms: isExpanded ? filteredTerms : filteredTerms.slice(0, MAX_TERMS_PER_CATEGORY),
       totalCount,
-      hasMore: totalCount > MAX_TERMS_PER_CATEGORY && !isExpanded,
+      isExpanded,
     }
   }).filter((group) => group.terms.length > 0)
 })
 
-const handleShowMoreTerms = (kind: string) => {
+const handleToggleTerms = (kind: string) => {
   expandedCategoryKinds.value = {
     ...expandedCategoryKinds.value,
-    [kind]: true,
+    [kind]: !expandedCategoryKinds.value[kind],
   }
+}
+
+const getGroupTermStartIndex = (groupIndex: number): number => {
+  return filteredSearchTermsByCategory.value
+    .slice(0, groupIndex)
+    .reduce((acc, group) => acc + group.terms.length, 0)
+}
+
+const handleToggleTermsByKeyboard = async (kind: string, groupIndex: number) => {
+  const wasExpanded = Boolean(expandedCategoryKinds.value[kind])
+  handleToggleTerms(kind)
+  await nextTick()
+
+  if (!wasExpanded) {
+    // When expanding from "... more", move focus to the first newly-revealed term.
+    const firstRevealedIndex = getGroupTermStartIndex(groupIndex) + MAX_TERMS_PER_CATEGORY
+    const revealedTerm = termButtonRefs.value[firstRevealedIndex]
+    const revealedTermEl = (revealedTerm?.$el ?? revealedTerm) as HTMLElement | undefined
+    revealedTermEl?.focus()
+    return
+  }
+
+  // When collapsing from "Show less", keep focus on the toggle so next Tab
+  // advances to the next category's first term.
+  const toggleEl = toggleButtonRefs.value[groupIndex]
+  toggleEl?.focus()
 }
 
 const getMatchingCount = <T extends SortableEntity>(items: T[], query: string): number => {
@@ -140,7 +187,7 @@ const workspacesCount = computed(() =>
 )
 
 // Build a human-readable label for the types of term results currently shown,
-// e.g. "an author", "a keyword", or "an author, keyword, or publication reference".
+// e.g. "an author", "a keyword", or "an author or keyword or publication reference".
 // Returns null when no term groups are present (only exposure/workspace counts are shown).
 const availableTermTypeLabel = computed<string | null>(() => {
   const kinds = new Set(filteredSearchTermsByCategory.value.map((g) => g.kind))
@@ -152,11 +199,11 @@ const availableTermTypeLabel = computed<string | null>(() => {
   const article = parts[0] === 'author' ? 'an' : 'a'
   if (parts.length === 1) return `${article} ${parts[0]}`
   const last = parts.pop()
-  return `${article} ${parts.join(', ')}, or ${last}`
+  return `${article} ${parts.join(' or ')} or ${last}`
 })
 
 const termTypeSuffix = computed(() =>
-  availableTermTypeLabel.value ? `, or select ${availableTermTypeLabel.value} below` : '',
+  availableTermTypeLabel.value ? ` or select ${availableTermTypeLabel.value} below` : '',
 )
 
 const hasResults = computed(() => {
@@ -236,15 +283,22 @@ const handleKeyDown = (event: KeyboardEvent) => {
     if (activeIndex === -1) return
 
     const searchInputEl = searchInputRef.value?.inputRef
+    event.preventDefault()
 
-    if (event.shiftKey && activeIndex === 0) {
-      // Shift+Tab on first term button → go back to search input.
-      event.preventDefault()
-      searchInputEl?.focus()
-    } else if (!event.shiftKey && activeIndex === buttonEls.length - 1) {
-      // Tab on last term button → cycle back to search input.
-      event.preventDefault()
-      searchInputEl?.focus()
+    if (event.shiftKey) {
+      if (activeIndex === 0) {
+        // Shift+Tab on first suggestion button → go back to search input.
+        searchInputEl?.focus()
+      } else {
+        buttonEls[activeIndex - 1]?.focus()
+      }
+    } else {
+      if (activeIndex === buttonEls.length - 1) {
+        // Tab on last suggestion button → cycle back to search input.
+        searchInputEl?.focus()
+      } else {
+        buttonEls[activeIndex + 1]?.focus()
+      }
     }
   }
 }
@@ -296,6 +350,7 @@ watch(
 
 watch(filteredSearchTermsByCategory, () => {
   termButtonRefs.value = []
+  toggleButtonRefs.value = []
   exposuresButtonRef.value = null
   workspacesButtonRef.value = null
 })
@@ -351,7 +406,7 @@ defineExpose({
         </div>
         <div v-else-if="!hasResults" class="p-4">
           <p class="text-gray-500 dark:text-gray-400 text-sm">
-            No keywords or authors found for
+            No authors or keywords found for
             <span class="text-gray-700 dark:text-gray-200 font-semibold">"{{ searchInput }}"</span>.
             <SearchEnterHint :query="searchInput" />
           </p>
@@ -368,9 +423,22 @@ defineExpose({
               :key="categoryGroup.kind"
               class="result-group"
             >
-              <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                {{ categoryGroup.label }}
-              </h4>
+              <div class="mb-3 flex items-start justify-between gap-3">
+                <h4 class="font-semibold text-gray-700 dark:text-gray-300">
+                  {{ categoryGroup.label }}
+                </h4>
+                <button
+                  v-if="categoryGroup.totalCount > MAX_TERMS_PER_CATEGORY"
+                  type="button"
+                  :ref="(el) => setToggleButtonRef(el, groupIndex)"
+                  class="px-3 py-1 text-sm rounded-md transition-colors relative focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-gray-900 cursor-pointer text-primary hover:text-primary-hover bg-transparent"
+                  :aria-expanded="categoryGroup.isExpanded"
+                  @click="handleToggleTerms(categoryGroup.kind)"
+                  @keydown.enter.prevent="handleToggleTermsByKeyboard(categoryGroup.kind, groupIndex)"
+                >
+                  {{ categoryGroup.isExpanded ? 'Show less' : '... more' }}
+                </button>
+              </div>
               <div class="flex flex-row items-start justify-start flex-wrap gap-2">
                 <TermButton
                   v-for="(term, termIndex) in categoryGroup.terms"
@@ -379,14 +447,6 @@ defineExpose({
                   :term="term"
                   @click="handleSearchTermClick(categoryGroup.kind, term)"
                 />
-                <button
-                  v-if="categoryGroup.hasMore"
-                  type="button"
-                  class="px-3 py-1.5 rounded-md text-sm transition-colors relative focus:outline-none cursor-pointer text-primary hover:text-primary-hover border border-dashed border-gray-300 dark:border-gray-600 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-900/40 hover:border-gray-400 dark:hover:border-gray-500"
-                  @click="handleShowMoreTerms(categoryGroup.kind)"
-                >
-                  Show more
-                </button>
               </div>
             </div>
             <div
