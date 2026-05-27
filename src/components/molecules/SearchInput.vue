@@ -127,16 +127,19 @@ const workspacesCount = computed(() =>
 )
 
 // Build a human-readable label for the types of term results currently shown,
-// e.g. "keyword", "author", or "keyword or author". Returns null when no term
-// groups are present (only exposure/workspace counts are shown).
+// e.g. "an author", "a keyword", or "an author, keyword, or publication reference".
+// Returns null when no term groups are present (only exposure/workspace counts are shown).
 const availableTermTypeLabel = computed<string | null>(() => {
   const kinds = new Set(filteredSearchTermsByCategory.value.map((g) => g.kind))
-  const hasKeyword = kinds.has('cellml_keyword')
-  const hasAuthor = kinds.has('citation_author_family_name') || kinds.has('model_author')
-  if (hasKeyword && hasAuthor) return 'an author or keyword'
-  if (hasKeyword) return 'a keyword'
-  if (hasAuthor) return 'an author'
-  return null
+  const parts: string[] = []
+  if (kinds.has('citation_author_family_name') || kinds.has('model_author')) parts.push('author')
+  if (kinds.has('cellml_keyword')) parts.push('keyword')
+  if (kinds.has('citation_id')) parts.push('publication reference')
+  if (parts.length === 0) return null
+  const article = parts[0] === 'author' ? 'an' : 'a'
+  if (parts.length === 1) return `${article} ${parts[0]}`
+  const last = parts.pop()
+  return `${article} ${parts.join(', ')}, or ${last}`
 })
 
 const termTypeSuffix = computed(() =>
