@@ -126,6 +126,23 @@ const workspacesCount = computed(() =>
   getMatchingCount(workspaceStore.workspaces, searchInput.value.trim()),
 )
 
+// Build a human-readable label for the types of term results currently shown,
+// e.g. "keyword", "author", or "keyword or author". Returns null when no term
+// groups are present (only exposure/workspace counts are shown).
+const availableTermTypeLabel = computed<string | null>(() => {
+  const kinds = new Set(filteredSearchTermsByCategory.value.map((g) => g.kind))
+  const hasKeyword = kinds.has('cellml_keyword')
+  const hasAuthor = kinds.has('citation_author_family_name') || kinds.has('model_author')
+  if (hasKeyword && hasAuthor) return 'an author or keyword'
+  if (hasKeyword) return 'a keyword'
+  if (hasAuthor) return 'an author'
+  return null
+})
+
+const termTypeSuffix = computed(() =>
+  availableTermTypeLabel.value ? `, or select ${availableTermTypeLabel.value} below` : '',
+)
+
 const hasResults = computed(() => {
   return (
     filteredSearchTermsByCategory.value.length > 0 ||
@@ -322,7 +339,7 @@ defineExpose({
         <div v-else class="max-h-96 overflow-y-auto scrollbar-thin group/results">
           <div class="p-4 border-b border-gray-200 dark:border-gray-700" v-if="!props.inOverlay">
             <p class="text-gray-500 dark:text-gray-400 text-sm">
-              Press <Keycap>Enter</Keycap> to search, or select a keyword or author below.
+              Press <Keycap>Enter</Keycap> to search{{ termTypeSuffix }}.
             </p>
           </div>
           <div
