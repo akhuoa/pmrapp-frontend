@@ -46,10 +46,6 @@ const handleSearchClick = () => {
 
 const handleKeyup = (event: KeyboardEvent) => {
   emit('keyup', event)
-  // TODO: Emit 'search' event when Enter is pressed once API is available.
-  // if (event.key === 'Enter') {
-  //   emit('search')
-  // }
 }
 
 const handleFocus = (event: FocusEvent) => {

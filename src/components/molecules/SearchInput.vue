@@ -9,6 +9,7 @@ import {
   watch,
 } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import SearchEnterHint from '@/components/atoms/SearchEnterHint.vue'
 import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import { SEARCH_CATEGORIES } from '@/constants/search'
@@ -53,6 +54,7 @@ const categoriesError = ref<string | null>(null)
 const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
 const exposuresButtonRef = ref<HTMLButtonElement | null>(null)
 const workspacesButtonRef = ref<HTMLButtonElement | null>(null)
+const expandedCategoryKinds = ref<Record<string, boolean>>({})
 
 const setTermButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
   if (el) {
@@ -101,13 +103,25 @@ const filteredSearchTermsByCategory = computed(() => {
       (term) => isValidTerm(term) && term.toLowerCase().includes(searchTermValue),
     )
 
+    const totalCount = filteredTerms.length
+    const isExpanded = Boolean(expandedCategoryKinds.value[category.value])
+
     return {
       kind: category.value,
       label: category.label,
-      terms: filteredTerms.slice(0, MAX_TERMS_PER_CATEGORY),
+      terms: isExpanded ? filteredTerms : filteredTerms.slice(0, MAX_TERMS_PER_CATEGORY),
+      totalCount,
+      hasMore: totalCount > MAX_TERMS_PER_CATEGORY && !isExpanded,
     }
   }).filter((group) => group.terms.length > 0)
 })
+
+const handleShowMoreTerms = (kind: string) => {
+  expandedCategoryKinds.value = {
+    ...expandedCategoryKinds.value,
+    [kind]: true,
+  }
+}
 
 const getMatchingCount = <T extends SortableEntity>(items: T[], query: string): number => {
   const normalisedQuery = normaliseSearchText(query)
@@ -123,6 +137,26 @@ const exposuresCount = computed(() =>
 
 const workspacesCount = computed(() =>
   getMatchingCount(workspaceStore.workspaces, searchInput.value.trim()),
+)
+
+// Build a human-readable label for the types of term results currently shown,
+// e.g. "an author", "a keyword", or "an author, keyword, or publication reference".
+// Returns null when no term groups are present (only exposure/workspace counts are shown).
+const availableTermTypeLabel = computed<string | null>(() => {
+  const kinds = new Set(filteredSearchTermsByCategory.value.map((g) => g.kind))
+  const parts: string[] = []
+  if (kinds.has('citation_author_family_name') || kinds.has('model_author')) parts.push('author')
+  if (kinds.has('cellml_keyword')) parts.push('keyword')
+  if (kinds.has('citation_id')) parts.push('publication reference')
+  if (parts.length === 0) return null
+  const article = parts[0] === 'author' ? 'an' : 'a'
+  if (parts.length === 1) return `${article} ${parts[0]}`
+  const last = parts.pop()
+  return `${article} ${parts.join(', ')}, or ${last}`
+})
+
+const termTypeSuffix = computed(() =>
+  availableTermTypeLabel.value ? `, or select ${availableTermTypeLabel.value} below` : '',
 )
 
 const hasResults = computed(() => {
@@ -253,6 +287,13 @@ watch(isSearchFocused, (newVal) => {
   }
 })
 
+watch(
+  () => searchInput.value,
+  () => {
+    expandedCategoryKinds.value = {}
+  },
+)
+
 watch(filteredSearchTermsByCategory, () => {
   termButtonRefs.value = []
   exposuresButtonRef.value = null
@@ -309,65 +350,77 @@ defineExpose({
           <p class="text-gray-500 dark:text-gray-400">Loading...</p>
         </div>
         <div v-else-if="!hasResults" class="p-4">
-          <p class="text-gray-500 dark:text-gray-400">
-            No suggestions found for ‘{{ searchInput }}’. Press Enter to search.
+          <p class="text-gray-500 dark:text-gray-400 text-sm">
+            No keywords or authors found for
+            <span class="text-gray-700 dark:text-gray-200 font-semibold">"{{ searchInput }}"</span>.
+            <SearchEnterHint :query="searchInput" />
           </p>
         </div>
-        <div v-else class="max-h-96 overflow-y-auto scrollbar-thin group/results">
-          <div class="p-4 border-b border-gray-200 dark:border-gray-700" v-if="!props.inOverlay">
+        <div v-else class="max-h-96 bg-background overflow-y-auto scrollbar-thin">
+          <div class="p-4 border-b border-gray-200 dark:border-gray-700">
             <p class="text-gray-500 dark:text-gray-400 text-sm">
-              Press Enter to search or click a suggestion below.
+              <SearchEnterHint :query="searchInput" :suffix="termTypeSuffix" />
             </p>
           </div>
-          <div
-            v-for="(categoryGroup, groupIndex) in filteredSearchTermsByCategory"
-            :key="categoryGroup.kind"
-            class="result-group"
-          >
-            <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              {{ categoryGroup.label }}
-            </h4>
-            <div class="flex flex-row items-start justify-start flex-wrap gap-2">
-              <TermButton
-                v-for="(term, termIndex) in categoryGroup.terms"
-                :key="term"
-                :ref="(el) => setTermButtonRef(el, filteredSearchTermsByCategory.slice(0, groupIndex).reduce((acc, g) => acc + g.terms.length, 0) + termIndex)"
-                :term="term"
-                @click="handleSearchTermClick(categoryGroup.kind, term)"
-              />
+          <div class="group/results">
+            <div
+              v-for="(categoryGroup, groupIndex) in filteredSearchTermsByCategory"
+              :key="categoryGroup.kind"
+              class="result-group"
+            >
+              <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                {{ categoryGroup.label }}
+              </h4>
+              <div class="flex flex-row items-start justify-start flex-wrap gap-2">
+                <TermButton
+                  v-for="(term, termIndex) in categoryGroup.terms"
+                  :key="term"
+                  :ref="(el) => setTermButtonRef(el, filteredSearchTermsByCategory.slice(0, groupIndex).reduce((acc, g) => acc + g.terms.length, 0) + termIndex)"
+                  :term="term"
+                  @click="handleSearchTermClick(categoryGroup.kind, term)"
+                />
+                <button
+                  v-if="categoryGroup.hasMore"
+                  type="button"
+                  class="px-3 py-1.5 rounded-md text-sm transition-colors relative focus:outline-none cursor-pointer text-primary hover:text-primary-hover border border-dashed border-gray-300 dark:border-gray-600 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-900/40 hover:border-gray-400 dark:hover:border-gray-500"
+                  @click="handleShowMoreTerms(categoryGroup.kind)"
+                >
+                  Show more
+                </button>
+              </div>
             </div>
-          </div>
-          <div
-            v-if="exposuresCount > 0"
-            class="result-group"
-          >
-            <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              Exposures
-            </h4>
-            <button
-              type="button"
-              ref="exposuresButtonRef"
-              class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
-              @click="handleExposuresClick"
+            <div
+              v-if="exposuresCount > 0"
+              class="result-group"
             >
-              See {{ formatNumber(exposuresCount) }} matching exposure{{ exposuresCount !== 1 ? 's' : '' }}
-            </button>
-          </div>
-          <div
-            v-if="workspacesCount > 0"
-            class="result-group"
-          >
-            <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              Workspaces
-            </h4>
-            <button
-              type="button"
-              ref="workspacesButtonRef"
-              class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
-              @click="handleWorkspacesClick"
+              <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                Exposures
+              </h4>
+              <button
+                type="button"
+                ref="exposuresButtonRef"
+                class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
+                @click="handleExposuresClick"
+              >
+                See {{ formatNumber(exposuresCount) }} matching exposure{{ exposuresCount !== 1 ? 's' : '' }}
+              </button>
+            </div>
+            <div
+              v-if="workspacesCount > 0"
+              class="result-group"
             >
-              See {{ formatNumber(workspacesCount) }} matching workspace{{ workspacesCount !== 1 ? 's' : '' }}
-            </button>
+              <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                Workspaces
+              </h4>
+              <button
+                type="button"
+                ref="workspacesButtonRef"
+                class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
+                @click="handleWorkspacesClick"
+              >
+                See {{ formatNumber(workspacesCount) }} matching workspace{{ workspacesCount !== 1 ? 's' : '' }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
