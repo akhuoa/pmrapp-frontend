@@ -112,7 +112,6 @@ const filteredSearchTermsByCategory = computed(() => {
       terms: isExpanded ? filteredTerms : filteredTerms.slice(0, MAX_TERMS_PER_CATEGORY),
       totalCount,
       isExpanded,
-      hasMore: totalCount > MAX_TERMS_PER_CATEGORY && !isExpanded,
     }
   }).filter((group) => group.terms.length > 0)
 })
