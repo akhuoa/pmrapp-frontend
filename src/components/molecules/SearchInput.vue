@@ -52,6 +52,7 @@ const searchInputRef = ref<InstanceType<typeof SearchField> | null>(null)
 const isSearchFocused = ref(false)
 const categoriesError = ref<string | null>(null)
 const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
+const toggleButtonRefs = ref<(HTMLButtonElement | null)[]>([])
 const exposuresButtonRef = ref<HTMLButtonElement | null>(null)
 const workspacesButtonRef = ref<HTMLButtonElement | null>(null)
 const expandedCategoryKinds = ref<Record<string, boolean>>({})
@@ -62,15 +63,20 @@ const setTermButtonRef = (el: Element | ComponentPublicInstance | null, index: n
   }
 }
 
+const setToggleButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
+  toggleButtonRefs.value[index] = el as HTMLButtonElement | null
+}
+
 // All focusable suggestion buttons in focus order: TermButtons first (rendered
-// per category group), then the Exposures button, then the Workspaces button.
-// This matches the DOM order used in the template.
+// per category group), then each category toggle (if shown), then the
+// Exposures button, then the Workspaces button.
 const allSuggestionButtons = computed<HTMLElement[]>(() => {
   const termEls = termButtonRefs.value.map((ref) => ref?.$el ?? ref).filter(Boolean)
+  const toggleEls = toggleButtonRefs.value.filter(Boolean) as HTMLElement[]
   const extras: HTMLElement[] = []
   if (exposuresButtonRef.value) extras.push(exposuresButtonRef.value)
   if (workspacesButtonRef.value) extras.push(workspacesButtonRef.value)
-  return [...termEls, ...extras]
+  return [...termEls, ...toggleEls, ...extras]
 })
 
 onMounted(async () => {
@@ -296,6 +302,7 @@ watch(
 
 watch(filteredSearchTermsByCategory, () => {
   termButtonRefs.value = []
+  toggleButtonRefs.value = []
   exposuresButtonRef.value = null
   workspacesButtonRef.value = null
 })
@@ -375,7 +382,8 @@ defineExpose({
                 <button
                   v-if="categoryGroup.totalCount > MAX_TERMS_PER_CATEGORY"
                   type="button"
-                  class="px-3 py-1 text-sm transition-colors relative focus:outline-none cursor-pointer text-primary hover:text-primary-hover bg-transparent"
+                  :ref="(el) => setToggleButtonRef(el, groupIndex)"
+                  class="px-3 py-1 text-sm rounded-md transition-colors relative focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-gray-900 cursor-pointer text-primary hover:text-primary-hover bg-transparent"
                   :aria-expanded="categoryGroup.isExpanded"
                   @click="handleToggleTerms(categoryGroup.kind)"
                 >
