@@ -351,7 +351,7 @@ defineExpose({
         </div>
         <div v-else-if="!hasResults" class="p-4">
           <p class="text-gray-500 dark:text-gray-400 text-sm">
-            No keywords or authors found for
+            No authors orkeywords found for
             <span class="text-gray-700 dark:text-gray-200 font-semibold">"{{ searchInput }}"</span>.
             <SearchEnterHint :query="searchInput" />
           </p>
