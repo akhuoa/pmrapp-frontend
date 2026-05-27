@@ -2,6 +2,7 @@
 import { nextTick, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import CloseButton from '@/components/atoms/CloseButton.vue'
+import Keycap from '@/components/atoms/Keycap.vue'
 import SearchInput from '@/components/molecules/SearchInput.vue'
 import { SEARCH_KIND_NAMES } from '@/constants/search'
 import { buildQuerySearchQuery, buildSearchQuery, parseQueryFiltersFromQuery } from '@/utils/search'
@@ -103,7 +104,7 @@ const getInitialKind = (): string => {
       </div>
       <div class="my-4 text-sm text-gray-500 dark:text-gray-400">
         Search by author, CellML keyword, publication, or free text.
-        Type to see suggestions or press <em>Enter</em> to search.
+        Type to see suggestions or press <Keycap>Enter</Keycap> to search.
       </div>
       <div class="pb-4">
         <SearchInput
