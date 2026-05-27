@@ -54,6 +54,7 @@ const categoriesError = ref<string | null>(null)
 const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
 const exposuresButtonRef = ref<HTMLButtonElement | null>(null)
 const workspacesButtonRef = ref<HTMLButtonElement | null>(null)
+const expandedCategoryKinds = ref<Record<string, boolean>>({})
 
 const setTermButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
   if (el) {
@@ -102,13 +103,25 @@ const filteredSearchTermsByCategory = computed(() => {
       (term) => isValidTerm(term) && term.toLowerCase().includes(searchTermValue),
     )
 
+    const totalCount = filteredTerms.length
+    const isExpanded = Boolean(expandedCategoryKinds.value[category.value])
+
     return {
       kind: category.value,
       label: category.label,
-      terms: filteredTerms.slice(0, MAX_TERMS_PER_CATEGORY),
+      terms: isExpanded ? filteredTerms : filteredTerms.slice(0, MAX_TERMS_PER_CATEGORY),
+      totalCount,
+      hasMore: totalCount > MAX_TERMS_PER_CATEGORY && !isExpanded,
     }
   }).filter((group) => group.terms.length > 0)
 })
+
+const handleShowMoreTerms = (kind: string) => {
+  expandedCategoryKinds.value = {
+    ...expandedCategoryKinds.value,
+    [kind]: true,
+  }
+}
 
 const getMatchingCount = <T extends SortableEntity>(items: T[], query: string): number => {
   const normalisedQuery = normaliseSearchText(query)
@@ -274,6 +287,13 @@ watch(isSearchFocused, (newVal) => {
   }
 })
 
+watch(
+  () => searchInput.value,
+  () => {
+    expandedCategoryKinds.value = {}
+  },
+)
+
 watch(filteredSearchTermsByCategory, () => {
   termButtonRefs.value = []
   exposuresButtonRef.value = null
@@ -359,6 +379,14 @@ defineExpose({
                   :term="term"
                   @click="handleSearchTermClick(categoryGroup.kind, term)"
                 />
+                <button
+                  v-if="categoryGroup.hasMore"
+                  type="button"
+                  class="px-3 py-1.5 rounded-md text-sm transition-colors relative focus:outline-none cursor-pointer text-primary hover:text-primary-hover border border-dashed border-gray-300 dark:border-gray-600 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-900/40 hover:border-gray-400 dark:hover:border-gray-500"
+                  @click="handleShowMoreTerms(categoryGroup.kind)"
+                >
+                  Show more
+                </button>
               </div>
             </div>
             <div
