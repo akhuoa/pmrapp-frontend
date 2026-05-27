@@ -336,7 +336,7 @@ defineExpose({
             <SearchEnterHint :query="searchInput" />
           </p>
         </div>
-        <div v-else class="max-h-96 overflow-y-auto scrollbar-thin group/results">
+        <div v-else class="max-h-96 bg-background overflow-y-auto scrollbar-thin group/results">
           <div class="p-4 border-b border-gray-200 dark:border-gray-700" v-if="!props.inOverlay">
             <p class="text-gray-500 dark:text-gray-400 text-sm">
               <SearchEnterHint :query="searchInput" :suffix="termTypeSuffix" />
