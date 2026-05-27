@@ -328,6 +328,52 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
     wrapper.unmount()
   })
 
+  it('can focus first category "... more" toggle by tabbing from its last visible term', async () => {
+    mockSearchCategories.push({
+      kind: 'citation_author_family_name',
+      loading: false,
+      kindInfo: {
+        terms: [
+          'Noble 1',
+          'Noble 2',
+          'Noble 3',
+          'Noble 4',
+          'Noble 5',
+          'Noble 6',
+          'Noble 7',
+          'Noble 8',
+          'Noble 9',
+          'Noble 10',
+          'Noble 11',
+        ],
+      },
+    })
+
+    const wrapper = mountSearchInput()
+    await flushPromises()
+
+    const input = wrapper.find('input')
+    await input.setValue('Noble')
+    await input.trigger('focus')
+    await nextTick()
+
+    const termButtons = wrapper.findAll('button.term-button')
+    const lastVisibleTermButton = termButtons[termButtons.length - 1]
+    const moreButton = wrapper.findAll('button').find((b) => b.text().trim() === '... more')
+
+    expect(lastVisibleTermButton).toBeDefined()
+    expect(moreButton).toBeDefined()
+
+    await lastVisibleTermButton?.trigger('focus')
+    await nextTick()
+    await lastVisibleTermButton?.trigger('keydown', { key: 'Tab' })
+    await nextTick()
+
+    expect(document.activeElement).toBe(moreButton?.element)
+
+    wrapper.unmount()
+  })
+
   it('uses singular form "exposure" when count is one', async () => {
     const wrapper = mountSearchInput()
     await flushPromises()

@@ -71,12 +71,27 @@ const setToggleButtonRef = (el: Element | ComponentPublicInstance | null, index:
 // per category group), then each category toggle (if shown), then the
 // Exposures button, then the Workspaces button.
 const allSuggestionButtons = computed<HTMLElement[]>(() => {
-  const termEls = termButtonRefs.value.map((ref) => ref?.$el ?? ref).filter(Boolean)
-  const toggleEls = toggleButtonRefs.value.filter(Boolean) as HTMLElement[]
+  const groupedButtons: HTMLElement[] = []
+  let termOffset = 0
+
+  filteredSearchTermsByCategory.value.forEach((group, groupIndex) => {
+    const groupTermEls = termButtonRefs.value
+      .slice(termOffset, termOffset + group.terms.length)
+      .map((ref) => ref?.$el ?? ref)
+      .filter(Boolean) as HTMLElement[]
+    groupedButtons.push(...groupTermEls)
+    termOffset += group.terms.length
+
+    const toggleEl = toggleButtonRefs.value[groupIndex]
+    if (group.totalCount > MAX_TERMS_PER_CATEGORY && toggleEl) {
+      groupedButtons.push(toggleEl)
+    }
+  })
+
   const extras: HTMLElement[] = []
   if (exposuresButtonRef.value) extras.push(exposuresButtonRef.value)
   if (workspacesButtonRef.value) extras.push(workspacesButtonRef.value)
-  return [...termEls, ...toggleEls, ...extras]
+  return [...groupedButtons, ...extras]
 })
 
 onMounted(async () => {
@@ -242,15 +257,22 @@ const handleKeyDown = (event: KeyboardEvent) => {
     if (activeIndex === -1) return
 
     const searchInputEl = searchInputRef.value?.inputRef
+    event.preventDefault()
 
-    if (event.shiftKey && activeIndex === 0) {
-      // Shift+Tab on first term button → go back to search input.
-      event.preventDefault()
-      searchInputEl?.focus()
-    } else if (!event.shiftKey && activeIndex === buttonEls.length - 1) {
-      // Tab on last term button → cycle back to search input.
-      event.preventDefault()
-      searchInputEl?.focus()
+    if (event.shiftKey) {
+      if (activeIndex === 0) {
+        // Shift+Tab on first suggestion button → go back to search input.
+        searchInputEl?.focus()
+      } else {
+        buttonEls[activeIndex - 1]?.focus()
+      }
+    } else {
+      if (activeIndex === buttonEls.length - 1) {
+        // Tab on last suggestion button → cycle back to search input.
+        searchInputEl?.focus()
+      } else {
+        buttonEls[activeIndex + 1]?.focus()
+      }
     }
   }
 }
