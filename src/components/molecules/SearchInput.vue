@@ -140,7 +140,7 @@ const workspacesCount = computed(() =>
 )
 
 // Build a human-readable label for the types of term results currently shown,
-// e.g. "an author", "a keyword", or "an author, keyword, or publication reference".
+// e.g. "an author", "a keyword", or "an author or keyword or publication reference".
 // Returns null when no term groups are present (only exposure/workspace counts are shown).
 const availableTermTypeLabel = computed<string | null>(() => {
   const kinds = new Set(filteredSearchTermsByCategory.value.map((g) => g.kind))
@@ -152,11 +152,11 @@ const availableTermTypeLabel = computed<string | null>(() => {
   const article = parts[0] === 'author' ? 'an' : 'a'
   if (parts.length === 1) return `${article} ${parts[0]}`
   const last = parts.pop()
-  return `${article} ${parts.join(', ')}, or ${last}`
+  return `${article} ${parts.join(' or ')} or ${last}`
 })
 
 const termTypeSuffix = computed(() =>
-  availableTermTypeLabel.value ? `, or select ${availableTermTypeLabel.value} below` : '',
+  availableTermTypeLabel.value ? ` or select ${availableTermTypeLabel.value} below` : '',
 )
 
 const hasResults = computed(() => {
