@@ -269,7 +269,7 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
     await input.trigger('focus')
     await nextTick()
 
-    expect(wrapper.text()).toContain('No suggestions found')
+    expect(wrapper.text()).toContain('No keywords or authors found for')
 
     wrapper.unmount()
   })
