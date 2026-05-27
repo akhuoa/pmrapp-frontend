@@ -9,6 +9,7 @@ import {
   watch,
 } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import Keycap from '@/components/atoms/Keycap.vue'
 import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import { SEARCH_CATEGORIES } from '@/constants/search'
@@ -309,14 +310,19 @@ defineExpose({
           <p class="text-gray-500 dark:text-gray-400">Loading...</p>
         </div>
         <div v-else-if="!hasResults" class="p-4">
-          <p class="text-gray-500 dark:text-gray-400">
-            No suggestions found for ‘{{ searchInput }}’. Press Enter to search.
+          <p class="text-gray-500 dark:text-gray-400 text-sm">
+            No keywords or authors found for
+            <span class="text-gray-700 dark:text-gray-200 font-semibold">"{{ searchInput }}"</span>.
+            Press <Keycap>Enter</Keycap>
+            to search for
+            <span class="text-gray-700 dark:text-gray-200 font-semibold">"{{ searchInput }}"</span> anywhere in
+            the repository.
           </p>
         </div>
         <div v-else class="max-h-96 overflow-y-auto scrollbar-thin group/results">
           <div class="p-4 border-b border-gray-200 dark:border-gray-700" v-if="!props.inOverlay">
             <p class="text-gray-500 dark:text-gray-400 text-sm">
-              Press Enter to search or click a suggestion below.
+              Press <Keycap>Enter</Keycap> to search, or select a keyword or author below.
             </p>
           </div>
           <div
