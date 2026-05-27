@@ -336,61 +336,63 @@ defineExpose({
             <SearchEnterHint :query="searchInput" />
           </p>
         </div>
-        <div v-else class="max-h-96 bg-background overflow-y-auto scrollbar-thin group/results">
+        <div v-else class="max-h-96 bg-background overflow-y-auto scrollbar-thin">
           <div class="p-4 border-b border-gray-200 dark:border-gray-700">
             <p class="text-gray-500 dark:text-gray-400 text-sm">
               <SearchEnterHint :query="searchInput" :suffix="termTypeSuffix" />
             </p>
           </div>
-          <div
-            v-for="(categoryGroup, groupIndex) in filteredSearchTermsByCategory"
-            :key="categoryGroup.kind"
-            class="result-group"
-          >
-            <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              {{ categoryGroup.label }}
-            </h4>
-            <div class="flex flex-row items-start justify-start flex-wrap gap-2">
-              <TermButton
-                v-for="(term, termIndex) in categoryGroup.terms"
-                :key="term"
-                :ref="(el) => setTermButtonRef(el, filteredSearchTermsByCategory.slice(0, groupIndex).reduce((acc, g) => acc + g.terms.length, 0) + termIndex)"
-                :term="term"
-                @click="handleSearchTermClick(categoryGroup.kind, term)"
-              />
+          <div class="group/results">
+            <div
+              v-for="(categoryGroup, groupIndex) in filteredSearchTermsByCategory"
+              :key="categoryGroup.kind"
+              class="result-group"
+            >
+              <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                {{ categoryGroup.label }}
+              </h4>
+              <div class="flex flex-row items-start justify-start flex-wrap gap-2">
+                <TermButton
+                  v-for="(term, termIndex) in categoryGroup.terms"
+                  :key="term"
+                  :ref="(el) => setTermButtonRef(el, filteredSearchTermsByCategory.slice(0, groupIndex).reduce((acc, g) => acc + g.terms.length, 0) + termIndex)"
+                  :term="term"
+                  @click="handleSearchTermClick(categoryGroup.kind, term)"
+                />
+              </div>
             </div>
-          </div>
-          <div
-            v-if="exposuresCount > 0"
-            class="result-group"
-          >
-            <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              Exposures
-            </h4>
-            <button
-              type="button"
-              ref="exposuresButtonRef"
-              class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
-              @click="handleExposuresClick"
+            <div
+              v-if="exposuresCount > 0"
+              class="result-group"
             >
-              See {{ formatNumber(exposuresCount) }} matching exposure{{ exposuresCount !== 1 ? 's' : '' }}
-            </button>
-          </div>
-          <div
-            v-if="workspacesCount > 0"
-            class="result-group"
-          >
-            <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              Workspaces
-            </h4>
-            <button
-              type="button"
-              ref="workspacesButtonRef"
-              class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
-              @click="handleWorkspacesClick"
+              <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                Exposures
+              </h4>
+              <button
+                type="button"
+                ref="exposuresButtonRef"
+                class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
+                @click="handleExposuresClick"
+              >
+                See {{ formatNumber(exposuresCount) }} matching exposure{{ exposuresCount !== 1 ? 's' : '' }}
+              </button>
+            </div>
+            <div
+              v-if="workspacesCount > 0"
+              class="result-group"
             >
-              See {{ formatNumber(workspacesCount) }} matching workspace{{ workspacesCount !== 1 ? 's' : '' }}
-            </button>
+              <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                Workspaces
+              </h4>
+              <button
+                type="button"
+                ref="workspacesButtonRef"
+                class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
+                @click="handleWorkspacesClick"
+              >
+                See {{ formatNumber(workspacesCount) }} matching workspace{{ workspacesCount !== 1 ? 's' : '' }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
