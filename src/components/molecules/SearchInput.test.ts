@@ -374,6 +374,113 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
     wrapper.unmount()
   })
 
+  it('moves focus to the first newly revealed term when pressing Enter on "... more"', async () => {
+    mockSearchCategories.push({
+      kind: 'citation_author_family_name',
+      loading: false,
+      kindInfo: {
+        terms: [
+          'Noble 1',
+          'Noble 2',
+          'Noble 3',
+          'Noble 4',
+          'Noble 5',
+          'Noble 6',
+          'Noble 7',
+          'Noble 8',
+          'Noble 9',
+          'Noble 10',
+          'Noble 11',
+        ],
+      },
+    })
+
+    const wrapper = mountSearchInput()
+    await flushPromises()
+
+    const input = wrapper.find('input')
+    await input.setValue('Noble')
+    await input.trigger('focus')
+    await nextTick()
+
+    const moreButton = wrapper.findAll('button').find((b) => b.text().trim() === '... more')
+    expect(moreButton).toBeDefined()
+
+    await moreButton?.trigger('focus')
+    await nextTick()
+    await moreButton?.trigger('keydown', { key: 'Enter' })
+    await nextTick()
+
+    expect(document.activeElement?.textContent?.trim()).toBe('Noble 11')
+
+    wrapper.unmount()
+  })
+
+  it('keeps focus on "Show less" after Enter so next Tab goes to next category term', async () => {
+    mockSearchCategories.push(
+      {
+        kind: 'citation_author_family_name',
+        loading: false,
+        kindInfo: {
+          terms: [
+            'Alpha 1',
+            'Alpha 2',
+            'Alpha 3',
+            'Alpha 4',
+            'Alpha 5',
+            'Alpha 6',
+            'Alpha 7',
+            'Alpha 8',
+            'Alpha 9',
+            'Alpha 10',
+            'Alpha 11',
+          ],
+        },
+      },
+      {
+        kind: 'cellml_keyword',
+        loading: false,
+        kindInfo: {
+          terms: ['Alpha keyword'],
+        },
+      },
+    )
+
+    const wrapper = mountSearchInput()
+    await flushPromises()
+
+    const input = wrapper.find('input')
+    await input.setValue('Alpha')
+    await input.trigger('focus')
+    await nextTick()
+
+    let moreButton = wrapper.findAll('button').find((b) => b.text().trim() === '... more')
+    expect(moreButton).toBeDefined()
+
+    await moreButton?.trigger('focus')
+    await nextTick()
+    await moreButton?.trigger('keydown', { key: 'Enter' })
+    await nextTick()
+
+    const showLessButton = wrapper.findAll('button').find((b) => b.text().trim() === 'Show less')
+    expect(showLessButton).toBeDefined()
+
+    await showLessButton?.trigger('focus')
+    await nextTick()
+    await showLessButton?.trigger('keydown', { key: 'Enter' })
+    await nextTick()
+
+    moreButton = wrapper.findAll('button').find((b) => b.text().trim() === '... more')
+    expect(moreButton).toBeDefined()
+    expect(document.activeElement).toBe(moreButton?.element)
+
+    await moreButton?.trigger('keydown', { key: 'Tab' })
+    await nextTick()
+    expect(document.activeElement?.textContent?.trim()).toBe('Alpha keyword')
+
+    wrapper.unmount()
+  })
+
   it('uses singular form "exposure" when count is one', async () => {
     const wrapper = mountSearchInput()
     await flushPromises()

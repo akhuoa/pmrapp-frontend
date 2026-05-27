@@ -144,6 +144,32 @@ const handleToggleTerms = (kind: string) => {
   }
 }
 
+const getGroupTermStartIndex = (groupIndex: number): number => {
+  return filteredSearchTermsByCategory.value
+    .slice(0, groupIndex)
+    .reduce((acc, group) => acc + group.terms.length, 0)
+}
+
+const handleToggleTermsByKeyboard = async (kind: string, groupIndex: number) => {
+  const wasExpanded = Boolean(expandedCategoryKinds.value[kind])
+  handleToggleTerms(kind)
+  await nextTick()
+
+  if (!wasExpanded) {
+    // When expanding from "... more", move focus to the first newly-revealed term.
+    const firstRevealedIndex = getGroupTermStartIndex(groupIndex) + MAX_TERMS_PER_CATEGORY
+    const revealedTerm = termButtonRefs.value[firstRevealedIndex]
+    const revealedTermEl = (revealedTerm?.$el ?? revealedTerm) as HTMLElement | undefined
+    revealedTermEl?.focus()
+    return
+  }
+
+  // When collapsing from "Show less", keep focus on the toggle so next Tab
+  // advances to the next category's first term.
+  const toggleEl = toggleButtonRefs.value[groupIndex]
+  toggleEl?.focus()
+}
+
 const getMatchingCount = <T extends SortableEntity>(items: T[], query: string): number => {
   const normalisedQuery = normaliseSearchText(query)
   // Return 0 for empty or punctuation-only input.
@@ -408,6 +434,7 @@ defineExpose({
                   class="px-3 py-1 text-sm rounded-md transition-colors relative focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-gray-900 cursor-pointer text-primary hover:text-primary-hover bg-transparent"
                   :aria-expanded="categoryGroup.isExpanded"
                   @click="handleToggleTerms(categoryGroup.kind)"
+                  @keydown.enter.prevent="handleToggleTermsByKeyboard(categoryGroup.kind, groupIndex)"
                 >
                   {{ categoryGroup.isExpanded ? 'Show less' : '... more' }}
                 </button>
