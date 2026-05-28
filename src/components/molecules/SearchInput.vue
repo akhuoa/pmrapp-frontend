@@ -196,10 +196,10 @@ const availableTermTypeLabel = computed<string | null>(() => {
   if (kinds.has('cellml_keyword')) parts.push('keyword')
   if (kinds.has('citation_id')) parts.push('publication reference')
   if (parts.length === 0) return null
-  const article = parts[0] === 'author' ? 'an' : 'a'
-  if (parts.length === 1) return `${article} ${parts[0]}`
+  const formatPart = (part: string): string => (part === 'author' ? 'an author' : `a ${part}`)
+  if (parts.length === 1) return formatPart(parts[0])
   const last = parts.pop()
-  return `${article} ${parts.join(' or ')} or ${last}`
+  return `${parts.map(formatPart).join(' or ')} or ${formatPart(last ?? '')}`
 })
 
 const termTypeSuffix = computed(() =>
