@@ -2,8 +2,10 @@
 import { nextTick, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import CloseButton from '@/components/atoms/CloseButton.vue'
+import Keycap from '@/components/atoms/Keycap.vue'
 import SearchInput from '@/components/molecules/SearchInput.vue'
-import { buildSearchQuery } from '@/utils/search'
+import { SEARCH_KIND_NAMES } from '@/constants/search'
+import { buildQuerySearchQuery, buildSearchQuery, parseQueryFiltersFromQuery } from '@/utils/search'
 
 const props = defineProps<{
   show: boolean
@@ -59,24 +61,32 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
   emit('close')
 }
 
+const handleQuerySearch = (query: string) => {
+  router.push({ path: '/search', query: buildQuerySearchQuery(query, [], route.query) })
+  emit('close')
+}
+
 const getInitialTerm = (): string => {
   const filterQuery = route.query.filter
-  const termQuery = route.query.term
+  const queryParam = route.query.query
 
   if (typeof filterQuery === 'string') {
     return filterQuery
   }
 
-  if (typeof termQuery === 'string') {
-    return termQuery
+  if (typeof queryParam === 'string') {
+    return queryParam
   }
+
+  const firstFilter = parseQueryFiltersFromQuery(route.query, SEARCH_KIND_NAMES)[0]
+  if (firstFilter) return firstFilter.term
 
   return ''
 }
 
 const getInitialKind = (): string => {
-  const kindQuery = route.query.kind
-  return typeof kindQuery === 'string' ? kindQuery : ''
+  const firstFilter = parseQueryFiltersFromQuery(route.query, SEARCH_KIND_NAMES)[0]
+  return firstFilter?.kind ?? ''
 }
 </script>
 
@@ -93,18 +103,16 @@ const getInitialKind = (): string => {
         <CloseButton @click="emit('close')" />
       </div>
       <div class="my-4 text-sm text-gray-500 dark:text-gray-400">
-        <p class="lg:w-3/4">
-          Search for models across authors, CellML keywords, and publication references.
-          Start typing to see available terms grouped by category.
-        </p>
+        Search by author, keyword, publication reference, or free text.
       </div>
-      <div class="py-4">
+      <div class="pb-4">
         <SearchInput
           ref="searchInputRef"
           :inOverlay="true"
           :initial-kind="getInitialKind()"
           :initial-term="getInitialTerm()"
           @search="handleSearch"
+          @querySearch="handleQuerySearch"
           @close="emit('close')"
         />
       </div>

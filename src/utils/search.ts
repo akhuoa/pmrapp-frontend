@@ -1,6 +1,6 @@
 import type { LocationQuery, LocationQueryRaw } from 'vue-router'
 import type { SortableEntity } from '@/types/common'
-import type { QueryFilterOptions, TextSegment } from '@/types/search'
+import type { QueryFilterOptions, SearchFilter, TextSegment } from '@/types/search'
 import { DEFAULT_SORT_OPTION, isValidSortOption } from '@/utils/sort'
 
 /**
@@ -31,16 +31,45 @@ export const normaliseSearchText = (text: string): string => {
 }
 
 /**
- * Builds a /search query and preserves the current sort option when it is valid.
+ * Builds a /search query for a single filter in flat format and preserves the
+ * current sort option when it is valid.
  */
 export const buildSearchQuery = (
   kind: string,
   term: string,
   currentQuery: LocationQuery,
 ): LocationQueryRaw => {
-  const query: LocationQueryRaw = { kind, term }
-  const sortQuery = currentQuery.sort
+  return buildQuerySearchQuery('', [{ kind, term }], currentQuery)
+}
 
+export const buildQuerySearchQuery = (
+  queryText: string,
+  filters: SearchFilter[],
+  currentQuery: LocationQuery,
+): LocationQueryRaw => {
+  const query: LocationQueryRaw = {}
+  const trimmedQueryText = queryText.trim()
+
+  if (trimmedQueryText) {
+    query.query = trimmedQueryText
+  }
+
+  const termsByKind = new Map<string, string[]>()
+  for (const filter of filters) {
+    const normalisedKind = filter.kind.trim()
+    const normalisedTerm = filter.term.trim()
+    if (!normalisedKind || !normalisedTerm) continue
+
+    const terms = termsByKind.get(normalisedKind) ?? []
+    terms.push(normalisedTerm)
+    termsByKind.set(normalisedKind, terms)
+  }
+
+  for (const [kind, terms] of termsByKind) {
+    query[kind] = terms.length === 1 ? (terms[0] as string) : terms
+  }
+
+  const sortQuery = currentQuery.sort
   if (
     typeof sortQuery === 'string' &&
     isValidSortOption(sortQuery) &&
@@ -50,6 +79,39 @@ export const buildSearchQuery = (
   }
 
   return query
+}
+
+const queryParamToStringArray = (value: LocationQuery[string]): string[] => {
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === 'string')
+  }
+
+  if (typeof value === 'string') {
+    return [value]
+  }
+
+  return []
+}
+
+/**
+ * Parses flat kind-named filter params used for search API (api/search) queries.
+ * e.g. ?cellml_keyword=cardiac&model_author=Noble
+ */
+export const parseQueryFiltersFromQuery = (
+  query: LocationQuery,
+  knownKinds: readonly string[],
+): SearchFilter[] => {
+  const filters: SearchFilter[] = []
+
+  for (const kind of knownKinds) {
+    for (const term of queryParamToStringArray(query[kind])) {
+      if (term.trim()) {
+        filters.push({ kind, term: term.trim() })
+      }
+    }
+  }
+
+  return filters
 }
 
 /**

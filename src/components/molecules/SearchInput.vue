@@ -9,6 +9,7 @@ import {
   watch,
 } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import SearchEnterHint from '@/components/atoms/SearchEnterHint.vue'
 import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import { SEARCH_CATEGORIES } from '@/constants/search'
@@ -27,6 +28,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'search', searchKind: string, searchTerm: string): void
+  (e: 'querySearch', query: string): void
   (e: 'close'): void
 }>()
 
@@ -35,6 +37,8 @@ const route = useRoute()
 const searchStore = useSearchStore()
 const exposureStore = useExposureStore()
 const workspaceStore = useWorkspaceStore()
+
+const MAX_TERMS_PER_CATEGORY = 10
 
 const searchInput = ref<string>(props.initialTerm)
 
@@ -48,8 +52,10 @@ const searchInputRef = ref<InstanceType<typeof SearchField> | null>(null)
 const isSearchFocused = ref(false)
 const categoriesError = ref<string | null>(null)
 const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
+const toggleButtonRefs = ref<(HTMLButtonElement | null)[]>([])
 const exposuresButtonRef = ref<HTMLButtonElement | null>(null)
 const workspacesButtonRef = ref<HTMLButtonElement | null>(null)
+const expandedCategoryKinds = ref<Record<string, boolean>>({})
 
 const setTermButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
   if (el) {
@@ -57,15 +63,35 @@ const setTermButtonRef = (el: Element | ComponentPublicInstance | null, index: n
   }
 }
 
+const setToggleButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
+  toggleButtonRefs.value[index] = el as HTMLButtonElement | null
+}
+
 // All focusable suggestion buttons in focus order: TermButtons first (rendered
-// per category group), then the Exposures button, then the Workspaces button.
-// This matches the DOM order used in the template.
+// per category group), then each category toggle (if shown), then the
+// Exposures button, then the Workspaces button.
 const allSuggestionButtons = computed<HTMLElement[]>(() => {
-  const termEls = termButtonRefs.value.map((ref) => ref?.$el ?? ref).filter(Boolean)
+  const groupedButtons: HTMLElement[] = []
+  let termOffset = 0
+
+  filteredSearchTermsByCategory.value.forEach((group, groupIndex) => {
+    const groupTermEls = termButtonRefs.value
+      .slice(termOffset, termOffset + group.terms.length)
+      .map((ref) => ref?.$el ?? ref)
+      .filter(Boolean) as HTMLElement[]
+    groupedButtons.push(...groupTermEls)
+    termOffset += group.terms.length
+
+    const toggleEl = toggleButtonRefs.value[groupIndex]
+    if (group.totalCount > MAX_TERMS_PER_CATEGORY && toggleEl) {
+      groupedButtons.push(toggleEl)
+    }
+  })
+
   const extras: HTMLElement[] = []
   if (exposuresButtonRef.value) extras.push(exposuresButtonRef.value)
   if (workspacesButtonRef.value) extras.push(workspacesButtonRef.value)
-  return [...termEls, ...extras]
+  return [...groupedButtons, ...extras]
 })
 
 onMounted(async () => {
@@ -98,13 +124,51 @@ const filteredSearchTermsByCategory = computed(() => {
       (term) => isValidTerm(term) && term.toLowerCase().includes(searchTermValue),
     )
 
+    const totalCount = filteredTerms.length
+    const isExpanded = Boolean(expandedCategoryKinds.value[category.value])
+
     return {
       kind: category.value,
       label: category.label,
-      terms: filteredTerms,
+      terms: isExpanded ? filteredTerms : filteredTerms.slice(0, MAX_TERMS_PER_CATEGORY),
+      totalCount,
+      isExpanded,
     }
   }).filter((group) => group.terms.length > 0)
 })
+
+const handleToggleTerms = (kind: string) => {
+  expandedCategoryKinds.value = {
+    ...expandedCategoryKinds.value,
+    [kind]: !expandedCategoryKinds.value[kind],
+  }
+}
+
+const getGroupTermStartIndex = (groupIndex: number): number => {
+  return filteredSearchTermsByCategory.value
+    .slice(0, groupIndex)
+    .reduce((acc, group) => acc + group.terms.length, 0)
+}
+
+const handleToggleTermsByKeyboard = async (kind: string, groupIndex: number) => {
+  const wasExpanded = Boolean(expandedCategoryKinds.value[kind])
+  handleToggleTerms(kind)
+  await nextTick()
+
+  if (!wasExpanded) {
+    // When expanding from "... more", move focus to the first newly-revealed term.
+    const firstRevealedIndex = getGroupTermStartIndex(groupIndex) + MAX_TERMS_PER_CATEGORY
+    const revealedTerm = termButtonRefs.value[firstRevealedIndex]
+    const revealedTermEl = (revealedTerm?.$el ?? revealedTerm) as HTMLElement | undefined
+    revealedTermEl?.focus()
+    return
+  }
+
+  // When collapsing from "Show less", keep focus on the toggle so next Tab
+  // advances to the next category's first term.
+  const toggleEl = toggleButtonRefs.value[groupIndex]
+  toggleEl?.focus()
+}
 
 const getMatchingCount = <T extends SortableEntity>(items: T[], query: string): number => {
   const normalisedQuery = normaliseSearchText(query)
@@ -122,6 +186,26 @@ const workspacesCount = computed(() =>
   getMatchingCount(workspaceStore.workspaces, searchInput.value.trim()),
 )
 
+// Build a human-readable label for the types of term results currently shown,
+// e.g. "an author", "a keyword", or "an author or keyword or publication reference".
+// Returns null when no term groups are present (only exposure/workspace counts are shown).
+const availableTermTypeLabel = computed<string | null>(() => {
+  const kinds = new Set(filteredSearchTermsByCategory.value.map((g) => g.kind))
+  const parts: string[] = []
+  if (kinds.has('citation_author_family_name') || kinds.has('model_author')) parts.push('author')
+  if (kinds.has('cellml_keyword')) parts.push('keyword')
+  if (kinds.has('citation_id')) parts.push('publication reference')
+  if (parts.length === 0) return null
+  const formatPart = (part: string): string => (part === 'author' ? 'an author' : `a ${part}`)
+  if (parts.length === 1) return formatPart(parts[0])
+  const last = parts.pop()
+  return `${parts.map(formatPart).join(' or ')} or ${formatPart(last ?? '')}`
+})
+
+const termTypeSuffix = computed(() =>
+  availableTermTypeLabel.value ? ` or select ${availableTermTypeLabel.value} below` : '',
+)
+
 const hasResults = computed(() => {
   return (
     filteredSearchTermsByCategory.value.length > 0 ||
@@ -135,28 +219,16 @@ const isSuggestionsVisible = computed(() => {
   return props.inOverlay ? true : isSearchFocused.value
 })
 
-const defaultSearchKind = computed(() => {
-  if (SEARCH_CATEGORIES.some((category) => category.value === props.initialKind)) {
-    return props.initialKind
-  }
-  return 'citation_id'
-})
-
-const handleSearch = () => {
-  const searchTerm = searchInput.value.trim()
-  if (searchTerm === '') {
+const handleQuerySearch = () => {
+  const searchQuery = searchInput.value.trim()
+  if (!searchQuery) {
     searchInputRef?.value?.inputRef?.focus()
     return
   }
 
-  // Use the first category kind that has matching results, otherwise prefer
-  // initialKind when valid, and finally fallback to citation_id.
-  const firstCategoryWithResults = filteredSearchTermsByCategory.value[0]
-  const searchKind = firstCategoryWithResults?.kind || defaultSearchKind.value
-
-  // Blur the input to close the dropdown.
-  // searchInputRef.value?.inputRef?.blur()
-  emit('search', searchKind, searchTerm)
+  searchInputRef.value?.inputRef?.blur()
+  isSearchFocused.value = false
+  emit('querySearch', searchQuery)
 }
 
 const handleSearchTermClick = (kind: string, term: string) => {
@@ -211,21 +283,34 @@ const handleKeyDown = (event: KeyboardEvent) => {
     if (activeIndex === -1) return
 
     const searchInputEl = searchInputRef.value?.inputRef
+    event.preventDefault()
 
-    if (event.shiftKey && activeIndex === 0) {
-      // Shift+Tab on first term button → go back to search input.
-      event.preventDefault()
-      searchInputEl?.focus()
-    } else if (!event.shiftKey && activeIndex === buttonEls.length - 1) {
-      // Tab on last term button → cycle back to search input.
-      event.preventDefault()
-      searchInputEl?.focus()
+    if (event.shiftKey) {
+      if (activeIndex === 0) {
+        // Shift+Tab on first suggestion button → go back to search input.
+        searchInputEl?.focus()
+      } else {
+        buttonEls[activeIndex - 1]?.focus()
+      }
+    } else {
+      if (activeIndex === buttonEls.length - 1) {
+        // Tab on last suggestion button → cycle back to search input.
+        searchInputEl?.focus()
+      } else {
+        buttonEls[activeIndex + 1]?.focus()
+      }
     }
   }
 }
 
 // Handle Tab/Shift+Tab key to cycle focus between search input and term buttons.
 const handleSearchInputKeyDown = async (event: KeyboardEvent) => {
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    handleQuerySearch()
+    return
+  }
+
   if (event.key === 'Tab' && hasResults.value) {
     event.preventDefault()
     await nextTick()
@@ -256,8 +341,16 @@ watch(isSearchFocused, (newVal) => {
   }
 })
 
+watch(
+  () => searchInput.value,
+  () => {
+    expandedCategoryKinds.value = {}
+  },
+)
+
 watch(filteredSearchTermsByCategory, () => {
   termButtonRefs.value = []
+  toggleButtonRefs.value = []
   exposuresButtonRef.value = null
   workspacesButtonRef.value = null
 })
@@ -280,8 +373,8 @@ defineExpose({
       @click="handleBackdropClick"
     ></div>
     <div
-      class="flex items-center bg-background justify-between w-full border rounded-lg transition-all relative z-40"
-      :class="isSearchFocused ? 'ring-2 ring-primary border-transparent' : 'border-gray-200 dark:border-gray-700 overflow-hidden'"
+      class="flex items-center bg-background justify-between w-full border rounded-lg transition-all relative z-40 overflow-hidden"
+      :class="isSearchFocused ? 'ring-1 ring-primary border-primary' : 'border-gray-200 dark:border-gray-700'"
     >
       <SearchField
         ref="searchInputRef"
@@ -290,9 +383,10 @@ defineExpose({
         aria-label="Search term"
         class="flex-1"
         input-class="flex-1 min-w-0 outline-none focus:ring-0 px-4 py-2"
+        :with-search-button="true"
         @focus="isSearchFocused = true"
         @blur="isSearchFocused = false"
-        @search="handleSearch"
+        @search="handleQuerySearch"
         @keydown="handleSearchInputKeyDown"
       />
     </div>
@@ -311,60 +405,82 @@ defineExpose({
           <p class="text-gray-500 dark:text-gray-400">Loading...</p>
         </div>
         <div v-else-if="!hasResults" class="p-4">
-          <p class="text-gray-500 dark:text-gray-400">
-            No matching results found for "{{ searchInput }}".
+          <p class="text-gray-500 dark:text-gray-400 text-sm">
+            No authors or keywords found for
+            <span class="text-gray-700 dark:text-gray-200 font-semibold">"{{ searchInput }}"</span>.
+            <SearchEnterHint :query="searchInput" />
           </p>
         </div>
-        <div v-else class="max-h-96 overflow-y-auto scrollbar-thin group/results">
-          <div
-            v-for="(categoryGroup, groupIndex) in filteredSearchTermsByCategory"
-            :key="categoryGroup.kind"
-            class="result-group"
-          >
-            <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              {{ categoryGroup.label }}
-            </h4>
-            <div class="flex flex-row items-start justify-start flex-wrap gap-2">
-              <TermButton
-                v-for="(term, termIndex) in categoryGroup.terms"
-                :key="term"
-                :ref="(el) => setTermButtonRef(el, filteredSearchTermsByCategory.slice(0, groupIndex).reduce((acc, g) => acc + g.terms.length, 0) + termIndex)"
-                :term="term"
-                @click="handleSearchTermClick(categoryGroup.kind, term)"
-              />
+        <div v-else class="max-h-96 bg-background overflow-y-auto scrollbar-thin">
+          <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+            <p class="text-gray-500 dark:text-gray-400 text-sm">
+              <SearchEnterHint :query="searchInput" :suffix="termTypeSuffix" />
+            </p>
+          </div>
+          <div class="group/results">
+            <div
+              v-for="(categoryGroup, groupIndex) in filteredSearchTermsByCategory"
+              :key="categoryGroup.kind"
+              class="result-group"
+            >
+              <div class="mb-3 flex items-start justify-between gap-3">
+                <h4 class="font-semibold text-gray-700 dark:text-gray-300">
+                  {{ categoryGroup.label }}
+                </h4>
+                <button
+                  v-if="categoryGroup.totalCount > MAX_TERMS_PER_CATEGORY"
+                  type="button"
+                  :ref="(el) => setToggleButtonRef(el, groupIndex)"
+                  class="px-3 py-1 text-sm rounded-md transition-colors relative focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-gray-900 cursor-pointer text-primary hover:text-primary-hover bg-transparent"
+                  :aria-expanded="categoryGroup.isExpanded"
+                  @click="handleToggleTerms(categoryGroup.kind)"
+                  @keydown.enter.prevent="handleToggleTermsByKeyboard(categoryGroup.kind, groupIndex)"
+                >
+                  {{ categoryGroup.isExpanded ? 'Show less' : '... more' }}
+                </button>
+              </div>
+              <div class="flex flex-row items-start justify-start flex-wrap gap-2">
+                <TermButton
+                  v-for="(term, termIndex) in categoryGroup.terms"
+                  :key="term"
+                  :ref="(el) => setTermButtonRef(el, filteredSearchTermsByCategory.slice(0, groupIndex).reduce((acc, g) => acc + g.terms.length, 0) + termIndex)"
+                  :term="term"
+                  @click="handleSearchTermClick(categoryGroup.kind, term)"
+                />
+              </div>
             </div>
-          </div>
-          <div
-            v-if="exposuresCount > 0"
-            class="result-group"
-          >
-            <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              Exposures
-            </h4>
-            <button
-              type="button"
-              ref="exposuresButtonRef"
-              class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
-              @click="handleExposuresClick"
+            <div
+              v-if="exposuresCount > 0"
+              class="result-group"
             >
-              See {{ formatNumber(exposuresCount) }} matching exposure{{ exposuresCount !== 1 ? 's' : '' }}
-            </button>
-          </div>
-          <div
-            v-if="workspacesCount > 0"
-            class="result-group"
-          >
-            <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              Workspaces
-            </h4>
-            <button
-              type="button"
-              ref="workspacesButtonRef"
-              class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
-              @click="handleWorkspacesClick"
+              <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                Exposures
+              </h4>
+              <button
+                type="button"
+                ref="exposuresButtonRef"
+                class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
+                @click="handleExposuresClick"
+              >
+                See {{ formatNumber(exposuresCount) }} matching exposure{{ exposuresCount !== 1 ? 's' : '' }}
+              </button>
+            </div>
+            <div
+              v-if="workspacesCount > 0"
+              class="result-group"
             >
-              See {{ formatNumber(workspacesCount) }} matching workspace{{ workspacesCount !== 1 ? 's' : '' }}
-            </button>
+              <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                Workspaces
+              </h4>
+              <button
+                type="button"
+                ref="workspacesButtonRef"
+                class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
+                @click="handleWorkspacesClick"
+              >
+                See {{ formatNumber(workspacesCount) }} matching workspace{{ workspacesCount !== 1 ? 's' : '' }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
