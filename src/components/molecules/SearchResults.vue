@@ -74,12 +74,12 @@ const isIdActive = (ids: string[] | undefined) => {
       </template>
       <template v-else-if="!hasResults">
         No results for
-        <template v-if="query?.trim()"><strong>"{{ query }}"</strong></template>
+        <template v-if="query?.trim()"><strong>{{ query }}</strong></template>
         <template v-if="query?.trim() && groupedFilters.length"> with </template>
         <template v-for="(group, gi) in groupedFilters" :key="group.kind">
           <strong>{{ group.terms.length === 1 ? (SEARCH_KIND_LABEL_SINGULAR_MAP[group.kind] || group.kind) : (SEARCH_KIND_LABEL_MAP[group.kind] || group.kind) }}</strong>:
           <template v-for="(term, ti) in group.terms" :key="term">
-            "<strong>{{ term }}</strong>"
+            <strong>{{ term }}</strong>
             <template v-if="ti < group.terms.length - 2">, </template>
             <template v-else-if="ti === group.terms.length - 2"> and </template>
           </template>
@@ -89,13 +89,13 @@ const isIdActive = (ids: string[] | undefined) => {
       </template>
       <template v-else>
         <strong>{{ resultsCount === 1 ? '1 result' : `${formatNumber(resultsCount)} results` }}</strong>
-        <template v-if="query?.trim()"> for <strong>"{{ query }}"</strong></template>
+        <template v-if="query?.trim()"> for <strong>{{ query }}</strong></template>
         <template v-if="query?.trim() && groupedFilters.length"> with </template>
         <template v-else-if="!query?.trim() && groupedFilters.length"> for </template>
         <template v-for="(group, gi) in groupedFilters" :key="group.kind">
           <strong>{{ group.terms.length === 1 ? (SEARCH_KIND_LABEL_SINGULAR_MAP[group.kind] || group.kind) : (SEARCH_KIND_LABEL_MAP[group.kind] || group.kind) }}</strong>:
           <template v-for="(term, ti) in group.terms" :key="term">
-            "<strong>{{ term }}</strong>"
+            <strong>{{ term }}</strong>
             <template v-if="ti < group.terms.length - 2">, </template>
             <template v-else-if="ti === group.terms.length - 2"> and </template>
           </template>
