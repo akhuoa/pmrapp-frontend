@@ -40,11 +40,23 @@ const groupedFilters = computed(() => {
   return Array.from(groups.entries()).map(([kind, terms]) => ({ kind, terms }))
 })
 
+const formatSearchKey = (key: string): string => {
+  return `<span class="text-gray-700 dark:text-gray-200 font-semibold"><em>${key}</em></span>`
+}
+
+const formatTermKey = (key: string): string => {
+  return `<span class="text-gray-700 dark:text-gray-200 font-semibold">${key}</span>`
+}
+
+const formatKindLabel = (label: string): string => {
+  return `<em class="text-gray-600 dark:text-gray-300">${label}</em>`
+}
+
 const formatGroupLabel = (group: MessageGroup) => {
   const groupLabel = group.terms.length === 1
     ? SEARCH_KIND_LABEL_SINGULAR_MAP[group.kind] || group.kind
     : SEARCH_KIND_LABEL_MAP[group.kind] || group.kind
-  return `<em>${groupLabel}</em>`
+  return formatKindLabel(groupLabel)
 }
 
 const formatTerms = (terms: string[]) => {
@@ -52,7 +64,7 @@ const formatTerms = (terms: string[]) => {
     .map((term, i) => {
       const comma = i < terms.length - 2 ? ', ' : ''
       const and = i === terms.length - 2 ? ' and ' : ''
-      return `<strong><em>${term}</em></strong>${comma}${and}`
+      return `${formatTermKey(term)}${comma}${and}`
     })
     .join('')
 }
@@ -73,7 +85,7 @@ const messageNoResults = computed(() => {
   let message = 'No results for'
 
   if (props.query?.trim()) {
-    message += ` <strong><em>${props.query}</em></strong>`
+    message += ` ${formatSearchKey(props.query)}`
   }
 
   if (groupedFilters.value.length > 0) {
@@ -87,10 +99,10 @@ const messageNoResults = computed(() => {
 const messageWithResults = computed(() => {
   const countText =
     resultsCount.value === 1 ? '1 result' : `${formatNumber(resultsCount.value)} results`
-  let message = `<strong>${countText}</strong>`
+  let message = `<strong class="text-gray-700 dark:text-gray-200">${countText}</strong>`
 
   if (props.query?.trim()) {
-    message += ` for <strong><em>${props.query}</em></strong>`
+    message += ` for ${formatSearchKey(props.query)}`
   }
 
   if (groupedFilters.value.length > 0) {
@@ -103,7 +115,7 @@ const messageWithResults = computed(() => {
 </script>
 
 <template>
-  <p class="mb-4" v-if="!isLoading && !error">
+  <p class="mb-4 text-gray-500 dark:text-gray-400" v-if="!isLoading && !error">
     <template v-if="!hasResults && !hasActiveSearch">
       {{ messageNoSearch }}
     </template>
