@@ -47,19 +47,23 @@ const formatGroupLabel = (group: MessageGroup) => {
 }
 
 const formatTerms = (terms: string[]) => {
-  return terms.map((term, ti) => {
-    const comma = ti < terms.length - 2 ? ', ' : ''
-    const and = ti === terms.length - 2 ? ' and ' : ''
-    return `<strong>${term}</strong>${comma}${and}`
-  }).join('')
+  return terms
+    .map((term, ti) => {
+      const comma = ti < terms.length - 2 ? ', ' : ''
+      const and = ti === terms.length - 2 ? ' and ' : ''
+      return `<strong>${term}</strong>${comma}${and}`
+    })
+    .join('')
 }
 
 const formatFiltersHtml = computed(() => {
-  return groupedFilters.value.map((group, gi) => {
-    const groupSeparator = gi < groupedFilters.value.length - 2 ? ', ' : ''
-    const groupAnd = gi === groupedFilters.value.length - 2 ? ' and ' : ''
-    return `<strong>${formatGroupLabel(group)}</strong>: ${formatTerms(group.terms)}${groupSeparator}${groupAnd}`
-  }).join('')
+  return groupedFilters.value
+    .map((group, gi) => {
+      const groupSeparator = gi < groupedFilters.value.length - 2 ? ', ' : ''
+      const groupAnd = gi === groupedFilters.value.length - 2 ? ' and ' : ''
+      return `<strong>${formatGroupLabel(group)}</strong>: ${formatTerms(group.terms)}${groupSeparator}${groupAnd}`
+    })
+    .join('')
 })
 
 const messageNoSearch = 'Perform a search to see results.'
@@ -80,7 +84,8 @@ const messageNoResults = computed(() => {
 })
 
 const messageWithResults = computed(() => {
-  const countText = resultsCount.value === 1 ? '1 result' : `${formatNumber(resultsCount.value)} results`
+  const countText =
+    resultsCount.value === 1 ? '1 result' : `${formatNumber(resultsCount.value)} results`
   let message = `<strong>${countText}</strong>`
 
   if (props.query?.trim()) {
