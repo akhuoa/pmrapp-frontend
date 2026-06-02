@@ -6,6 +6,6 @@ withDefaults(defineProps<{ query: string; suffix?: string }>(), { suffix: '' })
 
 <template>
   Press <Keycap>Enter</Keycap> to search for
-  <span class="text-gray-700 dark:text-gray-200 font-semibold">"{{ query }}"</span>
+  <span class="text-gray-700 dark:text-gray-200 font-semibold">{{ query }}</span>
   anywhere in the repository{{ suffix }}.
 </template>
