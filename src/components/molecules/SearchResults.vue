@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import TermButton from '@/components/atoms/TermButton.vue'
 import SearchResultsMessage from '@/components/atoms/SearchResultsMessage.vue'
+import TermButton from '@/components/atoms/TermButton.vue'
 import FileIcon from '@/components/icons/FileIcon.vue'
 import ListContent from '@/components/molecules/ListContent.vue'
 import ListItem from '@/components/molecules/ListItem.vue'
