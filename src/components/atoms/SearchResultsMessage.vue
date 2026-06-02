@@ -13,6 +13,11 @@ interface Props {
   filters?: SearchFilter[]
 }
 
+interface MessageGroup {
+  kind: string
+  terms: string[]
+}
+
 const props = defineProps<Props>()
 
 const resultsCount = computed(() => props.results.length)
@@ -34,43 +39,75 @@ const groupedFilters = computed(() => {
   }
   return Array.from(groups.entries()).map(([kind, terms]) => ({ kind, terms }))
 })
+
+const formatGroupLabel = (group: MessageGroup) => {
+  return group.terms.length === 1
+    ? SEARCH_KIND_LABEL_SINGULAR_MAP[group.kind] || group.kind
+    : SEARCH_KIND_LABEL_MAP[group.kind] || group.kind
+}
+
+const formatTerms = (terms: string[]) => {
+  return terms.map((term, ti) => {
+    const comma = ti < terms.length - 2 ? ', ' : ''
+    const and = ti === terms.length - 2 ? ' and ' : ''
+    return `<strong>${term}</strong>${comma}${and}`
+  }).join('')
+}
+
+const formatFiltersHtml = computed(() => {
+  return groupedFilters.value.map((group, gi) => {
+    const groupSeparator = gi < groupedFilters.value.length - 2 ? ', ' : ''
+    const groupAnd = gi === groupedFilters.value.length - 2 ? ' and ' : ''
+    return `<strong>${formatGroupLabel(group)}</strong>: ${formatTerms(group.terms)}${groupSeparator}${groupAnd}`
+  }).join('')
+})
+
+const messageNoSearch = 'Perform a search to see results.'
+
+const messageNoResults = computed(() => {
+  let message = 'No results for'
+
+  if (props.query?.trim()) {
+    message += ` <strong>${props.query}</strong>`
+  }
+
+  if (groupedFilters.value.length > 0) {
+    message += props.query?.trim() ? ' with ' : ' '
+    message += formatFiltersHtml.value
+  }
+
+  return message
+})
+
+const messageWithResults = computed(() => {
+  const countText = resultsCount.value === 1 ? '1 result' : `${formatNumber(resultsCount.value)} results`
+  let message = `<strong>${countText}</strong>`
+
+  if (props.query?.trim()) {
+    message += ` for <strong>${props.query}</strong>`
+  }
+
+  if (groupedFilters.value.length > 0) {
+    message += props.query?.trim() ? ' with ' : ' for '
+    message += formatFiltersHtml.value
+  }
+
+  return message
+})
 </script>
 
 <template>
   <p class="mb-4" v-if="!isLoading && !error">
     <template v-if="!hasResults && !hasActiveSearch">
-      Perform a search to see results.
+      {{ messageNoSearch }}
     </template>
+
     <template v-else-if="!hasResults">
-      No results for
-      <template v-if="query?.trim()"><strong>{{ query }}</strong></template>
-      <template v-if="query?.trim() && groupedFilters.length"> with </template>
-      <template v-for="(group, gi) in groupedFilters" :key="group.kind">
-        <strong>{{ group.terms.length === 1 ? (SEARCH_KIND_LABEL_SINGULAR_MAP[group.kind] || group.kind) : (SEARCH_KIND_LABEL_MAP[group.kind] || group.kind) }}</strong>:
-        <template v-for="(term, ti) in group.terms" :key="term">
-          <strong>{{ term }}</strong>
-          <template v-if="ti < group.terms.length - 2">, </template>
-          <template v-else-if="ti === group.terms.length - 2"> and </template>
-        </template>
-        <template v-if="gi < groupedFilters.length - 2">, </template>
-        <template v-else-if="gi === groupedFilters.length - 2"> and </template>
-      </template>
+      <span v-html="messageNoResults"></span>
     </template>
+
     <template v-else>
-      <strong>{{ resultsCount === 1 ? '1 result' : `${formatNumber(resultsCount)} results` }}</strong>
-      <template v-if="query?.trim()"> for <strong>{{ query }}</strong></template>
-      <template v-if="query?.trim() && groupedFilters.length"> with </template>
-      <template v-else-if="!query?.trim() && groupedFilters.length"> for </template>
-      <template v-for="(group, gi) in groupedFilters" :key="group.kind">
-        <strong>{{ group.terms.length === 1 ? (SEARCH_KIND_LABEL_SINGULAR_MAP[group.kind] || group.kind) : (SEARCH_KIND_LABEL_MAP[group.kind] || group.kind) }}</strong>:
-        <template v-for="(term, ti) in group.terms" :key="term">
-          <strong>{{ term }}</strong>
-          <template v-if="ti < group.terms.length - 2">, </template>
-          <template v-else-if="ti === group.terms.length - 2"> and </template>
-        </template>
-        <template v-if="gi < groupedFilters.length - 2">, </template>
-        <template v-else-if="gi === groupedFilters.length - 2"> and </template>
-      </template>
+      <span v-html="messageWithResults"></span>
     </template>
   </p>
 </template>
