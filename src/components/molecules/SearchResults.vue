@@ -89,7 +89,7 @@ const isIdActive = (ids: string[] | undefined) => {
       </template>
       <template v-else>
         <strong>{{ resultsCount === 1 ? '1 result' : `${formatNumber(resultsCount)} results` }}</strong>
-        <template v-if="query?.trim()"> for <strong>"{{ query }}"</strong></template>
+        <template v-if="query?.trim()"> for <strong>{{ query }}</strong></template>
         <template v-if="query?.trim() && groupedFilters.length"> with </template>
         <template v-else-if="!query?.trim() && groupedFilters.length"> for </template>
         <template v-for="(group, gi) in groupedFilters" :key="group.kind">
