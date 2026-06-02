@@ -41,9 +41,10 @@ const groupedFilters = computed(() => {
 })
 
 const formatGroupLabel = (group: MessageGroup) => {
-  return group.terms.length === 1
+  const groupLabel = group.terms.length === 1
     ? SEARCH_KIND_LABEL_SINGULAR_MAP[group.kind] || group.kind
     : SEARCH_KIND_LABEL_MAP[group.kind] || group.kind
+  return `<em>${groupLabel}</em>`
 }
 
 const formatTerms = (terms: string[]) => {
@@ -61,7 +62,7 @@ const formatFiltersHtml = computed(() => {
     .map((group, i) => {
       const groupSeparator = i < groupedFilters.value.length - 2 ? ', ' : ''
       const groupAnd = i === groupedFilters.value.length - 2 ? ' and ' : ''
-      return `<em>${formatGroupLabel(group)}</em>: ${formatTerms(group.terms)}${groupSeparator}${groupAnd}`
+      return `${formatGroupLabel(group)}: ${formatTerms(group.terms)}${groupSeparator}${groupAnd}`
     })
     .join('')
 })
