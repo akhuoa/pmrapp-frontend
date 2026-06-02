@@ -51,7 +51,7 @@ const formatTerms = (terms: string[]) => {
     .map((term, i) => {
       const comma = i < terms.length - 2 ? ', ' : ''
       const and = i === terms.length - 2 ? ' and ' : ''
-      return `<strong>${term}</strong>${comma}${and}`
+      return `<strong><em>${term}</em></strong>${comma}${and}`
     })
     .join('')
 }
@@ -61,7 +61,7 @@ const formatFiltersHtml = computed(() => {
     .map((group, i) => {
       const groupSeparator = i < groupedFilters.value.length - 2 ? ', ' : ''
       const groupAnd = i === groupedFilters.value.length - 2 ? ' and ' : ''
-      return `<strong>${formatGroupLabel(group)}</strong>: ${formatTerms(group.terms)}${groupSeparator}${groupAnd}`
+      return `<em>${formatGroupLabel(group)}</em>: ${formatTerms(group.terms)}${groupSeparator}${groupAnd}`
     })
     .join('')
 })
@@ -72,7 +72,7 @@ const messageNoResults = computed(() => {
   let message = 'No results for'
 
   if (props.query?.trim()) {
-    message += ` <strong>${props.query}</strong>`
+    message += ` <strong><em>${props.query}</em></strong>`
   }
 
   if (groupedFilters.value.length > 0) {
@@ -89,7 +89,7 @@ const messageWithResults = computed(() => {
   let message = `<strong>${countText}</strong>`
 
   if (props.query?.trim()) {
-    message += ` for <strong>${props.query}</strong>`
+    message += ` for <strong><em>${props.query}</em></strong>`
   }
 
   if (groupedFilters.value.length > 0) {
