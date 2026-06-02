@@ -48,9 +48,9 @@ const formatGroupLabel = (group: MessageGroup) => {
 
 const formatTerms = (terms: string[]) => {
   return terms
-    .map((term, ti) => {
-      const comma = ti < terms.length - 2 ? ', ' : ''
-      const and = ti === terms.length - 2 ? ' and ' : ''
+    .map((term, i) => {
+      const comma = i < terms.length - 2 ? ', ' : ''
+      const and = i === terms.length - 2 ? ' and ' : ''
       return `<strong>${term}</strong>${comma}${and}`
     })
     .join('')
@@ -58,9 +58,9 @@ const formatTerms = (terms: string[]) => {
 
 const formatFiltersHtml = computed(() => {
   return groupedFilters.value
-    .map((group, gi) => {
-      const groupSeparator = gi < groupedFilters.value.length - 2 ? ', ' : ''
-      const groupAnd = gi === groupedFilters.value.length - 2 ? ' and ' : ''
+    .map((group, i) => {
+      const groupSeparator = i < groupedFilters.value.length - 2 ? ', ' : ''
+      const groupAnd = i === groupedFilters.value.length - 2 ? ' and ' : ''
       return `<strong>${formatGroupLabel(group)}</strong>: ${formatTerms(group.terms)}${groupSeparator}${groupAnd}`
     })
     .join('')
