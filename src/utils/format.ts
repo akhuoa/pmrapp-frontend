@@ -36,3 +36,15 @@ export function formatFileCount(count: number | undefined | null): string {
   const formatted = formatNumber(count)
   return `${formatted} ${count === 1 ? 'item' : 'items'}`
 }
+
+export function formatSearchKey (key: string): string {
+  return `<span class="text-gray-700 dark:text-gray-200 font-semibold"><em>${key}</em></span>`
+}
+
+export function formatTermKey (key: string): string {
+  return `<span class="text-gray-700 dark:text-gray-200 font-semibold">${key}</span>`
+}
+
+export function formatKindLabel (label: string): string {
+  return `<em class="text-gray-600 dark:text-gray-300">${label}</em>`
+}
