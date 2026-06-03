@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { SEARCH_KIND_LABEL_MAP, SEARCH_KIND_LABEL_SINGULAR_MAP } from '@/constants/search'
 import type { SearchFilter, SearchResult } from '@/types/search'
-import { formatNumber } from '@/utils/format'
+import { formatKindLabel, formatNumber, formatSearchKey, formatTermKey } from '@/utils/format'
 
 interface Props {
   results: SearchResult[]
@@ -39,18 +39,6 @@ const groupedFilters = computed(() => {
   }
   return Array.from(groups.entries()).map(([kind, terms]) => ({ kind, terms }))
 })
-
-const formatSearchKey = (key: string): string => {
-  return `<span class="text-gray-700 dark:text-gray-200 font-semibold"><em>${key}</em></span>`
-}
-
-const formatTermKey = (key: string): string => {
-  return `<span class="text-gray-700 dark:text-gray-200 font-semibold">${key}</span>`
-}
-
-const formatKindLabel = (label: string): string => {
-  return `<em class="text-gray-600 dark:text-gray-300">${label}</em>`
-}
 
 const formatGroupLabel = (group: MessageGroup) => {
   const groupLabel = group.terms.length === 1
