@@ -37,14 +37,26 @@ export function formatFileCount(count: number | undefined | null): string {
   return `${formatted} ${count === 1 ? 'item' : 'items'}`
 }
 
-export function formatSearchKey (key: string): string {
-  return `<span class="text-gray-700 dark:text-gray-200 font-semibold"><em>${key}</em></span>`
+const escapeHtml = (value: string): string => {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
 }
 
-export function formatTermKey (key: string): string {
-  return `<span class="text-gray-700 dark:text-gray-200 font-semibold">${key}</span>`
+export function formatSearchKey(key: string): string {
+  const safeKey = escapeHtml(key)
+  return `<span class="text-gray-700 dark:text-gray-200 font-semibold"><em>${safeKey}</em></span>`
 }
 
-export function formatKindLabel (label: string): string {
-  return `<em class="text-gray-600 dark:text-gray-300">${label}</em>`
+export function formatTermKey(key: string): string {
+  const safeKey = escapeHtml(key)
+  return `<span class="text-gray-700 dark:text-gray-200 font-semibold">${safeKey}</span>`
+}
+
+export function formatKindLabel(label: string): string {
+  const safeLabel = escapeHtml(label)
+  return `<em class="text-gray-600 dark:text-gray-300">${safeLabel}</em>`
 }
