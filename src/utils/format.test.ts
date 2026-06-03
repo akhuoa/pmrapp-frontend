@@ -61,7 +61,7 @@ describe('formatSearchKey', () => {
     const results = formatSearchKey('Cells')
 
     expect(results).toBe(
-      '<span class="text-gray-700 dark:text-gray-200 font-semibold"><em>Cells</em></span>',
+      '<span class="text-gray-700 dark:text-gray-200 font-semibold">Cells</span>',
     )
   })
 
@@ -69,7 +69,7 @@ describe('formatSearchKey', () => {
     const results = formatSearchKey('<h1>Cells</h1>')
 
     expect(results).toBe(
-      '<span class="text-gray-700 dark:text-gray-200 font-semibold"><em>&lt;h1&gt;Cells&lt;/h1&gt;</em></span>',
+      '<span class="text-gray-700 dark:text-gray-200 font-semibold">&lt;h1&gt;Cells&lt;/h1&gt;</span>',
     )
   })
 
@@ -77,7 +77,7 @@ describe('formatSearchKey', () => {
     const results = formatSearchKey('<script>alert("hello")</script>')
 
     expect(results).toBe(
-      '<span class="text-gray-700 dark:text-gray-200 font-semibold"><em>&lt;script&gt;alert(&quot;hello&quot;)&lt;/script&gt;</em></span>',
+      '<span class="text-gray-700 dark:text-gray-200 font-semibold">&lt;script&gt;alert(&quot;hello&quot;)&lt;/script&gt;</span>',
     )
   })
 })
@@ -96,6 +96,6 @@ describe('formatKindLabel', () => {
   it('returns formatted kind label for normal string', () => {
     const results = formatKindLabel('Cells')
 
-    expect(results).toBe('<em class="text-gray-600 dark:text-gray-300">Cells</em>')
+    expect(results).toBe('<span class="text-gray-600 dark:text-gray-300">Cells</span>')
   })
 })
