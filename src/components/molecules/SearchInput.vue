@@ -18,7 +18,7 @@ import { useSearchStore } from '@/stores/search'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { SortableEntity } from '@/types/common'
 import type { SearchFilter, SearchQueryRequest } from '@/types/search'
-import { formatNumber } from '@/utils/format'
+import { formatNumber, formatSearchKey } from '@/utils/format'
 import { filterItemsByQuery, isValidTerm, normaliseSearchText } from '@/utils/search'
 
 const props = withDefaults(defineProps<{
@@ -507,7 +507,7 @@ defineExpose({
         <div v-else-if="!hasResults" class="p-4">
           <p class="text-gray-500 dark:text-gray-400 text-sm">
             No authors or keywords found for
-            <span class="text-gray-700 dark:text-gray-200 font-semibold">"{{ searchInput }}"</span>.
+            <span v-html="formatSearchKey(searchInput)"></span>.
             <SearchEnterHint :query="searchInput" />
           </p>
         </div>
