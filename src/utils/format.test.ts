@@ -60,19 +60,25 @@ describe('formatSearchKey', () => {
   it('returns formatted search key for normal string', () => {
     const results = formatSearchKey('Cells')
 
-    expect(results).toBe('<span class="text-gray-700 dark:text-gray-200 font-semibold"><em>Cells</em></span>')
+    expect(results).toBe(
+      '<span class="text-gray-700 dark:text-gray-200 font-semibold"><em>Cells</em></span>',
+    )
   })
 
   it('returns formatted and escaped HTML for HTML string', () => {
     const results = formatSearchKey('<h1>Cells</h1>')
 
-    expect(results).toBe('<span class="text-gray-700 dark:text-gray-200 font-semibold"><em>&lt;h1&gt;Cells&lt;/h1&gt;</em></span>')
+    expect(results).toBe(
+      '<span class="text-gray-700 dark:text-gray-200 font-semibold"><em>&lt;h1&gt;Cells&lt;/h1&gt;</em></span>',
+    )
   })
 
   it('returns formatted and escaped HTML for HTML string', () => {
     const results = formatSearchKey('<script>alert("hello")</script>')
 
-    expect(results).toBe('<span class="text-gray-700 dark:text-gray-200 font-semibold"><em>&lt;script&gt;alert(&quot;hello&quot;)&lt;/script&gt;</em></span>')
+    expect(results).toBe(
+      '<span class="text-gray-700 dark:text-gray-200 font-semibold"><em>&lt;script&gt;alert(&quot;hello&quot;)&lt;/script&gt;</em></span>',
+    )
   })
 })
 
@@ -80,7 +86,9 @@ describe('formatTermKey', () => {
   it('returns formatted term key for normal string', () => {
     const results = formatTermKey('Cells')
 
-    expect(results).toBe('<span class="text-gray-700 dark:text-gray-200 font-semibold">Cells</span>')
+    expect(results).toBe(
+      '<span class="text-gray-700 dark:text-gray-200 font-semibold">Cells</span>',
+    )
   })
 })
 
