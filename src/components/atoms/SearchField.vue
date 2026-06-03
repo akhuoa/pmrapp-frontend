@@ -9,6 +9,7 @@ interface Props {
   ariaLabel?: string
   inputClass?: string
   withSearchButton?: boolean
+  chips?: Array<{ id: string; label: string }>
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -16,15 +17,18 @@ const props = withDefaults(defineProps<Props>(), {
   ariaLabel: 'Search',
   inputClass: '',
   withSearchButton: false,
+  chips: () => [],
 })
 
 const inputPaddingClass = props.withSearchButton ? 'pr-[5.5rem]!' : 'pr-[2.5rem]!'
 
 const emit = defineEmits<{
   'update:modelValue': [value: string]
+  removeChip: [chipId: string]
   search: []
   focus: [event: FocusEvent]
   blur: [event: FocusEvent]
+  keydown: [event: KeyboardEvent]
   keyup: [event: KeyboardEvent]
 }>()
 
@@ -42,6 +46,15 @@ const handleClear = () => {
 
 const handleSearchClick = () => {
   emit('search')
+}
+
+const handleRemoveChip = (chipId: string) => {
+  emit('removeChip', chipId)
+  inputRef.value?.focus()
+}
+
+const handleKeydown = (event: KeyboardEvent) => {
+  emit('keydown', event)
 }
 
 const handleKeyup = (event: KeyboardEvent) => {
@@ -64,18 +77,36 @@ defineExpose({
 
 <template>
   <div class="relative flex items-center" :class="{'overflow-hidden': props.withSearchButton}">
-    <input
-      ref="inputRef"
-      type="text"
-      :value="modelValue"
-      :placeholder="placeholder"
-      :aria-label="ariaLabel"
+    <div
+      class="flex flex-1 flex-wrap items-center gap-2 pl-4"
       :class="[inputPaddingClass, inputClass]"
-      @input="handleInput"
-      @keyup="handleKeyup"
-      @focus="handleFocus"
-      @blur="handleBlur"
-    />
+      @click="inputRef?.focus()"
+    >
+      <div
+        v-for="chip in props.chips"
+        :key="chip.id"
+        class="inline-flex items-center gap-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-2.5 text-xs"
+      >
+        <span class="truncate max-w-48">{{ chip.label }}</span>
+        <CloseButton
+          @click="handleRemoveChip(chip.id)"
+          :aria-label="`Remove ${chip.label}`"
+        />
+      </div>
+      <input
+        ref="inputRef"
+        type="text"
+        :value="modelValue"
+        :placeholder="placeholder"
+        :aria-label="ariaLabel"
+        class="flex-1 min-w-32 outline-none bg-transparent"
+        @input="handleInput"
+        @keydown="handleKeydown"
+        @keyup="handleKeyup"
+        @focus="handleFocus"
+        @blur="handleBlur"
+      />
+    </div>
     <div
       v-if="modelValue"
       class="absolute flex items-center hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full cursor-pointer p-1"
