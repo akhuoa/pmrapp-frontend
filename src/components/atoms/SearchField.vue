@@ -11,6 +11,7 @@ interface Props {
   inputClass?: string
   withSearchButton?: boolean
   withAdvancedButton?: boolean
+  advancedSearchActive?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -19,6 +20,7 @@ const props = withDefaults(defineProps<Props>(), {
   inputClass: '',
   withSearchButton: false,
   withAdvancedButton: false,
+  advancedSearchActive: false,
 })
 
 const emit = defineEmits<{
@@ -100,7 +102,10 @@ defineExpose({
         @click="handleAdvancedSearchClick"
       >
         <span class="text-sm pr-1">Advanced</span>
-        <ArrowRightIcon class="w-4 h-4 rotate-90" />
+        <ArrowRightIcon
+          class="w-4 h-4"
+          :style="{ transform: props.advancedSearchActive ? 'rotate(-90deg)' : 'rotate(90deg)' }"
+        />
       </button>
     </div>
     <button

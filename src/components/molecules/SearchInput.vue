@@ -50,6 +50,7 @@ watch(
 )
 const searchInputRef = ref<InstanceType<typeof SearchField> | null>(null)
 const isSearchFocused = ref(false)
+const showAdvancedSearch = ref(false)
 const categoriesError = ref<string | null>(null)
 const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
 const toggleButtonRefs = ref<(HTMLButtonElement | null)[]>([])
@@ -223,8 +224,8 @@ const hasResults = computed(() => {
 })
 
 const isSuggestionsVisible = computed(() => {
-  if (!searchInput.value.trim()) return false
-  return props.inOverlay ? true : isSearchFocused.value
+  if (!searchInput.value.trim() && !showAdvancedSearch.value) return false
+  return props.inOverlay || showAdvancedSearch.value || isSearchFocused.value
 })
 
 const formattedSearchInput = computed(() => formatSearchKey(searchInput.value))
@@ -238,6 +239,7 @@ const handleQuerySearch = () => {
 
   searchInputRef.value?.inputRef?.blur()
   isSearchFocused.value = false
+  showAdvancedSearch.value = false
   emit('querySearch', searchQuery)
 }
 
@@ -245,7 +247,12 @@ const handleSearchTermClick = (kind: string, term: string) => {
   // Blur the input to close the dropdown.
   searchInputRef.value?.inputRef?.blur()
   isSearchFocused.value = false
+  showAdvancedSearch.value = false
   emit('search', kind, term)
+}
+
+const toggleAdvancedSearch = () => {
+  showAdvancedSearch.value = !showAdvancedSearch.value
 }
 
 const buildListQuery = (): Record<string, string> => {
@@ -395,10 +402,12 @@ defineExpose({
         input-class="flex-1 min-w-0 outline-none focus:ring-0 px-4 py-2"
         :with-search-button="true"
         :with-advanced-button="true"
+        :advanced-search-active="showAdvancedSearch"
         @focus="isSearchFocused = true"
         @blur="isSearchFocused = false"
         @search="handleQuerySearch"
         @keydown="handleSearchInputKeyDown"
+        @advanced-search="toggleAdvancedSearch"
       />
     </div>
     <SearchSuggestions
