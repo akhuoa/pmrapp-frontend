@@ -257,7 +257,7 @@ const kindLabelByValue: Record<string, string> = Object.fromEntries(
 const selectedFilterChips = computed(() =>
   selectedFilters.value.map((filter) => ({
     id: `${filter.kind}:${filter.term}`,
-    label: `${kindLabelByValue[filter.kind] ?? filter.kind}: ${filter.term}`,
+    label: `${filter.term}`,
   })),
 )
 
