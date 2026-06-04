@@ -69,7 +69,19 @@ describe('SearchInput.vue – category groups', () => {
         kind: 'citation_author_family_name',
         loading: false,
         kindInfo: {
-          terms: ['Alice', 'Bob', 'Carol', 'Dave', 'Eve', 'Frank', 'Grace', 'Heidi', 'Ivan', 'Judy', 'Ken'],
+          terms: [
+            'Alice',
+            'Bob',
+            'Carol',
+            'Dave',
+            'Eve',
+            'Frank',
+            'Grace',
+            'Heidi',
+            'Ivan',
+            'Judy',
+            'Ken',
+          ],
         },
       },
       {
