@@ -18,8 +18,9 @@ import { useSearchStore } from '@/stores/search'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { SortableEntity } from '@/types/common'
 import type { SearchFilter, SearchQueryRequest } from '@/types/search'
-import { formatNumber, formatSearchKey } from '@/utils/format'
+import { formatNumber } from '@/utils/format'
 import { filterItemsByQuery, isValidTerm, normaliseSearchText } from '@/utils/search'
+import CloseButton from '@/components/atoms/CloseButton.vue'
 
 const props = withDefaults(defineProps<{
   initialTerm?: string
@@ -46,7 +47,8 @@ const workspaceStore = useWorkspaceStore()
 
 const MAX_TERMS_PER_CATEGORY = 10
 
-const searchInput = ref<string>(props.initialTerm ?? '')
+const searchQueryInput = ref<string>(props.initialTerm ?? '')
+const advancedSearchInput = ref<string>('')
 const selectedFilters = ref<SearchFilter[]>([])
 
 const getInitialFilters = (): SearchFilter[] => {
@@ -73,7 +75,7 @@ selectedFilters.value = getInitialFilters()
 watch(
   () => props.initialTerm,
   (newTerm) => {
-    searchInput.value = newTerm ?? ''
+    searchQueryInput.value = newTerm ?? ''
   },
 )
 
@@ -95,7 +97,9 @@ watch(
 )
 
 const searchInputRef = ref<InstanceType<typeof SearchField> | null>(null)
+const advancedSearchInputRef = ref<HTMLInputElement | null>(null)
 const isSearchFocused = ref(false)
+const isAdvancedOpen = ref(false)
 const categoriesError = ref<string | null>(null)
 const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
 const toggleButtonRefs = ref<(HTMLButtonElement | null)[]>([])
@@ -177,18 +181,19 @@ const hasFilter = (kind: string, term: string): boolean => {
 }
 
 const filteredSearchTermsByCategory = computed(() => {
-  const searchTermValue = searchInput.value.trim().toLowerCase()
-  if (!searchTermValue) return []
+  const searchTermValue = advancedSearchInput.value.trim().toLowerCase()
 
   return SEARCH_CATEGORIES.map((category) => {
     const categoryData = searchStore.categories.find((cat) => cat.kind === category.value)
     const terms = categoryData?.kindInfo?.terms || []
 
-    const filteredTerms = terms.filter((term) => {
+    const availableTerms = terms.filter((term) => {
+      return isValidTerm(term) && !hasFilter(category.value, term)
+    })
+
+    const filteredTerms = availableTerms.filter((term) => {
       return (
-        isValidTerm(term) &&
-        term.toLowerCase().includes(searchTermValue) &&
-        !hasFilter(category.value, term)
+        !searchTermValue || term.toLowerCase().includes(searchTermValue)
       )
     })
 
@@ -247,11 +252,11 @@ const getMatchingCount = <T extends SortableEntity>(items: T[], query: string): 
 }
 
 const exposuresCount = computed(() =>
-  getMatchingCount(exposureStore.exposures, searchInput.value.trim()),
+  getMatchingCount(exposureStore.exposures, searchQueryInput.value.trim()),
 )
 
 const workspacesCount = computed(() =>
-  getMatchingCount(workspaceStore.workspaces, searchInput.value.trim()),
+  getMatchingCount(workspaceStore.workspaces, searchQueryInput.value.trim()),
 )
 
 // Build a human-readable label for the types of term results currently shown,
@@ -283,12 +288,11 @@ const hasResults = computed(() => {
 })
 
 const isSuggestionsVisible = computed(() => {
-  if (!searchInput.value.trim()) return false
-  return props.inOverlay ? true : isSearchFocused.value
+  return isAdvancedOpen.value
 })
 
-const handleQuerySearch = () => {
-  const searchQuery = searchInput.value.trim()
+const handleQuerySearch = (queryOverride?: string) => {
+  const searchQuery = (queryOverride ?? searchQueryInput.value).trim()
   const filters = selectedFilters.value.map((filter) => ({ ...filter }))
 
   if (!searchQuery && filters.length === 0) {
@@ -298,6 +302,8 @@ const handleQuerySearch = () => {
 
   searchInputRef.value?.inputRef?.blur()
   isSearchFocused.value = false
+  isAdvancedOpen.value = false
+  advancedSearchInput.value = ''
   const request: SearchQueryRequest = {
     query: searchQuery || undefined,
     filters: filters.length > 0 ? filters : undefined,
@@ -315,23 +321,21 @@ const handleSearchTermClick = (kind: string, term: string) => {
   }
 
   selectedFilters.value = [...selectedFilters.value, { kind: normalisedKind, term: normalisedTerm }]
-  searchInput.value = ''
+  advancedSearchInput.value = ''
 
-  // Keep focus on the input so term selection behaves like a combobox.
-  searchInputRef.value?.inputRef?.focus()
-  isSearchFocused.value = true
+  // Keep focus on the advanced combobox input for quick multi-selection.
+  advancedSearchInputRef.value?.focus()
 }
 
 const handleRemoveChip = (chipId: string) => {
   selectedFilters.value = selectedFilters.value.filter(
     (filter) => `${filter.kind}:${filter.term}` !== chipId,
   )
-  searchInputRef.value?.inputRef?.focus()
-  isSearchFocused.value = true
+  advancedSearchInputRef.value?.focus()
 }
 
 const buildListQuery = (): Record<string, string> => {
-  const query: Record<string, string> = { filter: searchInput.value.trim() }
+  const query: Record<string, string> = { filter: searchQueryInput.value.trim() }
   const currentSort = route.query.sort
   if (typeof currentSort === 'string' && currentSort.trim()) {
     query.sort = currentSort
@@ -356,13 +360,20 @@ const handleWorkspacesClick = () => {
 }
 
 const handleBackdropClick = () => {
-  // Blur the input to close the dropdown.
-  searchInputRef.value?.inputRef?.blur()
-  isSearchFocused.value = false
+  isAdvancedOpen.value = false
+  advancedSearchInput.value = ''
+}
+
+const toggleAdvancedSearch = async () => {
+  isAdvancedOpen.value = !isAdvancedOpen.value
+  if (isAdvancedOpen.value) {
+    await nextTick()
+    advancedSearchInputRef.value?.focus()
+  }
 }
 
 const handleKeyDown = (event: KeyboardEvent) => {
-  if (event.key === 'Escape' && searchInput.value.trim().length > 0) {
+  if (event.key === 'Escape' && isAdvancedOpen.value) {
     handleBackdropClick()
     return
   }
@@ -374,20 +385,20 @@ const handleKeyDown = (event: KeyboardEvent) => {
     const activeIndex = buttonEls.indexOf(event.target as HTMLElement)
     if (activeIndex === -1) return
 
-    const searchInputEl = searchInputRef.value?.inputRef
+    const advancedInputEl = advancedSearchInputRef.value
     event.preventDefault()
 
     if (event.shiftKey) {
       if (activeIndex === 0) {
-        // Shift+Tab on first suggestion button → go back to search input.
-        searchInputEl?.focus()
+        // Shift+Tab on first suggestion button → go back to advanced input.
+        advancedInputEl?.focus()
       } else {
         buttonEls[activeIndex - 1]?.focus()
       }
     } else {
       if (activeIndex === buttonEls.length - 1) {
-        // Tab on last suggestion button → cycle back to search input.
-        searchInputEl?.focus()
+        // Tab on last suggestion button → cycle back to advanced input.
+        advancedInputEl?.focus()
       } else {
         buttonEls[activeIndex + 1]?.focus()
       }
@@ -395,9 +406,16 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 }
 
-// Handle Tab/Shift+Tab key to cycle focus between search input and term buttons.
-const handleSearchInputKeyDown = async (event: KeyboardEvent) => {
-  if (event.key === 'Backspace' && searchInput.value.length === 0 && selectedFilters.value.length > 0) {
+const handleSearchInputKeyDown = (event: KeyboardEvent) => {
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    handleQuerySearch()
+  }
+}
+
+// Handle Tab/Shift+Tab key to cycle focus between combobox input and term buttons.
+const handleAdvancedInputKeyDown = async (event: KeyboardEvent) => {
+  if (event.key === 'Backspace' && advancedSearchInput.value.length === 0 && selectedFilters.value.length > 0) {
     event.preventDefault()
     selectedFilters.value = selectedFilters.value.slice(0, -1)
     return
@@ -405,7 +423,8 @@ const handleSearchInputKeyDown = async (event: KeyboardEvent) => {
 
   if (event.key === 'Enter') {
     event.preventDefault()
-    handleQuerySearch()
+    const fallbackQuery = searchQueryInput.value.trim() ? undefined : advancedSearchInput.value.trim()
+    handleQuerySearch(fallbackQuery)
     return
   }
 
@@ -414,24 +433,22 @@ const handleSearchInputKeyDown = async (event: KeyboardEvent) => {
     await nextTick()
     const buttonEls = allSuggestionButtons.value
     if (event.shiftKey) {
-      // Shift+Tab on search input → go to last suggestion button.
+      // Shift+Tab on advanced input → go to last suggestion button.
       const lastButton = buttonEls[buttonEls.length - 1]
       if (lastButton) {
         lastButton.focus()
-        isSearchFocused.value = true
       }
     } else {
-      // Tab on search input → go to first suggestion button.
+      // Tab on advanced input → go to first suggestion button.
       const firstButton = buttonEls[0]
       if (firstButton) {
         firstButton.focus()
-        isSearchFocused.value = true
       }
     }
   }
 }
 
-watch(isSearchFocused, (newVal) => {
+watch(isAdvancedOpen, (newVal) => {
   if (newVal) {
     document.addEventListener('keydown', handleKeyDown)
   } else {
@@ -439,12 +456,9 @@ watch(isSearchFocused, (newVal) => {
   }
 })
 
-watch(
-  () => searchInput.value,
-  () => {
-    expandedCategoryKinds.value = {}
-  },
-)
+watch(() => advancedSearchInput.value, () => {
+  expandedCategoryKinds.value = {}
+})
 
 watch(filteredSearchTermsByCategory, () => {
   termButtonRefs.value = []
@@ -463,32 +477,35 @@ defineExpose({
 </script>
 
 <template>
-  <div :class="`relative ${isSearchFocused ? 'z-100' : ''}`">
+  <div :class="`relative ${(isSearchFocused || isAdvancedOpen) ? 'z-100' : ''}`">
     <!-- Backdrop overlay (only when not in SearchOverlay). -->
     <div
-      v-if="isSearchFocused && searchInput.trim().length > 0 && !props.inOverlay"
+      v-if="isAdvancedOpen && !props.inOverlay"
       class="fixed inset-0 bg-gray-400/75 dark:bg-gray-900/75 z-30"
       @click="handleBackdropClick"
     ></div>
-    <div
-      class="flex items-center bg-background justify-between w-full border rounded-lg transition-all relative z-40 overflow-hidden"
-      :class="isSearchFocused ? 'ring-1 ring-primary border-primary' : 'border-gray-200 dark:border-gray-700'"
-    >
+    <div class="flex items-center gap-2 relative z-40">
       <SearchField
         ref="searchInputRef"
-        v-model="searchInput"
-        :chips="selectedFilterChips"
+        v-model="searchQueryInput"
         placeholder="Start typing to search..."
         aria-label="Search term"
         class="flex-1"
-        input-class="flex-1 min-w-0 outline-none focus:ring-0 px-4 py-2"
+        input-class="flex-1 min-w-0 outline-none focus:ring-0 px-4 py-2 border rounded-lg"
         :with-search-button="true"
-        @remove-chip="handleRemoveChip"
         @focus="isSearchFocused = true"
         @blur="isSearchFocused = false"
         @search="handleQuerySearch"
         @keydown="handleSearchInputKeyDown"
       />
+      <button
+        type="button"
+        class="shrink-0 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm cursor-pointer bg-background hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+        :aria-expanded="isAdvancedOpen"
+        @click="toggleAdvancedSearch"
+      >
+        Advanced search<span v-if="selectedFilters.length > 0"> ({{ selectedFilters.length }})</span>
+      </button>
     </div>
     <div
       v-if="isSuggestionsVisible"
@@ -496,6 +513,35 @@ defineExpose({
       @mousedown.prevent
     >
       <div class="mt-2 box box-small overflow-hidden !shadow-none !p-0">
+        <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            Add structured filters in advanced search. Press Enter to search with filters and query text.
+          </p>
+          <div class="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 bg-background">
+            <div class="flex flex-wrap items-center gap-2">
+              <div
+                v-for="chip in selectedFilterChips"
+                :key="chip.id"
+                class="inline-flex items-center gap-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-2.5 py-1 text-xs"
+              >
+                <span>{{ chip.label }}</span>
+                <CloseButton
+                  @click="handleRemoveChip(chip.id)"
+                  :aria-label="`Remove ${chip.label}`"
+                />
+              </div>
+              <input
+                ref="advancedSearchInputRef"
+                v-model="advancedSearchInput"
+                type="text"
+                placeholder="Filter terms..."
+                aria-label="Advanced search filter"
+                class="flex-1 min-w-40 outline-none bg-transparent text-sm"
+                @keydown="handleAdvancedInputKeyDown"
+              />
+            </div>
+          </div>
+        </div>
         <div v-if="categoriesError" class="error-box">
           <p class="text-sm">
             {{ categoriesError }}
@@ -506,15 +552,15 @@ defineExpose({
         </div>
         <div v-else-if="!hasResults" class="p-4">
           <p class="text-gray-500 dark:text-gray-400 text-sm">
-            No authors or keywords found for
-            <span v-html="formatSearchKey(searchInput)"></span>.
-            <SearchEnterHint :query="searchInput" />
+            No terms found for
+            <span class="text-gray-700 dark:text-gray-200 font-semibold">"{{ advancedSearchInput }}"</span>.
+            <SearchEnterHint :query="searchQueryInput" />
           </p>
         </div>
         <div v-else class="max-h-96 bg-background overflow-y-auto scrollbar-thin">
           <div class="p-4 border-b border-gray-200 dark:border-gray-700">
             <p class="text-gray-500 dark:text-gray-400 text-sm">
-              <SearchEnterHint :query="searchInput" :suffix="termTypeSuffix" />
+              <SearchEnterHint :query="searchQueryInput" :suffix="termTypeSuffix" />
             </p>
           </div>
           <div class="group/results">
