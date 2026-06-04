@@ -8,7 +8,6 @@ import {
   ref,
   watch,
 } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
 import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import SearchSuggestions from '@/components/molecules/SearchSuggestions.vue'
@@ -30,8 +29,6 @@ const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
-const router = useRouter()
-const route = useRoute()
 const searchStore = useSearchStore()
 
 const MAX_TERMS_PER_CATEGORY = 10
