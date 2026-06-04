@@ -111,7 +111,7 @@ defineExpose({
           Advanced
           <span
             v-if="filtersCount"
-            class="ml-1 inline-flex items-center justify-center w-[1.25rem] h-[1.25rem] text-xs leading-none rounded-full text-foreground bg-primary"
+            class="ml-1 inline-flex items-center justify-center w-[1.25rem] h-[1.25rem] text-xs leading-none rounded-full text-white bg-primary"
           >
             {{ filtersCount }}
           </span>
