@@ -51,6 +51,15 @@ watch(
   },
 )
 
+watch(
+  () => route.fullPath,
+  () => {
+    if (props.show) {
+      emit('close')
+    }
+  },
+)
+
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeyDown)
 })
