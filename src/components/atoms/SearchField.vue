@@ -88,6 +88,7 @@ defineExpose({
       <div
         v-if="modelValue"
         class="flex items-center hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full cursor-pointer p-1"
+        :class="props.withSearchButton ? '' : 'absolute right-2'"
       >
         <CloseButton
           @click="handleClear"
