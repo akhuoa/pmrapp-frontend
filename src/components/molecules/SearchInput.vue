@@ -109,6 +109,10 @@ const handleSearchTermClick = (filters: SearchFilter[]) => {
 const focusSearchInput = () => {
   searchInputRef.value?.inputRef?.focus()
   isSearchFocused.value = true
+
+  if (selectedFilters.value.length) {
+    showAdvancedSearch.value = true
+  }
 }
 
 const handleSuggestionsEscape = () => {
@@ -181,7 +185,7 @@ defineExpose({
         :with-search-button="true"
         :with-advanced-button="true"
         :advanced-search-active="showAdvancedSearch"
-        @focus="isSearchFocused = true"
+        @focus="focusSearchInput"
         @search="handleQuerySearch"
         @keydown="handleSearchInputKeyDown"
         @advanced-search="toggleAdvancedSearch"
