@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import type { ComponentPublicInstance } from 'vue'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import Chip from '@/components/atoms/Chip.vue'
 import CloseButton from '@/components/atoms/CloseButton.vue'
 import SearchEnterHint from '@/components/atoms/SearchEnterHint.vue'
+import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import { SEARCH_CATEGORIES } from '@/constants/search'
 import { useSearchStore } from '@/stores/search'
 import type { SearchFilter } from '@/types/search'
 import { formatSearchKey } from '@/utils/format'
 import { isValidTerm } from '@/utils/search'
-import SearchField from '../atoms/SearchField.vue'
 
 const props = defineProps<{
   isSuggestionsVisible: boolean
@@ -308,17 +309,16 @@ const handleRemoveChip = (chipId: string) => {
         v-if="selectedFilterChips.length"
         class="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-1 flex-wrap items-center gap-2 pl-4"
       >
-        <div
+        <Chip
           v-for="chip in selectedFilterChips"
           :key="chip.id"
-          class="inline-flex items-center gap-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-2.5 text-xs"
         >
           <span class="truncate max-w-48">{{ chip.label }}</span>
           <CloseButton
             @click="handleRemoveChip(chip.id)"
             :aria-label="`Remove ${chip.label}`"
           />
-        </div>
+        </Chip>
       </div>
       <div v-if="categoriesError" class="error-box">
         <p class="text-sm">

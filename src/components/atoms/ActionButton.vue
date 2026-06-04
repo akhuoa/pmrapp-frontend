@@ -55,7 +55,8 @@ const disabledClasses = {
 }
 
 const secondaryLightModeClasses = 'border-gray-300 bg-gray-100 enabled:hover:bg-gray-100'
-const secondaryDarkModeClasses = 'dark:border-gray-800 dark:bg-gray-800 enabled:dark:hover:bg-gray-700'
+const secondaryDarkModeClasses =
+  'dark:border-gray-800 dark:bg-gray-800 enabled:dark:hover:bg-gray-700'
 
 const variantClasses = {
   primary:
