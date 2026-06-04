@@ -94,7 +94,9 @@ onMounted(async () => {
   }
 })
 
-const isLoading = computed(() => searchStore.isLoading || searchStore.categories.some((cat) => cat.loading))
+const isLoading = computed(
+  () => searchStore.isLoading || searchStore.categories.some((cat) => cat.loading),
+)
 
 const handleToggleTerms = (kind: string) => {
   expandedCategoryKinds.value = {

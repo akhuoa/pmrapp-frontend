@@ -31,10 +31,7 @@ const isSearchFocused = ref(false)
 const showAdvancedSearch = ref(false)
 const MAX_TERMS_PER_CATEGORY = 10
 
-const setSuggestionButtonRef = (
-  el: Element | ComponentPublicInstance | null,
-  index: number,
-) => {
+const setSuggestionButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
   if (el) {
     suggestionButtonRefs.value[index] = el as HTMLElement | ComponentPublicInstance
   }
