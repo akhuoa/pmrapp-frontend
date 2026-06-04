@@ -345,7 +345,13 @@ describe('SearchInput.vue – getMatchingCount logic', () => {
     wrapper.findComponent({ name: 'SearchField' }).vm.$emit('search')
     await nextTick()
 
-    expect(wrapper.emitted('querySearch')?.[0]).toEqual(['Noble'])
+    // expect(wrapper.emitted('querySearch')?.[0]).toEqual(['Noble'])
+    expect(wrapper.emitted('querySearch')?.[0]).toEqual([
+      {
+        query: 'Noble',
+        filters: [{ kind: 'model_author', term: 'Noble' }],
+      },
+    ])
 
     wrapper.unmount()
   })
@@ -357,7 +363,13 @@ describe('SearchInput.vue – getMatchingCount logic', () => {
     wrapper.findComponent({ name: 'SearchField' }).vm.$emit('search')
     await nextTick()
 
-    expect(wrapper.emitted('querySearch')?.[0]).toEqual(['Noble'])
+    // expect(wrapper.emitted('querySearch')?.[0]).toEqual(['Noble'])
+    expect(wrapper.emitted('querySearch')?.[0]).toEqual([
+      {
+        query: 'Noble',
+        filters: [{ kind: 'not_a_real_kind', term: 'Noble' }],
+      },
+    ])
 
     wrapper.unmount()
   })
