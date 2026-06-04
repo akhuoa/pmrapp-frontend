@@ -5,8 +5,8 @@ import SearchEnterHint from '@/components/atoms/SearchEnterHint.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import { SEARCH_CATEGORIES } from '@/constants/search'
 import { useSearchStore } from '@/stores/search'
-import { isValidTerm } from '@/utils/search'
 import { formatSearchKey } from '@/utils/format'
+import { isValidTerm } from '@/utils/search'
 
 const props = defineProps<{
   isSuggestionsVisible: boolean
