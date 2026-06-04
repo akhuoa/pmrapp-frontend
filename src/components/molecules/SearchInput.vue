@@ -181,7 +181,6 @@ defineExpose({
         :with-advanced-button="true"
         :advanced-search-active="showAdvancedSearch"
         @focus="isSearchFocused = true"
-        @blur="isSearchFocused = false"
         @search="handleQuerySearch"
         @keydown="handleSearchInputKeyDown"
         @advanced-search="toggleAdvancedSearch"
