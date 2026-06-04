@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import type { ComponentPublicInstance } from 'vue'
-import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
 import SearchField from '@/components/atoms/SearchField.vue'
 import SearchSuggestions from '@/components/molecules/SearchSuggestions.vue'
 
@@ -26,25 +25,8 @@ watch(
 )
 
 const searchInputRef = ref<InstanceType<typeof SearchField> | null>(null)
-const suggestionButtonRefs = ref<(HTMLElement | ComponentPublicInstance | null)[]>([])
 const isSearchFocused = ref(false)
 const showAdvancedSearch = ref(false)
-const MAX_TERMS_PER_CATEGORY = 10
-
-const setSuggestionButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
-  if (el) {
-    suggestionButtonRefs.value[index] = el as HTMLElement | ComponentPublicInstance
-  }
-}
-
-const allSuggestionButtons = computed<HTMLElement[]>(() => {
-  return suggestionButtonRefs.value
-    .map((ref) => {
-      if (!ref) return undefined
-      return (ref as any).$el ?? (ref as HTMLElement)
-    })
-    .filter(Boolean) as HTMLElement[]
-})
 
 const isSuggestionsVisible = computed(() => {
   if (!showAdvancedSearch.value) return false
@@ -71,6 +53,17 @@ const handleSearchTermClick = (kind: string, term: string) => {
   emit('search', kind, term)
 }
 
+const focusSearchInput = () => {
+  searchInputRef.value?.inputRef?.focus()
+  isSearchFocused.value = true
+}
+
+const handleSuggestionsEscape = () => {
+  searchInputRef.value?.inputRef?.blur()
+  isSearchFocused.value = false
+  showAdvancedSearch.value = false
+}
+
 const toggleAdvancedSearch = () => {
   showAdvancedSearch.value = !showAdvancedSearch.value
 }
@@ -85,31 +78,6 @@ const handleKeyDown = (event: KeyboardEvent) => {
     handleBackdropClick()
     return
   }
-
-  if (event.key === 'Tab' && isSuggestionsVisible.value) {
-    const buttonEls = allSuggestionButtons.value
-    if (buttonEls.length === 0) return
-
-    const activeIndex = buttonEls.indexOf(event.target as HTMLElement)
-    if (activeIndex === -1) return
-
-    const searchInputEl = searchInputRef.value?.inputRef
-    event.preventDefault()
-
-    if (event.shiftKey) {
-      if (activeIndex === 0) {
-        searchInputEl?.focus()
-      } else {
-        buttonEls[activeIndex - 1]?.focus()
-      }
-    } else {
-      if (activeIndex === buttonEls.length - 1) {
-        searchInputEl?.focus()
-      } else {
-        buttonEls[activeIndex + 1]?.focus()
-      }
-    }
-  }
 }
 
 const handleSearchInputKeyDown = async (event: KeyboardEvent) => {
@@ -117,25 +85,6 @@ const handleSearchInputKeyDown = async (event: KeyboardEvent) => {
     event.preventDefault()
     handleQuerySearch()
     return
-  }
-
-  if (event.key === 'Tab' && isSuggestionsVisible.value) {
-    event.preventDefault()
-    await nextTick()
-    const buttonEls = allSuggestionButtons.value
-    if (event.shiftKey) {
-      const lastButton = buttonEls[buttonEls.length - 1]
-      if (lastButton) {
-        lastButton.focus()
-        isSearchFocused.value = true
-      }
-    } else {
-      const firstButton = buttonEls[0]
-      if (firstButton) {
-        firstButton.focus()
-        isSearchFocused.value = true
-      }
-    }
   }
 }
 
@@ -147,12 +96,6 @@ watch(isSearchFocused, (newVal) => {
   }
 })
 
-watch(
-  () => searchInput.value,
-  () => {
-    suggestionButtonRefs.value = []
-  },
-)
 
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeyDown)
@@ -196,9 +139,9 @@ defineExpose({
       :is-suggestions-visible="isSuggestionsVisible"
       :in-overlay="props.inOverlay"
       :search-input="searchInput"
-      :max-terms-per-category="MAX_TERMS_PER_CATEGORY"
-      :set-suggestion-button-ref="setSuggestionButtonRef"
       @search-term-click="handleSearchTermClick"
+      @focus-search-input="focusSearchInput"
+      @escape="handleSuggestionsEscape"
     />
   </div>
 </template>

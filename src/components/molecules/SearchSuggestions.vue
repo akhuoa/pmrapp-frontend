@@ -12,12 +12,12 @@ const props = defineProps<{
   isSuggestionsVisible: boolean
   inOverlay?: boolean
   searchInput: string
-  maxTermsPerCategory: number
-  setSuggestionButtonRef: (el: Element | ComponentPublicInstance | null, index: number) => void
 }>()
 
 const emit = defineEmits<{
   (e: 'searchTermClick', kind: string, term: string): void
+  (e: 'focusSearchInput'): void
+  (e: 'escape'): void
 }>()
 
 const searchStore = useSearchStore()
@@ -25,19 +25,19 @@ const termsFilter = ref<string>('')
 const formattedTermsFilter = computed(() => formatSearchKey(termsFilter.value))
 const categoriesError = ref<string | null>(null)
 const expandedCategoryKinds = ref<Record<string, boolean>>({})
+const filterInputRef = ref<HTMLInputElement | null>(null)
 const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
 const toggleButtonRefs = ref<(HTMLButtonElement | null)[]>([])
+const MAX_TERMS_PER_CATEGORY = 10
 
 const setTermButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
   if (el) {
     termButtonRefs.value[index] = el as InstanceType<typeof TermButton>
   }
-  props.setSuggestionButtonRef(el, index)
 }
 
 const setToggleButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
   toggleButtonRefs.value[index] = el as HTMLButtonElement | null
-  props.setSuggestionButtonRef(el, index)
 }
 
 const filteredSearchTermsByCategory = computed(() => {
@@ -60,7 +60,7 @@ const filteredSearchTermsByCategory = computed(() => {
     return {
       kind: category.value,
       label: category.label,
-      terms: isExpanded ? filteredTerms : filteredTerms.slice(0, props.maxTermsPerCategory),
+      terms: isExpanded ? filteredTerms : filteredTerms.slice(0, MAX_TERMS_PER_CATEGORY),
       totalCount,
       isExpanded,
     }
@@ -75,12 +75,12 @@ const getTermIndexInFlattenedList = (groupIndex: number, termIndex: number): num
   return priorTermsCount + termIndex
 }
 
-const getToggleButtonIndex = (groupIndex: number): number => {
+const getGroupTermStartIndex = (groupIndex: number): number => {
   const priorTermsCount = filteredSearchTermsByCategory.value
     .slice(0, groupIndex)
     .reduce((acc, group) => acc + group.terms.length, 0)
 
-  return priorTermsCount + filteredSearchTermsByCategory.value[groupIndex].terms.length
+  return priorTermsCount
 }
 
 onMounted(async () => {
@@ -111,7 +111,8 @@ const handleToggleTermsByKeyboard = async (kind: string, groupIndex: number) => 
   await nextTick()
 
   if (!wasExpanded) {
-    const firstRevealedIndex = getToggleButtonIndex(groupIndex)
+    // Move focus to first newly revealed term after expanding from "... more".
+    const firstRevealedIndex = getGroupTermStartIndex(groupIndex) + MAX_TERMS_PER_CATEGORY
     const revealedTerm = termButtonRefs.value[firstRevealedIndex]
     const revealedTermEl = (revealedTerm?.$el ?? revealedTerm) as HTMLElement | undefined
     revealedTermEl?.focus()
@@ -139,7 +140,94 @@ const termTypeSuffix = computed(() =>
   availableTermTypeLabel.value ? ` or select ${availableTermTypeLabel.value} below` : '',
 )
 
+const allSuggestionButtons = computed<HTMLElement[]>(() => {
+  const buttons: HTMLElement[] = []
+  let termOffset = 0
+
+  filteredSearchTermsByCategory.value.forEach((group, groupIndex) => {
+    const termEls = termButtonRefs.value
+      .slice(termOffset, termOffset + group.terms.length)
+      .map((ref) => (ref?.$el ?? ref) as HTMLElement | undefined)
+      .filter(Boolean) as HTMLElement[]
+
+    buttons.push(...termEls)
+    termOffset += group.terms.length
+
+    const toggleEl = toggleButtonRefs.value[groupIndex]
+    if (group.totalCount > MAX_TERMS_PER_CATEGORY && toggleEl) {
+      buttons.push(toggleEl)
+    }
+  })
+
+  return buttons
+})
+
 const hasResults = computed(() => filteredSearchTermsByCategory.value.length > 0)
+
+const focusSearchInput = () => {
+  emit('focusSearchInput')
+}
+
+const handleEscape = () => {
+  emit('escape')
+}
+
+const handleSuggestionButtonKeyDown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    handleEscape()
+    return
+  }
+
+  if (event.key !== 'Tab') return
+  if (!hasResults.value) return
+
+  const buttons = allSuggestionButtons.value
+  if (buttons.length === 0) return
+
+  const activeIndex = buttons.indexOf(event.target as HTMLElement)
+  if (activeIndex === -1) return
+
+  event.preventDefault()
+
+  if (event.shiftKey) {
+    if (activeIndex === 0) {
+      filterInputRef.value?.focus()
+    } else {
+      buttons[activeIndex - 1]?.focus()
+    }
+    return
+  }
+
+  if (activeIndex === buttons.length - 1) {
+    focusSearchInput()
+  } else {
+    buttons[activeIndex + 1]?.focus()
+  }
+}
+
+const handleFilterInputKeyDown = async (event: KeyboardEvent) => {
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    handleEscape()
+    return
+  }
+
+  if (event.key !== 'Tab') return
+  if (!hasResults.value) return
+
+  if (event.shiftKey) {
+    return
+  }
+
+  event.preventDefault()
+  await nextTick()
+
+  const buttons = allSuggestionButtons.value
+  if (buttons.length === 0) return
+
+  buttons[0]?.focus()
+}
 
 watch(
   () => props.searchInput,
@@ -167,11 +255,13 @@ const handleSearchTermClick = (kind: string, term: string) => {
     <div class="mt-2 box box-small overflow-hidden !shadow-none !p-0">
       <div class="p-4 border-b border-gray-200 dark:border-gray-700">
         <input
+          ref="filterInputRef"
           type="search"
           name="termsFilter"
           placeholder="Filter terms..."
           class="input-field input-field-sm"
           v-model="termsFilter"
+          @keydown="handleFilterInputKeyDown"
         />
       </div>
       <div v-if="categoriesError" class="error-box">
@@ -206,13 +296,15 @@ const handleSearchTermClick = (kind: string, term: string) => {
                 {{ categoryGroup.label }}
               </h4>
               <button
-                v-if="categoryGroup.totalCount > maxTermsPerCategory"
+                v-if="categoryGroup.totalCount > MAX_TERMS_PER_CATEGORY"
                 type="button"
                 :ref="(el) => setToggleButtonRef(el, groupIndex)"
                 class="px-3 py-1 text-sm rounded-md transition-colors relative focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-gray-900 cursor-pointer text-primary hover:text-primary-hover bg-transparent"
                 :aria-expanded="categoryGroup.isExpanded"
                 @click="handleToggleTerms(categoryGroup.kind)"
                 @keydown.enter.prevent="handleToggleTermsByKeyboard(categoryGroup.kind, groupIndex)"
+                @keydown.tab.prevent="handleSuggestionButtonKeyDown($event)"
+                @keydown.esc.prevent="handleEscape"
               >
                 {{ categoryGroup.isExpanded ? 'Show less' : '... more' }}
               </button>
@@ -223,7 +315,9 @@ const handleSearchTermClick = (kind: string, term: string) => {
                 :key="term"
                 :ref="(el) => setTermButtonRef(el, getTermIndexInFlattenedList(groupIndex, termIndex))"
                 :term="term"
-                @click="emit('searchTermClick', categoryGroup.kind, term)"
+                @click="handleSearchTermClick(categoryGroup.kind, term)"
+                @keydown.tab.prevent="handleSuggestionButtonKeyDown($event)"
+                @keydown.esc.prevent="handleEscape"
               />
             </div>
           </div>
