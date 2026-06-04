@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import ArrowRightIcon from '../icons/ArrowRightIcon.vue'
 import SearchIcon from '../icons/SearchIcon.vue'
 import CloseButton from './CloseButton.vue'
@@ -13,6 +13,7 @@ interface Props {
   withAdvancedButton?: boolean
   advancedSearchActive?: boolean
   filtersCount?: number
+  searchEnabled?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -22,6 +23,7 @@ const props = withDefaults(defineProps<Props>(), {
   withSearchButton: false,
   withAdvancedButton: false,
   advancedSearchActive: false,
+  searchEnabled: false,
 })
 
 const emit = defineEmits<{
@@ -34,6 +36,8 @@ const emit = defineEmits<{
 }>()
 
 const inputRef = ref<HTMLInputElement | null>(null)
+
+const searchEnabled = computed(() => Boolean(props.modelValue) || props.searchEnabled)
 
 const handleInput = (event: Event) => {
   const target = event.target as HTMLInputElement
@@ -123,7 +127,7 @@ defineExpose({
       type="button"
       class="flex items-center justify-center p-3 border-l border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-default disabled:hover:bg-transparent"
       aria-label="Search"
-      :disabled="!modelValue"
+      :disabled="!searchEnabled"
       @click="handleSearchClick"
     >
       <SearchIcon class="w-4 h-4" />
