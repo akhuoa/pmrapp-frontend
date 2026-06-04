@@ -71,7 +71,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="relative flex items-center " :class="{'overflow-hidden': props.withSearchButton}">
+  <div class="relative flex items-center" :class="{'overflow-hidden': props.withSearchButton}">
     <div class="relative flex items-center w-full">
       <input
         ref="inputRef"

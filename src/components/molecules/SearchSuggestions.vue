@@ -9,6 +9,7 @@ import { useSearchStore } from '@/stores/search'
 import type { SearchFilter } from '@/types/search'
 import { formatSearchKey } from '@/utils/format'
 import { isValidTerm } from '@/utils/search'
+import SearchField from '../atoms/SearchField.vue'
 
 const props = defineProps<{
   isSuggestionsVisible: boolean
@@ -291,13 +292,11 @@ const handleRemoveChip = (chipId: string) => {
   >
     <div class="mt-2 box box-small overflow-hidden !shadow-none !p-0">
       <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-        <input
+        <SearchField
           ref="filterInputRef"
-          type="search"
-          name="termsFilter"
-          placeholder="Filter terms..."
-          class="input-field input-field-sm"
           v-model="termsFilter"
+          placeholder="Filter terms..."
+          input-class="input-field input-field-sm flex-1"
           @keydown="handleFilterInputKeyDown"
         />
       </div>
