@@ -96,7 +96,6 @@ watch(isSearchFocused, (newVal) => {
   }
 })
 
-
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeyDown)
 })
