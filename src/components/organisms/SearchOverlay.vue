@@ -2,7 +2,6 @@
 import { nextTick, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import CloseButton from '@/components/atoms/CloseButton.vue'
-import Keycap from '@/components/atoms/Keycap.vue'
 import SearchInput from '@/components/molecules/SearchInput.vue'
 import { SEARCH_KIND_NAMES } from '@/constants/search'
 import { buildQuerySearchQuery, buildSearchQuery, parseQueryFiltersFromQuery } from '@/utils/search'
@@ -61,33 +60,24 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
   emit('close')
 }
 
-const handleQuerySearch = (query: string) => {
-  router.push({ path: '/search', query: buildQuerySearchQuery(query, [], route.query) })
+const handleQuerySearch = (request: { query?: string; filters?: Array<{ kind: string; term: string }> }) => {
+  router.push({
+    path: '/search',
+    query: buildQuerySearchQuery(request.query ?? '', request.filters ?? [], route.query),
+  })
   emit('close')
 }
 
 const getInitialTerm = (): string => {
-  const filterQuery = route.query.filter
   const queryParam = route.query.query
-
-  if (typeof filterQuery === 'string') {
-    return filterQuery
-  }
 
   if (typeof queryParam === 'string') {
     return queryParam
   }
 
-  const firstFilter = parseQueryFiltersFromQuery(route.query, SEARCH_KIND_NAMES)[0]
-  if (firstFilter) return firstFilter.term
-
   return ''
 }
 
-const getInitialKind = (): string => {
-  const firstFilter = parseQueryFiltersFromQuery(route.query, SEARCH_KIND_NAMES)[0]
-  return firstFilter?.kind ?? ''
-}
 </script>
 
 <template>
@@ -109,8 +99,9 @@ const getInitialKind = (): string => {
         <SearchInput
           ref="searchInputRef"
           :inOverlay="true"
-          :initial-kind="getInitialKind()"
+          :initial-kind="''"
           :initial-term="getInitialTerm()"
+          :initial-filters="parseQueryFiltersFromQuery(route.query, SEARCH_KIND_NAMES)"
           @search="handleSearch"
           @querySearch="handleQuerySearch"
           @close="emit('close')"

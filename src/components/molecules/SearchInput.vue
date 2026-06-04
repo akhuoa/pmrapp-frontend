@@ -2,25 +2,70 @@
 import { computed, onUnmounted, ref, watch } from 'vue'
 import SearchField from '@/components/atoms/SearchField.vue'
 import SearchSuggestions from '@/components/molecules/SearchSuggestions.vue'
+import type { SearchFilter, SearchQueryRequest } from '@/types/search'
 
-const props = defineProps<{
-  initialTerm: string
-  initialKind: string
+const props = withDefaults(defineProps<{
+  initialTerm?: string
+  initialKind?: string
+  initialFilters?: SearchFilter[]
   inOverlay?: boolean
-}>()
+}>(), {
+  initialTerm: '',
+  initialKind: '',
+  initialFilters: () => [],
+})
 
 const emit = defineEmits<{
   (e: 'search', searchKind: string, searchTerm: string): void
-  (e: 'querySearch', query: string): void
+  (e: 'querySearch', request: SearchQueryRequest): void
   (e: 'close'): void
 }>()
 
-const searchInput = ref<string>(props.initialTerm)
+const searchInput = ref<string>(props.initialTerm ?? '')
+const selectedFilters = ref<SearchFilter[]>([])
+
+const getInitialFilters = (): SearchFilter[] => {
+  if (props.initialFilters.length > 0) {
+    return props.initialFilters
+      .map((filter) => ({
+        kind: filter.kind.trim(),
+        term: filter.term.trim(),
+      }))
+      .filter((filter) => filter.kind && filter.term)
+  }
+
+  const initialKind = (props.initialKind ?? '').trim()
+  const initialTerm = (props.initialTerm ?? '').trim()
+  if (initialKind && initialTerm) {
+    return [{ kind: initialKind, term: initialTerm }]
+  }
+
+  return []
+}
+
+selectedFilters.value = getInitialFilters()
 
 watch(
   () => props.initialTerm,
   (newTerm) => {
-    searchInput.value = newTerm
+    searchInput.value = newTerm ?? ''
+  },
+)
+
+watch(
+  () => props.initialFilters,
+  () => {
+    selectedFilters.value = getInitialFilters()
+  },
+  { deep: true },
+)
+
+watch(
+  () => props.initialKind,
+  () => {
+    if (props.initialFilters.length === 0) {
+      selectedFilters.value = getInitialFilters()
+    }
   },
 )
 
@@ -35,22 +80,26 @@ const isSuggestionsVisible = computed(() => {
 
 const handleQuerySearch = () => {
   const searchQuery = searchInput.value.trim()
-  if (!searchQuery) {
+  const filters = selectedFilters.value.map((filter) => ({ ...filter }))
+
+  if (!searchQuery && filters.length === 0) {
     searchInputRef?.value?.inputRef?.focus()
     return
   }
 
   searchInputRef.value?.inputRef?.blur()
   isSearchFocused.value = false
-  showAdvancedSearch.value = false
-  emit('querySearch', searchQuery)
+
+  const request: SearchQueryRequest = {
+    query: searchQuery || undefined,
+    filters: filters.length > 0 ? filters : undefined,
+  }
+  console.log('request', request)
+  emit('querySearch', request)
 }
 
-const handleSearchTermClick = (kind: string, term: string) => {
-  searchInputRef.value?.inputRef?.blur()
-  isSearchFocused.value = false
-  showAdvancedSearch.value = false
-  emit('search', kind, term)
+const handleSearchTermClick = (filters: SearchFilter[]) => {
+  selectedFilters.value = filters
 }
 
 const focusSearchInput = () => {
@@ -138,6 +187,7 @@ defineExpose({
       :is-suggestions-visible="isSuggestionsVisible"
       :in-overlay="props.inOverlay"
       :search-input="searchInput"
+      :initial-filters="selectedFilters"
       @search-term-click="handleSearchTermClick"
       @focus-search-input="focusSearchInput"
       @escape="handleSuggestionsEscape"

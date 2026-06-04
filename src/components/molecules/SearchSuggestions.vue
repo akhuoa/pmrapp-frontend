@@ -7,15 +7,18 @@ import { SEARCH_CATEGORIES } from '@/constants/search'
 import { useSearchStore } from '@/stores/search'
 import { formatSearchKey } from '@/utils/format'
 import { isValidTerm } from '@/utils/search'
+import type { SearchFilter } from '@/types/search'
+import CloseButton from "@/components/atoms/CloseButton.vue";
 
 const props = defineProps<{
   isSuggestionsVisible: boolean
   inOverlay?: boolean
   searchInput: string
+  initialFilters?: SearchFilter[]
 }>()
 
 const emit = defineEmits<{
-  (e: 'searchTermClick', kind: string, term: string): void
+  (e: 'searchTermClick', filters: SearchFilter[]): void
   (e: 'focusSearchInput'): void
   (e: 'escape'): void
 }>()
@@ -29,6 +32,9 @@ const filterInputRef = ref<HTMLInputElement | null>(null)
 const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
 const toggleButtonRefs = ref<(HTMLButtonElement | null)[]>([])
 const MAX_TERMS_PER_CATEGORY = 10
+const selectedFilters = ref<SearchFilter[]>([])
+
+selectedFilters.value = props.initialFilters ?? []
 
 const setTermButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
   if (el) {
@@ -242,8 +248,40 @@ watch(filteredSearchTermsByCategory, () => {
   toggleButtonRefs.value = []
 })
 
+const kindLabelByValue: Record<string, string> = Object.fromEntries(
+  SEARCH_CATEGORIES.map((category) => [category.value, category.labelSingular]),
+)
+
+const selectedFilterChips = computed(() =>
+  selectedFilters.value.map((filter) => ({
+    id: `${filter.kind}:${filter.term}`,
+    label: `${kindLabelByValue[filter.kind] ?? filter.kind}: ${filter.term}`,
+  })),
+)
+
+const hasFilter = (kind: string, term: string): boolean => {
+  return selectedFilters.value.some(
+    (filter) =>
+      filter.kind === kind && filter.term.toLowerCase() === term.toLowerCase(),
+  )
+}
+
 const handleSearchTermClick = (kind: string, term: string) => {
-  emit('searchTermClick', kind, term)
+  const normalisedKind = kind.trim()
+  const normalisedTerm = term.trim()
+  if (!normalisedKind || !normalisedTerm || hasFilter(normalisedKind, normalisedTerm)) {
+    return
+  }
+
+  selectedFilters.value = [...selectedFilters.value, { kind: normalisedKind, term: normalisedTerm }]
+  emit('searchTermClick', selectedFilters.value)
+}
+
+const handleRemoveChip = (chipId: string) => {
+  selectedFilters.value = selectedFilters.value.filter(
+    (filter) => `${filter.kind}:${filter.term}` !== chipId,
+  )
+  emit('searchTermClick', selectedFilters.value)
 }
 </script>
 
@@ -263,6 +301,19 @@ const handleSearchTermClick = (kind: string, term: string) => {
           v-model="termsFilter"
           @keydown="handleFilterInputKeyDown"
         />
+      </div>
+      <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-1 flex-wrap items-center gap-2 pl-4">
+        <div
+          v-for="chip in selectedFilterChips"
+          :key="chip.id"
+          class="inline-flex items-center gap-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-2.5 text-xs"
+        >
+          <span class="truncate max-w-48">{{ chip.label }}</span>
+          <CloseButton
+            @click="handleRemoveChip(chip.id)"
+            :aria-label="`Remove ${chip.label}`"
+          />
+        </div>
       </div>
       <div v-if="categoriesError" class="error-box">
         <p class="text-sm">
