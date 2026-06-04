@@ -2,7 +2,6 @@
 import type { ComponentPublicInstance } from 'vue'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import Chip from '@/components/atoms/Chip.vue'
-import CloseButton from '@/components/atoms/CloseButton.vue'
 import SearchEnterHint from '@/components/atoms/SearchEnterHint.vue'
 import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
@@ -278,7 +277,7 @@ const handleSearchTermClick = (kind: string, term: string) => {
   emit('searchTermClick', selectedFilters.value)
 }
 
-const handleRemoveChip = (chipId: string) => {
+const handleRemoveChip = (chipId: string): void => {
   selectedFilters.value = selectedFilters.value.filter(
     (filter) => `${filter.kind}:${filter.term}` !== chipId,
   )
@@ -312,13 +311,10 @@ const handleRemoveChip = (chipId: string) => {
         <Chip
           v-for="chip in selectedFilterChips"
           :key="chip.id"
-        >
-          <span class="truncate max-w-48">{{ chip.label }}</span>
-          <CloseButton
-            @click="handleRemoveChip(chip.id)"
-            :aria-label="`Remove ${chip.label}`"
-          />
-        </Chip>
+          :label="chip.label"
+          :removable="true"
+          :on-remove="() => handleRemoveChip(chip.id)"
+        />
       </div>
       <div v-if="categoriesError" class="error-box">
         <p class="text-sm">
