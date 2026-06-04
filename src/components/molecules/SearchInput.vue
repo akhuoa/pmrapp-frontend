@@ -102,15 +102,17 @@ const isLoading = computed(() => {
 
 const filteredSearchTermsByCategory = computed(() => {
   const searchTermValue = searchInput.value.trim().toLowerCase()
-  if (!searchTermValue) return []
+  const shouldFilterByInput = Boolean(searchTermValue)
 
   return SEARCH_CATEGORIES.map((category) => {
     const categoryData = searchStore.categories.find((cat) => cat.kind === category.value)
     const terms = categoryData?.kindInfo?.terms || []
 
-    const filteredTerms = terms.filter(
-      (term) => isValidTerm(term) && term.toLowerCase().includes(searchTermValue),
-    )
+    const filteredTerms = terms.filter((term) => {
+      if (!isValidTerm(term)) return false
+      if (!shouldFilterByInput) return true
+      return term.toLowerCase().includes(searchTermValue)
+    })
 
     const totalCount = filteredTerms.length
     const isExpanded = Boolean(expandedCategoryKinds.value[category.value])

@@ -63,6 +63,41 @@ describe('SearchInput.vue – category groups', () => {
   })
 
   // TODO: to update this after adding another filter input in advanced search.
+  it('shows all categories with up to ten items when search input is empty', async () => {
+    mockSearchCategories.push(
+      {
+        kind: 'citation_author_family_name',
+        loading: false,
+        kindInfo: {
+          terms: ['Alice', 'Bob', 'Carol', 'Dave', 'Eve', 'Frank', 'Grace', 'Heidi', 'Ivan', 'Judy', 'Ken'],
+        },
+      },
+      {
+        kind: 'cellml_keyword',
+        loading: false,
+        kindInfo: {
+          terms: ['Keyword A', 'Keyword B'],
+        },
+      },
+    )
+
+    const wrapper = mountSearchInput()
+    await flushPromises()
+
+    const input = wrapper.find('input')
+    await input.trigger('advanced-search')
+    await input.trigger('focus')
+    await nextTick()
+
+    const termButtons = wrapper.findAll('button.term-button')
+    expect(termButtons).toHaveLength(12)
+    expect(wrapper.text()).toContain('Alice')
+    expect(wrapper.text()).toContain('Keyword A')
+    expect(wrapper.findAll('button').some((b) => b.text().trim() === '... more')).toBe(true)
+
+    wrapper.unmount()
+  })
+
   it('shows "no results" message when query matches nothing in any category', async () => {
     const wrapper = mountSearchInput()
     await flushPromises()
