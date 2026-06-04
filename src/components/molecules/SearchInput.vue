@@ -224,8 +224,8 @@ const hasResults = computed(() => {
 })
 
 const isSuggestionsVisible = computed(() => {
-  if (!searchInput.value.trim() && !showAdvancedSearch.value) return false
-  return props.inOverlay || showAdvancedSearch.value || isSearchFocused.value
+  if (!showAdvancedSearch.value) return false
+  return props.inOverlay || showAdvancedSearch.value
 })
 
 const formattedSearchInput = computed(() => formatSearchKey(searchInput.value))
@@ -385,12 +385,12 @@ defineExpose({
   <div :class="`relative ${isSearchFocused ? 'z-100' : ''}`">
     <!-- Backdrop overlay (only when not in SearchOverlay). -->
     <div
-      v-if="isSearchFocused && searchInput.trim().length > 0 && !props.inOverlay"
-      class="fixed inset-0 bg-gray-400/75 dark:bg-gray-900/75 z-30"
+      v-if="((isSearchFocused && searchInput.trim().length > 0) || showAdvancedSearch) && !props.inOverlay"
+      class="fixed inset-0 bg-gray-400/75 dark:bg-gray-900/75 z-100"
       @click="handleBackdropClick"
     ></div>
     <div
-      class="flex items-center bg-background justify-between w-full border rounded-lg transition-all relative z-40 overflow-hidden"
+      class="flex items-center bg-background justify-between w-full border rounded-lg transition-all relative z-200 overflow-hidden"
       :class="isSearchFocused ? 'ring-1 ring-primary border-primary' : 'border-gray-200 dark:border-gray-700'"
     >
       <SearchField

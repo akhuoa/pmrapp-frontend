@@ -59,7 +59,7 @@ const handleWorkspacesButtonRef = (el: Element | ComponentPublicInstance | null)
 <template>
   <div
     v-if="isSuggestionsVisible"
-    :class="`top-full left-0 w-full z-40 ${inOverlay ? '' : 'absolute'}`"
+    :class="`top-full left-0 w-full z-200 ${inOverlay ? '' : 'absolute'}`"
     @mousedown.prevent
   >
     <div class="mt-2 box box-small overflow-hidden !shadow-none !p-0">

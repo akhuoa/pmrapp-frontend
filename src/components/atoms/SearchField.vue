@@ -97,7 +97,7 @@ defineExpose({
       <button
         v-if="props.withAdvancedButton"
         type="button"
-        class="flex items-center justify-center p-2 transition-colors cursor-pointer"
+        class="flex items-center justify-center p-2 text-primary cursor-pointer"
         aria-label="Advanced Search"
         @click="handleAdvancedSearchClick"
       >
