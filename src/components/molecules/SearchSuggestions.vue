@@ -291,7 +291,11 @@ const handleRemoveChip = (chipId: string) => {
     :class="`top-full left-0 w-full z-200 ${inOverlay ? '' : 'absolute'}`"
   >
     <div class="mt-2 box box-small overflow-hidden !shadow-none !p-0">
-      <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+      <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between gap-4">
+        <p class="text-gray-500 dark:text-gray-400 text-sm">
+          Click the term(s) to add in your search query.
+          Use the filter to find specific terms.
+        </p>
         <SearchField
           ref="filterInputRef"
           v-model="termsFilter"
@@ -300,7 +304,10 @@ const handleRemoveChip = (chipId: string) => {
           @keydown="handleFilterInputKeyDown"
         />
       </div>
-      <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-1 flex-wrap items-center gap-2 pl-4">
+      <div
+        v-if="selectedFilterChips.length"
+        class="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-1 flex-wrap items-center gap-2 pl-4"
+      >
         <div
           v-for="chip in selectedFilterChips"
           :key="chip.id"
@@ -329,11 +336,6 @@ const handleRemoveChip = (chipId: string) => {
         </p>
       </div>
       <div v-else class="max-h-96 bg-background overflow-y-auto scrollbar-thin">
-        <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-          <p class="text-gray-500 dark:text-gray-400 text-sm">
-            <SearchEnterHint :query="props.searchInput" :suffix="termTypeSuffix" />
-          </p>
-        </div>
         <div class="group/results">
           <div
             v-for="(categoryGroup, groupIndex) in filteredSearchTermsByCategory"
