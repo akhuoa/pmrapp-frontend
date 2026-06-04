@@ -1,21 +1,8 @@
 <script setup lang="ts">
-import {
-  type ComponentPublicInstance,
-  computed,
-  nextTick,
-  onMounted,
-  onUnmounted,
-  ref,
-  watch,
-} from 'vue'
+import type { ComponentPublicInstance } from 'vue'
+import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
 import SearchField from '@/components/atoms/SearchField.vue'
-import TermButton from '@/components/atoms/TermButton.vue'
 import SearchSuggestions from '@/components/molecules/SearchSuggestions.vue'
-import { SEARCH_CATEGORIES } from '@/constants/search'
-import { useSearchStore } from '@/stores/search'
-import type { SortableEntity } from '@/types/common'
-import { formatSearchKey } from '@/utils/format'
-import { filterItemsByQuery, isValidTerm, normaliseSearchText } from '@/utils/search'
 
 const props = defineProps<{
   initialTerm: string
@@ -29,10 +16,6 @@ const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
-const searchStore = useSearchStore()
-
-const MAX_TERMS_PER_CATEGORY = 10
-
 const searchInput = ref<string>(props.initialTerm)
 
 watch(
@@ -41,159 +24,35 @@ watch(
     searchInput.value = newTerm
   },
 )
+
 const searchInputRef = ref<InstanceType<typeof SearchField> | null>(null)
+const suggestionButtonRefs = ref<(HTMLElement | ComponentPublicInstance | null)[]>([])
 const isSearchFocused = ref(false)
 const showAdvancedSearch = ref(false)
-const categoriesError = ref<string | null>(null)
-const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
-const toggleButtonRefs = ref<(HTMLButtonElement | null)[]>([])
-const expandedCategoryKinds = ref<Record<string, boolean>>({})
+const MAX_TERMS_PER_CATEGORY = 10
 
-const setTermButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
+const setSuggestionButtonRef = (
+  el: Element | ComponentPublicInstance | null,
+  index: number,
+) => {
   if (el) {
-    termButtonRefs.value[index] = el as InstanceType<typeof TermButton>
+    suggestionButtonRefs.value[index] = el as HTMLElement | ComponentPublicInstance
   }
 }
 
-const setToggleButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
-  toggleButtonRefs.value[index] = el as HTMLButtonElement | null
-}
-
-// All focusable suggestion buttons in focus order: TermButtons first (rendered
-// per category group), then each category toggle (if shown).
 const allSuggestionButtons = computed<HTMLElement[]>(() => {
-  const groupedButtons: HTMLElement[] = []
-  let termOffset = 0
-
-  filteredSearchTermsByCategory.value.forEach((group, groupIndex) => {
-    const groupTermEls = termButtonRefs.value
-      .slice(termOffset, termOffset + group.terms.length)
-      .map((ref) => ref?.$el ?? ref)
-      .filter(Boolean) as HTMLElement[]
-    groupedButtons.push(...groupTermEls)
-    termOffset += group.terms.length
-
-    const toggleEl = toggleButtonRefs.value[groupIndex]
-    if (group.totalCount > MAX_TERMS_PER_CATEGORY && toggleEl) {
-      groupedButtons.push(toggleEl)
-    }
-  })
-
-  return groupedButtons
-})
-
-onMounted(async () => {
-  const validKinds = SEARCH_CATEGORIES.map((cat) => cat.value)
-
-  try {
-    await searchStore.fetchCategories(validKinds)
-  } catch (err) {
-    categoriesError.value = 'Failed to fetch search categories.'
-    console.error('Failed to fetch search categories:', err)
-  }
-})
-
-const isLoading = computed(() => {
-  return searchStore.isLoading || searchStore.categories.some((cat) => cat.loading)
-})
-
-const filteredSearchTermsByCategory = computed(() => {
-  const searchTermValue = searchInput.value.trim().toLowerCase()
-  const shouldFilterByInput = Boolean(searchTermValue)
-
-  return SEARCH_CATEGORIES.map((category) => {
-    const categoryData = searchStore.categories.find((cat) => cat.kind === category.value)
-    const terms = categoryData?.kindInfo?.terms || []
-
-    const filteredTerms = terms.filter((term) => {
-      if (!isValidTerm(term)) return false
-      if (!shouldFilterByInput) return true
-      return term.toLowerCase().includes(searchTermValue)
+  return suggestionButtonRefs.value
+    .map((ref) => {
+      if (!ref) return undefined
+      return (ref as any).$el ?? (ref as HTMLElement)
     })
-
-    const totalCount = filteredTerms.length
-    const isExpanded = Boolean(expandedCategoryKinds.value[category.value])
-
-    return {
-      kind: category.value,
-      label: category.label,
-      terms: isExpanded ? filteredTerms : filteredTerms.slice(0, MAX_TERMS_PER_CATEGORY),
-      totalCount,
-      isExpanded,
-    }
-  }).filter((group) => group.terms.length > 0)
-})
-
-const handleToggleTerms = (kind: string) => {
-  expandedCategoryKinds.value = {
-    ...expandedCategoryKinds.value,
-    [kind]: !expandedCategoryKinds.value[kind],
-  }
-}
-
-const getGroupTermStartIndex = (groupIndex: number): number => {
-  return filteredSearchTermsByCategory.value
-    .slice(0, groupIndex)
-    .reduce((acc, group) => acc + group.terms.length, 0)
-}
-
-const handleToggleTermsByKeyboard = async (kind: string, groupIndex: number) => {
-  const wasExpanded = Boolean(expandedCategoryKinds.value[kind])
-  handleToggleTerms(kind)
-  await nextTick()
-
-  if (!wasExpanded) {
-    // When expanding from "... more", move focus to the first newly-revealed term.
-    const firstRevealedIndex = getGroupTermStartIndex(groupIndex) + MAX_TERMS_PER_CATEGORY
-    const revealedTerm = termButtonRefs.value[firstRevealedIndex]
-    const revealedTermEl = (revealedTerm?.$el ?? revealedTerm) as HTMLElement | undefined
-    revealedTermEl?.focus()
-    return
-  }
-
-  // When collapsing from "Show less", keep focus on the toggle so next Tab
-  // advances to the next category's first term.
-  const toggleEl = toggleButtonRefs.value[groupIndex]
-  toggleEl?.focus()
-}
-
-const getMatchingCount = <T extends SortableEntity>(items: T[], query: string): number => {
-  const normalisedQuery = normaliseSearchText(query)
-  // Return 0 for empty or punctuation-only input.
-  if (!normalisedQuery.trim()) return 0
-  // Use the raw query for filtering so counts match list page behaviour.
-  return filterItemsByQuery({ query, items }).length
-}
-
-// Build a human-readable label for the types of term results currently shown,
-// e.g. "an author", "a keyword", or "an author or keyword or publication reference".
-const availableTermTypeLabel = computed<string | null>(() => {
-  const kinds = new Set(filteredSearchTermsByCategory.value.map((g) => g.kind))
-  const parts: string[] = []
-  if (kinds.has('citation_author_family_name') || kinds.has('model_author')) parts.push('author')
-  if (kinds.has('cellml_keyword')) parts.push('keyword')
-  if (kinds.has('citation_id')) parts.push('publication reference')
-  if (parts.length === 0) return null
-  const formatPart = (part: string): string => (part === 'author' ? 'an author' : `a ${part}`)
-  if (parts.length === 1) return formatPart(parts[0])
-  const last = parts.pop()
-  return `${parts.map(formatPart).join(' or ')} or ${formatPart(last ?? '')}`
-})
-
-const termTypeSuffix = computed(() =>
-  availableTermTypeLabel.value ? ` or select ${availableTermTypeLabel.value} below` : '',
-)
-
-const hasResults = computed(() => {
-  return filteredSearchTermsByCategory.value.length > 0
+    .filter(Boolean) as HTMLElement[]
 })
 
 const isSuggestionsVisible = computed(() => {
   if (!showAdvancedSearch.value) return false
   return props.inOverlay || showAdvancedSearch.value
 })
-
-const formattedSearchInput = computed(() => formatSearchKey(searchInput.value))
 
 const handleQuerySearch = () => {
   const searchQuery = searchInput.value.trim()
@@ -209,7 +68,6 @@ const handleQuerySearch = () => {
 }
 
 const handleSearchTermClick = (kind: string, term: string) => {
-  // Blur the input to close the dropdown.
   searchInputRef.value?.inputRef?.blur()
   isSearchFocused.value = false
   showAdvancedSearch.value = false
@@ -221,7 +79,6 @@ const toggleAdvancedSearch = () => {
 }
 
 const handleBackdropClick = () => {
-  // Blur the input to close the dropdown.
   searchInputRef.value?.inputRef?.blur()
   isSearchFocused.value = false
 }
@@ -232,7 +89,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
     return
   }
 
-  if (event.key === 'Tab' && hasResults.value) {
+  if (event.key === 'Tab' && isSuggestionsVisible.value) {
     const buttonEls = allSuggestionButtons.value
     if (buttonEls.length === 0) return
 
@@ -244,14 +101,12 @@ const handleKeyDown = (event: KeyboardEvent) => {
 
     if (event.shiftKey) {
       if (activeIndex === 0) {
-        // Shift+Tab on first suggestion button → go back to search input.
         searchInputEl?.focus()
       } else {
         buttonEls[activeIndex - 1]?.focus()
       }
     } else {
       if (activeIndex === buttonEls.length - 1) {
-        // Tab on last suggestion button → cycle back to search input.
         searchInputEl?.focus()
       } else {
         buttonEls[activeIndex + 1]?.focus()
@@ -260,7 +115,6 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 }
 
-// Handle Tab/Shift+Tab key to cycle focus between search input and term buttons.
 const handleSearchInputKeyDown = async (event: KeyboardEvent) => {
   if (event.key === 'Enter') {
     event.preventDefault()
@@ -268,19 +122,17 @@ const handleSearchInputKeyDown = async (event: KeyboardEvent) => {
     return
   }
 
-  if (event.key === 'Tab' && hasResults.value) {
+  if (event.key === 'Tab' && isSuggestionsVisible.value) {
     event.preventDefault()
     await nextTick()
     const buttonEls = allSuggestionButtons.value
     if (event.shiftKey) {
-      // Shift+Tab on search input → go to last suggestion button.
       const lastButton = buttonEls[buttonEls.length - 1]
       if (lastButton) {
         lastButton.focus()
         isSearchFocused.value = true
       }
     } else {
-      // Tab on search input → go to first suggestion button.
       const firstButton = buttonEls[0]
       if (firstButton) {
         firstButton.focus()
@@ -301,14 +153,9 @@ watch(isSearchFocused, (newVal) => {
 watch(
   () => searchInput.value,
   () => {
-    expandedCategoryKinds.value = {}
+    suggestionButtonRefs.value = []
   },
 )
-
-watch(filteredSearchTermsByCategory, () => {
-  termButtonRefs.value = []
-  toggleButtonRefs.value = []
-})
 
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeyDown)
@@ -351,18 +198,9 @@ defineExpose({
     <SearchSuggestions
       :is-suggestions-visible="isSuggestionsVisible"
       :in-overlay="props.inOverlay"
-      :categories-error="categoriesError"
-      :is-loading="isLoading"
-      :has-results="hasResults"
       :search-input="searchInput"
-      :formatted-search-input="formattedSearchInput"
-      :term-type-suffix="termTypeSuffix"
-      :filtered-search-terms-by-category="filteredSearchTermsByCategory"
       :max-terms-per-category="MAX_TERMS_PER_CATEGORY"
-      :set-toggle-button-ref="setToggleButtonRef"
-      :set-term-button-ref="setTermButtonRef"
-      @toggle-terms="handleToggleTerms"
-      @toggle-terms-by-keyboard="handleToggleTermsByKeyboard"
+      :set-suggestion-button-ref="setSuggestionButtonRef"
       @search-term-click="handleSearchTermClick"
     />
   </div>
