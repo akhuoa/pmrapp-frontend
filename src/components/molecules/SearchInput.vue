@@ -13,11 +13,9 @@ import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import SearchSuggestions from '@/components/molecules/SearchSuggestions.vue'
 import { SEARCH_CATEGORIES } from '@/constants/search'
-import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
-import { useWorkspaceStore } from '@/stores/workspace'
 import type { SortableEntity } from '@/types/common'
-import { formatNumber, formatSearchKey } from '@/utils/format'
+import { formatSearchKey } from '@/utils/format'
 import { filterItemsByQuery, isValidTerm, normaliseSearchText } from '@/utils/search'
 
 const props = defineProps<{
@@ -35,8 +33,6 @@ const emit = defineEmits<{
 const router = useRouter()
 const route = useRoute()
 const searchStore = useSearchStore()
-const exposureStore = useExposureStore()
-const workspaceStore = useWorkspaceStore()
 
 const MAX_TERMS_PER_CATEGORY = 10
 
@@ -54,8 +50,6 @@ const showAdvancedSearch = ref(false)
 const categoriesError = ref<string | null>(null)
 const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
 const toggleButtonRefs = ref<(HTMLButtonElement | null)[]>([])
-const exposuresButtonRef = ref<HTMLButtonElement | null>(null)
-const workspacesButtonRef = ref<HTMLButtonElement | null>(null)
 const expandedCategoryKinds = ref<Record<string, boolean>>({})
 
 const setTermButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
@@ -68,17 +62,8 @@ const setToggleButtonRef = (el: Element | ComponentPublicInstance | null, index:
   toggleButtonRefs.value[index] = el as HTMLButtonElement | null
 }
 
-const setExposuresButtonRef = (el: HTMLButtonElement | null) => {
-  exposuresButtonRef.value = el
-}
-
-const setWorkspacesButtonRef = (el: HTMLButtonElement | null) => {
-  workspacesButtonRef.value = el
-}
-
 // All focusable suggestion buttons in focus order: TermButtons first (rendered
-// per category group), then each category toggle (if shown), then the
-// Exposures button, then the Workspaces button.
+// per category group), then each category toggle (if shown).
 const allSuggestionButtons = computed<HTMLElement[]>(() => {
   const groupedButtons: HTMLElement[] = []
   let termOffset = 0
@@ -97,10 +82,7 @@ const allSuggestionButtons = computed<HTMLElement[]>(() => {
     }
   })
 
-  const extras: HTMLElement[] = []
-  if (exposuresButtonRef.value) extras.push(exposuresButtonRef.value)
-  if (workspacesButtonRef.value) extras.push(workspacesButtonRef.value)
-  return [...groupedButtons, ...extras]
+  return groupedButtons
 })
 
 onMounted(async () => {
@@ -112,9 +94,6 @@ onMounted(async () => {
     categoriesError.value = 'Failed to fetch search categories.'
     console.error('Failed to fetch search categories:', err)
   }
-
-  // Fetch exposures and workspaces silently so they are available for filtering.
-  await Promise.all([exposureStore.fetchExposures(), workspaceStore.fetchWorkspaces()])
 })
 
 const isLoading = computed(() => {
@@ -187,17 +166,8 @@ const getMatchingCount = <T extends SortableEntity>(items: T[], query: string): 
   return filterItemsByQuery({ query, items }).length
 }
 
-const exposuresCount = computed(() =>
-  getMatchingCount(exposureStore.exposures, searchInput.value.trim()),
-)
-
-const workspacesCount = computed(() =>
-  getMatchingCount(workspaceStore.workspaces, searchInput.value.trim()),
-)
-
 // Build a human-readable label for the types of term results currently shown,
 // e.g. "an author", "a keyword", or "an author or keyword or publication reference".
-// Returns null when no term groups are present (only exposure/workspace counts are shown).
 const availableTermTypeLabel = computed<string | null>(() => {
   const kinds = new Set(filteredSearchTermsByCategory.value.map((g) => g.kind))
   const parts: string[] = []
@@ -216,11 +186,7 @@ const termTypeSuffix = computed(() =>
 )
 
 const hasResults = computed(() => {
-  return (
-    filteredSearchTermsByCategory.value.length > 0 ||
-    exposuresCount.value > 0 ||
-    workspacesCount.value > 0
-  )
+  return filteredSearchTermsByCategory.value.length > 0
 })
 
 const isSuggestionsVisible = computed(() => {
@@ -262,22 +228,6 @@ const buildListQuery = (): Record<string, string> => {
     query.sort = currentSort
   }
   return query
-}
-
-const handleExposuresClick = () => {
-  handleBackdropClick()
-  if (props.inOverlay) {
-    emit('close')
-  }
-  router.push({ name: 'exposures', query: buildListQuery() })
-}
-
-const handleWorkspacesClick = () => {
-  handleBackdropClick()
-  if (props.inOverlay) {
-    emit('close')
-  }
-  router.push({ name: 'workspaces', query: buildListQuery() })
 }
 
 const handleBackdropClick = () => {
@@ -368,8 +318,6 @@ watch(
 watch(filteredSearchTermsByCategory, () => {
   termButtonRefs.value = []
   toggleButtonRefs.value = []
-  exposuresButtonRef.value = null
-  workspacesButtonRef.value = null
 })
 
 onUnmounted(() => {
@@ -421,17 +369,11 @@ defineExpose({
       :term-type-suffix="termTypeSuffix"
       :filtered-search-terms-by-category="filteredSearchTermsByCategory"
       :max-terms-per-category="MAX_TERMS_PER_CATEGORY"
-      :exposures-count="exposuresCount"
-      :workspaces-count="workspacesCount"
       :set-toggle-button-ref="setToggleButtonRef"
       :set-term-button-ref="setTermButtonRef"
-      :set-exposures-button-ref="setExposuresButtonRef"
-      :set-workspaces-button-ref="setWorkspacesButtonRef"
       @toggle-terms="handleToggleTerms"
       @toggle-terms-by-keyboard="handleToggleTermsByKeyboard"
       @search-term-click="handleSearchTermClick"
-      @exposures-click="handleExposuresClick"
-      @workspaces-click="handleWorkspacesClick"
     />
   </div>
 </template>

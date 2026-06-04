@@ -2,7 +2,6 @@
 import type { ComponentPublicInstance } from 'vue'
 import SearchEnterHint from '@/components/atoms/SearchEnterHint.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
-import { formatNumber } from '@/utils/format'
 
 type CategoryGroup = {
   kind: string
@@ -23,20 +22,14 @@ const props = defineProps<{
   termTypeSuffix: string
   filteredSearchTermsByCategory: CategoryGroup[]
   maxTermsPerCategory: number
-  exposuresCount: number
-  workspacesCount: number
   setToggleButtonRef: (el: Element | ComponentPublicInstance | null, index: number) => void
   setTermButtonRef: (el: Element | ComponentPublicInstance | null, index: number) => void
-  setExposuresButtonRef: (el: HTMLButtonElement | null) => void
-  setWorkspacesButtonRef: (el: HTMLButtonElement | null) => void
 }>()
 
 const emit = defineEmits<{
   (e: 'toggleTerms', kind: string): void
   (e: 'toggleTermsByKeyboard', kind: string, groupIndex: number): void
   (e: 'searchTermClick', kind: string, term: string): void
-  (e: 'exposuresClick'): void
-  (e: 'workspacesClick'): void
 }>()
 
 const getTermIndexInFlattenedList = (groupIndex: number, termIndex: number): number => {
@@ -47,13 +40,6 @@ const getTermIndexInFlattenedList = (groupIndex: number, termIndex: number): num
   return priorTermsCount + termIndex
 }
 
-const handleExposuresButtonRef = (el: Element | ComponentPublicInstance | null) => {
-  props.setExposuresButtonRef(el as HTMLButtonElement | null)
-}
-
-const handleWorkspacesButtonRef = (el: Element | ComponentPublicInstance | null) => {
-  props.setWorkspacesButtonRef(el as HTMLButtonElement | null)
-}
 </script>
 
 <template>
@@ -115,38 +101,6 @@ const handleWorkspacesButtonRef = (el: Element | ComponentPublicInstance | null)
                 @click="emit('searchTermClick', categoryGroup.kind, term)"
               />
             </div>
-          </div>
-          <div
-            v-if="exposuresCount > 0"
-            class="result-group"
-          >
-            <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              Exposures
-            </h4>
-            <button
-              type="button"
-              :ref="handleExposuresButtonRef"
-              class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
-              @click="emit('exposuresClick')"
-            >
-              See {{ formatNumber(exposuresCount) }} matching exposure{{ exposuresCount !== 1 ? 's' : '' }}
-            </button>
-          </div>
-          <div
-            v-if="workspacesCount > 0"
-            class="result-group"
-          >
-            <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              Workspaces
-            </h4>
-            <button
-              type="button"
-              :ref="handleWorkspacesButtonRef"
-              class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
-              @click="emit('workspacesClick')"
-            >
-              See {{ formatNumber(workspacesCount) }} matching workspace{{ workspacesCount !== 1 ? 's' : '' }}
-            </button>
           </div>
         </div>
       </div>
