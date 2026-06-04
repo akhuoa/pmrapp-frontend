@@ -12,6 +12,7 @@ import { useRoute, useRouter } from 'vue-router'
 import SearchEnterHint from '@/components/atoms/SearchEnterHint.vue'
 import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
+import SearchSuggestions from '@/components/molecules/SearchSuggestions.vue'
 import { SEARCH_CATEGORIES } from '@/constants/search'
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
@@ -65,6 +66,14 @@ const setTermButtonRef = (el: Element | ComponentPublicInstance | null, index: n
 
 const setToggleButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
   toggleButtonRefs.value[index] = el as HTMLButtonElement | null
+}
+
+const setExposuresButtonRef = (el: HTMLButtonElement | null) => {
+  exposuresButtonRef.value = el
+}
+
+const setWorkspacesButtonRef = (el: HTMLButtonElement | null) => {
+  workspacesButtonRef.value = el
 }
 
 // All focusable suggestion buttons in focus order: TermButtons first (rendered
@@ -218,6 +227,8 @@ const isSuggestionsVisible = computed(() => {
   if (!searchInput.value.trim()) return false
   return props.inOverlay ? true : isSearchFocused.value
 })
+
+const formattedSearchInput = computed(() => formatSearchKey(searchInput.value))
 
 const handleQuerySearch = () => {
   const searchQuery = searchInput.value.trim()
@@ -390,109 +401,29 @@ defineExpose({
         @keydown="handleSearchInputKeyDown"
       />
     </div>
-    <div
-      v-if="isSuggestionsVisible"
-      :class="`top-full left-0 w-full z-40 ${props.inOverlay ? '' : 'absolute'}`"
-      @mousedown.prevent
-    >
-      <div class="mt-2 box box-small overflow-hidden !shadow-none !p-0">
-        <div v-if="categoriesError" class="error-box">
-          <p class="text-sm">
-            {{ categoriesError }}
-          </p>
-        </div>
-        <div v-else-if="isLoading" class="p-4">
-          <p class="text-gray-500 dark:text-gray-400">Loading...</p>
-        </div>
-        <div v-else-if="!hasResults" class="p-4">
-          <p class="text-gray-500 dark:text-gray-400 text-sm">
-            No authors or keywords found for
-            <span v-html="formatSearchKey(searchInput)"></span>.
-            <SearchEnterHint :query="searchInput" />
-          </p>
-        </div>
-        <div v-else class="max-h-96 bg-background overflow-y-auto scrollbar-thin">
-          <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-            <p class="text-gray-500 dark:text-gray-400 text-sm">
-              <SearchEnterHint :query="searchInput" :suffix="termTypeSuffix" />
-            </p>
-          </div>
-          <div class="group/results">
-            <div
-              v-for="(categoryGroup, groupIndex) in filteredSearchTermsByCategory"
-              :key="categoryGroup.kind"
-              class="result-group"
-            >
-              <div class="mb-3 flex items-start justify-between gap-3">
-                <h4 class="font-semibold text-gray-700 dark:text-gray-300">
-                  {{ categoryGroup.label }}
-                </h4>
-                <button
-                  v-if="categoryGroup.totalCount > MAX_TERMS_PER_CATEGORY"
-                  type="button"
-                  :ref="(el) => setToggleButtonRef(el, groupIndex)"
-                  class="px-3 py-1 text-sm rounded-md transition-colors relative focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-gray-900 cursor-pointer text-primary hover:text-primary-hover bg-transparent"
-                  :aria-expanded="categoryGroup.isExpanded"
-                  @click="handleToggleTerms(categoryGroup.kind)"
-                  @keydown.enter.prevent="handleToggleTermsByKeyboard(categoryGroup.kind, groupIndex)"
-                >
-                  {{ categoryGroup.isExpanded ? 'Show less' : '... more' }}
-                </button>
-              </div>
-              <div class="flex flex-row items-start justify-start flex-wrap gap-2">
-                <TermButton
-                  v-for="(term, termIndex) in categoryGroup.terms"
-                  :key="term"
-                  :ref="(el) => setTermButtonRef(el, filteredSearchTermsByCategory.slice(0, groupIndex).reduce((acc, g) => acc + g.terms.length, 0) + termIndex)"
-                  :term="term"
-                  @click="handleSearchTermClick(categoryGroup.kind, term)"
-                />
-              </div>
-            </div>
-            <div
-              v-if="exposuresCount > 0"
-              class="result-group"
-            >
-              <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                Exposures
-              </h4>
-              <button
-                type="button"
-                ref="exposuresButtonRef"
-                class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
-                @click="handleExposuresClick"
-              >
-                See {{ formatNumber(exposuresCount) }} matching exposure{{ exposuresCount !== 1 ? 's' : '' }}
-              </button>
-            </div>
-            <div
-              v-if="workspacesCount > 0"
-              class="result-group"
-            >
-              <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                Workspaces
-              </h4>
-              <button
-                type="button"
-                ref="workspacesButtonRef"
-                class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
-                @click="handleWorkspacesClick"
-              >
-                See {{ formatNumber(workspacesCount) }} matching workspace{{ workspacesCount !== 1 ? 's' : '' }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <SearchSuggestions
+      :is-suggestions-visible="isSuggestionsVisible"
+      :in-overlay="props.inOverlay"
+      :categories-error="categoriesError"
+      :is-loading="isLoading"
+      :has-results="hasResults"
+      :search-input="searchInput"
+      :formatted-search-input="formattedSearchInput"
+      :term-type-suffix="termTypeSuffix"
+      :filtered-search-terms-by-category="filteredSearchTermsByCategory"
+      :max-terms-per-category="MAX_TERMS_PER_CATEGORY"
+      :exposures-count="exposuresCount"
+      :workspaces-count="workspacesCount"
+      :set-toggle-button-ref="setToggleButtonRef"
+      :set-term-button-ref="setTermButtonRef"
+      :set-exposures-button-ref="setExposuresButtonRef"
+      :set-workspaces-button-ref="setWorkspacesButtonRef"
+      @toggle-terms="handleToggleTerms"
+      @toggle-terms-by-keyboard="handleToggleTermsByKeyboard"
+      @search-term-click="handleSearchTermClick"
+      @exposures-click="handleExposuresClick"
+      @workspaces-click="handleWorkspacesClick"
+    />
   </div>
 </template>
 
-<style scoped>
-@import '@/assets/box.css';
-@import '@/assets/error-box.css';
-
-.result-group {
-  @apply hover:bg-gray-50 dark:hover:bg-gray-900 border-b last:border-0 border-gray-200 dark:border-gray-700 p-4 transition-all group-hover/results:opacity-75 hover:!opacity-100;
-}
-</style>
