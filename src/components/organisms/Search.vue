@@ -168,16 +168,15 @@ const handleRefresh = async () => {
       @querySearch="handleQuerySearch"
     />
     <SortDropdown
-      v-if="hasResults || isLoading"
+      :disabled="!(hasResults || isLoading)"
       :model-value="sortBy"
       :options="SORT_OPTIONS_GROUPED"
       @update:model-value="(value) => (sortBy = value)"
     />
     <ActionButton
-      v-if="hasResults || isLoading"
+      :disabled="!(hasResults || isLoading)"
       variant="secondary"
       size="lg"
-      :disabled="isLoading"
       content-section="Search Results"
       @click="handleRefresh"
     >
