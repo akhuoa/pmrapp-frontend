@@ -9,7 +9,6 @@ import {
   watch,
 } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import SearchEnterHint from '@/components/atoms/SearchEnterHint.vue'
 import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import SearchSuggestions from '@/components/molecules/SearchSuggestions.vue'
