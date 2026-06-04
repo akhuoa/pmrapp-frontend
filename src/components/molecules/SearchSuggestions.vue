@@ -39,7 +39,6 @@ const getTermIndexInFlattenedList = (groupIndex: number, termIndex: number): num
 
   return priorTermsCount + termIndex
 }
-
 </script>
 
 <template>

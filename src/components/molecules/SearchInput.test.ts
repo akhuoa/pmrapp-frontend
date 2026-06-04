@@ -291,7 +291,6 @@ describe('SearchInput.vue – category groups', () => {
 })
 
 describe('SearchInput.vue – getMatchingCount logic', () => {
-
   it('emits querySearch when SearchField emits search', async () => {
     const wrapper = mountSearchInput('Noble', 'model_author')
     await flushPromises()
