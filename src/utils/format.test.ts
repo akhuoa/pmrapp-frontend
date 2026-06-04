@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
-  formatNumber,
   formatDate,
   formatFileCount,
+  formatKindLabel,
+  formatNumber,
   formatSearchKey,
   formatTermKey,
-  formatKindLabel,
 } from './format'
 
 describe('formatNumber', () => {
