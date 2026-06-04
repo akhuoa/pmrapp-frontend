@@ -185,6 +185,7 @@ defineExpose({
         :with-search-button="true"
         :with-advanced-button="true"
         :advanced-search-active="showAdvancedSearch"
+        :filtersCount="selectedFilters.length"
         @focus="focusSearchInput"
         @search="handleQuerySearch"
         @keydown="handleSearchInputKeyDown"

@@ -12,6 +12,7 @@ interface Props {
   withSearchButton?: boolean
   withAdvancedButton?: boolean
   advancedSearchActive?: boolean
+  filtersCount?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -102,7 +103,15 @@ defineExpose({
         aria-label="Advanced Search"
         @click="handleAdvancedSearchClick"
       >
-        <span class="text-sm pr-1">Advanced</span>
+        <span class="text-sm pr-1">
+          Advanced
+          <span
+            v-if="filtersCount"
+            class="ml-1 inline-flex items-center justify-center w-[1.25rem] h-[1.25rem] text-xs leading-none rounded-full text-foreground bg-primary"
+          >
+            {{ filtersCount }}
+          </span>
+        </span>
         <ArrowRightIcon
           class="w-4 h-4"
           :style="{ transform: props.advancedSearchActive ? 'rotate(-90deg)' : 'rotate(90deg)' }"
