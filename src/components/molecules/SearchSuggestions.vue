@@ -8,7 +8,7 @@ import { useSearchStore } from '@/stores/search'
 import { formatSearchKey } from '@/utils/format'
 import { isValidTerm } from '@/utils/search'
 import type { SearchFilter } from '@/types/search'
-import CloseButton from "@/components/atoms/CloseButton.vue";
+import CloseButton from '@/components/atoms/CloseButton.vue'
 
 const props = defineProps<{
   isSuggestionsVisible: boolean
@@ -261,8 +261,7 @@ const selectedFilterChips = computed(() =>
 
 const hasFilter = (kind: string, term: string): boolean => {
   return selectedFilters.value.some(
-    (filter) =>
-      filter.kind === kind && filter.term.toLowerCase() === term.toLowerCase(),
+    (filter) => filter.kind === kind && filter.term.toLowerCase() === term.toLowerCase(),
   )
 }
 

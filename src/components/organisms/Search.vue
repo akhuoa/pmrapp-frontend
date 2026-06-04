@@ -137,7 +137,10 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
   })
 }
 
-const handleQuerySearch = (request: { query?: string; filters?: Array<{ kind: string; term: string }> }) => {
+const handleQuerySearch = (request: {
+  query?: string
+  filters?: Array<{ kind: string; term: string }>
+}) => {
   router.push({
     path: '/search',
     query: buildQuerySearchQuery(request.query ?? '', request.filters ?? [], route.query),

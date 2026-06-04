@@ -4,16 +4,19 @@ import SearchField from '@/components/atoms/SearchField.vue'
 import SearchSuggestions from '@/components/molecules/SearchSuggestions.vue'
 import type { SearchFilter, SearchQueryRequest } from '@/types/search'
 
-const props = withDefaults(defineProps<{
-  initialTerm?: string
-  initialKind?: string
-  initialFilters?: SearchFilter[]
-  inOverlay?: boolean
-}>(), {
-  initialTerm: '',
-  initialKind: '',
-  initialFilters: () => [],
-})
+const props = withDefaults(
+  defineProps<{
+    initialTerm?: string
+    initialKind?: string
+    initialFilters?: SearchFilter[]
+    inOverlay?: boolean
+  }>(),
+  {
+    initialTerm: '',
+    initialKind: '',
+    initialFilters: () => [],
+  },
+)
 
 const emit = defineEmits<{
   (e: 'search', searchKind: string, searchTerm: string): void

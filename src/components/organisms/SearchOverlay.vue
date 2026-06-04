@@ -60,7 +60,10 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
   emit('close')
 }
 
-const handleQuerySearch = (request: { query?: string; filters?: Array<{ kind: string; term: string }> }) => {
+const handleQuerySearch = (request: {
+  query?: string
+  filters?: Array<{ kind: string; term: string }>
+}) => {
   router.push({
     path: '/search',
     query: buildQuerySearchQuery(request.query ?? '', request.filters ?? [], route.query),
@@ -77,7 +80,6 @@ const getInitialTerm = (): string => {
 
   return ''
 }
-
 </script>
 
 <template>
