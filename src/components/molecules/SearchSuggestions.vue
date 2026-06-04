@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import type { ComponentPublicInstance } from 'vue'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import CloseButton from '@/components/atoms/CloseButton.vue'
 import SearchEnterHint from '@/components/atoms/SearchEnterHint.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import { SEARCH_CATEGORIES } from '@/constants/search'
 import { useSearchStore } from '@/stores/search'
+import type { SearchFilter } from '@/types/search'
 import { formatSearchKey } from '@/utils/format'
 import { isValidTerm } from '@/utils/search'
-import type { SearchFilter } from '@/types/search'
-import CloseButton from '@/components/atoms/CloseButton.vue'
 
 const props = defineProps<{
   isSuggestionsVisible: boolean
