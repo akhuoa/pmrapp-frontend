@@ -223,15 +223,6 @@ const toggleAdvancedSearch = () => {
   showAdvancedSearch.value = !showAdvancedSearch.value
 }
 
-const buildListQuery = (): Record<string, string> => {
-  const query: Record<string, string> = { filter: searchInput.value.trim() }
-  const currentSort = route.query.sort
-  if (typeof currentSort === 'string' && currentSort.trim()) {
-    query.sort = currentSort
-  }
-  return query
-}
-
 const handleBackdropClick = () => {
   // Blur the input to close the dropdown.
   searchInputRef.value?.inputRef?.blur()
