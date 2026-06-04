@@ -362,6 +362,7 @@ const handleRemoveChip = (chipId: string): void => {
                 :key="term"
                 :ref="(el) => setTermButtonRef(el, getTermIndexInFlattenedList(groupIndex, termIndex))"
                 :term="term"
+                :active="hasFilter(categoryGroup.kind, term)"
                 @click="handleSearchTermClick(categoryGroup.kind, term)"
                 @keydown.tab.prevent="handleSuggestionButtonKeyDown($event)"
                 @keydown.esc.prevent="handleEscape"
