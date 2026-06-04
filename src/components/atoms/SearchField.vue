@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import ArrowRightIcon from '../icons/ArrowRightIcon.vue'
 import SearchIcon from '../icons/SearchIcon.vue'
 import CloseButton from './CloseButton.vue'
-import ArrowRightIcon from '../icons/ArrowRightIcon.vue'
 
 interface Props {
   modelValue: string
