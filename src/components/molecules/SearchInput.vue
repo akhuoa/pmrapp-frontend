@@ -123,6 +123,7 @@ const toggleAdvancedSearch = () => {
 const handleBackdropClick = () => {
   searchInputRef.value?.inputRef?.blur()
   isSearchFocused.value = false
+  showAdvancedSearch.value = false
 }
 
 const handleKeyDown = (event: KeyboardEvent) => {
