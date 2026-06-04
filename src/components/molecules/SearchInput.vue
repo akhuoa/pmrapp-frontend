@@ -92,12 +92,13 @@ const handleQuerySearch = () => {
 
   searchInputRef.value?.inputRef?.blur()
   isSearchFocused.value = false
+  showAdvancedSearch.value = false
 
   const request: SearchQueryRequest = {
     query: searchQuery || undefined,
     filters: filters.length > 0 ? filters : undefined,
   }
-  console.log('request', request)
+
   emit('querySearch', request)
 }
 
