@@ -136,13 +136,14 @@ const handleToggleTermsByKeyboard = async (kind: string, groupIndex: number) => 
   toggleEl?.focus()
 }
 
-const chipButtons = computed<HTMLElement[]>(() =>
-  chipRefs.value
-    .map((chip) => {
-      const el = (chip?.$el ?? chip) as HTMLElement | undefined
-      return el?.querySelector('button') as HTMLElement | null
-    })
-    .filter(Boolean) as HTMLElement[],
+const chipButtons = computed<HTMLElement[]>(
+  () =>
+    chipRefs.value
+      .map((chip) => {
+        const el = (chip?.$el ?? chip) as HTMLElement | undefined
+        return el?.querySelector('button') as HTMLElement | null
+      })
+      .filter(Boolean) as HTMLElement[],
 )
 
 const allSuggestionButtons = computed<HTMLElement[]>(() => {
