@@ -92,7 +92,7 @@ defineExpose({
       />
       <div
         v-if="modelValue"
-        class="flex items-center hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full cursor-pointer p-1"
+        class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full cursor-pointer p-1"
         :class="props.withSearchButton ? '' : 'absolute right-2'"
       >
         <CloseButton
@@ -103,8 +103,10 @@ defineExpose({
       <button
         v-if="props.withAdvancedButton"
         type="button"
-        class="flex items-center justify-center p-2 text-primary cursor-pointer"
+        class="flex items-center justify-center px-2.5 py-1 mx-2 text-primary hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full cursor-pointer"
+        :class="{ 'bg-gray-100 dark:bg-gray-700': props.advancedSearchActive }"
         aria-label="Advanced Search"
+        :aria-expanded="props.advancedSearchActive"
         @click="handleAdvancedSearchClick"
       >
         <span class="text-sm pr-1">

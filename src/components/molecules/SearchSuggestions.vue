@@ -28,14 +28,20 @@ const termsFilter = ref<string>('')
 const formattedTermsFilter = computed(() => formatSearchKey(termsFilter.value))
 const categoriesError = ref<string | null>(null)
 const expandedCategoryKinds = ref<Record<string, boolean>>({})
-const filterInputRef = ref<HTMLInputElement | null>(null)
+const filterInputRef = ref<InstanceType<typeof SearchField> | null>(null)
 const chipRefs = ref<InstanceType<typeof Chip>[]>([])
 const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
 const toggleButtonRefs = ref<(HTMLButtonElement | null)[]>([])
 const MAX_TERMS_PER_CATEGORY = 10
-const selectedFilters = ref<SearchFilter[]>([])
+const selectedFilters = ref<SearchFilter[]>(props.initialFilters ? [...props.initialFilters] : [])
 
-selectedFilters.value = props.initialFilters ?? []
+watch(
+  () => props.initialFilters,
+  (newFilters) => {
+    selectedFilters.value = newFilters ? [...newFilters] : []
+  },
+  { deep: true },
+)
 
 const setTermButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
   if (el) {
@@ -197,7 +203,7 @@ const handleSuggestionButtonKeyDown = (event: KeyboardEvent) => {
 
   if (event.shiftKey) {
     if (activeIndex === 0) {
-      filterInputRef.value?.focus()
+      filterInputRef.value?.inputRef?.focus()
     } else {
       buttons[activeIndex - 1]?.focus()
     }
@@ -251,10 +257,6 @@ watch(
   () => {
     chipRefs.value = []
   },
-)
-
-const kindLabelByValue: Record<string, string> = Object.fromEntries(
-  SEARCH_CATEGORIES.map((category) => [category.value, category.labelSingular]),
 )
 
 const selectedFilterChips = computed(() =>
@@ -331,7 +333,7 @@ const handleRemoveChip = (chipId: string): void => {
       </div>
       <div v-else-if="!hasResults" class="p-4">
         <p class="text-gray-500 dark:text-gray-400 text-sm">
-          No authors or keywords found for
+          No authors, keywords, or publication references found for
           <span v-html="formattedTermsFilter"></span>.
         </p>
       </div>
