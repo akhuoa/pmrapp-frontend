@@ -129,23 +129,6 @@ const handleToggleTermsByKeyboard = async (kind: string, groupIndex: number) => 
   toggleEl?.focus()
 }
 
-const availableTermTypeLabel = computed<string | null>(() => {
-  const kinds = new Set(filteredSearchTermsByCategory.value.map((g) => g.kind))
-  const parts: string[] = []
-  if (kinds.has('citation_author_family_name') || kinds.has('model_author')) parts.push('author')
-  if (kinds.has('cellml_keyword')) parts.push('keyword')
-  if (kinds.has('citation_id')) parts.push('publication reference')
-  if (parts.length === 0) return null
-  const formatPart = (part: string): string => (part === 'author' ? 'an author' : `a ${part}`)
-  if (parts.length === 1) return formatPart(parts[0])
-  const last = parts.pop()
-  return `${parts.map(formatPart).join(' or ')} or ${formatPart(last ?? '')}`
-})
-
-const termTypeSuffix = computed(() =>
-  availableTermTypeLabel.value ? ` or select ${availableTermTypeLabel.value} below` : '',
-)
-
 const allSuggestionButtons = computed<HTMLElement[]>(() => {
   const buttons: HTMLElement[] = []
   let termOffset = 0
