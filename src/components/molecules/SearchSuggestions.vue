@@ -259,10 +259,6 @@ watch(
   },
 )
 
-const kindLabelByValue: Record<string, string> = Object.fromEntries(
-  SEARCH_CATEGORIES.map((category) => [category.value, category.labelSingular]),
-)
-
 const selectedFilterChips = computed(() =>
   selectedFilters.value.map((filter) => ({
     id: `${filter.kind}:${filter.term}`,
