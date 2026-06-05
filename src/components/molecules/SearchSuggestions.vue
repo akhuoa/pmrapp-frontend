@@ -33,9 +33,15 @@ const chipRefs = ref<InstanceType<typeof Chip>[]>([])
 const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
 const toggleButtonRefs = ref<(HTMLButtonElement | null)[]>([])
 const MAX_TERMS_PER_CATEGORY = 10
-const selectedFilters = ref<SearchFilter[]>([])
+const selectedFilters = ref<SearchFilter[]>(props.initialFilters ? [...props.initialFilters] : [])
 
-selectedFilters.value = props.initialFilters ?? []
+watch(
+  () => props.initialFilters,
+  (newFilters) => {
+    selectedFilters.value = newFilters ? [...newFilters] : []
+  },
+  { deep: true },
+)
 
 const setTermButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
   if (el) {
