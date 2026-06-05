@@ -29,6 +29,7 @@ const formattedTermsFilter = computed(() => formatSearchKey(termsFilter.value))
 const categoriesError = ref<string | null>(null)
 const expandedCategoryKinds = ref<Record<string, boolean>>({})
 const filterInputRef = ref<HTMLInputElement | null>(null)
+const chipRefs = ref<InstanceType<typeof Chip>[]>([])
 const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
 const toggleButtonRefs = ref<(HTMLButtonElement | null)[]>([])
 const MAX_TERMS_PER_CATEGORY = 10
@@ -39,6 +40,12 @@ selectedFilters.value = props.initialFilters ?? []
 const setTermButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
   if (el) {
     termButtonRefs.value[index] = el as InstanceType<typeof TermButton>
+  }
+}
+
+const setChipRef = (el: Element | ComponentPublicInstance | null, index: number) => {
+  if (el) {
+    chipRefs.value[index] = el as InstanceType<typeof Chip>
   }
 }
 
@@ -129,8 +136,17 @@ const handleToggleTermsByKeyboard = async (kind: string, groupIndex: number) => 
   toggleEl?.focus()
 }
 
+const chipButtons = computed<HTMLElement[]>(() =>
+  chipRefs.value
+    .map((chip) => {
+      const el = (chip?.$el ?? chip) as HTMLElement | undefined
+      return el?.querySelector('button') as HTMLElement | null
+    })
+    .filter(Boolean) as HTMLElement[],
+)
+
 const allSuggestionButtons = computed<HTMLElement[]>(() => {
-  const buttons: HTMLElement[] = []
+  const buttons: HTMLElement[] = [...chipButtons.value]
   let termOffset = 0
 
   filteredSearchTermsByCategory.value.forEach((group, groupIndex) => {
@@ -169,7 +185,6 @@ const handleSuggestionButtonKeyDown = (event: KeyboardEvent) => {
   }
 
   if (event.key !== 'Tab') return
-  if (!hasResults.value) return
 
   const buttons = allSuggestionButtons.value
   if (buttons.length === 0) return
@@ -203,7 +218,6 @@ const handleFilterInputKeyDown = async (event: KeyboardEvent) => {
   }
 
   if (event.key !== 'Tab') return
-  if (!hasResults.value) return
 
   if (event.shiftKey) {
     return
@@ -230,6 +244,13 @@ watch(filteredSearchTermsByCategory, () => {
   termButtonRefs.value = []
   toggleButtonRefs.value = []
 })
+
+watch(
+  () => selectedFilters.value,
+  () => {
+    chipRefs.value = []
+  },
+)
 
 const kindLabelByValue: Record<string, string> = Object.fromEntries(
   SEARCH_CATEGORIES.map((category) => [category.value, category.labelSingular]),
@@ -288,10 +309,12 @@ const handleRemoveChip = (chipId: string): void => {
       <div
         v-if="selectedFilterChips.length"
         class="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-1 flex-wrap items-center gap-2 pl-4"
+        @keydown="handleSuggestionButtonKeyDown"
       >
         <Chip
-          v-for="chip in selectedFilterChips"
+          v-for="(chip, chipIndex) in selectedFilterChips"
           :key="chip.id"
+          :ref="(el) => setChipRef(el, chipIndex)"
           :label="chip.label"
           :removable="true"
           :on-remove="() => handleRemoveChip(chip.id)"
