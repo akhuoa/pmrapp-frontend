@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import ConfirmDialog from '@/components/atoms/ConfirmDialog.vue'
 import UserIcon from '@/components/icons/UserIcon.vue'
 import { getAuthService } from '@/services'
