@@ -55,11 +55,12 @@ const mountSearchInput = (initialTerm = '', initialKind = 'citation_author_famil
           template: `<input
               :value="modelValue"
               @input="$emit('update:modelValue', $event.target.value)"
+              @keydown="$emit('keydown', $event)"
               @focus="$emit('focus')"
               @blur="$emit('blur')"
             />`,
-          props: ['modelValue'],
-          emits: ['update:modelValue', 'focus', 'blur', 'search'],
+          props: ['modelValue', 'chips'],
+          emits: ['update:modelValue', 'focus', 'blur', 'search', 'keydown', 'removeChip'],
           expose: ['inputRef'],
         },
         TermButton: {
@@ -526,7 +527,12 @@ describe('SearchInput.vue – getMatchingCount logic', () => {
     wrapper.findComponent({ name: 'SearchField' }).vm.$emit('search')
     await nextTick()
 
-    expect(wrapper.emitted('querySearch')?.[0]).toEqual(['Noble'])
+    expect(wrapper.emitted('querySearch')?.[0]).toEqual([
+      {
+        query: 'Noble',
+        filters: [{ kind: 'model_author', term: 'Noble' }],
+      },
+    ])
 
     wrapper.unmount()
   })
@@ -538,7 +544,12 @@ describe('SearchInput.vue – getMatchingCount logic', () => {
     wrapper.findComponent({ name: 'SearchField' }).vm.$emit('search')
     await nextTick()
 
-    expect(wrapper.emitted('querySearch')?.[0]).toEqual(['Noble'])
+    expect(wrapper.emitted('querySearch')?.[0]).toEqual([
+      {
+        query: 'Noble',
+        filters: [{ kind: 'not_a_real_kind', term: 'Noble' }],
+      },
+    ])
 
     wrapper.unmount()
   })
@@ -551,6 +562,92 @@ describe('SearchInput.vue – getMatchingCount logic', () => {
     await nextTick()
 
     expect(wrapper.emitted('querySearch')).toBeUndefined()
+
+    wrapper.unmount()
+  })
+
+  it('uses selected term as a filter chip and combines it with typed query on Enter', async () => {
+    mockSearchCategories.push({
+      kind: 'citation_author_family_name',
+      loading: false,
+      kindInfo: {
+        terms: ['Noble'],
+      },
+    })
+
+    const wrapper = mountSearchInput('Nob', '')
+    await flushPromises()
+
+    const input = wrapper.find('input')
+    await input.trigger('focus')
+    await nextTick()
+
+    const termButton = wrapper.find('button.term-button')
+    expect(termButton.exists()).toBe(true)
+
+    await termButton.trigger('click')
+    await nextTick()
+
+    await input.setValue('myocyte')
+    await nextTick()
+
+    wrapper.findComponent({ name: 'SearchField' }).vm.$emit('search')
+    await nextTick()
+
+    expect(wrapper.emitted('querySearch')?.[0]).toEqual([
+      {
+        query: 'myocyte',
+        filters: [{ kind: 'citation_author_family_name', term: 'Noble' }],
+      },
+    ])
+
+    wrapper.unmount()
+  })
+
+  it('combines multiple selected chips and free-text query in one search request', async () => {
+    mockSearchCategories.push({
+      kind: 'cellml_keyword',
+      loading: false,
+      kindInfo: {
+        terms: ['cardiac', 'electrophysiology'],
+      },
+    })
+
+    const wrapper = mountSearchInput('car', '')
+    await flushPromises()
+
+    const input = wrapper.find('input')
+    await input.trigger('focus')
+    await nextTick()
+
+    const termButtons = wrapper.findAll('button.term-button')
+    expect(termButtons).toHaveLength(1)
+    await termButtons[0]?.trigger('click')
+    await nextTick()
+
+    await input.setValue('ele')
+    await nextTick()
+
+    const nextButtons = wrapper.findAll('button.term-button')
+    expect(nextButtons).toHaveLength(1)
+    await nextButtons[0]?.trigger('click')
+    await nextTick()
+
+    await input.setValue('voltage clamp')
+    await nextTick()
+
+    wrapper.findComponent({ name: 'SearchField' }).vm.$emit('search')
+    await nextTick()
+
+    expect(wrapper.emitted('querySearch')?.[0]).toEqual([
+      {
+        query: 'voltage clamp',
+        filters: [
+          { kind: 'cellml_keyword', term: 'cardiac' },
+          { kind: 'cellml_keyword', term: 'electrophysiology' },
+        ],
+      },
+    ])
 
     wrapper.unmount()
   })

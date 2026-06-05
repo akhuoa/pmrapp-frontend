@@ -137,10 +137,11 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
   })
 }
 
-const handleQuerySearch = (query: string) => {
-  const searchQuery: Record<string, string> = { query }
-  if (sortBy.value !== DEFAULT_SORT_OPTION) searchQuery.sort = sortBy.value
-  router.push({ path: '/search', query: searchQuery })
+const handleQuerySearch = (request: { query?: string; filters?: Array<{ kind: string; term: string }> }) => {
+  router.push({
+    path: '/search',
+    query: buildQuerySearchQuery(request.query ?? '', request.filters ?? [], route.query),
+  })
 }
 
 const sortedResults = computed(() => sortSearchResults(searchResults.value, sortBy.value))
@@ -157,8 +158,9 @@ const handleRefresh = async () => {
     <SearchInput
       class="flex-1 w-full sm:w-auto"
       ref="searchInputRef"
-      :initial-kind="kind"
-      :initial-term="searchQueryParam || term"
+      :initial-kind="''"
+      :initial-term="searchQueryParam"
+      :initial-filters="queryFilters"
       @search="handleSearch"
       @querySearch="handleQuerySearch"
     />
