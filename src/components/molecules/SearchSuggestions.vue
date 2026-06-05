@@ -333,7 +333,7 @@ const handleRemoveChip = (chipId: string): void => {
       </div>
       <div v-else-if="!hasResults" class="p-4">
         <p class="text-gray-500 dark:text-gray-400 text-sm">
-          No authors or keywords found for
+          No authors, keywords, or publication references found for
           <span v-html="formattedTermsFilter"></span>.
         </p>
       </div>

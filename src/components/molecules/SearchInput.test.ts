@@ -120,7 +120,7 @@ describe('SearchInput.vue – category groups', () => {
     await input.trigger('focus')
     await nextTick()
 
-    expect(wrapper.text()).toContain('No authors or keywords found for')
+    expect(wrapper.text()).toContain('No authors, keywords, or publication references found for')
 
     wrapper.unmount()
   })
