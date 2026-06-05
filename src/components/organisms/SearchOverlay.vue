@@ -5,6 +5,7 @@ import CloseButton from '@/components/atoms/CloseButton.vue'
 import SearchInput from '@/components/molecules/SearchInput.vue'
 import { SEARCH_KIND_NAMES } from '@/constants/search'
 import { buildQuerySearchQuery, buildSearchQuery, parseQueryFiltersFromQuery } from '@/utils/search'
+import Keycap from '../atoms/Keycap.vue'
 
 const props = defineProps<{
   show: boolean
@@ -104,7 +105,8 @@ const getInitialTerm = (): string => {
         <CloseButton @click="emit('close')" />
       </div>
       <div class="my-4 text-sm text-gray-500 dark:text-gray-400">
-        Search by author, keyword, publication reference, or free text.
+        Type a term and press <Keycap>Enter</Keycap> to search the repository,
+        or use the advanced search to filter by category (author, keyword, publication references), or combine both.
       </div>
       <div class="pb-4">
         <SearchInput

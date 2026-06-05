@@ -2,7 +2,6 @@
 import type { ComponentPublicInstance } from 'vue'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import Chip from '@/components/atoms/Chip.vue'
-import SearchEnterHint from '@/components/atoms/SearchEnterHint.vue'
 import SearchField from '@/components/atoms/SearchField.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import { SEARCH_CATEGORIES } from '@/constants/search'
@@ -293,8 +292,7 @@ const handleRemoveChip = (chipId: string): void => {
     <div class="mt-2 box box-small overflow-hidden !shadow-none !p-0">
       <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between gap-4">
         <p class="text-gray-500 dark:text-gray-400 text-sm">
-          Click the term(s) to add in your search query.
-          Use the filter to find specific terms.
+          Click a term to add it to your search, or use the filter to narrow results.
         </p>
         <SearchField
           ref="filterInputRef"
@@ -328,7 +326,6 @@ const handleRemoveChip = (chipId: string): void => {
         <p class="text-gray-500 dark:text-gray-400 text-sm">
           No authors or keywords found for
           <span v-html="formattedTermsFilter"></span>.
-          <SearchEnterHint :query="props.searchInput" />
         </p>
       </div>
       <div v-else class="max-h-96 bg-background overflow-y-auto scrollbar-thin">
