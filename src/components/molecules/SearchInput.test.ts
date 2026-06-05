@@ -2,7 +2,6 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import SearchInput from '@/components/molecules/SearchInput.vue'
-import { exposures, workspaces } from '@/mocks/search'
 
 const mockRouterPush = vi.fn()
 const mockRoute = { query: {} as Record<string, string> }
@@ -22,22 +21,6 @@ vi.mock('@/stores/search', () => ({
     categories: mockSearchCategories,
     isLoading: false,
     fetchCategories: vi.fn().mockResolvedValue(undefined),
-  }),
-}))
-
-vi.mock('@/stores/exposure', () => ({
-  useExposureStore: () => ({
-    exposures,
-    isLoading: false,
-    fetchExposures: vi.fn().mockResolvedValue(undefined),
-  }),
-}))
-
-vi.mock('@/stores/workspace', () => ({
-  useWorkspaceStore: () => ({
-    workspaces,
-    isLoading: false,
-    fetchWorkspaces: vi.fn().mockResolvedValue(undefined),
   }),
 }))
 
@@ -72,190 +55,57 @@ const mountSearchInput = (initialTerm = '', initialKind = 'citation_author_famil
   })
 }
 
-describe('SearchInput.vue – exposures and workspaces groups', () => {
+describe('SearchInput.vue – category groups', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockRoute.query = {}
     mockSearchCategories.splice(0)
   })
 
-  it('shows "See N matching exposures" when query matches exposures', async () => {
+  // TODO: to update this after adding another filter input in advanced search.
+  it('shows all categories with up to ten items when search input is empty', async () => {
+    mockSearchCategories.push(
+      {
+        kind: 'citation_author_family_name',
+        loading: false,
+        kindInfo: {
+          terms: [
+            'Alice',
+            'Bob',
+            'Carol',
+            'Dave',
+            'Eve',
+            'Frank',
+            'Grace',
+            'Heidi',
+            'Ivan',
+            'Judy',
+            'Ken',
+          ],
+        },
+      },
+      {
+        kind: 'cellml_keyword',
+        loading: false,
+        kindInfo: {
+          terms: ['Keyword A', 'Keyword B'],
+        },
+      },
+    )
+
     const wrapper = mountSearchInput()
     await flushPromises()
 
     const input = wrapper.find('input')
-    await input.setValue("O'Hara-Rudy")
+    await input.trigger('advanced-search')
     await input.trigger('focus')
     await nextTick()
 
-    const buttons = wrapper.findAll('button')
-    const exposuresBtn = buttons.find((b) => b.text().includes('matching exposure'))
-    expect(exposuresBtn).toBeDefined()
-    expect(exposuresBtn?.text()).toContain('See 1 matching exposure')
-
-    wrapper.unmount()
-  })
-
-  it('shows "See N matching workspaces" when query matches workspaces', async () => {
-    const wrapper = mountSearchInput()
-    await flushPromises()
-
-    const input = wrapper.find('input')
-    await input.setValue("O'Hara")
-    await input.trigger('focus')
-    await nextTick()
-
-    const buttons = wrapper.findAll('button')
-    const workspacesBtn = buttons.find((b) => b.text().includes('matching workspace'))
-    expect(workspacesBtn).toBeDefined()
-
-    wrapper.unmount()
-  })
-
-  it('does not show exposures group when query does not match any exposure', async () => {
-    const wrapper = mountSearchInput()
-    await flushPromises()
-
-    const input = wrapper.find('input')
-    await input.setValue('unrelated-xyzzy-nope')
-    await input.trigger('focus')
-    await nextTick()
-
-    const buttons = wrapper.findAll('button')
-    const exposuresBtn = buttons.find((b) => b.text().includes('matching exposure'))
-    expect(exposuresBtn).toBeUndefined()
-
-    wrapper.unmount()
-  })
-
-  it('navigates to /exposures with filter query when exposures group is clicked', async () => {
-    const wrapper = mountSearchInput()
-    await flushPromises()
-
-    const input = wrapper.find('input')
-    await input.setValue("O'Hara-Rudy")
-    await input.trigger('focus')
-    await nextTick()
-
-    const buttons = wrapper.findAll('button')
-    const exposuresBtn = buttons.find((b) => b.text().includes('matching exposure'))
-    expect(exposuresBtn).toBeDefined()
-    await exposuresBtn?.trigger('click')
-
-    expect(mockRouterPush).toHaveBeenCalledWith({
-      name: 'exposures',
-      query: { filter: "O'Hara-Rudy" },
-    })
-    expect(wrapper.emitted('close')).toBeTruthy()
-
-    wrapper.unmount()
-  })
-
-  it('navigates to /workspaces with filter query when workspaces group is clicked', async () => {
-    const wrapper = mountSearchInput()
-    await flushPromises()
-
-    const input = wrapper.find('input')
-    await input.setValue("O'Hara")
-    await input.trigger('focus')
-    await nextTick()
-
-    const buttons = wrapper.findAll('button')
-    const workspacesBtn = buttons.find((b) => b.text().includes('matching workspace'))
-    expect(workspacesBtn).toBeDefined()
-    await workspacesBtn?.trigger('click')
-
-    expect(mockRouterPush).toHaveBeenCalledWith({
-      name: 'workspaces',
-      query: { filter: "O'Hara" },
-    })
-    expect(wrapper.emitted('close')).toBeTruthy()
-
-    wrapper.unmount()
-  })
-
-  it('preserves existing sort query when navigating to exposures', async () => {
-    mockRoute.query = { sort: 'id-desc' }
-    const wrapper = mountSearchInput()
-    await flushPromises()
-
-    const input = wrapper.find('input')
-    await input.setValue("O'Hara-Rudy")
-    await input.trigger('focus')
-    await nextTick()
-
-    const buttons = wrapper.findAll('button')
-    const exposuresBtn = buttons.find((b) => b.text().includes('matching exposure'))
-    expect(exposuresBtn).toBeDefined()
-    await exposuresBtn?.trigger('click')
-
-    expect(mockRouterPush).toHaveBeenCalledWith({
-      name: 'exposures',
-      query: { filter: "O'Hara-Rudy", sort: 'id-desc' },
-    })
-
-    wrapper.unmount()
-  })
-
-  it('preserves existing sort query when navigating to workspaces', async () => {
-    mockRoute.query = { sort: 'description-asc' }
-    const wrapper = mountSearchInput()
-    await flushPromises()
-
-    const input = wrapper.find('input')
-    await input.setValue("O'Hara")
-    await input.trigger('focus')
-    await nextTick()
-
-    const buttons = wrapper.findAll('button')
-    const workspacesBtn = buttons.find((b) => b.text().includes('matching workspace'))
-    expect(workspacesBtn).toBeDefined()
-    await workspacesBtn?.trigger('click')
-
-    expect(mockRouterPush).toHaveBeenCalledWith({
-      name: 'workspaces',
-      query: { filter: "O'Hara", sort: 'description-asc' },
-    })
-
-    wrapper.unmount()
-  })
-
-  it('allows keyboard navigation to suggestion buttons with Tab and Shift+Tab', async () => {
-    const wrapper = mountSearchInput()
-    await flushPromises()
-
-    const input = wrapper.find('input')
-    // Use a query that yields both exposures and workspaces suggestions.
-    await input.setValue("O'Hara")
-    await input.trigger('focus')
-    await nextTick()
-
-    const buttons = wrapper.findAll('button')
-    const exposuresBtn = buttons.find((b) => b.text().includes('matching exposure'))
-    const workspacesBtn = buttons.find((b) => b.text().includes('matching workspace'))
-
-    expect(exposuresBtn).toBeDefined()
-    expect(workspacesBtn).toBeDefined()
-    expect(exposuresBtn?.attributes('disabled')).toBeUndefined()
-    expect(workspacesBtn?.attributes('disabled')).toBeUndefined()
-
-    // Simulate forward tabbing from the input.
-    await input.trigger('keydown', { key: 'Tab' })
-    await nextTick()
-    expect(document.activeElement).toBe(exposuresBtn?.element)
-
-    // Simulate reverse tabbing (Shift+Tab) within the dropdown.
-    await input.trigger('keydown', { key: 'Tab', shiftKey: true })
-    await nextTick()
-    expect(document.activeElement).toBe(workspacesBtn?.element)
-
-    await exposuresBtn?.trigger('focus')
-    await nextTick()
-    // Simulate tabbing from the focused exposures suggestion button.
-    await exposuresBtn?.trigger('keydown', { key: 'Tab' })
-    await nextTick()
-    // Focus should move to the next button, workspace.
-    expect(document.activeElement).toBe(workspacesBtn?.element)
+    const termButtons = wrapper.findAll('button.term-button')
+    expect(termButtons).toHaveLength(12)
+    expect(wrapper.text()).toContain('Alice')
+    expect(wrapper.text()).toContain('Keyword A')
+    expect(wrapper.findAll('button').some((b) => b.text().trim() === '... more')).toBe(true)
 
     wrapper.unmount()
   })
@@ -266,6 +116,7 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
 
     const input = wrapper.find('input')
     await input.setValue('unrelated-xyzzy-nope')
+    await input.trigger('advanced-search')
     await input.trigger('focus')
     await nextTick()
 
@@ -300,6 +151,7 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
 
     const input = wrapper.find('input')
     await input.setValue('Noble')
+    await input.trigger('advanced-search')
     await input.trigger('focus')
     await nextTick()
 
@@ -354,6 +206,7 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
 
     const input = wrapper.find('input')
     await input.setValue('Noble')
+    await input.trigger('advanced-search')
     await input.trigger('focus')
     await nextTick()
 
@@ -400,6 +253,7 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
 
     const input = wrapper.find('input')
     await input.setValue('Noble')
+    await input.trigger('advanced-search')
     await input.trigger('focus')
     await nextTick()
 
@@ -451,6 +305,7 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
 
     const input = wrapper.find('input')
     await input.setValue('Alpha')
+    await input.trigger('advanced-search')
     await input.trigger('focus')
     await nextTick()
 
@@ -480,45 +335,9 @@ describe('SearchInput.vue – exposures and workspaces groups', () => {
 
     wrapper.unmount()
   })
-
-  it('uses singular form "exposure" when count is one', async () => {
-    const wrapper = mountSearchInput()
-    await flushPromises()
-
-    // "Noble" matches only one exposure ("Noble, 2003"), check singular vs plural:
-    const input = wrapper.find('input')
-    await input.setValue('Noble')
-    await input.trigger('focus')
-    await nextTick()
-
-    const buttons = wrapper.findAll('button')
-    const exposuresBtn = buttons.find((b) => b.text().includes('matching exposure'))
-    // Only 1 match → "See 1 matching exposure".
-    expect(exposuresBtn?.text()).toContain('See 1 matching exposure')
-
-    wrapper.unmount()
-  })
 })
 
 describe('SearchInput.vue – getMatchingCount logic', () => {
-  it("matches description with normalised punctuation (O'Hara-Rudy)", async () => {
-    const wrapper = mountSearchInput()
-    await flushPromises()
-
-    const input = wrapper.find('input')
-    await input.setValue("O'Hara-Rudy")
-    await input.trigger('focus')
-    await nextTick()
-
-    // "O'Hara-Rudy" normalises to tokens ["o", "hara", "rudy"]
-    // which all match "O'Hara-Rudy-CiPA-v1.0 (2017)".
-    const buttons = wrapper.findAll('button')
-    const exposuresBtn = buttons.find((b) => b.text().includes('matching exposure'))
-    expect(exposuresBtn).toBeDefined()
-
-    wrapper.unmount()
-  })
-
   it('emits querySearch when SearchField emits search', async () => {
     const wrapper = mountSearchInput('Noble', 'model_author')
     await flushPromises()
@@ -526,7 +345,13 @@ describe('SearchInput.vue – getMatchingCount logic', () => {
     wrapper.findComponent({ name: 'SearchField' }).vm.$emit('search')
     await nextTick()
 
-    expect(wrapper.emitted('querySearch')?.[0]).toEqual(['Noble'])
+    // expect(wrapper.emitted('querySearch')?.[0]).toEqual(['Noble'])
+    expect(wrapper.emitted('querySearch')?.[0]).toEqual([
+      {
+        query: 'Noble',
+        filters: [{ kind: 'model_author', term: 'Noble' }],
+      },
+    ])
 
     wrapper.unmount()
   })
@@ -538,7 +363,13 @@ describe('SearchInput.vue – getMatchingCount logic', () => {
     wrapper.findComponent({ name: 'SearchField' }).vm.$emit('search')
     await nextTick()
 
-    expect(wrapper.emitted('querySearch')?.[0]).toEqual(['Noble'])
+    // expect(wrapper.emitted('querySearch')?.[0]).toEqual(['Noble'])
+    expect(wrapper.emitted('querySearch')?.[0]).toEqual([
+      {
+        query: 'Noble',
+        filters: [{ kind: 'not_a_real_kind', term: 'Noble' }],
+      },
+    ])
 
     wrapper.unmount()
   })

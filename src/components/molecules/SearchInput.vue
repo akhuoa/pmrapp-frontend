@@ -1,272 +1,134 @@
 <script setup lang="ts">
-import {
-  type ComponentPublicInstance,
-  computed,
-  nextTick,
-  onMounted,
-  onUnmounted,
-  ref,
-  watch,
-} from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import SearchEnterHint from '@/components/atoms/SearchEnterHint.vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
 import SearchField from '@/components/atoms/SearchField.vue'
-import TermButton from '@/components/atoms/TermButton.vue'
-import { SEARCH_CATEGORIES } from '@/constants/search'
-import { useExposureStore } from '@/stores/exposure'
-import { useSearchStore } from '@/stores/search'
-import { useWorkspaceStore } from '@/stores/workspace'
-import type { SortableEntity } from '@/types/common'
-import { formatNumber, formatSearchKey } from '@/utils/format'
-import { filterItemsByQuery, isValidTerm, normaliseSearchText } from '@/utils/search'
+import SearchSuggestions from '@/components/molecules/SearchSuggestions.vue'
+import type { SearchFilter, SearchQueryRequest } from '@/types/search'
 
-const props = defineProps<{
-  initialTerm: string
-  initialKind: string
-  inOverlay?: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    initialTerm?: string
+    initialKind?: string
+    initialFilters?: SearchFilter[]
+    inOverlay?: boolean
+  }>(),
+  {
+    initialTerm: '',
+    initialKind: '',
+    initialFilters: () => [],
+  },
+)
 
 const emit = defineEmits<{
   (e: 'search', searchKind: string, searchTerm: string): void
-  (e: 'querySearch', query: string): void
+  (e: 'querySearch', request: SearchQueryRequest): void
   (e: 'close'): void
 }>()
 
-const router = useRouter()
-const route = useRoute()
-const searchStore = useSearchStore()
-const exposureStore = useExposureStore()
-const workspaceStore = useWorkspaceStore()
+const searchInput = ref<string>(props.initialTerm ?? '')
+const selectedFilters = ref<SearchFilter[]>([])
 
-const MAX_TERMS_PER_CATEGORY = 10
+const getInitialFilters = (): SearchFilter[] => {
+  if (props.initialFilters.length > 0) {
+    return props.initialFilters
+      .map((filter) => ({
+        kind: filter.kind.trim(),
+        term: filter.term.trim(),
+      }))
+      .filter((filter) => filter.kind && filter.term)
+  }
 
-const searchInput = ref<string>(props.initialTerm)
+  const initialKind = (props.initialKind ?? '').trim()
+  const initialTerm = (props.initialTerm ?? '').trim()
+  if (initialKind && initialTerm) {
+    return [{ kind: initialKind, term: initialTerm }]
+  }
+
+  return []
+}
+
+selectedFilters.value = getInitialFilters()
 
 watch(
   () => props.initialTerm,
   (newTerm) => {
-    searchInput.value = newTerm
+    searchInput.value = newTerm ?? ''
   },
 )
+
+watch(
+  () => props.initialFilters,
+  () => {
+    selectedFilters.value = getInitialFilters()
+  },
+  { deep: true },
+)
+
+watch(
+  () => props.initialKind,
+  () => {
+    if (props.initialFilters.length === 0) {
+      selectedFilters.value = getInitialFilters()
+    }
+  },
+)
+
 const searchInputRef = ref<InstanceType<typeof SearchField> | null>(null)
 const isSearchFocused = ref(false)
-const categoriesError = ref<string | null>(null)
-const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
-const toggleButtonRefs = ref<(HTMLButtonElement | null)[]>([])
-const exposuresButtonRef = ref<HTMLButtonElement | null>(null)
-const workspacesButtonRef = ref<HTMLButtonElement | null>(null)
-const expandedCategoryKinds = ref<Record<string, boolean>>({})
-
-const setTermButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
-  if (el) {
-    termButtonRefs.value[index] = el as InstanceType<typeof TermButton>
-  }
-}
-
-const setToggleButtonRef = (el: Element | ComponentPublicInstance | null, index: number) => {
-  toggleButtonRefs.value[index] = el as HTMLButtonElement | null
-}
-
-// All focusable suggestion buttons in focus order: TermButtons first (rendered
-// per category group), then each category toggle (if shown), then the
-// Exposures button, then the Workspaces button.
-const allSuggestionButtons = computed<HTMLElement[]>(() => {
-  const groupedButtons: HTMLElement[] = []
-  let termOffset = 0
-
-  filteredSearchTermsByCategory.value.forEach((group, groupIndex) => {
-    const groupTermEls = termButtonRefs.value
-      .slice(termOffset, termOffset + group.terms.length)
-      .map((ref) => ref?.$el ?? ref)
-      .filter(Boolean) as HTMLElement[]
-    groupedButtons.push(...groupTermEls)
-    termOffset += group.terms.length
-
-    const toggleEl = toggleButtonRefs.value[groupIndex]
-    if (group.totalCount > MAX_TERMS_PER_CATEGORY && toggleEl) {
-      groupedButtons.push(toggleEl)
-    }
-  })
-
-  const extras: HTMLElement[] = []
-  if (exposuresButtonRef.value) extras.push(exposuresButtonRef.value)
-  if (workspacesButtonRef.value) extras.push(workspacesButtonRef.value)
-  return [...groupedButtons, ...extras]
-})
-
-onMounted(async () => {
-  const validKinds = SEARCH_CATEGORIES.map((cat) => cat.value)
-
-  try {
-    await searchStore.fetchCategories(validKinds)
-  } catch (err) {
-    categoriesError.value = 'Failed to fetch search categories.'
-    console.error('Failed to fetch search categories:', err)
-  }
-
-  // Fetch exposures and workspaces silently so they are available for filtering.
-  await Promise.all([exposureStore.fetchExposures(), workspaceStore.fetchWorkspaces()])
-})
-
-const isLoading = computed(() => {
-  return searchStore.isLoading || searchStore.categories.some((cat) => cat.loading)
-})
-
-const filteredSearchTermsByCategory = computed(() => {
-  const searchTermValue = searchInput.value.trim().toLowerCase()
-  if (!searchTermValue) return []
-
-  return SEARCH_CATEGORIES.map((category) => {
-    const categoryData = searchStore.categories.find((cat) => cat.kind === category.value)
-    const terms = categoryData?.kindInfo?.terms || []
-
-    const filteredTerms = terms.filter(
-      (term) => isValidTerm(term) && term.toLowerCase().includes(searchTermValue),
-    )
-
-    const totalCount = filteredTerms.length
-    const isExpanded = Boolean(expandedCategoryKinds.value[category.value])
-
-    return {
-      kind: category.value,
-      label: category.label,
-      terms: isExpanded ? filteredTerms : filteredTerms.slice(0, MAX_TERMS_PER_CATEGORY),
-      totalCount,
-      isExpanded,
-    }
-  }).filter((group) => group.terms.length > 0)
-})
-
-const handleToggleTerms = (kind: string) => {
-  expandedCategoryKinds.value = {
-    ...expandedCategoryKinds.value,
-    [kind]: !expandedCategoryKinds.value[kind],
-  }
-}
-
-const getGroupTermStartIndex = (groupIndex: number): number => {
-  return filteredSearchTermsByCategory.value
-    .slice(0, groupIndex)
-    .reduce((acc, group) => acc + group.terms.length, 0)
-}
-
-const handleToggleTermsByKeyboard = async (kind: string, groupIndex: number) => {
-  const wasExpanded = Boolean(expandedCategoryKinds.value[kind])
-  handleToggleTerms(kind)
-  await nextTick()
-
-  if (!wasExpanded) {
-    // When expanding from "... more", move focus to the first newly-revealed term.
-    const firstRevealedIndex = getGroupTermStartIndex(groupIndex) + MAX_TERMS_PER_CATEGORY
-    const revealedTerm = termButtonRefs.value[firstRevealedIndex]
-    const revealedTermEl = (revealedTerm?.$el ?? revealedTerm) as HTMLElement | undefined
-    revealedTermEl?.focus()
-    return
-  }
-
-  // When collapsing from "Show less", keep focus on the toggle so next Tab
-  // advances to the next category's first term.
-  const toggleEl = toggleButtonRefs.value[groupIndex]
-  toggleEl?.focus()
-}
-
-const getMatchingCount = <T extends SortableEntity>(items: T[], query: string): number => {
-  const normalisedQuery = normaliseSearchText(query)
-  // Return 0 for empty or punctuation-only input.
-  if (!normalisedQuery.trim()) return 0
-  // Use the raw query for filtering so counts match list page behaviour.
-  return filterItemsByQuery({ query, items }).length
-}
-
-const exposuresCount = computed(() =>
-  getMatchingCount(exposureStore.exposures, searchInput.value.trim()),
-)
-
-const workspacesCount = computed(() =>
-  getMatchingCount(workspaceStore.workspaces, searchInput.value.trim()),
-)
-
-// Build a human-readable label for the types of term results currently shown,
-// e.g. "an author", "a keyword", or "an author or keyword or publication reference".
-// Returns null when no term groups are present (only exposure/workspace counts are shown).
-const availableTermTypeLabel = computed<string | null>(() => {
-  const kinds = new Set(filteredSearchTermsByCategory.value.map((g) => g.kind))
-  const parts: string[] = []
-  if (kinds.has('citation_author_family_name') || kinds.has('model_author')) parts.push('author')
-  if (kinds.has('cellml_keyword')) parts.push('keyword')
-  if (kinds.has('citation_id')) parts.push('publication reference')
-  if (parts.length === 0) return null
-  const formatPart = (part: string): string => (part === 'author' ? 'an author' : `a ${part}`)
-  if (parts.length === 1) return formatPart(parts[0])
-  const last = parts.pop()
-  return `${parts.map(formatPart).join(' or ')} or ${formatPart(last ?? '')}`
-})
-
-const termTypeSuffix = computed(() =>
-  availableTermTypeLabel.value ? ` or select ${availableTermTypeLabel.value} below` : '',
-)
-
-const hasResults = computed(() => {
-  return (
-    filteredSearchTermsByCategory.value.length > 0 ||
-    exposuresCount.value > 0 ||
-    workspacesCount.value > 0
-  )
-})
+const showAdvancedSearch = ref(false)
 
 const isSuggestionsVisible = computed(() => {
-  if (!searchInput.value.trim()) return false
-  return props.inOverlay ? true : isSearchFocused.value
+  if (!showAdvancedSearch.value) return false
+  return props.inOverlay || showAdvancedSearch.value
 })
 
 const handleQuerySearch = () => {
   const searchQuery = searchInput.value.trim()
-  if (!searchQuery) {
+  const filters = selectedFilters.value.map((filter) => ({ ...filter }))
+
+  if (!searchQuery && filters.length === 0) {
     searchInputRef?.value?.inputRef?.focus()
     return
   }
 
   searchInputRef.value?.inputRef?.blur()
   isSearchFocused.value = false
-  emit('querySearch', searchQuery)
+  showAdvancedSearch.value = false
+
+  const request: SearchQueryRequest = {
+    query: searchQuery || undefined,
+    filters: filters.length > 0 ? filters : undefined,
+  }
+
+  emit('querySearch', request)
 }
 
-const handleSearchTermClick = (kind: string, term: string) => {
-  // Blur the input to close the dropdown.
+const handleSearchTermClick = (filters: SearchFilter[]) => {
+  selectedFilters.value = filters
+}
+
+const focusSearchInput = () => {
+  searchInputRef.value?.inputRef?.focus()
+  isSearchFocused.value = true
+
+  if (selectedFilters.value.length) {
+    showAdvancedSearch.value = true
+  }
+}
+
+const handleSuggestionsEscape = () => {
   searchInputRef.value?.inputRef?.blur()
   isSearchFocused.value = false
-  emit('search', kind, term)
+  showAdvancedSearch.value = false
 }
 
-const buildListQuery = (): Record<string, string> => {
-  const query: Record<string, string> = { filter: searchInput.value.trim() }
-  const currentSort = route.query.sort
-  if (typeof currentSort === 'string' && currentSort.trim()) {
-    query.sort = currentSort
-  }
-  return query
-}
-
-const handleExposuresClick = () => {
-  handleBackdropClick()
-  if (props.inOverlay) {
-    emit('close')
-  }
-  router.push({ name: 'exposures', query: buildListQuery() })
-}
-
-const handleWorkspacesClick = () => {
-  handleBackdropClick()
-  if (props.inOverlay) {
-    emit('close')
-  }
-  router.push({ name: 'workspaces', query: buildListQuery() })
+const toggleAdvancedSearch = () => {
+  showAdvancedSearch.value = !showAdvancedSearch.value
 }
 
 const handleBackdropClick = () => {
-  // Blur the input to close the dropdown.
   searchInputRef.value?.inputRef?.blur()
   isSearchFocused.value = false
+  showAdvancedSearch.value = false
 }
 
 const handleKeyDown = (event: KeyboardEvent) => {
@@ -274,62 +136,13 @@ const handleKeyDown = (event: KeyboardEvent) => {
     handleBackdropClick()
     return
   }
-
-  if (event.key === 'Tab' && hasResults.value) {
-    const buttonEls = allSuggestionButtons.value
-    if (buttonEls.length === 0) return
-
-    const activeIndex = buttonEls.indexOf(event.target as HTMLElement)
-    if (activeIndex === -1) return
-
-    const searchInputEl = searchInputRef.value?.inputRef
-    event.preventDefault()
-
-    if (event.shiftKey) {
-      if (activeIndex === 0) {
-        // Shift+Tab on first suggestion button → go back to search input.
-        searchInputEl?.focus()
-      } else {
-        buttonEls[activeIndex - 1]?.focus()
-      }
-    } else {
-      if (activeIndex === buttonEls.length - 1) {
-        // Tab on last suggestion button → cycle back to search input.
-        searchInputEl?.focus()
-      } else {
-        buttonEls[activeIndex + 1]?.focus()
-      }
-    }
-  }
 }
 
-// Handle Tab/Shift+Tab key to cycle focus between search input and term buttons.
 const handleSearchInputKeyDown = async (event: KeyboardEvent) => {
   if (event.key === 'Enter') {
     event.preventDefault()
     handleQuerySearch()
     return
-  }
-
-  if (event.key === 'Tab' && hasResults.value) {
-    event.preventDefault()
-    await nextTick()
-    const buttonEls = allSuggestionButtons.value
-    if (event.shiftKey) {
-      // Shift+Tab on search input → go to last suggestion button.
-      const lastButton = buttonEls[buttonEls.length - 1]
-      if (lastButton) {
-        lastButton.focus()
-        isSearchFocused.value = true
-      }
-    } else {
-      // Tab on search input → go to first suggestion button.
-      const firstButton = buttonEls[0]
-      if (firstButton) {
-        firstButton.focus()
-        isSearchFocused.value = true
-      }
-    }
   }
 }
 
@@ -339,20 +152,6 @@ watch(isSearchFocused, (newVal) => {
   } else {
     document.removeEventListener('keydown', handleKeyDown)
   }
-})
-
-watch(
-  () => searchInput.value,
-  () => {
-    expandedCategoryKinds.value = {}
-  },
-)
-
-watch(filteredSearchTermsByCategory, () => {
-  termButtonRefs.value = []
-  toggleButtonRefs.value = []
-  exposuresButtonRef.value = null
-  workspacesButtonRef.value = null
 })
 
 onUnmounted(() => {
@@ -368,12 +167,12 @@ defineExpose({
   <div :class="`relative ${isSearchFocused ? 'z-100' : ''}`">
     <!-- Backdrop overlay (only when not in SearchOverlay). -->
     <div
-      v-if="isSearchFocused && searchInput.trim().length > 0 && !props.inOverlay"
-      class="fixed inset-0 bg-gray-400/75 dark:bg-gray-900/75 z-30"
+      v-if="((isSearchFocused && searchInput.trim().length > 0) || showAdvancedSearch) && !props.inOverlay"
+      class="fixed inset-0 bg-gray-400/75 dark:bg-gray-900/75 z-100"
       @click="handleBackdropClick"
     ></div>
     <div
-      class="flex items-center bg-background justify-between w-full border rounded-lg transition-all relative z-40 overflow-hidden"
+      class="flex items-center bg-background justify-between w-full border rounded-lg transition-all relative z-200 overflow-hidden"
       :class="isSearchFocused ? 'ring-1 ring-primary border-primary' : 'border-gray-200 dark:border-gray-700'"
     >
       <SearchField
@@ -384,115 +183,25 @@ defineExpose({
         class="flex-1"
         input-class="flex-1 min-w-0 outline-none focus:ring-0 px-4 py-2"
         :with-search-button="true"
-        @focus="isSearchFocused = true"
-        @blur="isSearchFocused = false"
+        :with-advanced-button="true"
+        :advanced-search-active="showAdvancedSearch"
+        :filtersCount="selectedFilters.length"
+        :searchEnabled="selectedFilters.length > 0"
+        @focus="focusSearchInput"
         @search="handleQuerySearch"
         @keydown="handleSearchInputKeyDown"
+        @advanced-search="toggleAdvancedSearch"
       />
     </div>
-    <div
-      v-if="isSuggestionsVisible"
-      :class="`top-full left-0 w-full z-40 ${props.inOverlay ? '' : 'absolute'}`"
-      @mousedown.prevent
-    >
-      <div class="mt-2 box box-small overflow-hidden !shadow-none !p-0">
-        <div v-if="categoriesError" class="error-box">
-          <p class="text-sm">
-            {{ categoriesError }}
-          </p>
-        </div>
-        <div v-else-if="isLoading" class="p-4">
-          <p class="text-gray-500 dark:text-gray-400">Loading...</p>
-        </div>
-        <div v-else-if="!hasResults" class="p-4">
-          <p class="text-gray-500 dark:text-gray-400 text-sm">
-            No authors or keywords found for
-            <span v-html="formatSearchKey(searchInput)"></span>.
-            <SearchEnterHint :query="searchInput" />
-          </p>
-        </div>
-        <div v-else class="max-h-96 bg-background overflow-y-auto scrollbar-thin">
-          <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-            <p class="text-gray-500 dark:text-gray-400 text-sm">
-              <SearchEnterHint :query="searchInput" :suffix="termTypeSuffix" />
-            </p>
-          </div>
-          <div class="group/results">
-            <div
-              v-for="(categoryGroup, groupIndex) in filteredSearchTermsByCategory"
-              :key="categoryGroup.kind"
-              class="result-group"
-            >
-              <div class="mb-3 flex items-start justify-between gap-3">
-                <h4 class="font-semibold text-gray-700 dark:text-gray-300">
-                  {{ categoryGroup.label }}
-                </h4>
-                <button
-                  v-if="categoryGroup.totalCount > MAX_TERMS_PER_CATEGORY"
-                  type="button"
-                  :ref="(el) => setToggleButtonRef(el, groupIndex)"
-                  class="px-3 py-1 text-sm rounded-md transition-colors relative focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-gray-900 cursor-pointer text-primary hover:text-primary-hover bg-transparent"
-                  :aria-expanded="categoryGroup.isExpanded"
-                  @click="handleToggleTerms(categoryGroup.kind)"
-                  @keydown.enter.prevent="handleToggleTermsByKeyboard(categoryGroup.kind, groupIndex)"
-                >
-                  {{ categoryGroup.isExpanded ? 'Show less' : '... more' }}
-                </button>
-              </div>
-              <div class="flex flex-row items-start justify-start flex-wrap gap-2">
-                <TermButton
-                  v-for="(term, termIndex) in categoryGroup.terms"
-                  :key="term"
-                  :ref="(el) => setTermButtonRef(el, filteredSearchTermsByCategory.slice(0, groupIndex).reduce((acc, g) => acc + g.terms.length, 0) + termIndex)"
-                  :term="term"
-                  @click="handleSearchTermClick(categoryGroup.kind, term)"
-                />
-              </div>
-            </div>
-            <div
-              v-if="exposuresCount > 0"
-              class="result-group"
-            >
-              <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                Exposures
-              </h4>
-              <button
-                type="button"
-                ref="exposuresButtonRef"
-                class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
-                @click="handleExposuresClick"
-              >
-                See {{ formatNumber(exposuresCount) }} matching exposure{{ exposuresCount !== 1 ? 's' : '' }}
-              </button>
-            </div>
-            <div
-              v-if="workspacesCount > 0"
-              class="result-group"
-            >
-              <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                Workspaces
-              </h4>
-              <button
-                type="button"
-                ref="workspacesButtonRef"
-                class="cursor-pointer text-primary hover:text-primary-hover transition-colors"
-                @click="handleWorkspacesClick"
-              >
-                See {{ formatNumber(workspacesCount) }} matching workspace{{ workspacesCount !== 1 ? 's' : '' }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <SearchSuggestions
+      :is-suggestions-visible="isSuggestionsVisible"
+      :in-overlay="props.inOverlay"
+      :search-input="searchInput"
+      :initial-filters="selectedFilters"
+      @search-term-click="handleSearchTermClick"
+      @focus-search-input="focusSearchInput"
+      @escape="handleSuggestionsEscape"
+    />
   </div>
 </template>
 
-<style scoped>
-@import '@/assets/box.css';
-@import '@/assets/error-box.css';
-
-.result-group {
-  @apply hover:bg-gray-50 dark:hover:bg-gray-900 border-b last:border-0 border-gray-200 dark:border-gray-700 p-4 transition-all group-hover/results:opacity-75 hover:!opacity-100;
-}
-</style>
