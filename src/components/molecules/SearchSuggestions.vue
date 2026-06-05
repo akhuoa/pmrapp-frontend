@@ -203,7 +203,7 @@ const handleSuggestionButtonKeyDown = (event: KeyboardEvent) => {
 
   if (event.shiftKey) {
     if (activeIndex === 0) {
-      filterInputRef.value?.focus()
+      filterInputRef.value?.inputRef?.focus()
     } else {
       buttons[activeIndex - 1]?.focus()
     }
