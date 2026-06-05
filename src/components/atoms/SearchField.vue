@@ -106,6 +106,7 @@ defineExpose({
         class="flex items-center justify-center px-2.5 py-1 mx-2 text-primary hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full cursor-pointer"
         :class="{ 'bg-gray-100 dark:bg-gray-700': props.advancedSearchActive }"
         aria-label="Advanced Search"
+        :aria-expanded="props.advancedSearchActive"
         @click="handleAdvancedSearchClick"
       >
         <span class="text-sm pr-1">
