@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref, watch } from 'vue'
+import ArrowRightIcon from '@/components/icons/ArrowRightIcon.vue'
 import SearchField from '@/components/atoms/SearchField.vue'
 import SearchSuggestions from '@/components/molecules/SearchSuggestions.vue'
 import type { SearchFilter, SearchQueryRequest } from '@/types/search'
@@ -171,16 +172,14 @@ defineExpose({
       class="fixed inset-0 bg-gray-400/75 dark:bg-gray-900/75 z-100"
       @click="handleBackdropClick"
     ></div>
-    <div
-      class="flex items-center bg-background justify-between w-full border rounded-lg transition-all relative z-200 overflow-hidden"
-      :class="isSearchFocused ? 'ring-1 ring-primary border-primary' : 'border-gray-200 dark:border-gray-700'"
-    >
+    <div class="flex items-center justify-between w-full transition-all relative z-200">
       <SearchField
         ref="searchInputRef"
         v-model="searchInput"
         placeholder="Start typing to search..."
         aria-label="Search term"
-        class="flex-1"
+        class="flex-1 bg-background border rounded-lg relative overflow-hidden"
+        :class="isSearchFocused ? 'ring-1 ring-primary border-primary' : 'border-gray-200 dark:border-gray-700'"
         input-class="flex-1 min-w-0 outline-none focus:ring-0 px-4 py-2"
         :with-search-button="true"
         :with-advanced-button="true"
@@ -192,6 +191,28 @@ defineExpose({
         @keydown="handleSearchInputKeyDown"
         @advanced-search="toggleAdvancedSearch"
       />
+      <button
+        type="button"
+        class="flex items-center justify-center px-2.5 py-1 mx-2 text-primary hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full cursor-pointer"
+        :class="{ 'bg-gray-100 dark:bg-gray-700': showAdvancedSearch }"
+        aria-label="Advanced Search"
+        :aria-expanded="showAdvancedSearch"
+        @click="toggleAdvancedSearch"
+      >
+        <span class="text-sm pr-1">
+          More...
+          <span
+            v-if="selectedFilters.length"
+            class="ml-1 inline-flex items-center justify-center w-[1.25rem] h-[1.25rem] text-xs leading-none rounded-full text-white bg-primary"
+          >
+            {{ selectedFilters.length }}
+          </span>
+        </span>
+        <ArrowRightIcon
+          class="w-4 h-4"
+          :style="{ transform: showAdvancedSearch ? 'rotate(-90deg)' : 'rotate(90deg)' }"
+        />
+      </button>
     </div>
     <SearchSuggestions
       :is-suggestions-visible="isSuggestionsVisible"
