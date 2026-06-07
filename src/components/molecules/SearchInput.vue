@@ -17,18 +17,24 @@ import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { SortableEntity } from '@/types/common'
+import type { SearchFilter, SearchQueryRequest } from '@/types/search'
 import { formatNumber, formatSearchKey } from '@/utils/format'
 import { filterItemsByQuery, isValidTerm, normaliseSearchText } from '@/utils/search'
 
-const props = defineProps<{
-  initialTerm: string
-  initialKind: string
+const props = withDefaults(defineProps<{
+  initialTerm?: string
+  initialKind?: string
+  initialFilters?: SearchFilter[]
   inOverlay?: boolean
-}>()
+}>(), {
+  initialTerm: '',
+  initialKind: '',
+  initialFilters: () => [],
+})
 
 const emit = defineEmits<{
   (e: 'search', searchKind: string, searchTerm: string): void
-  (e: 'querySearch', query: string): void
+  (e: 'querySearch', request: SearchQueryRequest): void
   (e: 'close'): void
 }>()
 
@@ -40,14 +46,54 @@ const workspaceStore = useWorkspaceStore()
 
 const MAX_TERMS_PER_CATEGORY = 10
 
-const searchInput = ref<string>(props.initialTerm)
+const searchInput = ref<string>(props.initialTerm ?? '')
+const selectedFilters = ref<SearchFilter[]>([])
+
+const getInitialFilters = (): SearchFilter[] => {
+  if (props.initialFilters.length > 0) {
+    return props.initialFilters
+      .map((filter) => ({
+        kind: filter.kind.trim(),
+        term: filter.term.trim(),
+      }))
+      .filter((filter) => filter.kind && filter.term)
+  }
+
+  const initialKind = (props.initialKind ?? '').trim()
+  const initialTerm = (props.initialTerm ?? '').trim()
+  if (initialKind && initialTerm) {
+    return [{ kind: initialKind, term: initialTerm }]
+  }
+
+  return []
+}
+
+selectedFilters.value = getInitialFilters()
 
 watch(
   () => props.initialTerm,
   (newTerm) => {
-    searchInput.value = newTerm
+    searchInput.value = newTerm ?? ''
   },
 )
+
+watch(
+  () => props.initialFilters,
+  () => {
+    selectedFilters.value = getInitialFilters()
+  },
+  { deep: true },
+)
+
+watch(
+  () => props.initialKind,
+  () => {
+    if (props.initialFilters.length === 0) {
+      selectedFilters.value = getInitialFilters()
+    }
+  },
+)
+
 const searchInputRef = ref<InstanceType<typeof SearchField> | null>(null)
 const isSearchFocused = ref(false)
 const categoriesError = ref<string | null>(null)
@@ -112,6 +158,24 @@ const isLoading = computed(() => {
   return searchStore.isLoading || searchStore.categories.some((cat) => cat.loading)
 })
 
+const kindLabelByValue: Record<string, string> = Object.fromEntries(
+  SEARCH_CATEGORIES.map((category) => [category.value, category.labelSingular]),
+)
+
+const selectedFilterChips = computed(() =>
+  selectedFilters.value.map((filter) => ({
+    id: `${filter.kind}:${filter.term}`,
+    label: `${kindLabelByValue[filter.kind] ?? filter.kind}: ${filter.term}`,
+  })),
+)
+
+const hasFilter = (kind: string, term: string): boolean => {
+  return selectedFilters.value.some(
+    (filter) =>
+      filter.kind === kind && filter.term.toLowerCase() === term.toLowerCase(),
+  )
+}
+
 const filteredSearchTermsByCategory = computed(() => {
   const searchTermValue = searchInput.value.trim().toLowerCase()
   if (!searchTermValue) return []
@@ -120,9 +184,13 @@ const filteredSearchTermsByCategory = computed(() => {
     const categoryData = searchStore.categories.find((cat) => cat.kind === category.value)
     const terms = categoryData?.kindInfo?.terms || []
 
-    const filteredTerms = terms.filter(
-      (term) => isValidTerm(term) && term.toLowerCase().includes(searchTermValue),
-    )
+    const filteredTerms = terms.filter((term) => {
+      return (
+        isValidTerm(term) &&
+        term.toLowerCase().includes(searchTermValue) &&
+        !hasFilter(category.value, term)
+      )
+    })
 
     const totalCount = filteredTerms.length
     const isExpanded = Boolean(expandedCategoryKinds.value[category.value])
@@ -221,21 +289,45 @@ const isSuggestionsVisible = computed(() => {
 
 const handleQuerySearch = () => {
   const searchQuery = searchInput.value.trim()
-  if (!searchQuery) {
+  const filters = selectedFilters.value.map((filter) => ({ ...filter }))
+
+  if (!searchQuery && filters.length === 0) {
     searchInputRef?.value?.inputRef?.focus()
     return
   }
 
   searchInputRef.value?.inputRef?.blur()
   isSearchFocused.value = false
-  emit('querySearch', searchQuery)
+  const request: SearchQueryRequest = {
+    query: searchQuery || undefined,
+    filters: filters.length > 0 ? filters : undefined,
+  }
+  emit('querySearch', request)
 }
 
 const handleSearchTermClick = (kind: string, term: string) => {
-  // Blur the input to close the dropdown.
-  searchInputRef.value?.inputRef?.blur()
-  isSearchFocused.value = false
-  emit('search', kind, term)
+  const normalisedKind = kind.trim()
+  const normalisedTerm = term.trim()
+  if (!normalisedKind || !normalisedTerm || hasFilter(normalisedKind, normalisedTerm)) {
+    searchInputRef.value?.inputRef?.focus()
+    isSearchFocused.value = true
+    return
+  }
+
+  selectedFilters.value = [...selectedFilters.value, { kind: normalisedKind, term: normalisedTerm }]
+  searchInput.value = ''
+
+  // Keep focus on the input so term selection behaves like a combobox.
+  searchInputRef.value?.inputRef?.focus()
+  isSearchFocused.value = true
+}
+
+const handleRemoveChip = (chipId: string) => {
+  selectedFilters.value = selectedFilters.value.filter(
+    (filter) => `${filter.kind}:${filter.term}` !== chipId,
+  )
+  searchInputRef.value?.inputRef?.focus()
+  isSearchFocused.value = true
 }
 
 const buildListQuery = (): Record<string, string> => {
@@ -305,6 +397,12 @@ const handleKeyDown = (event: KeyboardEvent) => {
 
 // Handle Tab/Shift+Tab key to cycle focus between search input and term buttons.
 const handleSearchInputKeyDown = async (event: KeyboardEvent) => {
+  if (event.key === 'Backspace' && searchInput.value.length === 0 && selectedFilters.value.length > 0) {
+    event.preventDefault()
+    selectedFilters.value = selectedFilters.value.slice(0, -1)
+    return
+  }
+
   if (event.key === 'Enter') {
     event.preventDefault()
     handleQuerySearch()
@@ -379,11 +477,13 @@ defineExpose({
       <SearchField
         ref="searchInputRef"
         v-model="searchInput"
+        :chips="selectedFilterChips"
         placeholder="Start typing to search..."
         aria-label="Search term"
         class="flex-1"
         input-class="flex-1 min-w-0 outline-none focus:ring-0 px-4 py-2"
         :with-search-button="true"
+        @remove-chip="handleRemoveChip"
         @focus="isSearchFocused = true"
         @blur="isSearchFocused = false"
         @search="handleQuerySearch"
