@@ -139,4 +139,34 @@ describe('SearchSuggestions', () => {
     expect(wrapper.emitted('searchTermClick')?.[1]?.[0]).toEqual([])
     expect(wrapper.find('.term-button').attributes('data-active')).toBe('false')
   })
+
+  it('clears all filters when clear all button is clicked', async () => {
+    const wrapper = mount(SearchSuggestions, {
+      props: {
+        isSuggestionsVisible: true,
+        searchInput: '',
+        initialFilters: [
+          { kind: 'model_author', term: 'Alpha term' },
+          { kind: 'cellml_keyword', term: 'Beta term' },
+        ],
+      },
+      global: {
+        stubs: {
+          SearchField: SearchFieldStub,
+          TermButton: TermButtonStub,
+          Chip: ChipStub,
+        },
+      },
+    })
+
+    await nextTick()
+
+    const clearAllButton = wrapper.find('button[aria-label="Clear all filters"]')
+    expect(clearAllButton.exists()).toBe(true)
+
+    await clearAllButton.trigger('click')
+    await nextTick()
+
+    expect(wrapper.emitted('searchTermClick')?.[0]?.[0]).toEqual([])
+  })
 })

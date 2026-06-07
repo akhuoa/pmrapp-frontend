@@ -299,6 +299,11 @@ const handleRemoveChip = (chipId: string): void => {
   )
   emit('searchTermClick', selectedFilters.value)
 }
+
+const handleClearAllFilters = (): void => {
+  selectedFilters.value = []
+  emit('searchTermClick', selectedFilters.value)
+}
 </script>
 
 <template>
@@ -321,17 +326,27 @@ const handleRemoveChip = (chipId: string): void => {
       </div>
       <div
         v-if="selectedFilterChips.length"
-        class="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-1 flex-wrap items-center gap-2 pl-4"
+        class="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-row flex-1 items-start justify-between gap-2"
         @keydown="handleSuggestionButtonKeyDown"
       >
-        <Chip
-          v-for="(chip, chipIndex) in selectedFilterChips"
-          :key="chip.id"
-          :ref="(el) => setChipRef(el, chipIndex)"
-          :label="chip.label"
-          :removable="true"
-          :on-remove="() => handleRemoveChip(chip.id)"
-        />
+        <div class="flex flex-wrap items-center gap-2">
+          <Chip
+            v-for="(chip, chipIndex) in selectedFilterChips"
+            :key="chip.id"
+            :ref="(el) => setChipRef(el, chipIndex)"
+            :label="chip.label"
+            :removable="true"
+            :on-remove="() => handleRemoveChip(chip.id)"
+          />
+        </div>
+        <button
+          type="button"
+          class="text-sm text-primary hover:text-primary-hover cursor-pointer px-3 py-1 rounded-md transition-colors relative focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-gray-900 whitespace-nowrap"
+          @click="handleClearAllFilters"
+          aria-label="Clear all filters"
+        >
+          Clear all
+        </button>
       </div>
       <div v-if="categoriesError" class="error-box">
         <p class="text-sm">
