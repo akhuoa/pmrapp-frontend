@@ -282,7 +282,8 @@ const handleSearchTermClick = (kind: string, term: string) => {
   if (hasFilter(normalisedKind, normalisedTerm)) {
     selectedFilters.value = selectedFilters.value.filter(
       (filter) =>
-        filter.kind !== normalisedKind || filter.term.toLowerCase() !== normalisedTerm.toLowerCase(),
+        filter.kind !== normalisedKind ||
+        filter.term.toLowerCase() !== normalisedTerm.toLowerCase(),
     )
     emit('searchTermClick', selectedFilters.value)
     return
