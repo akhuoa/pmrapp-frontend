@@ -62,7 +62,6 @@ describe('SearchInput.vue – category groups', () => {
     mockSearchCategories.splice(0)
   })
 
-  // TODO: to update this after adding another filter input in advanced search.
   it('shows all categories with up to ten items when search input is empty', async () => {
     mockSearchCategories.push(
       {
@@ -96,9 +95,8 @@ describe('SearchInput.vue – category groups', () => {
     const wrapper = mountSearchInput()
     await flushPromises()
 
-    const input = wrapper.find('input')
-    await input.trigger('advanced-search')
-    await input.trigger('focus')
+    const advancedSearchButton = wrapper.find('button[aria-label="Advanced Search"]')
+    await advancedSearchButton.trigger('click')
     await nextTick()
 
     const termButtons = wrapper.findAll('button.term-button')
@@ -114,10 +112,12 @@ describe('SearchInput.vue – category groups', () => {
     const wrapper = mountSearchInput()
     await flushPromises()
 
-    const input = wrapper.find('input')
+    const advancedSearchButton = wrapper.find('button[aria-label="Advanced Search"]')
+    await advancedSearchButton.trigger('click')
+    await nextTick()
+
+    const input = wrapper.find('input[placeholder="Filter terms..."]')
     await input.setValue('unrelated-xyzzy-nope')
-    await input.trigger('advanced-search')
-    await input.trigger('focus')
     await nextTick()
 
     expect(wrapper.text()).toContain('No authors, keywords, or publication references found for')
@@ -149,10 +149,12 @@ describe('SearchInput.vue – category groups', () => {
     const wrapper = mountSearchInput()
     await flushPromises()
 
-    const input = wrapper.find('input')
+    const advancedSearchButton = wrapper.find('button[aria-label="Advanced Search"]')
+    await advancedSearchButton.trigger('click')
+    await nextTick()
+
+    const input = wrapper.find('input[placeholder="Filter terms..."]')
     await input.setValue('Noble')
-    await input.trigger('advanced-search')
-    await input.trigger('focus')
     await nextTick()
 
     let termButtons = wrapper.findAll('button.term-button')
@@ -204,10 +206,12 @@ describe('SearchInput.vue – category groups', () => {
     const wrapper = mountSearchInput()
     await flushPromises()
 
-    const input = wrapper.find('input')
+    const advancedSearchButton = wrapper.find('button[aria-label="Advanced Search"]')
+    await advancedSearchButton.trigger('click')
+    await nextTick()
+
+    const input = wrapper.find('input[placeholder="Filter terms..."]')
     await input.setValue('Noble')
-    await input.trigger('advanced-search')
-    await input.trigger('focus')
     await nextTick()
 
     const termButtons = wrapper.findAll('button.term-button')
@@ -251,10 +255,12 @@ describe('SearchInput.vue – category groups', () => {
     const wrapper = mountSearchInput()
     await flushPromises()
 
-    const input = wrapper.find('input')
+    const advancedSearchButton = wrapper.find('button[aria-label="Advanced Search"]')
+    await advancedSearchButton.trigger('click')
+    await nextTick()
+
+    const input = wrapper.find('input[placeholder="Filter terms..."]')
     await input.setValue('Noble')
-    await input.trigger('advanced-search')
-    await input.trigger('focus')
     await nextTick()
 
     const moreButton = wrapper.findAll('button').find((b) => b.text().trim() === '... more')
@@ -303,10 +309,12 @@ describe('SearchInput.vue – category groups', () => {
     const wrapper = mountSearchInput()
     await flushPromises()
 
-    const input = wrapper.find('input')
+    const advancedSearchButton = wrapper.find('button[aria-label="Advanced Search"]')
+    await advancedSearchButton.trigger('click')
+    await nextTick()
+
+    const input = wrapper.find('input[placeholder="Filter terms..."]')
     await input.setValue('Alpha')
-    await input.trigger('advanced-search')
-    await input.trigger('focus')
     await nextTick()
 
     let moreButton = wrapper.findAll('button').find((b) => b.text().trim() === '... more')
