@@ -182,14 +182,11 @@ defineExpose({
         :class="isSearchFocused ? 'ring-1 ring-primary border-primary' : 'border-gray-200 dark:border-gray-700'"
         input-class="flex-1 min-w-0 outline-none focus:ring-0 px-4 py-2"
         :with-search-button="true"
-        :with-advanced-button="true"
-        :advanced-search-active="showAdvancedSearch"
         :filtersCount="selectedFilters.length"
         :searchEnabled="selectedFilters.length > 0"
         @focus="focusSearchInput"
         @search="handleQuerySearch"
         @keydown="handleSearchInputKeyDown"
-        @advanced-search="toggleAdvancedSearch"
       />
       <button
         type="button"
