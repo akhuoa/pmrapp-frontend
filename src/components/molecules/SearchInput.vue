@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref, watch } from 'vue'
+import ActionButton from '@/components/atoms/ActionButton.vue'
 import SearchField from '@/components/atoms/SearchField.vue'
 import ArrowRightIcon from '@/components/icons/ArrowRightIcon.vue'
 import SearchSuggestions from '@/components/molecules/SearchSuggestions.vue'
 import type { SearchFilter, SearchQueryRequest } from '@/types/search'
-import ActionButton from '@/components/atoms/ActionButton.vue'
 
 const props = withDefaults(
   defineProps<{
