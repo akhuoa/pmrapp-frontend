@@ -32,6 +32,7 @@ const filterInputRef = ref<InstanceType<typeof SearchField> | null>(null)
 const chipRefs = ref<InstanceType<typeof Chip>[]>([])
 const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
 const toggleButtonRefs = ref<(HTMLButtonElement | null)[]>([])
+const clearAllButtonRef = ref<HTMLButtonElement | null>(null)
 const MAX_TERMS_PER_CATEGORY = 10
 const selectedFilters = ref<SearchFilter[]>(props.initialFilters ? [...props.initialFilters] : [])
 
@@ -155,6 +156,10 @@ const chipButtons = computed<HTMLElement[]>(
 const allSuggestionButtons = computed<HTMLElement[]>(() => {
   const buttons: HTMLElement[] = [...chipButtons.value]
   let termOffset = 0
+
+  if (clearAllButtonRef.value) {
+    buttons.push(clearAllButtonRef.value)
+  }
 
   filteredSearchTermsByCategory.value.forEach((group, groupIndex) => {
     const termEls = termButtonRefs.value
@@ -340,9 +345,12 @@ const handleClearAllFilters = (): void => {
           />
         </div>
         <button
+          ref="clearAllButtonRef"
           type="button"
           class="text-sm text-primary hover:text-primary-hover cursor-pointer px-3 py-1 rounded-md transition-colors relative focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-gray-900 whitespace-nowrap"
           @click="handleClearAllFilters"
+          @keydown.tab.prevent="handleSuggestionButtonKeyDown($event)"
+          @keydown.esc.prevent="handleEscape"
           aria-label="Clear all filters"
         >
           Clear all

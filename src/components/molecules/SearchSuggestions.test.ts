@@ -169,4 +169,33 @@ describe('SearchSuggestions', () => {
 
     expect(wrapper.emitted('searchTermClick')?.[0]?.[0]).toEqual([])
   })
+
+  it('includes clear all button in tab navigation', async () => {
+    const wrapper = mount(SearchSuggestions, {
+      props: {
+        isSuggestionsVisible: true,
+        searchInput: '',
+        initialFilters: [{ kind: 'model_author', term: 'Alpha term' }],
+      },
+      global: {
+        stubs: {
+          SearchField: SearchFieldStub,
+          TermButton: TermButtonStub,
+          Chip: ChipStub,
+        },
+      },
+    })
+
+    await nextTick()
+
+    const clearAllButton = wrapper.find('button[aria-label="Clear all filters"]')
+    expect(clearAllButton.exists()).toBe(true)
+
+    clearAllButton.element.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }),
+    )
+    await nextTick()
+
+    expect(clearAllButton.classes()).toContain('focus-visible:ring-2')
+  })
 })
