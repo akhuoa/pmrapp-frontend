@@ -4,6 +4,7 @@ import SearchField from '@/components/atoms/SearchField.vue'
 import ArrowRightIcon from '@/components/icons/ArrowRightIcon.vue'
 import SearchSuggestions from '@/components/molecules/SearchSuggestions.vue'
 import type { SearchFilter, SearchQueryRequest } from '@/types/search'
+import ActionButton from '@/components/atoms/ActionButton.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -188,19 +189,20 @@ defineExpose({
         @search="handleQuerySearch"
         @keydown="handleSearchInputKeyDown"
       />
-      <button
-        type="button"
-        class="flex items-center justify-center px-2.5 py-1 mx-2 text-primary hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full cursor-pointer"
-        :class="{ 'bg-gray-100 dark:bg-gray-700': showAdvancedSearch }"
+      <ActionButton
+        variant="secondary"
+        size="lg"
+        class="ml-2"
         aria-label="Advanced Search"
         :aria-expanded="showAdvancedSearch"
         @click="toggleAdvancedSearch"
+        content-section="Search input: advanced search toggle button"
       >
-        <span class="text-sm pr-1">
+        <span class="pr-1">
           More...
           <span
             v-if="selectedFilters.length"
-            class="ml-1 inline-flex items-center justify-center w-[1.25rem] h-[1.25rem] text-xs leading-none rounded-full text-white bg-primary"
+            class="absolute top-0 right-0 -mt-[0.625rem] -mr-[0.625rem] inline-flex items-center justify-center w-[1.25rem] h-[1.25rem] text-xs leading-none rounded-full text-white bg-primary"
           >
             {{ selectedFilters.length }}
           </span>
@@ -209,7 +211,7 @@ defineExpose({
           class="w-4 h-4"
           :style="{ transform: showAdvancedSearch ? 'rotate(-90deg)' : 'rotate(90deg)' }"
         />
-      </button>
+      </ActionButton>
     </div>
     <SearchSuggestions
       :is-suggestions-visible="isSuggestionsVisible"
