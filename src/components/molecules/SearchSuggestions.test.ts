@@ -198,4 +198,33 @@ describe('SearchSuggestions', () => {
 
     expect(clearAllButton.classes()).toContain('focus-visible:ring-2')
   })
+
+  it('preserves the filter input when the search input prop changes', async () => {
+    const wrapper = mount(SearchSuggestions, {
+      props: {
+        isSuggestionsVisible: true,
+        searchInput: '',
+      },
+      global: {
+        stubs: {
+          SearchField: SearchFieldStub,
+          TermButton: TermButtonStub,
+          Chip: ChipStub,
+        },
+      },
+    })
+
+    await nextTick()
+
+    const filterInput = wrapper.find('input')
+    await filterInput.setValue('author')
+    await nextTick()
+
+    expect(filterInput.element.value).toBe('author')
+
+    await wrapper.setProps({ searchInput: 'Rodriguez' })
+    await nextTick()
+
+    expect(wrapper.find('input').element.value).toBe('author')
+  })
 })

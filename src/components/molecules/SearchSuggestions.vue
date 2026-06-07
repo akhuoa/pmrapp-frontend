@@ -248,7 +248,6 @@ watch(
   () => props.searchInput,
   () => {
     expandedCategoryKinds.value = {}
-    termsFilter.value = ''
   },
 )
 
