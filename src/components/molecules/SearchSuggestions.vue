@@ -275,7 +275,16 @@ const hasFilter = (kind: string, term: string): boolean => {
 const handleSearchTermClick = (kind: string, term: string) => {
   const normalisedKind = kind.trim()
   const normalisedTerm = term.trim()
-  if (!normalisedKind || !normalisedTerm || hasFilter(normalisedKind, normalisedTerm)) {
+  if (!normalisedKind || !normalisedTerm) {
+    return
+  }
+
+  if (hasFilter(normalisedKind, normalisedTerm)) {
+    selectedFilters.value = selectedFilters.value.filter(
+      (filter) =>
+        filter.kind !== normalisedKind || filter.term.toLowerCase() !== normalisedTerm.toLowerCase(),
+    )
+    emit('searchTermClick', selectedFilters.value)
     return
   }
 
