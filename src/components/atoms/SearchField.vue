@@ -94,7 +94,7 @@ defineExpose({
     <button
       v-if="props.withSearchButton"
       type="button"
-      class="flex items-center justify-center p-3 border-l border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-default disabled:hover:bg-transparent"
+      class="flex items-center justify-center p-3 border-l border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus-visible:ring-2 focus-visible:ring-primary focus:outline-none cursor-pointer disabled:opacity-50 disabled:cursor-default disabled:hover:bg-transparent"
       aria-label="Search"
       :disabled="!searchEnabled"
       @click="handleSearchClick"

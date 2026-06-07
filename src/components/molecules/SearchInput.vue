@@ -192,7 +192,7 @@ defineExpose({
       <ActionButton
         variant="secondary"
         size="lg"
-        class="ml-2"
+        class="ml-2 focus-visible:ring-2 focus-visible:ring-primary focus:outline-none"
         aria-label="Advanced Search"
         :aria-expanded="showAdvancedSearch"
         @click="toggleAdvancedSearch"

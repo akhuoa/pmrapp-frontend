@@ -402,6 +402,7 @@ const handleClearAllFilters = (): void => {
                 :ref="(el) => setTermButtonRef(el, getTermIndexInFlattenedList(groupIndex, termIndex))"
                 :term="term"
                 :active="hasFilter(categoryGroup.kind, term)"
+                class="focus-visible:ring-2 focus-visible:ring-primary focus:outline-none"
                 @click="handleSearchTermClick(categoryGroup.kind, term)"
                 @keydown.tab.prevent="handleSuggestionButtonKeyDown($event)"
                 @keydown.esc.prevent="handleEscape"
