@@ -52,7 +52,7 @@ const formatTerms = (terms: string[]) => {
   return terms
     .map((term, i) => {
       const comma = i < terms.length - 2 ? ', ' : ''
-      const and = i === terms.length - 2 ? ' and ' : ''
+      const and = i === terms.length - 2 ? (terms.length > 2 ? ', and ' : ' and ') : ''
       return `${formatTermKey(term)}${comma}${and}`
     })
     .join('')
@@ -62,7 +62,7 @@ const formatFiltersHtml = computed(() => {
   return groupedFilters.value
     .map((group, i) => {
       const groupSeparator = i < groupedFilters.value.length - 2 ? ', ' : ''
-      const groupAnd = i === groupedFilters.value.length - 2 ? ' and ' : ''
+      const groupAnd = i === groupedFilters.value.length - 2 ? (groupedFilters.value.length > 2 ? ', and ' : ' and ') : ''
       return `${formatGroupLabel(group)}: ${formatTerms(group.terms)}${groupSeparator}${groupAnd}`
     })
     .join('')
