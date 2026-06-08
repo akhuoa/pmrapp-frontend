@@ -318,7 +318,7 @@ const handleClearAllFilters = (): void => {
     <div class="mt-2 box box-small overflow-hidden !shadow-none !p-0">
       <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between gap-4">
         <p class="text-gray-500 dark:text-gray-400 text-sm">
-          Click a term to add it to your search, or use the filter to narrow results.
+          Click a term to add it to your search or use the filter to narrow results.
         </p>
         <SearchField
           ref="filterInputRef"
