@@ -324,6 +324,7 @@ const handleClearAllFilters = (): void => {
           ref="filterInputRef"
           v-model="termsFilter"
           placeholder="Filter terms..."
+          ariaLabel="Filter search terms"
           input-class="input-field input-field-sm flex-1"
           @keydown="handleFilterInputKeyDown"
         />

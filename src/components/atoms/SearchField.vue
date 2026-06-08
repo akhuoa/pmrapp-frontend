@@ -5,20 +5,17 @@ import CloseButton from './CloseButton.vue'
 
 interface Props {
   modelValue: string
-  placeholder?: string
-  ariaLabel?: string
+  placeholder: string
+  ariaLabel: string
   inputClass?: string
   withSearchButton?: boolean
-  filtersCount?: number
   searchEnabled?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  modelValue: '',
   placeholder: 'Search...',
   ariaLabel: 'Search',
-  inputClass: '',
-  withSearchButton: false,
-  searchEnabled: false,
 })
 
 const emit = defineEmits<{

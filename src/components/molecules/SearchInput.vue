@@ -178,7 +178,7 @@ defineExpose({
         ref="searchInputRef"
         v-model="searchInput"
         placeholder="Start typing to search..."
-        aria-label="Search term"
+        ariaLabel="Search term"
         class="flex-1 bg-background border rounded-lg relative overflow-hidden"
         :class="isSearchFocused ? 'ring-1 ring-primary border-primary' : 'border-gray-200 dark:border-gray-700'"
         input-class="flex-1 min-w-0 outline-none focus:ring-0 px-4 py-2"
