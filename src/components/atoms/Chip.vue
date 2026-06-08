@@ -26,7 +26,7 @@ const handleRemoveChip = () => {
   <span class="truncate max-w-48">{{ label }}</span>
   <CloseButton
     v-if="removable"
-    class="w-4 h-4 rounded-full p-0 hover:bg-gray-300 dark:hover:bg-gray-500"
+    class="w-4 h-4 rounded-full p-0 hover:bg-gray-300 dark:hover:bg-gray-500 focus-visible:ring-2 focus-visible:ring-primary focus:outline-none cursor-pointer"
     @click="handleRemoveChip"
     :aria-label="`Remove ${label}`"
   />

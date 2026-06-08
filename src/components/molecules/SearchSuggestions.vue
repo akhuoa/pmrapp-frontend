@@ -32,6 +32,7 @@ const filterInputRef = ref<InstanceType<typeof SearchField> | null>(null)
 const chipRefs = ref<InstanceType<typeof Chip>[]>([])
 const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
 const toggleButtonRefs = ref<(HTMLButtonElement | null)[]>([])
+const clearAllButtonRef = ref<HTMLButtonElement | null>(null)
 const MAX_TERMS_PER_CATEGORY = 10
 const selectedFilters = ref<SearchFilter[]>(props.initialFilters ? [...props.initialFilters] : [])
 
@@ -156,6 +157,10 @@ const allSuggestionButtons = computed<HTMLElement[]>(() => {
   const buttons: HTMLElement[] = [...chipButtons.value]
   let termOffset = 0
 
+  if (clearAllButtonRef.value) {
+    buttons.push(clearAllButtonRef.value)
+  }
+
   filteredSearchTermsByCategory.value.forEach((group, groupIndex) => {
     const termEls = termButtonRefs.value
       .slice(termOffset, termOffset + group.terms.length)
@@ -243,7 +248,6 @@ watch(
   () => props.searchInput,
   () => {
     expandedCategoryKinds.value = {}
-    termsFilter.value = ''
   },
 )
 
@@ -275,7 +279,17 @@ const hasFilter = (kind: string, term: string): boolean => {
 const handleSearchTermClick = (kind: string, term: string) => {
   const normalisedKind = kind.trim()
   const normalisedTerm = term.trim()
-  if (!normalisedKind || !normalisedTerm || hasFilter(normalisedKind, normalisedTerm)) {
+  if (!normalisedKind || !normalisedTerm) {
+    return
+  }
+
+  if (hasFilter(normalisedKind, normalisedTerm)) {
+    selectedFilters.value = selectedFilters.value.filter(
+      (filter) =>
+        filter.kind !== normalisedKind ||
+        filter.term.toLowerCase() !== normalisedTerm.toLowerCase(),
+    )
+    emit('searchTermClick', selectedFilters.value)
     return
   }
 
@@ -289,6 +303,11 @@ const handleRemoveChip = (chipId: string): void => {
   )
   emit('searchTermClick', selectedFilters.value)
 }
+
+const handleClearAllFilters = (): void => {
+  selectedFilters.value = []
+  emit('searchTermClick', selectedFilters.value)
+}
 </script>
 
 <template>
@@ -299,29 +318,43 @@ const handleRemoveChip = (chipId: string): void => {
     <div class="mt-2 box box-small overflow-hidden !shadow-none !p-0">
       <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between gap-4">
         <p class="text-gray-500 dark:text-gray-400 text-sm">
-          Click a term to add it to your search, or use the filter to narrow results.
+          Click a term to add it to your search or use the filter to narrow results.
         </p>
         <SearchField
           ref="filterInputRef"
           v-model="termsFilter"
           placeholder="Filter terms..."
+          ariaLabel="Filter search terms"
           input-class="input-field input-field-sm flex-1"
           @keydown="handleFilterInputKeyDown"
         />
       </div>
       <div
         v-if="selectedFilterChips.length"
-        class="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-1 flex-wrap items-center gap-2 pl-4"
+        class="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-row flex-1 items-start justify-between gap-2"
         @keydown="handleSuggestionButtonKeyDown"
       >
-        <Chip
-          v-for="(chip, chipIndex) in selectedFilterChips"
-          :key="chip.id"
-          :ref="(el) => setChipRef(el, chipIndex)"
-          :label="chip.label"
-          :removable="true"
-          :on-remove="() => handleRemoveChip(chip.id)"
-        />
+        <div class="flex flex-wrap items-center gap-2">
+          <Chip
+            v-for="(chip, chipIndex) in selectedFilterChips"
+            :key="chip.id"
+            :ref="(el) => setChipRef(el, chipIndex)"
+            :label="chip.label"
+            :removable="true"
+            :on-remove="() => handleRemoveChip(chip.id)"
+          />
+        </div>
+        <button
+          ref="clearAllButtonRef"
+          type="button"
+          class="text-sm text-primary hover:text-primary-hover cursor-pointer px-3 py-1 rounded-md transition-colors relative focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-gray-900 whitespace-nowrap"
+          @click="handleClearAllFilters"
+          @keydown.tab.prevent="handleSuggestionButtonKeyDown($event)"
+          @keydown.esc.prevent="handleEscape"
+          aria-label="Clear all filters"
+        >
+          Clear all
+        </button>
       </div>
       <div v-if="categoriesError" class="error-box">
         <p class="text-sm">
@@ -369,6 +402,7 @@ const handleRemoveChip = (chipId: string): void => {
                 :ref="(el) => setTermButtonRef(el, getTermIndexInFlattenedList(groupIndex, termIndex))"
                 :term="term"
                 :active="hasFilter(categoryGroup.kind, term)"
+                class="focus-visible:ring-2 focus-visible:ring-primary focus:outline-none"
                 @click="handleSearchTermClick(categoryGroup.kind, term)"
                 @keydown.tab.prevent="handleSuggestionButtonKeyDown($event)"
                 @keydown.esc.prevent="handleEscape"
