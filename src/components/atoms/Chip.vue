@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import CloseButton from '@/components/atoms/CloseButton.vue'
 
 interface Props {
@@ -19,6 +20,7 @@ const chipClasses = [
   'text-gray-700 dark:text-gray-200',
   'rounded-full',
   'bg-gray-200 hover:bg-gray-200/80 dark:bg-gray-700 dark:hover:bg-gray-700/80',
+  'group/chip',
   'cursor-default',
   transitionClasses,
 ].join(' ')
@@ -29,6 +31,7 @@ const closeButtonClasses = [
   'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600',
   'focus-visible:ring-2 focus-visible:ring-primary focus:outline-none',
   'cursor-pointer',
+  'opacity-50 group-hover/chip:opacity-100',
   transitionClasses,
 ].join(' ')
 
@@ -43,7 +46,9 @@ const handleRemoveChip = () => {
   <div
     :class="[chipClasses, removable ? 'pl-2.5 pr-1' : 'px-2.5']"
   >
-  <span class="truncate max-w-48">{{ label }}</span>
+  <span class="truncate max-w-48 group-hover/chip:opacity-75" :class="[transitionClasses]">
+    {{ label }}
+  </span>
   <CloseButton
     v-if="removable"
     :class="closeButtonClasses"
