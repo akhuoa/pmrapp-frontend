@@ -117,6 +117,11 @@ const focusSearchInput = () => {
   }
 }
 
+const blurSearchInput = () => {
+  searchInputRef.value?.inputRef?.blur()
+  isSearchFocused.value = false
+}
+
 const handleSuggestionsEscape = () => {
   searchInputRef.value?.inputRef?.blur()
   isSearchFocused.value = false
@@ -186,6 +191,7 @@ defineExpose({
         :filtersCount="selectedFilters.length"
         :searchEnabled="selectedFilters.length > 0"
         @focus="focusSearchInput"
+        @blur="blurSearchInput"
         @search="handleQuerySearch"
         @keydown="handleSearchInputKeyDown"
       />
