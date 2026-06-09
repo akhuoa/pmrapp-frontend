@@ -95,7 +95,7 @@ const getInitialTerm = (): string => {
 <template>
   <div
     v-if="show"
-    class="fixed inset-0 bg-gray-800/75 dark:bg-gray-900/75 z-50 flex justify-center items-start pt-20"
+    class="fixed inset-0 bg-gray-800/75 dark:bg-gray-900/75 backdrop-blur-sm z-50 flex justify-center items-start pt-20"
     @mousedown.self="handleBackdropMouseDown"
     @mouseup="handleBackdropMouseUp"
   >

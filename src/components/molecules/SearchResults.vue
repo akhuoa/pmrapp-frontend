@@ -146,6 +146,7 @@ const isIdActive = (ids: string[] | undefined) => {
               :key="keyword"
               :term="keyword"
               :active="kind === 'cellml_keyword' && term === keyword"
+              :class="{'pointer-events-none': kind === 'cellml_keyword' && term === keyword}"
               @click="handleKeywordClick('cellml_keyword', keyword)"
             />
           </div>
