@@ -175,7 +175,7 @@ defineExpose({
     <!-- Backdrop overlay (only when not in SearchOverlay). -->
     <div
       v-if="((isSearchFocused && searchInput.trim().length > 0) || showAdvancedSearch) && !props.inOverlay"
-      class="fixed inset-0 bg-gray-400/75 dark:bg-gray-900/75 z-100"
+      class="fixed inset-0 bg-gray-600/75 dark:bg-gray-900/75 backdrop-blur-sm z-100"
       @click="handleBackdropClick"
     ></div>
     <div class="flex items-center justify-between w-full transition-all relative z-200">
