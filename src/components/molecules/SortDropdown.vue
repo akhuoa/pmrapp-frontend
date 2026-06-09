@@ -10,6 +10,7 @@ import type { SortOptionGroup } from '@/utils/sort'
 interface Props {
   modelValue: SortOption
   options: SortOptionGroup[]
+  disabled?: boolean
 }
 
 const props = defineProps<Props>()
@@ -88,6 +89,7 @@ onUnmounted(() => {
       aria-label="Sort options"
       @click="isOpen = !isOpen"
       content-section="List toolbar: sort dropdown"
+      :disabled="props.disabled"
     >
       <ArrowUpIcon :class="getDirectionArrowClass(currentSort.direction)" />
       <span>{{ currentFieldLabel }}</span>

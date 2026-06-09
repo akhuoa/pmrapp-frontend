@@ -88,7 +88,7 @@ const searchFieldInputClass = computed(() => {
             v-if="category.kindInfo"
             :model-value="categoryFilters.get(category.kind) || ''"
             placeholder="Filter keywords..."
-            aria-label="Filter keywords"
+            ariaLabel="Filter keywords"
             :input-class="searchFieldInputClass"
             @update:model-value="(value) => updateFilter(category.kind, value)"
           />

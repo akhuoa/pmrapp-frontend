@@ -1,24 +1,22 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import SearchIcon from '../icons/SearchIcon.vue'
 import CloseButton from './CloseButton.vue'
 
 interface Props {
   modelValue: string
-  placeholder?: string
-  ariaLabel?: string
+  placeholder: string
+  ariaLabel: string
   inputClass?: string
   withSearchButton?: boolean
+  searchEnabled?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  modelValue: '',
   placeholder: 'Search...',
   ariaLabel: 'Search',
-  inputClass: '',
-  withSearchButton: false,
 })
-
-const inputPaddingClass = props.withSearchButton ? 'pr-[5.5rem]!' : 'pr-[2.5rem]!'
 
 const emit = defineEmits<{
   'update:modelValue': [value: string]
@@ -29,6 +27,18 @@ const emit = defineEmits<{
 }>()
 
 const inputRef = ref<HTMLInputElement | null>(null)
+
+const searchButtonClasses = [
+  'flex items-center justify-center p-3',
+  'border-l border-gray-200 dark:border-gray-700',
+  'bg-gray-200 dark:bg-gray-700',
+  'focus-visible:ring-2 focus-visible:ring-primary focus:outline-none',
+  'disabled:opacity-50 disabled:cursor-default',
+  'transition duration-200 ease-linear',
+  'cursor-pointer',
+].join(' ')
+
+const searchEnabled = computed(() => Boolean(props.modelValue) || props.searchEnabled)
 
 const handleInput = (event: Event) => {
   const target = event.target as HTMLInputElement
@@ -64,34 +74,36 @@ defineExpose({
 
 <template>
   <div class="relative flex items-center" :class="{'overflow-hidden': props.withSearchButton}">
-    <input
-      ref="inputRef"
-      type="text"
-      :value="modelValue"
-      :placeholder="placeholder"
-      :aria-label="ariaLabel"
-      :class="[inputPaddingClass, inputClass]"
-      @input="handleInput"
-      @keyup="handleKeyup"
-      @focus="handleFocus"
-      @blur="handleBlur"
-    />
-    <div
-      v-if="modelValue"
-      class="absolute flex items-center hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full cursor-pointer p-1"
-      :class="props.withSearchButton ? 'right-12' : 'right-2'"
-    >
-      <CloseButton
-        @click="handleClear"
-        aria-label="Clear search"
+    <div class="relative flex items-center w-full">
+      <input
+        ref="inputRef"
+        type="text"
+        :value="modelValue"
+        :placeholder="placeholder"
+        :aria-label="ariaLabel"
+        :class="inputClass"
+        @input="handleInput"
+        @keyup="handleKeyup"
+        @focus="handleFocus"
+        @blur="handleBlur"
       />
+      <div
+        v-if="modelValue"
+        class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full cursor-pointer p-1"
+        :class="props.withSearchButton ? 'mr-1' : 'absolute right-2'"
+      >
+        <CloseButton
+          @click="handleClear"
+          aria-label="Clear search"
+        />
+      </div>
     </div>
     <button
       v-if="props.withSearchButton"
       type="button"
-      class="absolute inset-y-0 right-0 flex items-center justify-center px-3 border-l border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-default disabled:hover:bg-transparent"
+      :class="searchButtonClasses"
       aria-label="Search"
-      :disabled="!modelValue"
+      :disabled="!searchEnabled"
       @click="handleSearchClick"
     >
       <SearchIcon class="w-4 h-4" />

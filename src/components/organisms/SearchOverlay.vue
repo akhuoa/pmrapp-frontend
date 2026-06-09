@@ -2,10 +2,10 @@
 import { nextTick, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import CloseButton from '@/components/atoms/CloseButton.vue'
-import Keycap from '@/components/atoms/Keycap.vue'
 import SearchInput from '@/components/molecules/SearchInput.vue'
 import { SEARCH_KIND_NAMES } from '@/constants/search'
 import { buildQuerySearchQuery, buildSearchQuery, parseQueryFiltersFromQuery } from '@/utils/search'
+import Keycap from '../atoms/Keycap.vue'
 
 const props = defineProps<{
   show: boolean
@@ -52,6 +52,15 @@ watch(
   },
 )
 
+watch(
+  () => route.fullPath,
+  () => {
+    if (props.show) {
+      emit('close')
+    }
+  },
+)
+
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeyDown)
 })
@@ -61,39 +70,32 @@ const handleSearch = (searchKind: string, searchTerm: string) => {
   emit('close')
 }
 
-const handleQuerySearch = (query: string) => {
-  router.push({ path: '/search', query: buildQuerySearchQuery(query, [], route.query) })
+const handleQuerySearch = (request: {
+  query?: string
+  filters?: Array<{ kind: string; term: string }>
+}) => {
+  router.push({
+    path: '/search',
+    query: buildQuerySearchQuery(request.query ?? '', request.filters ?? [], route.query),
+  })
   emit('close')
 }
 
 const getInitialTerm = (): string => {
-  const filterQuery = route.query.filter
   const queryParam = route.query.query
-
-  if (typeof filterQuery === 'string') {
-    return filterQuery
-  }
 
   if (typeof queryParam === 'string') {
     return queryParam
   }
 
-  const firstFilter = parseQueryFiltersFromQuery(route.query, SEARCH_KIND_NAMES)[0]
-  if (firstFilter) return firstFilter.term
-
   return ''
-}
-
-const getInitialKind = (): string => {
-  const firstFilter = parseQueryFiltersFromQuery(route.query, SEARCH_KIND_NAMES)[0]
-  return firstFilter?.kind ?? ''
 }
 </script>
 
 <template>
   <div
     v-if="show"
-    class="fixed inset-0 bg-gray-800/75 dark:bg-gray-900/75 z-50 flex justify-center items-start pt-20"
+    class="fixed inset-0 bg-gray-800/75 dark:bg-gray-900/75 backdrop-blur-sm z-50 flex justify-center items-start pt-20"
     @mousedown.self="handleBackdropMouseDown"
     @mouseup="handleBackdropMouseUp"
   >
@@ -103,14 +105,16 @@ const getInitialKind = (): string => {
         <CloseButton @click="emit('close')" />
       </div>
       <div class="my-4 text-sm text-gray-500 dark:text-gray-400">
-        Search by author, keyword, publication reference, or free text.
+        Type a term and press <Keycap>Enter</Keycap> to search the repository,
+        or use the more options to filter by category (author, keyword, publication references), or combine both.
       </div>
       <div class="pb-4">
         <SearchInput
           ref="searchInputRef"
           :inOverlay="true"
-          :initial-kind="getInitialKind()"
+          :initial-kind="''"
           :initial-term="getInitialTerm()"
+          :initial-filters="parseQueryFiltersFromQuery(route.query, SEARCH_KIND_NAMES)"
           @search="handleSearch"
           @querySearch="handleQuerySearch"
           @close="emit('close')"
