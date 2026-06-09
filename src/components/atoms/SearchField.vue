@@ -28,6 +28,16 @@ const emit = defineEmits<{
 
 const inputRef = ref<HTMLInputElement | null>(null)
 
+const searchButtonClasses = [
+  'flex items-center justify-center p-3',
+  'border-l border-gray-200 dark:border-gray-700',
+  'text-white bg-gray-600 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600',
+  'focus-visible:ring-2 focus-visible:ring-primary focus:outline-none',
+  'disabled:opacity-50 disabled:cursor-default',
+  'transition duration-200 ease-linear',
+  'cursor-pointer',
+].join(' ')
+
 const searchEnabled = computed(() => Boolean(props.modelValue) || props.searchEnabled)
 
 const handleInput = (event: Event) => {
@@ -80,7 +90,7 @@ defineExpose({
       <div
         v-if="modelValue"
         class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full cursor-pointer p-1"
-        :class="props.withSearchButton ? '' : 'absolute right-2'"
+        :class="props.withSearchButton ? 'mr-1' : 'absolute right-2'"
       >
         <CloseButton
           @click="handleClear"
@@ -91,7 +101,7 @@ defineExpose({
     <button
       v-if="props.withSearchButton"
       type="button"
-      class="flex items-center justify-center p-3 border-l border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus-visible:ring-2 focus-visible:ring-primary focus:outline-none cursor-pointer disabled:opacity-50 disabled:cursor-default disabled:hover:bg-transparent"
+      :class="searchButtonClasses"
       aria-label="Search"
       :disabled="!searchEnabled"
       @click="handleSearchClick"
