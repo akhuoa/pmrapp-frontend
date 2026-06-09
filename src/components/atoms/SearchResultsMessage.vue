@@ -87,6 +87,7 @@ const messageNoResults = computed(() => {
     message += formatFiltersHtml.value
   }
 
+  message += '.'
   return message
 })
 
@@ -104,6 +105,7 @@ const messageWithResults = computed(() => {
     message += formatFiltersHtml.value
   }
 
+  message += '.'
   return message
 })
 </script>
