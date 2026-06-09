@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import ConfirmDialog from '@/components/atoms/ConfirmDialog.vue'
 import UserIcon from '@/components/icons/UserIcon.vue'
 import { getAuthService } from '@/services'
@@ -10,6 +10,7 @@ import { useGlobalStateStore } from '@/stores/globalState'
 const authStore = useAuthStore()
 const globalStateStore = useGlobalStateStore()
 const router = useRouter()
+const route = useRoute()
 const authService = getAuthService()
 
 const isOpen = ref(false)
@@ -62,6 +63,15 @@ const handleClickOutside = (event: MouseEvent) => {
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
 })
+
+watch(
+  () => route.fullPath,
+  () => {
+    if (isOpen.value) {
+      closeDropdown()
+    }
+  },
+)
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)

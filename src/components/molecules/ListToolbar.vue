@@ -37,6 +37,7 @@ const handleRefresh = () => {
         class="flex-1"
         :model-value="filterQuery"
         :placeholder="filterPlaceholder"
+        ariaLabel="Filter items"
         input-class="input-field w-full sm:flex-1"
         @update:model-value="(value) => emit('update:filterQuery', value)"
       />
