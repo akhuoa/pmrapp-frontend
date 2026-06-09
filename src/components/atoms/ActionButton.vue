@@ -60,8 +60,7 @@ const secondaryDarkModeClasses = 'dark:bg-gray-600 enabled:dark:hover:bg-gray-50
 const transitionClasses = 'transition duration-200 ease-linear'
 
 const variantClasses = {
-  primary:
-    `px-3 py-1 rounded border border-primary bg-primary text-white enabled:hover:opacity-90 ${transitionClasses}`,
+  primary: `px-3 py-1 rounded border border-primary bg-primary text-white enabled:hover:opacity-90 ${transitionClasses}`,
   secondary: `px-3 py-1 rounded border border-primary text-link enabled:hover:text-link-hover ${transitionClasses} ${secondaryLightModeClasses} ${secondaryDarkModeClasses}`,
   link: `text-primary enabled:hover:text-primary-hover ${transitionClasses}`,
   icon: `p-2 rounded text-gray-700 dark:text-gray-300 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 ${transitionClasses}`,
@@ -73,7 +72,8 @@ const sizeClasses = {
   lg: 'text-base px-4 py-2 rounded-lg',
 }
 
-const buttonClasses = 'inline-flex items-center justify-center gap-2 cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary'
+const buttonClasses =
+  'inline-flex items-center justify-center gap-2 cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary'
 </script>
 
 <template>
