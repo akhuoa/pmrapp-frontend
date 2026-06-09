@@ -31,7 +31,7 @@ const inputRef = ref<HTMLInputElement | null>(null)
 const searchButtonClasses = [
   'flex items-center justify-center p-3',
   'border-l border-gray-200 dark:border-gray-700',
-  'text-white bg-gray-600 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600',
+  'bg-gray-200 dark:bg-gray-700',
   'focus-visible:ring-2 focus-visible:ring-primary focus:outline-none',
   'disabled:opacity-50 disabled:cursor-default',
   'transition duration-200 ease-linear',
