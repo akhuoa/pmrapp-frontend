@@ -106,7 +106,7 @@ const getInitialTerm = (): string => {
       </div>
       <div class="my-4 text-sm text-gray-500 dark:text-gray-400">
         Type a term and press <Keycap>Enter</Keycap> to search the repository,
-        or use the advanced search to filter by category (author, keyword, publication references), or combine both.
+        or use the more options to filter by category (author, keyword, publication references), or combine both.
       </div>
       <div class="pb-4">
         <SearchInput
