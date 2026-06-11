@@ -4,6 +4,7 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
+import Citation from '@/components/atoms/Citation.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
 import Dialog from '@/components/atoms/Dialog.vue'
@@ -914,7 +915,7 @@ onMounted(async () => {
                 title="Citation Instructions"
                 @close="isCitationDialogOpen = false"
               >
-                [Placeholder content.]
+                <Citation />
               </Dialog>
             </li>
           </ul>
