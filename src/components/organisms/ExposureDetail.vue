@@ -31,7 +31,8 @@ import { getFileExtension, isOpenCORFile } from '@/utils/file'
 import { formatLicenseUrl } from '@/utils/license'
 import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
 import { buildSearchQuery, isValidTerm } from '@/utils/search'
-import TermButton from '../atoms/TermButton.vue'
+import TermButton from '@/components/atoms/TermButton.vue'
+import Dialog from '@/components/atoms/Dialog.vue'
 
 type ExposureFileEntry = ExposureInfo['files'][number]
 
@@ -124,6 +125,7 @@ const hasOtherRelatedModels = ref(false)
 const isDownloadingWorkspaceZip = ref(false)
 const isDownloadingWorkspaceTgz = ref(false)
 const isDownloadingCOMBINE = ref(false)
+const isCitationDialogOpen = ref(false)
 const { goBack } = useBackNavigation('/exposures')
 
 const router = useRouter()
@@ -892,6 +894,31 @@ onMounted(async () => {
             </div>
           </dl>
         </div>
+      </section>
+      <section class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+        <h4 class="text-lg font-semibold mb-3">Cite</h4>
+        <nav>
+          <ul class="space-y-2">
+            <li>
+              <ActionButton
+                type="button"
+                variant="secondary"
+                size="sm"
+                @click="isCitationDialogOpen = true"
+                content-section="Exposure detail"
+              >
+                Citation Instructions
+              </ActionButton>
+              <Dialog
+                :show="isCitationDialogOpen"
+                title="Citation Instructions"
+                @close="isCitationDialogOpen = false"
+              >
+                [Placeholder content.]
+              </Dialog>
+            </li>
+          </ul>
+        </nav>
       </section>
       <section v-if="licenseInfo" class="pt-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Licence</h4>
