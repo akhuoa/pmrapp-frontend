@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import Citation from '@/components/atoms/Citation.vue'
+import Cite from '@/components/atoms/Cite.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
 import Dialog from '@/components/atoms/Dialog.vue'
@@ -900,6 +901,24 @@ onMounted(async () => {
         <h4 class="text-lg font-semibold mb-3">Cite</h4>
         <nav>
           <ul class="space-y-2">
+            <li>
+              <ActionButton
+                type="button"
+                variant="secondary"
+                size="sm"
+                @click="isCitationDialogOpen = true"
+                content-section="Exposure detail"
+              >
+                Cite this model
+              </ActionButton>
+              <Dialog
+                :show="isCitationDialogOpen"
+                title="Cite this Model"
+                @close="isCitationDialogOpen = false"
+              >
+                <Cite :citationText="`example`" />
+              </Dialog>
+            </li>
             <li>
               <ActionButton
                 type="button"
