@@ -5,6 +5,7 @@
     However, the repository curators reserve the right to remove any inappropriate material from the repository.
   </p>
 
+  <h3>Referencing the CellML Model Repository</h3>
   <p>
     To reference the CellML model repository please cite the following publication:
   </p>
@@ -15,6 +16,7 @@
     </code>
   </p>
 
+  <h3>Referencing Specific Models</h3>
   <p>
     To reference a specific model in the CellML model repository, please cite:
   </p>
@@ -45,6 +47,8 @@
       CellML author(s): Catherine Lloyd
     </code>
   </p>
+
+  <h3>Referencing Specific Figures</h3>
 
   <p>
     To reference a specific figure in the CellML model repository, please cite:
@@ -81,6 +85,24 @@
 
 code {
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  @apply block p-2 bg-gray-200 dark:bg-gray-900 rounded overflow-x-auto text-sm! m-0! transition-all duration-200 ease-in-out;
+  @apply block p-4 bg-gray-100 dark:bg-gray-900 rounded overflow-x-auto text-sm! m-0! transition-all duration-200 ease-in-out;
+}
+
+h3 {
+  @apply text-lg font-semibold mt-6 mb-2;
+}
+
+p + p,
+p + ul,
+ul + p {
+  @apply mt-4;
+}
+
+ul {
+  @apply list-disc list-inside mb-4 pl-4;
+}
+
+li {
+  @apply mb-1;
 }
 </style>
