@@ -143,6 +143,29 @@ const handleToggleTermsByKeyboard = async (kind: string, groupIndex: number) => 
   toggleEl?.focus()
 }
 
+const handleToggleButtonKeyDown = async (
+  event: KeyboardEvent,
+  kind: string,
+  groupIndex: number,
+) => {
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    handleEscape()
+    return
+  }
+
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    await handleToggleTermsByKeyboard(kind, groupIndex)
+    return
+  }
+
+  if (event.key === 'Tab') {
+    event.preventDefault()
+    handleSuggestionButtonKeyDown(event)
+  }
+}
+
 const chipButtons = computed<HTMLElement[]>(
   () =>
     chipRefs.value
@@ -349,8 +372,7 @@ const handleClearAllFilters = (): void => {
           type="button"
           class="text-sm text-primary hover:text-primary-hover cursor-pointer px-3 py-1 rounded-md transition-colors relative focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-gray-900 whitespace-nowrap"
           @click="handleClearAllFilters"
-          @keydown.tab.prevent="handleSuggestionButtonKeyDown($event)"
-          @keydown.esc.prevent="handleEscape"
+          @keydown="handleSuggestionButtonKeyDown($event)"
           aria-label="Clear all filters"
         >
           Clear all
@@ -388,9 +410,7 @@ const handleClearAllFilters = (): void => {
                 class="px-3 py-1 text-sm rounded-md transition-colors relative focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-gray-900 cursor-pointer text-primary hover:text-primary-hover bg-transparent"
                 :aria-expanded="categoryGroup.isExpanded"
                 @click="handleToggleTerms(categoryGroup.kind)"
-                @keydown.enter.prevent="handleToggleTermsByKeyboard(categoryGroup.kind, groupIndex)"
-                @keydown.tab.prevent="handleSuggestionButtonKeyDown($event)"
-                @keydown.esc.prevent="handleEscape"
+                @keydown="handleToggleButtonKeyDown($event, categoryGroup.kind, groupIndex)"
               >
                 {{ categoryGroup.isExpanded ? 'Show less' : '... more' }}
               </button>
@@ -404,8 +424,7 @@ const handleClearAllFilters = (): void => {
                 :active="hasFilter(categoryGroup.kind, term)"
                 class="focus-visible:ring-2 focus-visible:ring-primary focus:outline-none"
                 @click="handleSearchTermClick(categoryGroup.kind, term)"
-                @keydown.tab.prevent="handleSuggestionButtonKeyDown($event)"
-                @keydown.esc.prevent="handleEscape"
+                @keydown="handleSuggestionButtonKeyDown($event)"
               />
             </div>
           </div>
