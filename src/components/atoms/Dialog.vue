@@ -3,7 +3,7 @@ import { nextTick, onUnmounted, computed, ref, watch } from 'vue'
 import CloseButton from '@/components/atoms/CloseButton.vue'
 
 const props = defineProps<{
-	show: boolean
+  show: boolean
   title?: string
 }>()
 
@@ -20,41 +20,41 @@ const headerClasses = computed(() => {
 })
 
 const handleBackdropMouseDown = (event: MouseEvent) => {
-	if (event.button !== 0) return
-	isMouseDownOnBackdrop = true
+  if (event.button !== 0) return
+  isMouseDownOnBackdrop = true
 }
 
 const handleBackdropMouseUp = (event: MouseEvent) => {
-	if (isMouseDownOnBackdrop && event.target === event.currentTarget) {
-		emit('close')
-	}
-	isMouseDownOnBackdrop = false
+  if (isMouseDownOnBackdrop && event.target === event.currentTarget) {
+    emit('close')
+  }
+  isMouseDownOnBackdrop = false
 }
 
 const handleKeyDown = (event: KeyboardEvent) => {
-	if (event.key === 'Escape') {
-		emit('close')
-	}
+  if (event.key === 'Escape') {
+    emit('close')
+  }
 }
 
 watch(
-	() => props.show,
-	(newVal) => {
-		if (newVal) {
-			nextTick(() => {
-				dialogRef.value?.focus()
-			})
-			document.addEventListener('keydown', handleKeyDown)
-		} else {
-			document.removeEventListener('keydown', handleKeyDown)
-			isMouseDownOnBackdrop = false
-		}
-	},
-	{ immediate: true },
+  () => props.show,
+  (newVal) => {
+    if (newVal) {
+      nextTick(() => {
+        dialogRef.value?.focus()
+      })
+      document.addEventListener('keydown', handleKeyDown)
+    } else {
+      document.removeEventListener('keydown', handleKeyDown)
+      isMouseDownOnBackdrop = false
+    }
+  },
+  { immediate: true },
 )
 
 onUnmounted(() => {
-	document.removeEventListener('keydown', handleKeyDown)
+  document.removeEventListener('keydown', handleKeyDown)
 })
 </script>
 
