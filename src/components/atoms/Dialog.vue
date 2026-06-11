@@ -50,6 +50,7 @@ watch(
 			isMouseDownOnBackdrop = false
 		}
 	},
+	{ immediate: true },
 )
 
 onUnmounted(() => {
