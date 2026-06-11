@@ -127,7 +127,8 @@ const hasOtherRelatedModels = ref(false)
 const isDownloadingWorkspaceZip = ref(false)
 const isDownloadingWorkspaceTgz = ref(false)
 const isDownloadingCOMBINE = ref(false)
-const isCitationDialogOpen = ref(false)
+const isCiteModelDialogOpen = ref(false)
+const isCitationInstructionsDialogOpen = ref(false)
 const { goBack } = useBackNavigation('/exposures')
 
 const router = useRouter()
@@ -906,17 +907,17 @@ onMounted(async () => {
                 type="button"
                 variant="secondary"
                 size="sm"
-                @click="isCitationDialogOpen = true"
+                @click="isCiteModelDialogOpen = true"
                 content-section="Exposure detail"
               >
                 Cite this model
               </ActionButton>
               <Dialog
-                :show="isCitationDialogOpen"
-                title="Cite this Model"
-                @close="isCitationDialogOpen = false"
+                :show="isCiteModelDialogOpen"
+                title="Cite"
+                @close="isCiteModelDialogOpen = false"
               >
-                <Cite :citationText="`example`" />
+                <Cite title="The model title" description="description of the model citation" citationText="example" />
               </Dialog>
             </li>
             <li>
@@ -924,15 +925,15 @@ onMounted(async () => {
                 type="button"
                 variant="secondary"
                 size="sm"
-                @click="isCitationDialogOpen = true"
+                @click="isCitationInstructionsDialogOpen = true"
                 content-section="Exposure detail"
               >
                 Citation Instructions
               </ActionButton>
               <Dialog
-                :show="isCitationDialogOpen"
+                :show="isCitationInstructionsDialogOpen"
                 title="Citation Instructions"
-                @close="isCitationDialogOpen = false"
+                @close="isCitationInstructionsDialogOpen = false"
               >
                 <Citation />
               </Dialog>
