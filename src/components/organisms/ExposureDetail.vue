@@ -6,7 +6,9 @@ import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
+import Dialog from '@/components/atoms/Dialog.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
+import TermButton from '@/components/atoms/TermButton.vue'
 import WrapButton from '@/components/atoms/WrapButton.vue'
 import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
@@ -31,8 +33,6 @@ import { getFileExtension, isOpenCORFile } from '@/utils/file'
 import { formatLicenseUrl } from '@/utils/license'
 import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
 import { buildSearchQuery, isValidTerm } from '@/utils/search'
-import TermButton from '@/components/atoms/TermButton.vue'
-import Dialog from '@/components/atoms/Dialog.vue'
 
 type ExposureFileEntry = ExposureInfo['files'][number]
 

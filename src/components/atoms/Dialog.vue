@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onUnmounted, computed, ref, watch } from 'vue'
+import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
 import CloseButton from '@/components/atoms/CloseButton.vue'
 
 const props = defineProps<{
