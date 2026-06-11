@@ -1,3 +1,10 @@
+<script setup lang="ts">
+import CopyButton from '@/components/atoms/CopyButton.vue';
+
+// Citation text for the CellML Model Repository.
+const citationText = 'Lloyd, C.M., Lawson, J.L., Hunter, P.J. and Nielsen, P.F. The CellML Model Repository. Bioinformatics. 2008 September;24(18):2122-2123.'
+</script>
+
 <template>
   <p>
     Registered users are free to upload any model file, and associated data (such as images, experimental data,
@@ -10,11 +17,17 @@
     To reference the CellML model repository please cite the following publication:
   </p>
 
-  <p>
+  <div class="group relative mt-4">
     <code>
-      Lloyd, C.M., Lawson, J.L., Hunter, P.J. and Nielsen, P.F. The CellML Model Repository. Bioinformatics. 2008 September;24(18):2122-2123.
+      {{ citationText }}
     </code>
-  </p>
+    <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <CopyButton
+        :text="citationText"
+        title="Copy citation"
+      />
+    </div>
+  </div>
 
   <h3>Referencing Specific Models</h3>
   <p>
@@ -84,8 +97,7 @@
 @reference '@/assets/main.css';
 
 code {
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  @apply block p-4 bg-gray-100 dark:bg-gray-900 rounded overflow-x-auto text-sm! m-0! transition-all duration-200 ease-in-out;
+  @apply block text-sm! m-0! p-4 pr-8 bg-gray-50 dark:bg-gray-800 rounded-md;
 }
 
 h3 {
