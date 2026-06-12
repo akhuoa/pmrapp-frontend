@@ -59,24 +59,24 @@ onUnmounted(() => {
 </script>
 
 <template>
-	<div
-		v-if="show"
-		class="fixed inset-0 bg-gray-800/75 dark:bg-gray-900/75 backdrop-blur-sm z-250 flex justify-center items-center"
-		@mousedown.self="handleBackdropMouseDown"
-		@mouseup="handleBackdropMouseUp"
-	>
-		<div
-			ref="dialogRef"
-			tabindex="-1"
-			class="relative flex max-h-[calc(100vh-2rem)] w-full max-w-4xl flex-col overflow-hidden rounded-lg bg-white shadow-lg dark:bg-gray-800"
-		>
-			<div class="flex p-4" :class="headerClasses">
-				<h2 v-if="title" class="text-lg font-semibold">{{ title }}</h2>
-				<CloseButton @click="emit('close')" />
-			</div>
-			<div class="min-h-0 flex-1 p-4 overflow-y-auto">
-				<slot />
+  <div
+    v-if="show"
+    class="fixed inset-0 bg-gray-800/75 dark:bg-gray-900/75 backdrop-blur-sm z-250 flex justify-center items-center"
+    @mousedown.self="handleBackdropMouseDown"
+    @mouseup="handleBackdropMouseUp"
+  >
+    <div
+      ref="dialogRef"
+      tabindex="-1"
+      class="relative flex max-h-[calc(100vh-2rem)] w-full max-w-4xl flex-col overflow-hidden rounded-lg bg-white shadow-lg dark:bg-gray-800"
+    >
+      <div class="flex p-4" :class="headerClasses">
+        <h2 v-if="title" class="text-lg font-semibold">{{ title }}</h2>
+        <CloseButton @click="emit('close')" />
       </div>
-		</div>
-	</div>
+      <div class="min-h-0 flex-1 p-4 overflow-y-auto">
+        <slot />
+      </div>
+    </div>
+  </div>
 </template>
