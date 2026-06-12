@@ -17,29 +17,10 @@ const props = defineProps<{
 
 const includeOptionalDetails = ref(true)
 
-const getFirstNonEmpty = (...values: string[]) => {
-  return values.find((value) => value.trim().length > 0)?.trim() || ''
-}
-
 const ensureSentence = (value: string) => {
   const trimmed = value.trim()
   if (!trimmed) return ''
   return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`
-}
-
-const formatAuthorForCitation = (authorParts: string[]) => {
-  if (!authorParts.length) return ''
-
-  const familyName = (authorParts[0] || '').trim()
-  const givenNames = authorParts
-    .slice(1)
-    .map((name) => name.trim())
-    .filter(Boolean)
-  const initials = givenNames.map((name) => `${name[0]?.toUpperCase() || ''}.`).join(' ')
-
-  if (!familyName) return initials
-  if (!initials) return familyName
-  return `${familyName}, ${initials}`
 }
 
 const normaliseUrl = (url: string) => {
@@ -57,83 +38,55 @@ const normaliseUrl = (url: string) => {
 }
 
 const title = computed(() => {
-  return getFirstNonEmpty(props.modelTitle, props.publicationTitle, props.pageTitle)
+  return props.modelTitle || props.pageTitle
 })
 
-const formattedPublicationAuthors = computed(() => {
-  const authors = props.publicationAuthors
-    .map((author) => formatAuthorForCitation(author))
-    .filter(Boolean)
-
-  if (authors.length === 0) return ''
-  if (authors.length === 1) return authors[0] || ''
-  if (authors.length === 2) return `${authors[0]}, & ${authors[1]}`
-  // For 3+ authors: "Author1, Author2, & Author3"
-  return `${authors.slice(0, -1).join(', ')}, & ${authors[authors.length - 1]}`
-})
-
-const year = computed(() => {
-  const match = props.issued.match(/\b\d{4}\b/)
-  return match?.[0] || ''
-})
-
-const citationPrefix = computed(() => {
-  const parts: string[] = []
-  const authorsPart = formattedPublicationAuthors.value
-  const yearPart = year.value
-
-  if (authorsPart && yearPart) {
-    parts.push(`${authorsPart} (${yearPart}).`)
-  } else if (authorsPart) {
-    parts.push(ensureSentence(authorsPart))
-  } else if (yearPart) {
-    parts.push(`(${yearPart}).`)
+const modelName = computed(() => {
+  if (props.pageTitle) {
+    return ensureSentence(props.pageTitle)
   }
 
-  if (title.value) {
-    parts.push(ensureSentence(title.value))
-  }
-
-  return parts.join(' ')
+  return ''
 })
 
-const citationUrl = computed(() => {
+const modelExposureURL = computed(() => {
   return normaliseUrl(props.url)
 })
 
-const citationSuffix = computed(() => {
-  const parts: string[] = []
-
-  if (includeOptionalDetails.value) {
-    if (props.dateAccessed) {
-      const formattedDate = formatAccessDate(props.dateAccessed)
-      if (formattedDate) {
-        parts.push(ensureSentence(formattedDate))
-      }
-    }
-  }
-
+const formattedModelAuthor = computed(() => {
   if (props.modelAuthor.trim()) {
-    parts.push(ensureSentence(`CellML author(s): ${props.modelAuthor.trim()}`))
+    return `CellML author(s): ${props.modelAuthor.trim()}`
   }
-
-  return parts.join(' ')
+  return ''
 })
 
-const citationText = computed(() => {
+const formattedAccessDate = computed(() => {
+  if (includeOptionalDetails.value && props.dateAccessed) {
+    const formattedDate = formatAccessDate(props.dateAccessed)
+    if (formattedDate) {
+      return formattedDate
+    }
+  }
+  return ''
+})
+
+const citationTextClipboard = computed(() => {
   const parts: string[] = []
 
-  if (citationPrefix.value) {
-    parts.push(citationPrefix.value)
+  if (modelName.value) {
+    parts.push(modelName.value)
   }
 
-  if (citationUrl.value) {
-    // Keep URL as a standalone token so pasted text is detected as clickable.
-    parts.push(citationUrl.value)
+  if (modelExposureURL.value) {
+    parts.push(modelExposureURL.value)
   }
 
-  if (citationSuffix.value) {
-    parts.push(citationSuffix.value)
+  if (formattedAccessDate.value) {
+    parts.push(formattedAccessDate.value)
+  }
+
+  if (formattedModelAuthor.value) {
+    parts.push(formattedModelAuthor.value)
   }
 
   return parts.join(' ')
@@ -145,19 +98,22 @@ const citationText = computed(() => {
   <p class="mb-4" v-if="description">{{ description }}</p>
   <div class="group relative">
     <code class="block text-sm! m-0! p-4 pr-8 bg-gray-50 dark:bg-gray-800 rounded-md">
-      <span v-if="citationPrefix">{{ citationPrefix }}</span>
-      <a
-        v-if="citationUrl"
-        :href="citationUrl"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="text-link break-all"
-      >&nbsp;{{ citationUrl }}</a>
-      <span v-if="citationSuffix">&nbsp;{{ citationSuffix }}</span>
+      <div>
+        <span v-if="modelName">{{ modelName }}</span>
+        <a
+          v-if="modelExposureURL"
+          :href="modelExposureURL"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-link break-all"
+        >&nbsp;{{ modelExposureURL }}</a>
+      </div>
+      <div v-if="formattedAccessDate">{{ formattedAccessDate }}</div>
+      <div>{{ formattedModelAuthor }}</div>
     </code>
     <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
       <CopyButton
-        :text="citationText"
+        :text="citationTextClipboard"
         title="Copy citation"
       />
     </div>
