@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
+import { ensureSentence, normaliseUrl } from '@/utils/citation'
 import { formatAccessDate } from '@/utils/format'
 
 const props = defineProps<{
@@ -12,26 +13,6 @@ const props = defineProps<{
 }>()
 
 const includeOptionalDetails = ref(true)
-
-const ensureSentence = (value: string) => {
-  const trimmed = value.trim()
-  if (!trimmed) return ''
-  return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`
-}
-
-const normaliseUrl = (url: string) => {
-  const trimmed = url.trim()
-  if (!trimmed) return ''
-
-  try {
-    const parsed = new URL(trimmed)
-    parsed.search = ''
-    parsed.hash = ''
-    return parsed.toString()
-  } catch {
-    return trimmed.split('#')[0]?.split('?')[0] || ''
-  }
-}
 
 const modelName = computed(() => {
   const titleToUse = props.modelTitle || props.pageTitle
