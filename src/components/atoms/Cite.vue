@@ -52,6 +52,37 @@ const normalizeUrl = (url: string) => {
   }
 }
 
+const formatAccessedDate = (isoString: string) => {
+  if (!isoString.trim()) return ''
+
+  try {
+    const date = new Date(isoString)
+    if (isNaN(date.getTime())) return ''
+
+    // Extract time
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    const ampm = date.getHours() >= 12 ? 'pm' : 'am'
+    const timeStr = `${hours}.${minutes}${ampm}`
+
+    // Extract day with ordinal suffix
+    const day = date.getDate()
+    const dayStr =
+      day % 10 === 1 && day !== 11 ? `${day}st` : day % 10 === 2 && day !== 12 ? `${day}nd` : day % 10 === 3 && day !== 13 ? `${day}rd` : `${day}th`
+
+    // Extract month name
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    const monthStr = monthNames[date.getMonth()]
+
+    // Extract year
+    const yearStr = date.getFullYear()
+
+    return `${timeStr} ${dayStr} ${monthStr} ${yearStr}`
+  } catch {
+    return ''
+  }
+}
+
 const title = computed(() => {
   return getFirstNonEmpty(props.modelTitle, props.publicationTitle, props.pageTitle)
 })
@@ -97,7 +128,10 @@ const citationText = computed(() => {
 
   if (includeOptionalDetails.value) {
     if (props.dateAccessed.trim()) {
-      parts.push(ensureSentence(`Accessed ${props.dateAccessed.trim()}`))
+      const formattedDate = formatAccessedDate(props.dateAccessed.trim())
+      if (formattedDate) {
+        parts.push(ensureSentence(formattedDate))
+      }
     }
     if (props.modelAuthor.trim()) {
       parts.push(ensureSentence(`CellML author(s): ${props.modelAuthor.trim()}`))

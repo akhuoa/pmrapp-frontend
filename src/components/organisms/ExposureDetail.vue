@@ -930,7 +930,7 @@ onMounted(async () => {
                   :publication-authors="metadataJSON.citation_authors || []"
                   :issued="metadataJSON.citation_issued || ''"
                   :url="citationUrl"
-                  :date-accessed="new Date().toISOString().split('T')[0]"
+                  :date-accessed="new Date().toISOString()"
                 />
               </Dialog>
             </li>
