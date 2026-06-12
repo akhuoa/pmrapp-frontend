@@ -179,8 +179,8 @@ const citationText = computed(() => {
         target="_blank"
         rel="noopener noreferrer"
         class="text-link break-all"
-      > {{ citationUrl }}</a>
-      <span v-if="citationSuffix"> {{ citationSuffix }}</span>
+      >&nbsp;{{ citationUrl }}</a>
+      <span v-if="citationSuffix">&nbsp;{{ citationSuffix }}</span>
     </code>
     <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
       <CopyButton
