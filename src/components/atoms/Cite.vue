@@ -133,9 +133,10 @@ const citationText = computed(() => {
         parts.push(ensureSentence(formattedDate))
       }
     }
-    if (props.modelAuthor.trim()) {
-      parts.push(ensureSentence(`CellML author(s): ${props.modelAuthor.trim()}`))
-    }
+  }
+
+  if (props.modelAuthor.trim()) {
+    parts.push(ensureSentence(`CellML author(s): ${props.modelAuthor.trim()}`))
   }
 
   return parts.join(' ')
@@ -162,7 +163,7 @@ const citationText = computed(() => {
         v-model="includeOptionalDetails"
         type="checkbox"
       >
-      Include date accessed and model authors in citation
+      Include date accessed in citation.
     </label>
   </div>
 </template>
