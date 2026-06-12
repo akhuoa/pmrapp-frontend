@@ -38,7 +38,7 @@ const formatAuthorForCitation = (authorParts: string[]) => {
   return `${familyName}, ${initials}`
 }
 
-const normalizeUrl = (url: string) => {
+const normaliseUrl = (url: string) => {
   const trimmed = url.trim()
   if (!trimmed) return ''
 
@@ -104,7 +104,7 @@ const year = computed(() => {
   return match?.[0] || ''
 })
 
-const citationText = computed(() => {
+const citationPrefix = computed(() => {
   const parts: string[] = []
   const authorsPart = publicationAuthors.value
   const yearPart = year.value
@@ -121,10 +121,15 @@ const citationText = computed(() => {
     parts.push(ensureSentence(title.value))
   }
 
-  const cleanUrl = normalizeUrl(props.url)
-  if (cleanUrl) {
-    parts.push(ensureSentence(cleanUrl))
-  }
+  return parts.join(' ')
+})
+
+const citationUrl = computed(() => {
+  return normaliseUrl(props.url)
+})
+
+const citationSuffix = computed(() => {
+  const parts: string[] = []
 
   if (includeOptionalDetails.value) {
     if (props.dateAccessed.trim()) {
@@ -141,14 +146,41 @@ const citationText = computed(() => {
 
   return parts.join(' ')
 })
+
+const citationText = computed(() => {
+  const parts: string[] = []
+
+  if (citationPrefix.value) {
+    parts.push(citationPrefix.value)
+  }
+
+  if (citationUrl.value) {
+    // Keep URL as a standalone token so pasted text is detected as clickable.
+    parts.push(citationUrl.value)
+  }
+
+  if (citationSuffix.value) {
+    parts.push(citationSuffix.value)
+  }
+
+  return parts.join(' ')
+})
 </script>
 
 <template>
   <h3 class="text-lg font-semibold mb-2">{{ title }}</h3>
   <p class="mb-4" v-if="description">{{ description }}</p>
   <div class="group relative">
-    <code class="block text-sm! break-words m-0! p-4 pr-8 bg-gray-50 dark:bg-gray-800 rounded-md">
-      {{ citationText }}
+    <code class="block text-sm! m-0! p-4 pr-8 bg-gray-50 dark:bg-gray-800 rounded-md">
+      <span v-if="citationPrefix">{{ citationPrefix }}</span>
+      <a
+        v-if="citationUrl"
+        :href="citationUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-link break-all"
+      > {{ citationUrl }}</a>
+      <span v-if="citationSuffix"> {{ citationSuffix }}</span>
     </code>
     <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
       <CopyButton
@@ -167,3 +199,7 @@ const citationText = computed(() => {
     </label>
   </div>
 </template>
+
+<style scoped>
+@import '@/assets/text-link.css';
+</style>
