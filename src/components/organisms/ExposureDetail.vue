@@ -930,11 +930,8 @@ onMounted(async () => {
               >
                 <Cite
                   :model-title="metadataJSON.model_title || ''"
-                  :publication-title="metadataJSON.citation_title || ''"
                   :page-title="pageTitle"
                   :model-author="metadataJSON.model_author || ''"
-                  :publication-authors="metadataJSON.citation_authors || []"
-                  :issued="metadataJSON.citation_issued || ''"
                   :url="citationUrl"
                   :date-accessed="citeDateAccessed"
                 />

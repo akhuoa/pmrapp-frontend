@@ -5,14 +5,10 @@ import { formatAccessDate } from '@/utils/format'
 
 const props = defineProps<{
   modelTitle: string
-  publicationTitle: string
   pageTitle: string
   modelAuthor: string
-  publicationAuthors: string[][]
-  issued: string
   url: string
   dateAccessed: Date
-  description?: string
 }>()
 
 const includeOptionalDetails = ref(true)
@@ -37,16 +33,9 @@ const normaliseUrl = (url: string) => {
   }
 }
 
-const title = computed(() => {
-  return props.modelTitle || props.pageTitle
-})
-
 const modelName = computed(() => {
-  if (props.pageTitle) {
-    return ensureSentence(props.pageTitle)
-  }
-
-  return ''
+  const titleToUse = props.modelTitle || props.pageTitle
+  return ensureSentence(titleToUse)
 })
 
 const modelExposureURL = computed(() => {
@@ -94,8 +83,6 @@ const citationTextClipboard = computed(() => {
 </script>
 
 <template>
-  <h3 class="text-lg font-semibold mb-2">{{ title }}</h3>
-  <p class="mb-4" v-if="description">{{ description }}</p>
   <div class="group relative">
     <code class="block text-sm! m-0! p-4 pr-8 bg-gray-50 dark:bg-gray-800 rounded-md">
       <div>
