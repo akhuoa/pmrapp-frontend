@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
+import { formatAccessDate } from '@/utils/format'
 
 const props = defineProps<{
   modelTitle: string
@@ -10,7 +11,7 @@ const props = defineProps<{
   publicationAuthors: string[][]
   issued: string
   url: string
-  dateAccessed: string
+  dateAccessed: Date
   description?: string
 }>()
 
@@ -52,56 +53,6 @@ const normaliseUrl = (url: string) => {
     return parsed.toString()
   } catch {
     return trimmed.split('#')[0]?.split('?')[0] || ''
-  }
-}
-
-const formatAccessedDate = (isoString: string) => {
-  if (!isoString.trim()) return ''
-
-  try {
-    const date = new Date(isoString)
-    if (Number.isNaN(date.getTime())) return ''
-
-    // Extract time
-    const hours = String(date.getHours()).padStart(2, '0')
-    const minutes = String(date.getMinutes()).padStart(2, '0')
-    const ampm = date.getHours() >= 12 ? 'pm' : 'am'
-    const timeStr = `${hours}.${minutes}${ampm}`
-
-    // Extract day with ordinal suffix
-    const day = date.getDate()
-    const dayStr =
-      day % 10 === 1 && day !== 11
-        ? `${day}st`
-        : day % 10 === 2 && day !== 12
-          ? `${day}nd`
-          : day % 10 === 3 && day !== 13
-            ? `${day}rd`
-            : `${day}th`
-
-    // Extract month name
-    const monthNames = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ]
-    const monthStr = monthNames[date.getMonth()]
-
-    // Extract year
-    const yearStr = date.getFullYear()
-
-    return `${timeStr} ${dayStr} ${monthStr} ${yearStr}`
-  } catch {
-    return ''
   }
 }
 
@@ -154,8 +105,8 @@ const citationSuffix = computed(() => {
   const parts: string[] = []
 
   if (includeOptionalDetails.value) {
-    if (props.dateAccessed.trim()) {
-      const formattedDate = formatAccessedDate(props.dateAccessed.trim())
+    if (props.dateAccessed) {
+      const formattedDate = formatAccessDate(props.dateAccessed)
       if (formattedDate) {
         parts.push(ensureSentence(formattedDate))
       }

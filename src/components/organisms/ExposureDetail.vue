@@ -129,7 +129,7 @@ const isDownloadingWorkspaceTgz = ref(false)
 const isDownloadingCOMBINE = ref(false)
 const isCiteModelDialogOpen = ref(false)
 const isCitationInstructionsDialogOpen = ref(false)
-const citeDateAccessed = ref('')
+const citeDateAccessed = ref<Date>(new Date())
 const { goBack } = useBackNavigation('/exposures')
 
 const router = useRouter()
@@ -396,7 +396,7 @@ const handleCitationAuthorClick = (authorParts: string[]) => {
 }
 
 const openCitationDialog = (): void => {
-  citeDateAccessed.value = new Date().toISOString()
+  citeDateAccessed.value = new Date()
   isCiteModelDialogOpen.value = true
 }
 
