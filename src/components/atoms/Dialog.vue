@@ -68,6 +68,9 @@ onUnmounted(() => {
     <div
       ref="dialogRef"
       tabindex="-1"
+      role="dialog"
+      aria-modal="true"
+      :aria-label="title || 'Dialog'"
       class="relative flex max-h-[calc(100vh-2rem)] w-full max-w-4xl flex-col overflow-hidden rounded-lg bg-white shadow-lg dark:bg-gray-800"
     >
       <div class="flex p-4" :class="headerClasses">
