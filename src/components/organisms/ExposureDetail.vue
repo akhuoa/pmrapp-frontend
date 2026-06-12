@@ -129,6 +129,7 @@ const isDownloadingWorkspaceTgz = ref(false)
 const isDownloadingCOMBINE = ref(false)
 const isCiteModelDialogOpen = ref(false)
 const isCitationInstructionsDialogOpen = ref(false)
+const citeDateAccessed = ref('')
 const { goBack } = useBackNavigation('/exposures')
 
 const router = useRouter()
@@ -392,6 +393,11 @@ const handleCitationAuthorClick = (authorParts: string[]) => {
   if (familyName) {
     handleKeywordClick('citation_author_family_name', familyName)
   }
+}
+
+const openCitationDialog = (): void => {
+  citeDateAccessed.value = new Date().toISOString()
+  isCiteModelDialogOpen.value = true
 }
 
 const filteredKeywords = computed(() => {
@@ -912,7 +918,7 @@ onMounted(async () => {
                 type="button"
                 variant="secondary"
                 size="sm"
-                @click="isCiteModelDialogOpen = true"
+                @click="openCitationDialog"
                 content-section="Exposure detail"
               >
                 Cite this model
@@ -930,7 +936,7 @@ onMounted(async () => {
                   :publication-authors="metadataJSON.citation_authors || []"
                   :issued="metadataJSON.citation_issued || ''"
                   :url="citationUrl"
-                  :date-accessed="new Date().toISOString()"
+                  :date-accessed="citeDateAccessed"
                 />
               </Dialog>
             </li>
