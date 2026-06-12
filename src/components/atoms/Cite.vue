@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import CopyButton from '@/components/atoms/CopyButton.vue';
+import { computed, ref } from 'vue'
+import CopyButton from '@/components/atoms/CopyButton.vue'
 
 const props = defineProps<{
   modelTitle: string
@@ -30,7 +30,10 @@ const formatAuthorForCitation = (authorParts: string[]) => {
   if (!authorParts.length) return ''
 
   const familyName = (authorParts[0] || '').trim()
-  const givenNames = authorParts.slice(1).map((name) => name.trim()).filter(Boolean)
+  const givenNames = authorParts
+    .slice(1)
+    .map((name) => name.trim())
+    .filter(Boolean)
   const initials = givenNames.map((name) => `${name[0]?.toUpperCase() || ''}.`).join(' ')
 
   if (!familyName) return initials
@@ -68,10 +71,29 @@ const formatAccessedDate = (isoString: string) => {
     // Extract day with ordinal suffix
     const day = date.getDate()
     const dayStr =
-      day % 10 === 1 && day !== 11 ? `${day}st` : day % 10 === 2 && day !== 12 ? `${day}nd` : day % 10 === 3 && day !== 13 ? `${day}rd` : `${day}th`
+      day % 10 === 1 && day !== 11
+        ? `${day}st`
+        : day % 10 === 2 && day !== 12
+          ? `${day}nd`
+          : day % 10 === 3 && day !== 13
+            ? `${day}rd`
+            : `${day}th`
 
     // Extract month name
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    const monthNames = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ]
     const monthStr = monthNames[date.getMonth()]
 
     // Extract year

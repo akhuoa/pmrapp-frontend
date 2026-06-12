@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import CopyButton from '@/components/atoms/CopyButton.vue';
+import CopyButton from '@/components/atoms/CopyButton.vue'
 
 // Citation text for the CellML Model Repository.
-const citationText = 'Lloyd, C.M., Lawson, J.L., Hunter, P.J. and Nielsen, P.F. The CellML Model Repository. Bioinformatics. 2008 September;24(18):2122-2123.'
+const citationText =
+  'Lloyd, C.M., Lawson, J.L., Hunter, P.J. and Nielsen, P.F. The CellML Model Repository. Bioinformatics. 2008 September;24(18):2122-2123.'
 </script>
 
 <template>
