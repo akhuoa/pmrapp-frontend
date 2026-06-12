@@ -140,6 +140,11 @@ const fileBrowserPath = computed(() => {
   return typeof p === 'string' ? p : undefined
 })
 
+const citationUrl = computed(() => {
+  if (typeof window === 'undefined') return route.path
+  return `${window.location.origin}${route.path}`
+})
+
 const handleFileBrowserFolderClick = (name: string) => {
   const currentPath = fileBrowserPath.value
   const newPath = currentPath ? `${currentPath}/${name}` : name
@@ -917,7 +922,16 @@ onMounted(async () => {
                 title="Cite"
                 @close="isCiteModelDialogOpen = false"
               >
-                <Cite title="The model title" description="description of the model citation" citationText="example" />
+                <Cite
+                  :model-title="metadataJSON.model_title || ''"
+                  :publication-title="metadataJSON.citation_title || ''"
+                  :page-title="pageTitle"
+                  :model-author="metadataJSON.model_author || ''"
+                  :publication-authors="metadataJSON.citation_authors || []"
+                  :issued="metadataJSON.citation_issued || ''"
+                  :url="citationUrl"
+                  :date-accessed="new Date().toISOString().split('T')[0]"
+                />
               </Dialog>
             </li>
             <li>
