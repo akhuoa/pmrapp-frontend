@@ -60,7 +60,7 @@ const formatAccessedDate = (isoString: string) => {
 
   try {
     const date = new Date(isoString)
-    if (isNaN(date.getTime())) return ''
+    if (Number.isNaN(date.getTime())) return ''
 
     // Extract time
     const hours = String(date.getHours()).padStart(2, '0')
@@ -109,7 +109,7 @@ const title = computed(() => {
   return getFirstNonEmpty(props.modelTitle, props.publicationTitle, props.pageTitle)
 })
 
-const publicationAuthors = computed(() => {
+const formattedPublicationAuthors = computed(() => {
   const authors = props.publicationAuthors
     .map((author) => formatAuthorForCitation(author))
     .filter(Boolean)
@@ -128,7 +128,7 @@ const year = computed(() => {
 
 const citationPrefix = computed(() => {
   const parts: string[] = []
-  const authorsPart = publicationAuthors.value
+  const authorsPart = formattedPublicationAuthors.value
   const yearPart = year.value
 
   if (authorsPart && yearPart) {
