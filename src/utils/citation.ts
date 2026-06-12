@@ -77,3 +77,33 @@ export const formatCitation = (citation: Citation): string => {
 
   return parts.join(' ')
 }
+
+/**
+ * Ensure a string ends with sentence punctuation.
+ * @param value Input string.
+ * @returns Trimmed sentence with trailing punctuation.
+ */
+export const ensureSentence = (value: string): string => {
+  const trimmed = value.trim()
+  if (!trimmed) return ''
+  return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`
+}
+
+/**
+ * Remove query and hash from a URL for cleaner citation output.
+ * @param url URL string.
+ * @returns Normalized URL string.
+ */
+export const normaliseUrl = (url: string): string => {
+  const trimmed = url.trim()
+  if (!trimmed) return ''
+
+  try {
+    const parsed = new URL(trimmed)
+    parsed.search = ''
+    parsed.hash = ''
+    return parsed.toString()
+  } catch {
+    return trimmed.split('#')[0]?.split('?')[0] || ''
+  }
+}
