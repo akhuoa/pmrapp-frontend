@@ -354,13 +354,16 @@ const generateMetadata = async () => {
 }
 
 const loadDefaultView = async () => {
-  detailHTML.value = await exposureStore.getExposureSafeHTML(
-    exposureId.value,
-    exposureFileId.value,
-    'view',
-    'index.html',
-    routePath,
-  )
+  // Only load the HTML view if we have the necessary exposure ID and file ID.
+  if (exposureId.value && exposureFileId.value) {
+    detailHTML.value = await exposureStore.getExposureSafeHTML(
+      exposureId.value,
+      exposureFileId.value,
+      'view',
+      'index.html',
+      routePath,
+    )
+  }
 }
 
 const loadCodegenView = async () => {
@@ -425,9 +428,9 @@ const checkOtherRelatedModels = async () => {
 const loadInitialView = async () => {
   if (!exposureInfo.value) return
 
-  const filesWithViews = exposureInfo.value.exposure?.files?.filter(
-    (file) => file.views && file.views.length > 0,
-  )
+  exposureId.value = exposureInfo.value.exposure?.id
+  const exposureFiles = exposureInfo.value.exposure?.files || []
+  const filesWithViews = exposureFiles.filter((file) => file.views?.length > 0)
   let fileWithViews = filesWithViews?.find((file) => file.workspace_file_path.endsWith('.cellml'))
 
   if (props.file) {
