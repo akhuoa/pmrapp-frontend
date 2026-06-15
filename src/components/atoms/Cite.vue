@@ -13,6 +13,8 @@ const props = defineProps<{
   modelAuthor: string
   url: string
   dateAccessed: Date
+  onlyModelCitation: boolean
+  includeCellmlModelRepositoryCitation: boolean
 }>()
 
 const includeOptionalDetails = ref(true)
@@ -69,7 +71,7 @@ const citationTextClipboard = computed(() => {
 <template>
   <div>
     <div>
-      <p class="mb-4">
+      <p class="mb-4" v-if="!props.onlyModelCitation">
         To cite this model, please use the following citation:
       </p>
 
@@ -106,7 +108,7 @@ const citationTextClipboard = computed(() => {
       </div>
     </div>
 
-    <div class="mt-8">
+    <div class="mt-8" v-if="props.includeCellmlModelRepositoryCitation">
       <p class="mb-4">
         To reference the CellML model repository, please cite the following publication:
       </p>

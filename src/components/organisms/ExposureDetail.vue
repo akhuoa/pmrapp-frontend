@@ -4,7 +4,6 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
-import Citation from '@/components/atoms/Citation.vue'
 import Cite from '@/components/atoms/Cite.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
@@ -710,6 +709,28 @@ onMounted(async () => {
         </dl>
       </section>
       <section class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+        <h4 class="text-lg font-semibold mb-3">Citation</h4>
+        <Cite
+          :model-title="metadataJSON.model_title || ''"
+          :page-title="pageTitle"
+          :model-author="metadataJSON.model_author || ''"
+          :url="citationUrl"
+          :date-accessed="citeDateAccessed"
+          :only-model-citation="true"
+          :include-cellml-model-repository-citation="false"
+        />
+        <Cite
+          :model-title="metadataJSON.model_title || ''"
+          :page-title="pageTitle"
+          :model-author="metadataJSON.model_author || ''"
+          :url="citationUrl"
+          :date-accessed="citeDateAccessed"
+          :only-model-citation="false"
+          :include-cellml-model-repository-citation="true"
+          class="text-sm leading-relaxed"
+        />
+      </section>
+      <section class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Cite</h4>
         <nav>
           <ul class="space-y-2">
@@ -734,6 +755,8 @@ onMounted(async () => {
                   :model-author="metadataJSON.model_author || ''"
                   :url="citationUrl"
                   :date-accessed="citeDateAccessed"
+                  :only-model-citation="false"
+                  :include-cellml-model-repository-citation="true"
                 />
               </Dialog>
             </li>
