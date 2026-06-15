@@ -65,7 +65,7 @@ const citationTextClipboard = computed(() => {
 
 <template>
   <div class="group relative">
-    <code class="block text-sm! m-0! p-4 pr-8 bg-gray-50 dark:bg-gray-800 rounded-md">
+    <code class="block text-sm! m-0! p-4 pr-8 bg-gray-50 dark:bg-gray-900 rounded-md">
       <div>
         <span v-if="modelName">{{ modelName }}</span>
         <a
@@ -86,7 +86,7 @@ const citationTextClipboard = computed(() => {
       />
     </div>
   </div>
-  <div class="mt-3">
+  <div class="mt-3 text-right">
     <label class="inline-flex items-center gap-2 text-sm cursor-pointer">
       <input
         v-model="includeOptionalDetails"
