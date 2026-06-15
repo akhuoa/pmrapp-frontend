@@ -4,9 +4,12 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
+import Cite from '@/components/atoms/Cite.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
+import Dialog from '@/components/atoms/Dialog.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
+import TermButton from '@/components/atoms/TermButton.vue'
 import WrapButton from '@/components/atoms/WrapButton.vue'
 import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
@@ -31,7 +34,6 @@ import { getFileExtension, isOpenCORFile } from '@/utils/file'
 import { formatLicenseUrl } from '@/utils/license'
 import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
 import { buildSearchQuery, isValidTerm } from '@/utils/search'
-import TermButton from '../atoms/TermButton.vue'
 
 type ExposureFileEntry = ExposureInfo['files'][number]
 
@@ -124,6 +126,9 @@ const hasOtherRelatedModels = ref(false)
 const isDownloadingWorkspaceZip = ref(false)
 const isDownloadingWorkspaceTgz = ref(false)
 const isDownloadingCOMBINE = ref(false)
+const isCiteModelDialogOpen = ref(false)
+const isCitationInstructionsDialogOpen = ref(false)
+const citeDateAccessed = ref<Date>(new Date())
 const { goBack } = useBackNavigation('/exposures')
 
 const router = useRouter()
@@ -133,6 +138,23 @@ const searchStore = useSearchStore()
 const fileBrowserPath = computed(() => {
   const p = route.query.path
   return typeof p === 'string' ? p : undefined
+})
+
+const citationUrl = computed(() => {
+  if (typeof window === 'undefined') return route.path
+  return `${window.location.origin}${route.path}`
+})
+
+// TEMP: This is a temporary solution to determine which citation format to show based on a query parameter.
+const citationOption = computed<'a' | 'b' | 'c'>(() => {
+  const queryValue = route.query.citationOption
+  const value = typeof queryValue === 'string' ? queryValue : ''
+
+  if (value === 'b' || value === 'c') {
+    return value
+  }
+
+  return 'a'
 })
 
 const handleFileBrowserFolderClick = (name: string) => {
@@ -382,6 +404,11 @@ const handleCitationAuthorClick = (authorParts: string[]) => {
   if (familyName) {
     handleKeywordClick('citation_author_family_name', familyName)
   }
+}
+
+const openCitationDialog = (): void => {
+  citeDateAccessed.value = new Date()
+  isCiteModelDialogOpen.value = true
 }
 
 const filteredKeywords = computed(() => {
@@ -693,6 +720,73 @@ onMounted(async () => {
           </div>
         </dl>
       </section>
+      <!-- TEMP: citation option a or b -->
+      <section
+        v-if="citationOption === 'a' || citationOption === 'b'"
+        class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700"
+      >
+        <h4 class="text-lg font-semibold mb-3">Citation</h4>
+        <!-- option a -->
+        <Cite
+          v-if="citationOption === 'a'"
+          :model-title="metadataJSON.model_title || ''"
+          :page-title="pageTitle"
+          :model-author="metadataJSON.model_author || ''"
+          :url="citationUrl"
+          :date-accessed="citeDateAccessed"
+          :only-model-citation="true"
+          :include-cellml-model-repository-citation="false"
+        />
+        <!-- option b -->
+        <Cite
+          v-if="citationOption === 'b'"
+          :model-title="metadataJSON.model_title || ''"
+          :page-title="pageTitle"
+          :model-author="metadataJSON.model_author || ''"
+          :url="citationUrl"
+          :date-accessed="citeDateAccessed"
+          :only-model-citation="false"
+          :include-cellml-model-repository-citation="true"
+          class="text-sm leading-relaxed"
+        />
+      </section>
+      <!-- TEMP: citation option c -->
+      <section
+        v-if="citationOption === 'c'"
+        class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700"
+      >
+        <h4 class="text-lg font-semibold mb-3">Cite</h4>
+        <nav>
+          <ul class="space-y-2">
+            <li>
+              <ActionButton
+                type="button"
+                variant="secondary"
+                size="sm"
+                @click="isCitationInstructionsDialogOpen = true"
+                content-section="Exposure detail"
+              >
+                Citation instructions
+              </ActionButton>
+              <Dialog
+                :show="isCitationInstructionsDialogOpen"
+                title="Citation"
+                @close="isCitationInstructionsDialogOpen = false"
+              >
+                <Cite
+                  :model-title="metadataJSON.model_title || ''"
+                  :page-title="pageTitle"
+                  :model-author="metadataJSON.model_author || ''"
+                  :url="citationUrl"
+                  :date-accessed="citeDateAccessed"
+                  :only-model-citation="false"
+                  :include-cellml-model-repository-citation="true"
+                />
+              </Dialog>
+            </li>
+          </ul>
+        </nav>
+      </section>
       <section v-if="metadataJSON.keywords?.length" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Keywords</h4>
         <div class="flex flex-wrap gap-2">
@@ -813,7 +907,7 @@ onMounted(async () => {
         <h4 class="text-lg font-semibold mb-3">References</h4>
         <ul class="space-y-4 text-sm mb-2" v-if="metadataJSON.citations && metadataJSON.citations.length > 0">
           <li v-for="citation in metadataJSON.citations" :key="citation.id">
-            <div class="group p-4 pr-8 bg-gray-50 dark:bg-gray-800 rounded-md relative">
+            <div class="group p-4 pr-8 bg-gray-50 dark:bg-gray-900 rounded-md relative">
               {{ formatCitation(citation) }}
               <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <CopyButton
