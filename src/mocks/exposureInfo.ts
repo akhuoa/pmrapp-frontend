@@ -396,17 +396,17 @@ export const mockMetadata = {
         {
           family: 'Baylor',
           given: 'S',
-          other: ['M'],
+          other: 'M',
         },
         {
           family: 'Hollingworth',
           given: 'S',
-          other: [],
+          other: '',
         },
         {
           family: 'Chandler',
           given: 'W',
-          other: ['K'],
+          other: 'K',
         },
       ],
       title:
