@@ -927,6 +927,14 @@ onMounted(async () => {
     @apply text-link dark:underline dark:decoration-dotted hover:text-link-hover transition;
   }
 
+  & :deep(h1) {
+    @apply text-3xl font-bold mt-8 mb-8;
+  }
+
+  & :deep(h1:first-child) {
+    @apply mt-0;
+  }
+
   & :deep(h2) {
     @apply text-2xl font-semibold mt-0 mb-8;
   }
@@ -969,6 +977,10 @@ onMounted(async () => {
 
   & :deep(table td) {
     @apply align-top text-sm;
+  }
+
+  & :deep(blockquote) {
+    @apply border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic text-gray-600 dark:text-gray-400 my-4;
   }
 }
 
