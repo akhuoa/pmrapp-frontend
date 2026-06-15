@@ -145,6 +145,18 @@ const citationUrl = computed(() => {
   return `${window.location.origin}${route.path}`
 })
 
+// TEMP: This is a temporary solution to determine which citation format to show based on a query parameter.
+const citationOption = computed<'a' | 'b' | 'c'>(() => {
+  const queryValue = route.query.citationOption
+  const value = typeof queryValue === 'string' ? queryValue : ''
+
+  if (value === 'b' || value === 'c') {
+    return value
+  }
+
+  return 'a'
+})
+
 const handleFileBrowserFolderClick = (name: string) => {
   const currentPath = fileBrowserPath.value
   const newPath = currentPath ? `${currentPath}/${name}` : name
@@ -708,9 +720,15 @@ onMounted(async () => {
           </div>
         </dl>
       </section>
-      <section class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+      <!-- TEMP: citation option a or b -->
+      <section
+        v-if="citationOption === 'a' || citationOption === 'b'"
+        class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700"
+      >
         <h4 class="text-lg font-semibold mb-3">Citation</h4>
+        <!-- option a -->
         <Cite
+          v-if="citationOption === 'a'"
           :model-title="metadataJSON.model_title || ''"
           :page-title="pageTitle"
           :model-author="metadataJSON.model_author || ''"
@@ -719,7 +737,9 @@ onMounted(async () => {
           :only-model-citation="true"
           :include-cellml-model-repository-citation="false"
         />
+        <!-- option b -->
         <Cite
+          v-if="citationOption === 'b'"
           :model-title="metadataJSON.model_title || ''"
           :page-title="pageTitle"
           :model-author="metadataJSON.model_author || ''"
@@ -730,7 +750,11 @@ onMounted(async () => {
           class="text-sm leading-relaxed"
         />
       </section>
-      <section class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+      <!-- TEMP: citation option c -->
+      <section
+        v-if="citationOption === 'c'"
+        class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700"
+      >
         <h4 class="text-lg font-semibold mb-3">Cite</h4>
         <nav>
           <ul class="space-y-2">
@@ -742,7 +766,7 @@ onMounted(async () => {
                 @click="isCitationInstructionsDialogOpen = true"
                 content-section="Exposure detail"
               >
-                Citation
+                Citation instructions
               </ActionButton>
               <Dialog
                 :show="isCitationInstructionsDialogOpen"
