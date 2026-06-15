@@ -1,7 +1,7 @@
 export interface Author {
   family: string
   given?: string
-  other?: string[]
+  other?: string
 }
 
 export interface Citation {

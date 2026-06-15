@@ -30,9 +30,7 @@ export const formatCitation = (citation: Citation): string => {
       const family = author.family || ''
       const given = author.given || ''
       const givenInitial = given ? `${given.charAt(0).toUpperCase()}.` : ''
-      const otherInitials = author.other
-        ? author.other.map((name: string) => `${name.charAt(0).toUpperCase()}.`).join(' ')
-        : ''
+      const otherInitials = author.other ? `${author.other.charAt(0).toUpperCase()}.` : ''
       const allInitials = [givenInitial, otherInitials].filter(Boolean).join(' ')
       return `${family}${allInitials ? `, ${allInitials}` : ''}`
     })
