@@ -728,7 +728,6 @@ onMounted(async () => {
                 title="Citation"
                 @close="isCitationInstructionsDialogOpen = false"
               >
-                <p class="mb-4">To cite this model, please use the following citation:</p>
                 <Cite
                   :model-title="metadataJSON.model_title || ''"
                   :page-title="pageTitle"
@@ -736,7 +735,6 @@ onMounted(async () => {
                   :url="citationUrl"
                   :date-accessed="citeDateAccessed"
                 />
-                <Citation class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700" />
               </Dialog>
             </li>
           </ul>
