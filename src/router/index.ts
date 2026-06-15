@@ -103,7 +103,7 @@ const router = createRouter({
       meta: { title: `Exposure Detail – ${title}` },
     },
     {
-      path: '/exposures/:alias/:file',
+      path: '/exposures/:alias/:file(.+)',
       name: 'exposure-file-detail',
       component: ExposureDetailView,
       // biome-ignore format: keep the formatting for readability
@@ -115,7 +115,7 @@ const router = createRouter({
       meta: { title: `Exposure File – ${title}` },
     },
     {
-      path: '/exposures/:alias/:file/:view',
+      path: '/exposures/:alias/:file(.+)/:view',
       name: 'exposure-file-detail-view',
       component: ExposureDetailView,
       // biome-ignore format: keep the formatting for readability
