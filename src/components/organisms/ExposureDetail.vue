@@ -709,6 +709,55 @@ onMounted(async () => {
           </div>
         </dl>
       </section>
+      <section class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+        <h4 class="text-lg font-semibold mb-3">Cite</h4>
+        <nav>
+          <ul class="space-y-2">
+            <li>
+              <ActionButton
+                type="button"
+                variant="secondary"
+                size="sm"
+                @click="openCitationDialog"
+                content-section="Exposure detail"
+              >
+                Cite this model
+              </ActionButton>
+              <Dialog
+                :show="isCiteModelDialogOpen"
+                title="Cite"
+                @close="isCiteModelDialogOpen = false"
+              >
+                <Cite
+                  :model-title="metadataJSON.model_title || ''"
+                  :page-title="pageTitle"
+                  :model-author="metadataJSON.model_author || ''"
+                  :url="citationUrl"
+                  :date-accessed="citeDateAccessed"
+                />
+              </Dialog>
+            </li>
+            <li>
+              <ActionButton
+                type="button"
+                variant="secondary"
+                size="sm"
+                @click="isCitationInstructionsDialogOpen = true"
+                content-section="Exposure detail"
+              >
+                Citation Instructions
+              </ActionButton>
+              <Dialog
+                :show="isCitationInstructionsDialogOpen"
+                title="Citation Instructions"
+                @close="isCitationInstructionsDialogOpen = false"
+              >
+                <Citation />
+              </Dialog>
+            </li>
+          </ul>
+        </nav>
+      </section>
       <section v-if="metadataJSON.keywords?.length" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Keywords</h4>
         <div class="flex flex-wrap gap-2">
@@ -908,55 +957,6 @@ onMounted(async () => {
             </div>
           </dl>
         </div>
-      </section>
-      <section class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
-        <h4 class="text-lg font-semibold mb-3">Cite</h4>
-        <nav>
-          <ul class="space-y-2">
-            <li>
-              <ActionButton
-                type="button"
-                variant="secondary"
-                size="sm"
-                @click="openCitationDialog"
-                content-section="Exposure detail"
-              >
-                Cite this model
-              </ActionButton>
-              <Dialog
-                :show="isCiteModelDialogOpen"
-                title="Cite"
-                @close="isCiteModelDialogOpen = false"
-              >
-                <Cite
-                  :model-title="metadataJSON.model_title || ''"
-                  :page-title="pageTitle"
-                  :model-author="metadataJSON.model_author || ''"
-                  :url="citationUrl"
-                  :date-accessed="citeDateAccessed"
-                />
-              </Dialog>
-            </li>
-            <li>
-              <ActionButton
-                type="button"
-                variant="secondary"
-                size="sm"
-                @click="isCitationInstructionsDialogOpen = true"
-                content-section="Exposure detail"
-              >
-                Citation Instructions
-              </ActionButton>
-              <Dialog
-                :show="isCitationInstructionsDialogOpen"
-                title="Citation Instructions"
-                @close="isCitationInstructionsDialogOpen = false"
-              >
-                <Citation />
-              </Dialog>
-            </li>
-          </ul>
-        </nav>
       </section>
       <section v-if="licenseInfo" class="pt-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Licence</h4>
