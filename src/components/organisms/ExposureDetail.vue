@@ -165,6 +165,16 @@ const pageTitle = computed(() => {
   return exposureInfo.value.exposure.description || `Exposure ${exposureInfo.value.exposure.id}`
 })
 
+watch(
+  pageTitle,
+  (newTitle) => {
+    if (newTitle) {
+      document.title = newTitle
+    }
+  },
+  { immediate: true },
+)
+
 const openCORFiles = computed(() => {
   if (!exposureInfo.value) return []
 
