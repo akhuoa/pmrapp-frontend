@@ -169,6 +169,9 @@ const openCORFiles = computed(() => {
   if (!exposureInfo.value) return []
 
   return exposureInfo.value.files.filter((entry) => {
+    if (props.file) {
+      return entry[0] === props.file && isOpenCORFile(entry[0])
+    }
     return isOpenCORFile(entry[0])
   })
 })
