@@ -931,7 +931,8 @@ onMounted(async () => {
     @apply text-3xl font-bold mt-8 mb-8;
   }
 
-  & :deep(h1:first-child) {
+  & :deep(> h1:first-child),
+  & :deep(> div > h1:first-child) {
     @apply mt-0;
   }
 
