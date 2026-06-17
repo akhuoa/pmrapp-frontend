@@ -19,7 +19,7 @@ describe('formatCitation', () => {
     }
 
     expect(formatCitation(citation)).toBe(
-      'Doe, J., & Smith, J. (2024) Example research article. Journal of Testing, 12, 34-56. Test Publisher. https://example.com/article',
+      'Doe, J., & Smith, J. (2024). Example research article. Journal of Testing, 12, 34-56. Test Publisher. https://example.com/article',
     )
   })
 
@@ -31,7 +31,7 @@ describe('formatCitation', () => {
     }
 
     expect(formatCitation(citation)).toBe(
-      'An anonymous study. (2023) Journal of Anonymous Research,',
+      'An anonymous study. (2023). Journal of Anonymous Research.',
     )
   })
 
@@ -41,7 +41,7 @@ describe('formatCitation', () => {
       title: 'Title without author',
     }
 
-    expect(formatCitation(citation)).toBe('Title without author. (2022)')
+    expect(formatCitation(citation)).toBe('Title without author. (2022).')
   })
 
   it('formats year and title correctly when author list is missing but title exists', () => {
@@ -50,7 +50,7 @@ describe('formatCitation', () => {
       title: 'Missing author, present title',
     }
 
-    expect(formatCitation(citation)).toBe('Missing author, present title. (2021)')
+    expect(formatCitation(citation)).toBe('Missing author, present title. (2021).')
   })
 
   it('formats year only when author and title are both missing', () => {
@@ -58,6 +58,6 @@ describe('formatCitation', () => {
       issued: '2020-07-15',
     }
 
-    expect(formatCitation(citation)).toBe('(2020)')
+    expect(formatCitation(citation)).toBe('(2020).')
   })
 })
