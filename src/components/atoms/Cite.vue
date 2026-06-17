@@ -34,9 +34,9 @@ const citation = computed(() => {
   <div>
     <div>
       <div class="group relative">
-        <code class="block text-sm! m-0! p-4 pr-8 bg-gray-50 dark:bg-gray-900 rounded-md break-words">
+        <div class="block text-sm! m-0! p-4 pr-8 bg-gray-50 dark:bg-gray-900 rounded-md break-words">
           {{ formatCitation(citation) }}
-        </code>
+        </div>
         <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <CopyButton
             :text="formatCitation(citation)"
