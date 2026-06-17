@@ -983,6 +983,56 @@ onMounted(async () => {
   & :deep(blockquote) {
     @apply border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic text-gray-600 dark:text-gray-400 my-4;
   }
+
+  & :deep(ul) {
+    @apply list-disc pl-6 mb-4;
+  }
+
+  & :deep(ol) {
+    @apply list-decimal pl-6 mb-4;
+  }
+
+  & :deep(li) {
+    @apply mb-2;
+
+    p {
+      @apply mb-0;
+    }
+
+    p + p {
+      @apply mt-2;
+    }
+  }
+
+  & :deep(dd) {
+    @apply pl-4 mb-2;
+  }
+
+  & :deep(strong),
+  & :deep(b) {
+    @apply font-semibold;
+  }
+
+  & :deep(em),
+  & :deep(i) {
+    @apply italic;
+  }
+
+  & :deep(code) {
+    @apply font-mono bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 rounded text-sm px-1 py-[0.125em];
+  }
+
+  & :deep(pre) {
+    @apply bg-gray-100 dark:bg-gray-800 rounded p-4 overflow-auto mb-4 text-sm font-mono;
+  }
+
+  & :deep(pre code) {
+    @apply bg-transparent p-0;
+  }
+
+  & :deep(hr) {
+    @apply border-t border-gray-300 dark:border-gray-600 my-6;
+  }
 }
 
 .math-view {
