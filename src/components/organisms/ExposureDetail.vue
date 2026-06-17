@@ -7,7 +7,6 @@ import BackButton from '@/components/atoms/BackButton.vue'
 import Cite from '@/components/atoms/Cite.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
-import Dialog from '@/components/atoms/Dialog.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import WrapButton from '@/components/atoms/WrapButton.vue'
@@ -126,8 +125,6 @@ const hasOtherRelatedModels = ref(false)
 const isDownloadingWorkspaceZip = ref(false)
 const isDownloadingWorkspaceTgz = ref(false)
 const isDownloadingCOMBINE = ref(false)
-const isCiteModelDialogOpen = ref(false)
-const isCitationInstructionsDialogOpen = ref(false)
 const citeDateAccessed = ref<Date>(new Date())
 const { goBack } = useBackNavigation('/exposures')
 
@@ -143,18 +140,6 @@ const fileBrowserPath = computed(() => {
 const citationUrl = computed(() => {
   if (typeof window === 'undefined') return route.path
   return `${window.location.origin}${route.path}`
-})
-
-// TEMP: This is a temporary solution to determine which citation format to show based on a query parameter.
-const citationOption = computed<'a' | 'b' | 'c'>(() => {
-  const queryValue = route.query.citationOption
-  const value = typeof queryValue === 'string' ? queryValue : ''
-
-  if (value === 'b' || value === 'c') {
-    return value
-  }
-
-  return 'a'
 })
 
 const handleFileBrowserFolderClick = (name: string) => {
@@ -404,11 +389,6 @@ const handleCitationAuthorClick = (authorParts: string[]) => {
   if (familyName) {
     handleKeywordClick('citation_author_family_name', familyName)
   }
-}
-
-const openCitationDialog = (): void => {
-  citeDateAccessed.value = new Date()
-  isCiteModelDialogOpen.value = true
 }
 
 const filteredKeywords = computed(() => {
@@ -720,15 +700,9 @@ onMounted(async () => {
           </div>
         </dl>
       </section>
-      <!-- TEMP: citation option a or b -->
-      <section
-        v-if="citationOption === 'a' || citationOption === 'b'"
-        class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700"
-      >
+      <section class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Citation</h4>
-        <!-- option a -->
         <Cite
-          v-if="citationOption === 'a'"
           :model-title="metadataJSON.model_title || ''"
           :page-title="pageTitle"
           :model-author="metadataJSON.model_author || ''"
@@ -737,55 +711,6 @@ onMounted(async () => {
           :only-model-citation="true"
           :include-cellml-model-repository-citation="false"
         />
-        <!-- option b -->
-        <Cite
-          v-if="citationOption === 'b'"
-          :model-title="metadataJSON.model_title || ''"
-          :page-title="pageTitle"
-          :model-author="metadataJSON.model_author || ''"
-          :url="citationUrl"
-          :date-accessed="citeDateAccessed"
-          :only-model-citation="false"
-          :include-cellml-model-repository-citation="true"
-          class="text-sm leading-relaxed"
-        />
-      </section>
-      <!-- TEMP: citation option c -->
-      <section
-        v-if="citationOption === 'c'"
-        class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700"
-      >
-        <h4 class="text-lg font-semibold mb-3">Cite</h4>
-        <nav>
-          <ul class="space-y-2">
-            <li>
-              <ActionButton
-                type="button"
-                variant="secondary"
-                size="sm"
-                @click="isCitationInstructionsDialogOpen = true"
-                content-section="Exposure detail"
-              >
-                Citation instructions
-              </ActionButton>
-              <Dialog
-                :show="isCitationInstructionsDialogOpen"
-                title="Citation"
-                @close="isCitationInstructionsDialogOpen = false"
-              >
-                <Cite
-                  :model-title="metadataJSON.model_title || ''"
-                  :page-title="pageTitle"
-                  :model-author="metadataJSON.model_author || ''"
-                  :url="citationUrl"
-                  :date-accessed="citeDateAccessed"
-                  :only-model-citation="false"
-                  :include-cellml-model-repository-citation="true"
-                />
-              </Dialog>
-            </li>
-          </ul>
-        </nav>
       </section>
       <section v-if="metadataJSON.keywords?.length" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Keywords</h4>
