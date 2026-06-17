@@ -25,7 +25,7 @@ const citation = computed(() => {
     authors: authors.value,
     issued: props.issued,
     url: modelExposureURL.value,
-    publisher: 'Physiome Model Repository'
+    publisher: 'Physiome Model Repository',
   }
 })
 </script>
