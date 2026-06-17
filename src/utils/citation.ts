@@ -1,6 +1,43 @@
 import type { Author, Citation } from '@/types/citation'
 
 /**
+ * Parse a full author name into an Author object.
+ *
+ * If only one name is supplied it is treated as the family name.
+ * If two names are supplied the first is the given name and the second is the family name.
+ * If three or more names are supplied the first is the given name, the last is the family name
+ * and the remainder is treated as other name.
+ * @param fullName - The full name of the author as a single string.
+ * @returns An Author object with family, given, and other name parts.
+ * @example parseFullNameToAuthor("Jane Doe") // { given: "Jane", family: "Doe" }
+ * @example parseFullNameToAuthor("John Michael Smith") // { given: "John", other: "Michael", family: "Smith" }
+ * @example parseFullNameToAuthor("Madonna") // { family: "Madonna" }
+ */
+export function parseFullNameToAuthor(fullName: string): Author {
+  const trimmedName = fullName.trim()
+
+  if (!trimmedName) {
+    return { family: '' }
+  }
+
+  const parts = trimmedName.split(/\s+/)
+
+  if (parts.length === 1) {
+    return { family: parts[0] }
+  }
+
+  if (parts.length === 2) {
+    return { given: parts[0], family: parts[1] }
+  }
+
+  const given = parts[0]
+  const family = parts[parts.length - 1]
+  const other = parts.slice(1, -1).join(' ')
+
+  return { family, given, other }
+}
+
+/**
  * Format an author name array to a readable string.
  * Author parts should be [lastName, firstName?, middleInitial?].
  * @param authorParts Array of name parts for one author.
@@ -14,25 +51,27 @@ export const formatCitationAuthor = (authorParts: string[]): string => {
   return authorParts.join(' ')
 }
 
+export const formatIndividualAuthor = (author: Author): string => {
+  const family = author.family || ''
+  const given = author.given || ''
+  const givenInitial = given ? `${given.charAt(0).toUpperCase()}.` : ''
+  const otherInitials = author.other ? `${author.other.charAt(0).toUpperCase()}.` : ''
+  const allInitials = [givenInitial, otherInitials].filter(Boolean).join(' ')
+  return `${family}${allInitials ? `, ${allInitials}` : ''}`
+}
+
 /**
  * Format a citation object to APA style citation string.
  * Format: Authors (Year). Title. Journal, Volume, Pages.
  * @param citation Citation object.
  * @returns APA formatted citation string.
  */
-
 export const formatCitation = (citation: Citation): string => {
   const parts: string[] = []
-
   // Format authors.
   if (citation.authors && Array.isArray(citation.authors)) {
     const authorStrings = citation.authors.map((author: Author) => {
-      const family = author.family || ''
-      const given = author.given || ''
-      const givenInitial = given ? `${given.charAt(0).toUpperCase()}.` : ''
-      const otherInitials = author.other ? `${author.other.charAt(0).toUpperCase()}.` : ''
-      const allInitials = [givenInitial, otherInitials].filter(Boolean).join(' ')
-      return `${family}${allInitials ? `, ${allInitials}` : ''}`
+      return formatIndividualAuthor(author)
     })
 
     if (authorStrings.length === 1) {
@@ -71,6 +110,16 @@ export const formatCitation = (citation: Citation): string => {
       volumeSection += `, ${citation.first_page}`
     }
     parts.push(`${volumeSection}.`)
+  }
+
+  // Format publisher.
+  if (citation.publisher) {
+    parts.push(`${citation.publisher}.`)
+  }
+
+  // Format URL.
+  if (citation.url) {
+    parts.push(`${normaliseUrl(citation.url)}`)
   }
 
   return parts.join(' ')
