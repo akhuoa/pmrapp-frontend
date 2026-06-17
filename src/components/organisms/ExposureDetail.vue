@@ -30,6 +30,7 @@ import { formatCitation, formatCitationAuthor } from '@/utils/citation'
 import { downloadFileFromContent } from '@/utils/download'
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { getFileExtension, isOpenCORFile } from '@/utils/file'
+import { formatYear } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
 import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
 import { buildSearchQuery, isValidTerm } from '@/utils/search'
@@ -183,6 +184,12 @@ const navigationFiles = computed(() => {
   if (!exposureInfo.value) return []
 
   return exposureInfo.value.files.filter((entry) => entry[1] === true)
+})
+
+const createdYear = computed(() => {
+  if (!exposureInfo.value) return ''
+
+  return formatYear(exposureInfo.value.exposure.created_ts)
 })
 
 const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
@@ -702,10 +709,10 @@ onMounted(async () => {
       <section class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Citation</h4>
         <Cite
-          :model-title="metadataJSON.model_title || ''"
-          :page-title="pageTitle"
+          :title="metadataJSON.model_title || pageTitle"
           :model-author="metadataJSON.model_author || ''"
           :url="citationUrl"
+          :issued="createdYear"
         />
       </section>
       <section v-if="metadataJSON.keywords?.length" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">

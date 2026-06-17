@@ -1,47 +1,32 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
-import { ensureSentence, normaliseUrl } from '@/utils/citation'
+import { normaliseUrl, parseFullNameToAuthor, formatCitation } from '@/utils/citation'
 
 const props = defineProps<{
-  modelTitle: string
-  pageTitle: string
+  title: string
   modelAuthor: string
   url: string
+  issued?: string
 }>()
-
-const modelName = computed(() => {
-  const titleToUse = props.modelTitle || props.pageTitle
-  return ensureSentence(titleToUse)
-})
 
 const modelExposureURL = computed(() => {
   return normaliseUrl(props.url)
 })
 
-const formattedModelAuthor = computed(() => {
-  if (props.modelAuthor.trim()) {
-    return `CellML author(s): ${props.modelAuthor.trim()}`
-  }
-  return ''
+const authors = computed(() => {
+  const author = parseFullNameToAuthor(props.modelAuthor)
+  return author ? [author] : []
 })
 
-const citationTextClipboard = computed(() => {
-  const parts: string[] = []
-
-  if (modelName.value) {
-    parts.push(modelName.value)
+const citation = computed(() => {
+  return {
+    title: props.title,
+    authors: authors.value,
+    issued: props.issued,
+    url: modelExposureURL.value,
+    publisher: 'Physiome Model Repository'
   }
-
-  if (modelExposureURL.value) {
-    parts.push(modelExposureURL.value)
-  }
-
-  if (formattedModelAuthor.value) {
-    parts.push(formattedModelAuthor.value)
-  }
-
-  return parts.join(' ')
 })
 </script>
 
@@ -49,22 +34,12 @@ const citationTextClipboard = computed(() => {
   <div>
     <div>
       <div class="group relative">
-        <code class="block text-sm! m-0! p-4 pr-8 bg-gray-50 dark:bg-gray-900 rounded-md">
-          <div>
-            <span v-if="modelName">{{ modelName }}</span>
-            <a
-              v-if="modelExposureURL"
-              :href="modelExposureURL"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-link break-all"
-            >&nbsp;{{ modelExposureURL }}</a>
-          </div>
-          <div>{{ formattedModelAuthor }}</div>
+        <code class="block text-sm! m-0! p-4 pr-8 bg-gray-50 dark:bg-gray-900 rounded-md break-words">
+          {{ formatCitation(citation) }}
         </code>
         <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <CopyButton
-            :text="citationTextClipboard"
+            :text="formatCitation(citation)"
             title="Copy citation"
           />
         </div>
