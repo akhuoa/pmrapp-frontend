@@ -68,40 +68,51 @@ export const formatIndividualAuthor = (author: Author): string => {
  */
 export const formatCitation = (citation: Citation): string => {
   const parts: string[] = []
-  // Format authors.
-  if (citation.authors && Array.isArray(citation.authors)) {
-    const authorStrings = citation.authors.map((author: Author) => {
-      return formatIndividualAuthor(author)
-    })
 
+  const authorStrings = citation.authors && Array.isArray(citation.authors)
+    ? citation.authors.map(formatIndividualAuthor).filter(Boolean)
+    : []
+
+  const year = citation.issued?.trim().split('-')[0]
+  const yearPart = year ? `(${year}).` : ''
+  const title = citation.title?.trim()
+  const titlePart = title ? ensureSentence(title) : ''
+
+  if (authorStrings.length > 0) {
     if (authorStrings.length === 1) {
-      parts.push(authorStrings[0] || '')
+      parts.push(authorStrings[0])
     } else if (authorStrings.length === 2) {
-      parts.push(`${authorStrings[0] || ''}, & ${authorStrings[1] || ''}`)
-    } else if (authorStrings.length > 2) {
-      parts.push(
-        `${authorStrings.slice(0, -1).join(', ')}, & ${authorStrings[authorStrings.length - 1]}`,
-      )
+      parts.push(`${authorStrings[0]}, & ${authorStrings[1]}`)
+    } else {
+      parts.push(`${authorStrings.slice(0, -1).join(', ')}, & ${authorStrings[authorStrings.length - 1]}`)
+    }
+
+    if (yearPart) {
+      parts.push(yearPart)
+    }
+
+    if (titlePart) {
+      parts.push(titlePart)
+    }
+  } else {
+    if (titlePart) {
+      parts.push(titlePart)
+      if (yearPart) {
+        parts.push(yearPart)
+      }
+    } else if (yearPart) {
+      parts.push(yearPart)
     }
   }
 
-  // Format year.
-  if (citation.issued) {
-    const year = citation.issued.split('-')[0]
-    parts.push(`(${year})`)
-  }
-
-  // Format title.
-  if (citation.title) {
-    parts.push(`${citation.title}.`)
-  }
-
-  // Format journal.
   if (citation.journal) {
-    parts.push(`${citation.journal},`)
+    if (citation.volume || citation.first_page || citation.last_page) {
+      parts.push(`${citation.journal},`)
+    } else {
+      parts.push(ensureSentence(citation.journal))
+    }
   }
 
-  // Format volume and pages.
   if (citation.volume) {
     let volumeSection = citation.volume
     if (citation.first_page && citation.last_page) {
@@ -110,19 +121,21 @@ export const formatCitation = (citation: Citation): string => {
       volumeSection += `, ${citation.first_page}`
     }
     parts.push(`${volumeSection}.`)
+  } else if (citation.first_page && citation.last_page) {
+    parts.push(`${citation.first_page}-${citation.last_page}.`)
+  } else if (citation.first_page) {
+    parts.push(`${citation.first_page}.`)
   }
 
-  // Format publisher.
   if (citation.publisher) {
-    parts.push(`${citation.publisher}.`)
+    parts.push(ensureSentence(citation.publisher))
   }
 
-  // Format URL.
   if (citation.url) {
-    parts.push(`${normaliseUrl(citation.url)}`)
+    parts.push(normaliseUrl(citation.url))
   }
 
-  return parts.join(' ')
+  return parts.filter(Boolean).join(' ')
 }
 
 /**
