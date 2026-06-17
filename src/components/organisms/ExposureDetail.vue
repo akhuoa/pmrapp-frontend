@@ -706,8 +706,6 @@ onMounted(async () => {
           :page-title="pageTitle"
           :model-author="metadataJSON.model_author || ''"
           :url="citationUrl"
-          :only-model-citation="true"
-          :include-cellml-model-repository-citation="false"
         />
       </section>
       <section v-if="metadataJSON.keywords?.length" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
