@@ -2,7 +2,6 @@
 import { computed, ref } from 'vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
 import { ensureSentence, normaliseUrl } from '@/utils/citation'
-import { formatAccessDate } from '@/utils/format'
 
 const CELLML_MODEL_REPOSITORY_CITATION =
   'Lloyd, C.M., Lawson, J.L., Hunter, P.J. and Nielsen, P.F. The CellML Model Repository. Bioinformatics. 2008 September;24(18):2122-2123.'
@@ -12,12 +11,9 @@ const props = defineProps<{
   pageTitle: string
   modelAuthor: string
   url: string
-  dateAccessed: Date
   onlyModelCitation: boolean
   includeCellmlModelRepositoryCitation: boolean
 }>()
-
-const includeOptionalDetails = ref(true)
 
 const modelName = computed(() => {
   const titleToUse = props.modelTitle || props.pageTitle
@@ -35,16 +31,6 @@ const formattedModelAuthor = computed(() => {
   return ''
 })
 
-const formattedAccessDate = computed(() => {
-  if (includeOptionalDetails.value && props.dateAccessed) {
-    const formattedDate = formatAccessDate(props.dateAccessed)
-    if (formattedDate) {
-      return formattedDate
-    }
-  }
-  return ''
-})
-
 const citationTextClipboard = computed(() => {
   const parts: string[] = []
 
@@ -54,10 +40,6 @@ const citationTextClipboard = computed(() => {
 
   if (modelExposureURL.value) {
     parts.push(modelExposureURL.value)
-  }
-
-  if (formattedAccessDate.value) {
-    parts.push(formattedAccessDate.value)
   }
 
   if (formattedModelAuthor.value) {
@@ -87,7 +69,6 @@ const citationTextClipboard = computed(() => {
               class="text-link break-all"
             >&nbsp;{{ modelExposureURL }}</a>
           </div>
-          <div v-if="formattedAccessDate">{{ formattedAccessDate }}</div>
           <div>{{ formattedModelAuthor }}</div>
         </code>
         <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -96,15 +77,6 @@ const citationTextClipboard = computed(() => {
             title="Copy citation"
           />
         </div>
-      </div>
-      <div class="mt-3 text-right">
-        <label class="inline-flex items-center gap-2 text-sm cursor-pointer">
-          <input
-            v-model="includeOptionalDetails"
-            type="checkbox"
-          >
-          Include date accessed in citation.
-        </label>
       </div>
     </div>
 

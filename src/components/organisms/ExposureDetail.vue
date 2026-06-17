@@ -125,7 +125,6 @@ const hasOtherRelatedModels = ref(false)
 const isDownloadingWorkspaceZip = ref(false)
 const isDownloadingWorkspaceTgz = ref(false)
 const isDownloadingCOMBINE = ref(false)
-const citeDateAccessed = ref<Date>(new Date())
 const { goBack } = useBackNavigation('/exposures')
 
 const router = useRouter()
@@ -707,7 +706,6 @@ onMounted(async () => {
           :page-title="pageTitle"
           :model-author="metadataJSON.model_author || ''"
           :url="citationUrl"
-          :date-accessed="citeDateAccessed"
           :only-model-citation="true"
           :include-cellml-model-repository-citation="false"
         />
