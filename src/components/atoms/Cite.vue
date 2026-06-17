@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
-import { normaliseUrl, parseFullNameToAuthor, formatCitation } from '@/utils/citation'
+import { formatCitation, normaliseUrl, parseFullNameToAuthor } from '@/utils/citation'
 
 const props = defineProps<{
   title: string
