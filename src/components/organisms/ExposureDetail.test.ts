@@ -15,6 +15,7 @@ vi.mock('vue-router', () => ({
   useRouter: () => ({
     push: vi.fn(),
     back: vi.fn(),
+    resolve: vi.fn(() => ({ href: '/exposures/test-alias' })),
     currentRoute: {
       value: {
         query: {},
@@ -344,6 +345,28 @@ describe('ExposureDetail', () => {
     expect(sectionContent).toContain('The University of Auckland')
   })
 
+  it('renders "Citation" section with model citation content', async () => {
+    const wrapper = await mountComponent()
+
+    const sectionHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'Citation')
+
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('Citation')
+
+    const citationSection = sectionHeading?.element.closest('section')
+    expect(citationSection).toBeDefined()
+
+    const citationBlock = citationSection?.querySelector('.group')
+    expect(citationBlock).toBeDefined()
+    expect(citationBlock?.textContent).toContain('Lloyd, C.')
+    expect(citationBlock?.textContent).toContain(
+      'Comparison of Simulated and Measured Calcium Sparks in Intact Skeletal Muscle Fibers of the Frog (Reaction A)',
+    )
+    expect(citationBlock?.textContent).toContain('Physiome Model Repository')
+  })
+
   it('renders "Keywords" section with correct content', async () => {
     const wrapper = await mountComponent()
 
@@ -502,25 +525,27 @@ describe('ExposureDetail', () => {
     expect(sectionHeading?.exists()).toBe(true)
     expect(sectionHeading?.text()).toBe('References')
 
-    const citationList = sectionHeading?.element.nextElementSibling
-    const citationItems = citationList?.querySelectorAll('li')
-    expect(citationItems?.length).toBeGreaterThan(0)
-    expect(citationList?.textContent).toContain(
+    const referencesSection = sectionHeading?.element.closest('section')
+    expect(referencesSection).toBeDefined()
+
+    const citationBlock = referencesSection?.querySelector('.group')
+    expect(citationBlock).toBeDefined()
+    expect(citationBlock?.textContent).toContain(
       'Baylor, S. M., Hollingworth, S., & Chandler, W. K. (2002)',
     )
-    expect(citationList?.textContent).toContain(
+    expect(citationBlock?.textContent).toContain(
       'Comparison of Simulated and Measured Calcium Sparks',
     )
-    expect(citationList?.textContent).toContain('in Intact Skeletal Muscle Fibers of the Frog.')
-    expect(citationList?.textContent).toContain('Journal of General Physiology, 120, 349-368.')
+    expect(citationBlock?.textContent).toContain('in Intact Skeletal Muscle Fibers of the Frog.')
+    expect(citationBlock?.textContent).toContain('Journal of General Physiology, 120, 349-368.')
 
-    const citationReferenceLink = citationList?.nextElementSibling
+    const citationReferenceLink = referencesSection?.querySelector('a')
     expect(citationReferenceLink).toBeDefined()
     expect(citationReferenceLink?.textContent).toContain('See other models using this reference')
 
-    const citationDetails = citationReferenceLink?.nextElementSibling
-    expect(citationDetails).toBeDefined()
-    const citationDetailsButton = citationDetails?.querySelector('button')
+    const citationDetailsButton = referencesSection?.querySelector(
+      'button[aria-controls="citation-details"]',
+    )
     expect(citationDetailsButton?.textContent).toBe('Details')
 
     citationDetailsButton?.dispatchEvent(new Event('click'))
