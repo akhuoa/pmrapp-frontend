@@ -69,9 +69,10 @@ export const formatIndividualAuthor = (author: Author): string => {
 export const formatCitation = (citation: Citation): string => {
   const parts: string[] = []
 
-  const authorStrings = citation.authors && Array.isArray(citation.authors)
-    ? citation.authors.map(formatIndividualAuthor).filter(Boolean)
-    : []
+  const authorStrings =
+    citation.authors && Array.isArray(citation.authors)
+      ? citation.authors.map(formatIndividualAuthor).filter(Boolean)
+      : []
 
   const year = citation.issued?.trim().split('-')[0]
   const yearPart = year ? `(${year}).` : ''
@@ -84,7 +85,9 @@ export const formatCitation = (citation: Citation): string => {
     } else if (authorStrings.length === 2) {
       parts.push(`${authorStrings[0]}, & ${authorStrings[1]}`)
     } else {
-      parts.push(`${authorStrings.slice(0, -1).join(', ')}, & ${authorStrings[authorStrings.length - 1]}`)
+      parts.push(
+        `${authorStrings.slice(0, -1).join(', ')}, & ${authorStrings[authorStrings.length - 1]}`,
+      )
     }
 
     if (yearPart) {

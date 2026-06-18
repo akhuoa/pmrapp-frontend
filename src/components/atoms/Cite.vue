@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
 import { formatCitation, normaliseUrl, parseFullNameToAuthor } from '@/utils/citation'
-import type { Author } from '@/types/citation';
+import type { Author } from '@/types/citation'
 
 const props = defineProps<{
   title: string

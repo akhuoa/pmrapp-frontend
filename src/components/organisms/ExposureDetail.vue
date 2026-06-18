@@ -406,9 +406,7 @@ const modelCitation = computed(() => {
 })
 
 const publicationCitation = computed(() => {
-  return metadataJSON.value.citations?.length
-    ? metadataJSON.value.citations[0]
-    : null
+  return metadataJSON.value.citations?.length ? metadataJSON.value.citations[0] : null
 })
 
 const handleKeywordClick = (kind: string, keyword: string) => {
