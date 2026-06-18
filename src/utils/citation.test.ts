@@ -19,8 +19,8 @@ describe('formatCitation', () => {
     }
 
     expect(formatCitation(citation)).toBe(
-      `Doe, J., & Smith, J. (2024). Example research article. Journal of Testing, 12, 34-56. Test Publisher. `
-      + `<a href="https://example.com/article" target="_blank" rel="noopener noreferrer">https://example.com/article</a>`,
+      `Doe, J., & Smith, J. (2024). Example research article. Journal of Testing, 12, 34-56. Test Publisher. ` +
+        `<a href="https://example.com/article" target="_blank" rel="noopener noreferrer">https://example.com/article</a>`,
     )
   })
 
