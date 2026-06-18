@@ -179,6 +179,9 @@ const openCORFiles = computed(() => {
   if (!exposureInfo.value) return []
 
   return exposureInfo.value.files.filter((entry) => {
+    if (props.file) {
+      return entry[0] === props.file && isOpenCORFile(entry[0])
+    }
     return isOpenCORFile(entry[0])
   })
 })
@@ -370,13 +373,16 @@ const generateMetadata = async () => {
 }
 
 const loadDefaultView = async () => {
-  detailHTML.value = await exposureStore.getExposureSafeHTML(
-    exposureId.value,
-    exposureFileId.value,
-    'view',
-    'index.html',
-    routePath,
-  )
+  // Only load the HTML view if we have the necessary exposure ID and file ID.
+  if (exposureId.value && exposureFileId.value) {
+    detailHTML.value = await exposureStore.getExposureSafeHTML(
+      exposureId.value,
+      exposureFileId.value,
+      'view',
+      'index.html',
+      routePath,
+    )
+  }
 }
 
 const loadCodegenView = async () => {
@@ -472,64 +478,87 @@ const checkOtherRelatedModels = async () => {
   }
 }
 
+// Reset all state variables that are specific to a file or view.
+const resetState = () => {
+  availableViews.value = []
+  detailHTML.value = ''
+  exposureFileId.value = Number.NaN
+  exposureFilePath.value = ''
+  generatedCode.value = ''
+  generatedCodeFilename.value = ''
+  hasOtherRelatedModels.value = false
+  licenseInfo.value = DEFAULT_LICENSE
+  metadataJSON.value = {}
+  rawMathsData.value = []
+}
+
 const loadInitialView = async () => {
   if (!exposureInfo.value) return
 
-  const filesWithViews = exposureInfo.value.exposure?.files?.filter(
-    (file) => file.views && file.views.length > 0,
-  )
-  let fileWithViews = filesWithViews?.find((file) => file.workspace_file_path.endsWith('.cellml'))
+  // Reset per-file state before selecting a new file to avoid stale view content.
+  resetState()
+  exposureId.value = exposureInfo.value.exposure?.id
+  const exposureFiles = exposureInfo.value.exposure?.files || []
+  const filesWithViews = exposureFiles.filter((file) => file.views?.length > 0)
+  const defaultFileWithViews =
+    filesWithViews.find((file) => file.workspace_file_path.endsWith('.cellml')) || filesWithViews[0]
+  let fileWithViews: (typeof filesWithViews)[number] | undefined = defaultFileWithViews
 
   if (props.file) {
-    fileWithViews = filesWithViews?.find((file) => file.workspace_file_path === props.file)
+    exposureFilePath.value = props.file
+    fileWithViews = filesWithViews.find((file) => file.workspace_file_path === props.file)
+  } else {
+    exposureFilePath.value = defaultFileWithViews?.workspace_file_path || ''
   }
 
-  if (fileWithViews) {
-    availableViews.value = AVAILABLE_VIEWS.filter((view) =>
-      fileWithViews.views.some((v) => v.view_key === view.view_key),
+  if (!fileWithViews) {
+    return
+  }
+
+  availableViews.value = AVAILABLE_VIEWS.filter((view) =>
+    fileWithViews.views.some((v) => v.view_key === view.view_key),
+  )
+  exposureFileId.value = fileWithViews.id
+  exposureFilePath.value = fileWithViews.workspace_file_path
+  exposureId.value = fileWithViews.exposure_id
+
+  const viewEntry = fileWithViews.views.find((v) => v.view_key === 'view')
+  const licenseEntry = fileWithViews.views.find((v) => v.view_key === 'license_citation')
+  const metaEntry = fileWithViews.views.find((v) => v.view_key === 'cellml_metadata')
+
+  // Show metadata onload.
+  if (metaEntry) {
+    await generateMetadata()
+  }
+  await checkOtherRelatedModels()
+
+  if (viewEntry) {
+    detailHTML.value = await exposureStore.getExposureSafeHTML(
+      exposureId.value,
+      viewEntry.exposure_file_id,
+      'view',
+      'index.html',
+      routePath,
     )
-    exposureFileId.value = fileWithViews.id
-    exposureFilePath.value = fileWithViews.workspace_file_path
-    exposureId.value = fileWithViews.exposure_id
+  }
 
-    const viewEntry = fileWithViews.views.find((v) => v.view_key === 'view')
-    const licenseEntry = fileWithViews.views.find((v) => v.view_key === 'license_citation')
-    const metaEntry = fileWithViews.views.find((v) => v.view_key === 'cellml_metadata')
+  if (licenseEntry) {
+    licenseInfo.value = await exposureStore.getExposureSafeHTML(
+      exposureId.value,
+      licenseEntry.exposure_file_id,
+      'license_citation',
+      'license.txt',
+      routePath,
+    )
+  }
 
-    // Show metadata onload.
-    if (metaEntry) {
-      await generateMetadata()
-    }
-    await checkOtherRelatedModels()
+  // Load codegen view with default language.
+  if (props.view === 'cellml_codegen') {
+    await loadCodegenView()
+  }
 
-    if (viewEntry) {
-      detailHTML.value = await exposureStore.getExposureSafeHTML(
-        exposureId.value,
-        viewEntry.exposure_file_id,
-        'view',
-        'index.html',
-        routePath,
-      )
-    }
-
-    if (licenseEntry) {
-      licenseInfo.value = await exposureStore.getExposureSafeHTML(
-        exposureId.value,
-        licenseEntry.exposure_file_id,
-        'license_citation',
-        'license.txt',
-        routePath,
-      )
-    }
-
-    // Load codegen view with default language.
-    if (props.view === 'cellml_codegen') {
-      await loadCodegenView()
-    }
-
-    if (props.view === 'cellml_math') {
-      await generateMath()
-    }
+  if (props.view === 'cellml_math') {
+    await generateMath()
   }
 }
 
