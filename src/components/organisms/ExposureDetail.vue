@@ -413,6 +413,8 @@ const modelCitation = computed(() => {
   }
 })
 
+// Although metadataJSON.value.citations is an array,
+// it contains only one citation because metadataJSON.value.citation_id and citation_title are single values.
 const publicationCitation = computed(() => {
   return metadataJSON.value.citations?.length ? metadataJSON.value.citations[0] : null
 })
