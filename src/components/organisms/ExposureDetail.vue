@@ -140,8 +140,9 @@ const fileBrowserPath = computed(() => {
 const citationUrl = computed(() => {
   const resolved = router.resolve({ name: route.name, params: route.params })
   const resolvedURL = new URL(resolved.href, window.location.origin)
+  const decodedHref = decodeURIComponent(resolved.href)
 
-  return resolvedURL.origin + resolved.href
+  return resolvedURL.origin + decodedHref
 })
 
 const handleFileBrowserFolderClick = (name: string) => {
