@@ -54,8 +54,6 @@
   mark {
     @apply bg-amber-200 dark:bg-amber-400 text-accent;
   }
-
-
 }
 
 :root {
