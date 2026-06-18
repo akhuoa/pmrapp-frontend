@@ -84,8 +84,8 @@ export const formatCitation = (citation: Citation): string => {
       authorStrings.length === 1
         ? authorStrings[0]
         : authorStrings.length === 2
-        ? `${authorStrings[0]}, & ${authorStrings[1]}`
-        : `${authorStrings.slice(0, -1).join(', ')}, & ${authorStrings[authorStrings.length - 1]}`
+          ? `${authorStrings[0]}, & ${authorStrings[1]}`
+          : `${authorStrings.slice(0, -1).join(', ')}, & ${authorStrings[authorStrings.length - 1]}`
 
     parts.push(/[.!?]$/.test(authorSection) ? authorSection : `${authorSection}.`)
 
