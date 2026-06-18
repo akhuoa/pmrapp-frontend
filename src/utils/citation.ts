@@ -135,7 +135,9 @@ export const formatCitation = (citation: Citation): string => {
   }
 
   if (citation.url) {
-    parts.push(normaliseUrl(citation.url))
+    const normalisedUrl = normaliseUrl(citation.url)
+    const anchorTag = `<a href="${normalisedUrl}" target="_blank" rel="noopener noreferrer">${normalisedUrl}</a>`
+    parts.push(anchorTag)
   }
 
   return parts.filter(Boolean).join(' ')

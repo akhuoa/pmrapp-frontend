@@ -736,6 +736,7 @@ onMounted(async () => {
           <CopyButton
             :text="formatCitation(modelCitation)"
             title="Copy citation"
+            :withHTML="true"
           />
         </div>
         <Citation :content="formatCitation(modelCitation)" />

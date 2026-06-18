@@ -542,7 +542,9 @@ describe('ExposureDetail', () => {
     expect(citationReferenceLink).toBeDefined()
     expect(citationReferenceLink?.textContent).toContain('See other models using this reference')
 
-    const citationDetailsButton = referencesSection?.querySelector('button[aria-controls="citation-details"]')
+    const citationDetailsButton = referencesSection?.querySelector(
+      'button[aria-controls="citation-details"]',
+    )
     expect(citationDetailsButton?.textContent).toBe('Details')
 
     citationDetailsButton?.dispatchEvent(new Event('click'))

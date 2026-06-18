@@ -5,7 +5,8 @@ defineProps<{
 </script>
 
 <template>
-  <div class="group p-4 text-sm bg-gray-50 dark:bg-gray-900 rounded-md break-words relative">
-    {{ content }}
-  </div>
+  <div
+    class="group p-4 text-sm bg-gray-50 dark:bg-gray-900 rounded-md break-words relative"
+    v-html="content"
+  ></div>
 </template>
