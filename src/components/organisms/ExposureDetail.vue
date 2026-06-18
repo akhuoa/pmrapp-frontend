@@ -385,6 +385,14 @@ const loadCodegenView = async () => {
   )
 }
 
+const isAboutSectionAvailable = computed(() => {
+  return (
+    metadataJSON.value.model_title ||
+    metadataJSON.value.model_author_org ||
+    (metadataJSON.value.model_author && isValidTerm(metadataJSON.value.model_author))
+  )
+})
+
 const citationTitle = computed(() => {
   return metadataJSON.value.model_title || pageTitle.value
 })
@@ -706,7 +714,10 @@ onMounted(async () => {
           </RouterLink>.
         </div>
       </section>
-      <section v-if="metadataJSON.model_title" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+      <section
+        v-if="isAboutSectionAvailable"
+        class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700"
+      >
         <h4 class="text-lg font-semibold mb-3">About</h4>
         <dl class="text-sm leading-relaxed space-y-4">
           <div v-if="metadataJSON.model_title">
