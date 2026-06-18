@@ -2,6 +2,7 @@
 
 @theme {
   --font-sans: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  --font-mono: "Consolas", "Monaco", "Courier New", monospace;
 
   --color-primary: var(--primary);
   --color-primary-fg: var(--primary-fg);
