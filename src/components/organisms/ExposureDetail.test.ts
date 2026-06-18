@@ -344,6 +344,28 @@ describe('ExposureDetail', () => {
     expect(sectionContent).toContain('The University of Auckland')
   })
 
+  it('renders "Citation" section with model citation content', async () => {
+    const wrapper = await mountComponent()
+
+    const sectionHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'Citation')
+
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('Citation')
+
+    const citationSection = sectionHeading?.element.closest('section')
+    expect(citationSection).toBeDefined()
+
+    const citationBlock = citationSection?.querySelector('.group')
+    expect(citationBlock).toBeDefined()
+    expect(citationBlock?.textContent).toContain('Lloyd, C.')
+    expect(citationBlock?.textContent).toContain(
+      'Comparison of Simulated and Measured Calcium Sparks in Intact Skeletal Muscle Fibers of the Frog (Reaction A)',
+    )
+    expect(citationBlock?.textContent).toContain('Physiome Model Repository')
+  })
+
   it('renders "Keywords" section with correct content', async () => {
     const wrapper = await mountComponent()
 
