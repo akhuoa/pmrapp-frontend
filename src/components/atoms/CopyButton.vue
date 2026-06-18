@@ -6,6 +6,7 @@ import CopyIcon from '@/components/icons/CopyIcon.vue'
 const props = defineProps<{
   text: string
   title?: string
+  withHTML?: boolean
 }>()
 
 const isCopied = ref(false)
@@ -14,6 +15,15 @@ const buttonRef = ref<HTMLElement | null>(null)
 let copiedTimer: ReturnType<typeof setTimeout> | null = null
 
 const handleCopy = async () => {
+  if (props.withHTML) {
+    await handleCopyHTML()
+  } else {
+    await handleCopyText()
+  }
+}
+
+// General use, especially for codesnippets
+const handleCopyText = async () => {
   try {
     await navigator.clipboard.writeText(props.text)
     isCopied.value = true
@@ -27,6 +37,37 @@ const handleCopy = async () => {
     }, 2000)
   } catch (err) {
     console.error('Failed to copy:', err)
+  }
+}
+
+// mainly used for citations with clickable URL
+const handleCopyHTML = async () => {
+  try {
+    const htmlContent = props.text.replaceAll('\n', '<br>')
+    const tempElement = document.createElement('div')
+    tempElement.innerHTML = props.text
+    const plainTextContent = tempElement.textContent || tempElement.innerText || ''
+
+    const htmlBlob = new Blob([htmlContent], { type: 'text/html' })
+    const textBlob = new Blob([plainTextContent], { type: 'text/plain' })
+
+    const clipboardItem = new ClipboardItem({
+      'text/html': htmlBlob,
+      'text/plain': textBlob,
+    })
+
+    await navigator.clipboard.write([clipboardItem])
+    isCopied.value = true
+
+    if (copiedTimer) {
+      clearTimeout(copiedTimer)
+    }
+
+    copiedTimer = setTimeout(() => {
+      isCopied.value = false
+    }, 2000)
+  } catch (err) {
+    console.error('Error when trying to use navigator.clipboard.write()', err)
   }
 }
 
