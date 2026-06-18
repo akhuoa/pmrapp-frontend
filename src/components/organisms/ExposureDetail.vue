@@ -428,26 +428,30 @@ const checkOtherRelatedModels = async () => {
   }
 }
 
+// Reset all state variables that are specific to a file or view.
+const resetState = () => {
+  availableViews.value = []
+  detailHTML.value = ''
+  exposureFileId.value = Number.NaN
+  exposureFilePath.value = ''
+  generatedCode.value = ''
+  generatedCodeFilename.value = ''
+  hasOtherRelatedModels.value = false
+  licenseInfo.value = DEFAULT_LICENSE
+  metadataJSON.value = {}
+  rawMathsData.value = []
+}
+
 const loadInitialView = async () => {
   if (!exposureInfo.value) return
 
+  // Reset per-file state before selecting a new file to avoid stale view content.
+  resetState()
   exposureId.value = exposureInfo.value.exposure?.id
   const exposureFiles = exposureInfo.value.exposure?.files || []
   const filesWithViews = exposureFiles.filter((file) => file.views?.length > 0)
   const defaultFileWithViews =
     filesWithViews.find((file) => file.workspace_file_path.endsWith('.cellml')) || filesWithViews[0]
-
-  // Reset per-file state before selecting a new file to avoid stale view content.
-  availableViews.value = []
-  exposureFileId.value = Number.NaN
-  detailHTML.value = ''
-  generatedCode.value = ''
-  generatedCodeFilename.value = ''
-  rawMathsData.value = []
-  metadataJSON.value = {}
-  hasOtherRelatedModels.value = false
-  licenseInfo.value = DEFAULT_LICENSE
-
   let fileWithViews: (typeof filesWithViews)[number] | undefined = defaultFileWithViews
 
   if (props.file) {
