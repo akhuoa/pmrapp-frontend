@@ -165,10 +165,15 @@ export const normaliseUrl = (url: string): string => {
 
   try {
     const parsed = new URL(trimmed)
+
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return ''
+    }
+
     parsed.search = ''
     parsed.hash = ''
     return parsed.toString()
   } catch {
-    return trimmed.split('#')[0]?.split('?')[0] || ''
+    return ''
   }
 }
