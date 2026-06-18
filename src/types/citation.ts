@@ -5,7 +5,7 @@ export interface Author {
 }
 
 export interface Citation {
-  id: string
+  id?: string
   authors?: Author[]
   issued?: string
   title?: string
@@ -13,4 +13,6 @@ export interface Citation {
   volume?: string
   first_page?: string
   last_page?: string
+  publisher?: string
+  url?: string
 }
