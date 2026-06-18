@@ -156,7 +156,7 @@ export const ensureSentence = (value: string): string => {
 /**
  * Remove query and hash from a URL for cleaner citation output.
  * @param url URL string.
- * @returns Normalized URL string.
+ * @returns normalised URL string.
  */
 export const normaliseUrl = (url: string): string => {
   const trimmed = url.trim()
