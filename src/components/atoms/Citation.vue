@@ -10,3 +10,11 @@ defineProps<{
     v-html="content"
   ></div>
 </template>
+
+<style scoped>
+@import '@/assets/text-link.css';
+
+:deep(a) {
+  @apply text-link dark:underline dark:decoration-dotted hover:text-link-hover transition;
+}
+</style>
