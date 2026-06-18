@@ -502,25 +502,25 @@ describe('ExposureDetail', () => {
     expect(sectionHeading?.exists()).toBe(true)
     expect(sectionHeading?.text()).toBe('References')
 
-    const citationList = sectionHeading?.element.nextElementSibling
-    const citationItems = citationList?.querySelectorAll('li')
-    expect(citationItems?.length).toBeGreaterThan(0)
-    expect(citationList?.textContent).toContain(
+    const referencesSection = sectionHeading?.element.closest('section')
+    expect(referencesSection).toBeDefined()
+
+    const citationBlock = referencesSection?.querySelector('.group')
+    expect(citationBlock).toBeDefined()
+    expect(citationBlock?.textContent).toContain(
       'Baylor, S. M., Hollingworth, S., & Chandler, W. K. (2002)',
     )
-    expect(citationList?.textContent).toContain(
+    expect(citationBlock?.textContent).toContain(
       'Comparison of Simulated and Measured Calcium Sparks',
     )
-    expect(citationList?.textContent).toContain('in Intact Skeletal Muscle Fibers of the Frog.')
-    expect(citationList?.textContent).toContain('Journal of General Physiology, 120, 349-368.')
+    expect(citationBlock?.textContent).toContain('in Intact Skeletal Muscle Fibers of the Frog.')
+    expect(citationBlock?.textContent).toContain('Journal of General Physiology, 120, 349-368.')
 
-    const citationReferenceLink = citationList?.nextElementSibling
+    const citationReferenceLink = referencesSection?.querySelector('a')
     expect(citationReferenceLink).toBeDefined()
     expect(citationReferenceLink?.textContent).toContain('See other models using this reference')
 
-    const citationDetails = citationReferenceLink?.nextElementSibling
-    expect(citationDetails).toBeDefined()
-    const citationDetailsButton = citationDetails?.querySelector('button')
+    const citationDetailsButton = referencesSection?.querySelector('button[aria-controls="citation-details"]')
     expect(citationDetailsButton?.textContent).toBe('Details')
 
     citationDetailsButton?.dispatchEvent(new Event('click'))
