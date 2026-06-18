@@ -2,10 +2,12 @@
 import { computed } from 'vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
 import { formatCitation, normaliseUrl, parseFullNameToAuthor } from '@/utils/citation'
+import type { Author } from '@/types/citation';
 
 const props = defineProps<{
   title: string
   modelAuthor: string
+  authors?: Author[]
   url: string
   issued?: string
 }>()
@@ -37,7 +39,7 @@ const citation = computed(() => {
         <div class="block text-sm! m-0! p-4 pr-8 bg-gray-50 dark:bg-gray-900 rounded-md break-words">
           {{ formatCitation(citation) }}
         </div>
-        <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div class="absolute -top-6 right-2 opacity-80 group-hover:opacity-100 transition-opacity">
           <CopyButton
             :text="formatCitation(citation)"
             title="Copy citation"

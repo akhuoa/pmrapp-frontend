@@ -4,7 +4,7 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
-import Cite from '@/components/atoms/Cite.vue'
+import Citation from '@/components/atoms/Citation.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
@@ -26,7 +26,7 @@ import { useSearchStore } from '@/stores/search'
 import type { ErrorInfo } from '@/types/error'
 import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
 import type { MathMLFormatOptions } from '@/types/mathml'
-import { formatCitation, formatCitationAuthor } from '@/utils/citation'
+import { formatCitation, formatCitationAuthor, parseFullNameToAuthor } from '@/utils/citation'
 import { downloadFileFromContent } from '@/utils/download'
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { getFileExtension, isOpenCORFile } from '@/utils/file'
@@ -385,6 +385,32 @@ const loadCodegenView = async () => {
   )
 }
 
+const citationTitle = computed(() => {
+  return metadataJSON.value.model_title || pageTitle.value
+})
+
+const citationAuthors = computed(() => {
+  if (!metadataJSON.value.model_author) return []
+  const author = parseFullNameToAuthor(metadataJSON.value.model_author)
+  return author ? [author] : []
+})
+
+const modelCitation = computed(() => {
+  return {
+    title: citationTitle.value,
+    authors: citationAuthors.value,
+    issued: createdYear.value,
+    url: citationUrl.value,
+    publisher: 'Physiome Model Repository',
+  }
+})
+
+const publicationCitation = computed(() => {
+  return metadataJSON.value.citations?.length
+    ? metadataJSON.value.citations[0]
+    : null
+})
+
 const handleKeywordClick = (kind: string, keyword: string) => {
   const currentQuery = router.currentRoute.value.query
   router.push({ path: '/search', query: buildSearchQuery(kind, keyword, currentQuery) })
@@ -707,13 +733,14 @@ onMounted(async () => {
         </dl>
       </section>
       <section class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
-        <h4 class="text-lg font-semibold mb-3">Citation</h4>
-        <Cite
-          :title="metadataJSON.model_title || pageTitle"
-          :model-author="metadataJSON.model_author || ''"
-          :url="citationUrl"
-          :issued="createdYear"
-        />
+        <div class="flex flex-row justify-between mb-3">
+          <h4 class="text-lg font-semibold">Citation</h4>
+          <CopyButton
+            :text="formatCitation(modelCitation)"
+            title="Copy citation"
+          />
+        </div>
+        <Citation :content="formatCitation(modelCitation)" />
       </section>
       <section v-if="metadataJSON.keywords?.length" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Keywords</h4>
@@ -831,21 +858,18 @@ onMounted(async () => {
           </ul>
         </nav>
       </section>
-      <section v-if="metadataJSON.citations?.length" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
-        <h4 class="text-lg font-semibold mb-3">References</h4>
-        <ul class="space-y-4 text-sm mb-2" v-if="metadataJSON.citations && metadataJSON.citations.length > 0">
-          <li v-for="citation in metadataJSON.citations" :key="citation.id">
-            <div class="group p-4 pr-8 bg-gray-50 dark:bg-gray-900 rounded-md relative">
-              {{ formatCitation(citation) }}
-              <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <CopyButton
-                  :text="formatCitation(citation)"
-                  title="Copy citation"
-                />
-              </div>
-            </div>
-          </li>
-        </ul>
+      <section v-if="publicationCitation" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex flex-row justify-between mb-3">
+          <h4 class="text-lg font-semibold">References</h4>
+          <CopyButton
+            :text="formatCitation(publicationCitation)"
+            title="Copy citation"
+          />
+        </div>
+        <Citation
+          :content="formatCitation(publicationCitation)"
+          class="mb-4"
+        />
         <div v-if="hasOtherRelatedModels" class="mb-4">
           <RouterLink
             :to="{ path: '/search', query: { citation_id: metadataJSON.citation_id } }"
@@ -855,7 +879,7 @@ onMounted(async () => {
             See other models using this reference
           </RouterLink>
         </div>
-        <div>
+        <div class="mt-4">
           <button
             @click="isCitationDetailsOpen = !isCitationDetailsOpen"
             class="text-link text-sm flex items-center gap-2 text-left"
