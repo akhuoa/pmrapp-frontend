@@ -43,7 +43,7 @@ const handleCopyText = async () => {
 // mainly used for citations with clickable URL
 const handleCopyHTML = async () => {
   try {
-    const htmlContent = props.text.replaceAll('\n', '')
+    const htmlContent = props.text.replaceAll('\n', '<br>')
     const tempElement = document.createElement('div')
     tempElement.innerHTML = props.text
     const plainTextContent = tempElement.textContent || tempElement.innerText || ''
