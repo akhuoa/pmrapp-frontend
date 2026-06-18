@@ -54,6 +54,16 @@ describe('formatCitation', () => {
     expect(formatCitation(citation)).toBe('Missing author, present title. (2021).')
   })
 
+  it('formats author with only family name and title', () => {
+    const citation = {
+      issued: '2020-07-15',
+      title: 'Only family name author',
+      authors: [{ family: 'Doe' }],
+    }
+
+    expect(formatCitation(citation)).toBe('Doe. (2020). Only family name author.')
+  })
+
   it('formats year only when author and title are both missing', () => {
     const citation = {
       issued: '2020-07-15',

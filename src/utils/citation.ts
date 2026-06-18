@@ -80,15 +80,14 @@ export const formatCitation = (citation: Citation): string => {
   const titlePart = title ? ensureSentence(title) : ''
 
   if (authorStrings.length > 0) {
-    if (authorStrings.length === 1) {
-      parts.push(authorStrings[0])
-    } else if (authorStrings.length === 2) {
-      parts.push(`${authorStrings[0]}, & ${authorStrings[1]}`)
-    } else {
-      parts.push(
-        `${authorStrings.slice(0, -1).join(', ')}, & ${authorStrings[authorStrings.length - 1]}`,
-      )
-    }
+    const authorSection =
+      authorStrings.length === 1
+        ? authorStrings[0]
+        : authorStrings.length === 2
+        ? `${authorStrings[0]}, & ${authorStrings[1]}`
+        : `${authorStrings.slice(0, -1).join(', ')}, & ${authorStrings[authorStrings.length - 1]}`
+
+    parts.push(/[.!?]$/.test(authorSection) ? authorSection : `${authorSection}.`)
 
     if (yearPart) {
       parts.push(yearPart)
