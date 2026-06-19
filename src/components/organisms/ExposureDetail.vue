@@ -137,11 +137,15 @@ const fileBrowserPath = computed(() => {
   return typeof p === 'string' ? p : undefined
 })
 
+// Generates a citation URL from the current route, excluding query parameters and the hash.
+// It resolves the application's base path from vite.config to construct the complete URL.
+// It also maintains reactivity for navigations.
 const citationUrl = computed(() => {
   const resolved = router.resolve({ name: route.name, params: route.params })
   const resolvedURL = new URL(resolved.href, window.location.origin)
+  const decodedHref = decodeURIComponent(resolved.href)
 
-  return resolvedURL.origin + resolved.href
+  return resolvedURL.origin + decodedHref
 })
 
 const handleFileBrowserFolderClick = (name: string) => {
