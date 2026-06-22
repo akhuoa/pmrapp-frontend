@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
@@ -109,9 +109,7 @@ const isTooLargeForPreview = computed(() => fileSizeBytes.value > MAX_PREVIEW_FI
 watch(
   () => props.path,
   (newPath) => {
-    nextTick(() => {
-      document.title = newPath
-    })
+    document.title = newPath
   },
   { immediate: true },
 )
