@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
+  ensureSentence,
   formatCitation,
-  parseFullNameToAuthor,
   formatCitationAuthor,
   formatIndividualAuthor,
-  ensureSentence,
   normaliseUrl,
+  parseFullNameToAuthor,
 } from './citation'
 
 describe('parseFullNameToAuthor', () => {
