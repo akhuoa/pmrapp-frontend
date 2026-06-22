@@ -193,7 +193,6 @@ watch(
   () => {
     document.title = pageTitle.value
   },
-  { immediate: true },
 )
 
 const openCORFiles = computed(() => {
