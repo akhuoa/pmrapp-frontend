@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory, type NavigationGuard } from 'vue-router'
+import { useExposureStore } from '@/stores/exposure'
+import { useWorkspaceStore } from '@/stores/workspace'
 import ExposureDetailView from '@/views/ExposureDetailView.vue'
 import ExposureView from '@/views/ExposureView.vue'
 import HomeView from '@/views/HomeView.vue'
@@ -7,8 +9,6 @@ import NotFoundView from '@/views/NotFoundView.vue'
 import SearchView from '@/views/SearchView.vue'
 import WorkspaceDetailView from '@/views/WorkspaceDetailView.vue'
 import WorkspaceView from '@/views/WorkspaceView.vue'
-import { useExposureStore } from '@/stores/exposure'
-import { useWorkspaceStore } from '@/stores/workspace'
 
 const title = 'Physiome Model Repository'
 const workspaceAliasBases = ['/workspace']
