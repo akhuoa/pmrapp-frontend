@@ -7,6 +7,7 @@ import NotFoundView from '@/views/NotFoundView.vue'
 import SearchView from '@/views/SearchView.vue'
 import WorkspaceDetailView from '@/views/WorkspaceDetailView.vue'
 import WorkspaceView from '@/views/WorkspaceView.vue'
+import { useExposureStore } from '@/stores/exposure'
 
 const title = 'Physiome Model Repository'
 const workspaceAliasBases = ['/workspace']
@@ -40,6 +41,26 @@ const createPluralRouteAliases = (pluralBase: string, aliasBases: string[], suff
   ...suffixes.slice(1).map((suffix) => `${pluralBase}${suffix}`),
   ...createAliases(aliasBases, ...suffixes),
 ]
+
+const exposureBeforeEnter = async (to: any, from: any, next: any) => {
+  const alias = to.params?.alias as string | undefined
+  if (!alias) {
+    next()
+    return
+  }
+
+  try {
+    const exposureInfo = await useExposureStore().getExposureInfo(alias)
+    const title = exposureInfo?.exposure?.description
+    if (title) {
+      to.meta.title = title
+    }
+    next()
+  } catch (error) {
+    console.error(`Error fetching exposure info for alias ${alias}:`, error)
+    next()
+  }
+}
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -101,6 +122,7 @@ const router = createRouter({
       component: ExposureDetailView,
       alias: createAliases(exposureAliasBases, '/:alias', '/:alias/view'),
       meta: { title: `Exposure Detail – ${title}` },
+      beforeEnter: exposureBeforeEnter,
     },
     {
       path: '/exposures/:alias/:file(.+)/:view([^./]+)',
@@ -113,6 +135,7 @@ const router = createRouter({
         exposureFileViewRouteSuffixes
       ),
       meta: { title: `Exposure File – ${title}` },
+      beforeEnter: exposureBeforeEnter,
     },
     {
       path: '/exposures/:alias/:file(.+)',
@@ -125,6 +148,7 @@ const router = createRouter({
         exposureFileRouteSuffixes
       ),
       meta: { title: `Exposure File – ${title}` },
+      beforeEnter: exposureBeforeEnter,
     },
     {
       path: '/search',

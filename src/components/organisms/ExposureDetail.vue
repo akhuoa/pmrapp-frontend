@@ -185,7 +185,6 @@ watch(
       document.title = newTitle
     }
   },
-  { immediate: true },
 )
 
 watch(fileBrowserPath, () => {
