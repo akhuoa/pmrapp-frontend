@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type NavigationGuard } from 'vue-router'
 import ExposureDetailView from '@/views/ExposureDetailView.vue'
 import ExposureView from '@/views/ExposureView.vue'
 import HomeView from '@/views/HomeView.vue'
@@ -42,7 +42,7 @@ const createPluralRouteAliases = (pluralBase: string, aliasBases: string[], suff
   ...createAliases(aliasBases, ...suffixes),
 ]
 
-const exposureBeforeEnter = async (to: any, from: any, next: any) => {
+const exposureBeforeEnter: NavigationGuard = async (to, _from, next) => {
   const alias = to.params?.alias as string | undefined
   if (!alias) {
     next()
