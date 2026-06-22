@@ -8,6 +8,7 @@ import SearchView from '@/views/SearchView.vue'
 import WorkspaceDetailView from '@/views/WorkspaceDetailView.vue'
 import WorkspaceView from '@/views/WorkspaceView.vue'
 import { useExposureStore } from '@/stores/exposure'
+import { useWorkspaceStore } from '@/stores/workspace'
 
 const title = 'Physiome Model Repository'
 const workspaceAliasBases = ['/workspace']
@@ -62,6 +63,28 @@ const exposureBeforeEnter: NavigationGuard = async (to, _from, next) => {
   }
 }
 
+const workspaceBeforeEnter: NavigationGuard = async (to, _from, next) => {
+  const alias = to.params?.alias as string | undefined
+  if (!alias) {
+    next()
+    return
+  }
+
+  try {
+    const commitId = to.params?.commitId as string | ''
+    const path = to.params?.path as string | ''
+    const workspaceInfo = await useWorkspaceStore().getWorkspaceInfo(alias, commitId, path)
+    const title = workspaceInfo?.workspace?.description
+    if (title) {
+      to.meta.title = title
+    }
+    next()
+  } catch (error) {
+    console.error(`Error fetching workspace info for alias ${alias}:`, error)
+    next()
+  }
+}
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   scrollBehavior(to, from, savedPosition) {
@@ -97,6 +120,7 @@ const router = createRouter({
         workspaceDetailRouteSuffixes,
       ),
       meta: { title: `Workspace Detail – ${title}` },
+      beforeEnter: workspaceBeforeEnter,
     },
     {
       path: '/workspaces/:alias/file/:commitId/:path(.+)',
@@ -108,6 +132,7 @@ const router = createRouter({
         workspaceFileRouteSuffixes,
       ),
       meta: { title: `Workspace File – ${title}` },
+      beforeEnter: workspaceBeforeEnter,
     },
     {
       path: '/exposures',

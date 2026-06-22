@@ -105,7 +105,6 @@ watch(
       document.title = newTitle
     }
   },
-  { immediate: true },
 )
 
 const loadWorkspaceInfo = async () => {
