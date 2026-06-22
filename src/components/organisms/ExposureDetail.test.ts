@@ -190,6 +190,26 @@ describe('ExposureDetail', () => {
     expect(title.text()).toBe(titleText)
   })
 
+  it('sets document.title to pageTitle on mount', async () => {
+    const { document: doc } = window
+    doc.title = ''
+
+    await mountComponent()
+
+    expect(doc.title).toBe('Baylor, Hollingworth, Chandler, 2002')
+  })
+
+  it('sets document.title to the view name when a view prop is provided', async () => {
+    const { document: doc } = window
+    doc.title = ''
+
+    await mountComponent({
+      props: { view: 'cellml_codegen' },
+    })
+
+    expect(doc.title).toBe('Generate code')
+  })
+
   it('renders html-view with content', async () => {
     const wrapper = await mountComponent()
 
