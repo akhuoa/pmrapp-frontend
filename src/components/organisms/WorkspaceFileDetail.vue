@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
@@ -105,6 +105,14 @@ const imageDataUrl = computed(() => {
 
 // Fast guard: avoid rendering very large payloads in the browser preview.
 const isTooLargeForPreview = computed(() => fileSizeBytes.value > MAX_PREVIEW_FILE_SIZE_BYTES)
+
+watch(
+  () => props.path,
+  (newPath) => {
+    document.title = newPath
+  },
+  { immediate: true },
+)
 
 const downloadFile = () => {
   downloadFileFromBlob(fileBlob.value, filename.value)
