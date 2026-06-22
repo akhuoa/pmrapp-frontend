@@ -190,7 +190,7 @@ watch(
 
 watch(
   fileBrowserPath,
-  (newPath) => {
+  () => {
     document.title = pageTitle.value
   },
   { immediate: true },
