@@ -174,8 +174,8 @@ const pageTitle = computed(() => {
       return `${viewEntry.name}`
     }
   }
-  if (!exposureInfo.value) return ''
-  return exposureInfo.value.exposure.description || `Exposure ${exposureInfo.value.exposure.id}`
+
+  return exposureInfo.value?.exposure.description || props.alias
 })
 
 watch(
