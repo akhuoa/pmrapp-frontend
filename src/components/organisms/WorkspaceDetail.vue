@@ -117,6 +117,7 @@ const loadWorkspaceInfo = async () => {
 
     if (currentRequest === requestCounter.value) {
       workspaceInfo.value = workspaceData
+      document.title = workspaceData.workspace.description || alias
     }
   } catch (err) {
     if (currentRequest === requestCounter.value) {
