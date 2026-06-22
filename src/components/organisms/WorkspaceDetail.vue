@@ -98,14 +98,11 @@ const pageTitle = computed(() => {
   return workspaceInfo.value?.workspace.description || props.alias
 })
 
-watch(
-  pageTitle,
-  (newTitle) => {
-    if (newTitle) {
-      document.title = newTitle
-    }
-  },
-)
+watch(pageTitle, (newTitle) => {
+  if (newTitle) {
+    document.title = newTitle
+  }
+})
 
 const loadWorkspaceInfo = async () => {
   isLoading.value = true

@@ -178,14 +178,11 @@ const pageTitle = computed(() => {
   return exposureInfo.value?.exposure.description || props.alias
 })
 
-watch(
-  pageTitle,
-  (newTitle) => {
-    if (newTitle) {
-      document.title = newTitle
-    }
-  },
-)
+watch(pageTitle, (newTitle) => {
+  if (newTitle) {
+    document.title = newTitle
+  }
+})
 
 watch(fileBrowserPath, () => {
   document.title = pageTitle.value
