@@ -23,6 +23,16 @@ export function formatDate(timestamp: number): string {
 }
 
 /**
+ * Format a Unix timestamp to a year string.
+ * @param timestamp - Unix timestamp in seconds.
+ * @returns Four-digit year string (e.g., "2026").
+ * @example formatYear(1704499200) // "2024".
+ */
+export function formatYear(timestamp: number): string {
+  return new Date(timestamp * 1000).getFullYear().toString()
+}
+
+/**
  * Format a file count with formatting.
  * Returns empty string if count is zero, negative, or falsy.
  * @param count - The number of files/items.

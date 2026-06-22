@@ -4,9 +4,11 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
+import Citation from '@/components/atoms/Citation.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
+import TermButton from '@/components/atoms/TermButton.vue'
 import WrapButton from '@/components/atoms/WrapButton.vue'
 import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
@@ -24,14 +26,14 @@ import { useSearchStore } from '@/stores/search'
 import type { ErrorInfo } from '@/types/error'
 import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
 import type { MathMLFormatOptions } from '@/types/mathml'
-import { formatCitation, formatCitationAuthor } from '@/utils/citation'
+import { formatCitation, formatCitationAuthor, parseFullNameToAuthor } from '@/utils/citation'
 import { downloadFileFromContent } from '@/utils/download'
 import { getExposureIdFromResourcePath } from '@/utils/exposure'
 import { getFileExtension, isOpenCORFile } from '@/utils/file'
+import { formatYear } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
 import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
 import { buildSearchQuery, isValidTerm } from '@/utils/search'
-import TermButton from '../atoms/TermButton.vue'
 
 type ExposureFileEntry = ExposureInfo['files'][number]
 
@@ -135,6 +137,17 @@ const fileBrowserPath = computed(() => {
   return typeof p === 'string' ? p : undefined
 })
 
+// Generates a citation URL from the current route, excluding query parameters and the hash.
+// It resolves the application's base path from vite.config to construct the complete URL.
+// It also maintains reactivity for navigations.
+const citationUrl = computed(() => {
+  const resolved = router.resolve({ name: route.name, params: route.params })
+  const resolvedURL = new URL(resolved.href, window.location.origin)
+  const decodedHref = decodeURIComponent(resolved.href)
+
+  return resolvedURL.origin + decodedHref
+})
+
 const handleFileBrowserFolderClick = (name: string) => {
   const currentPath = fileBrowserPath.value
   const newPath = currentPath ? `${currentPath}/${name}` : name
@@ -179,6 +192,9 @@ const openCORFiles = computed(() => {
   if (!exposureInfo.value) return []
 
   return exposureInfo.value.files.filter((entry) => {
+    if (props.file) {
+      return entry[0] === props.file && isOpenCORFile(entry[0])
+    }
     return isOpenCORFile(entry[0])
   })
 })
@@ -187,6 +203,12 @@ const navigationFiles = computed(() => {
   if (!exposureInfo.value) return []
 
   return exposureInfo.value.files.filter((entry) => entry[1] === true)
+})
+
+const createdYear = computed(() => {
+  if (!exposureInfo.value) return ''
+
+  return formatYear(exposureInfo.value.exposure.created_ts)
 })
 
 const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
@@ -364,13 +386,16 @@ const generateMetadata = async () => {
 }
 
 const loadDefaultView = async () => {
-  detailHTML.value = await exposureStore.getExposureSafeHTML(
-    exposureId.value,
-    exposureFileId.value,
-    'view',
-    'index.html',
-    routePath,
-  )
+  // Only load the HTML view if we have the necessary exposure ID and file ID.
+  if (exposureId.value && exposureFileId.value) {
+    detailHTML.value = await exposureStore.getExposureSafeHTML(
+      exposureId.value,
+      exposureFileId.value,
+      'view',
+      'index.html',
+      routePath,
+    )
+  }
 }
 
 const loadCodegenView = async () => {
@@ -381,6 +406,40 @@ const loadCodegenView = async () => {
     CODEGEN_LANGUAGES[0]?.fileName || 'code.c',
   )
 }
+
+const isAboutSectionAvailable = computed(() => {
+  return (
+    metadataJSON.value.model_title ||
+    metadataJSON.value.model_author_org ||
+    (metadataJSON.value.model_author && isValidTerm(metadataJSON.value.model_author))
+  )
+})
+
+const citationTitle = computed(() => {
+  return metadataJSON.value.model_title || pageTitle.value
+})
+
+const citationAuthors = computed(() => {
+  if (!metadataJSON.value.model_author) return []
+  const author = parseFullNameToAuthor(metadataJSON.value.model_author)
+  return author ? [author] : []
+})
+
+const modelCitation = computed(() => {
+  return {
+    title: citationTitle.value,
+    authors: citationAuthors.value,
+    issued: createdYear.value,
+    url: citationUrl.value,
+    publisher: 'Physiome Model Repository',
+  }
+})
+
+// Although metadataJSON.value.citations is an array,
+// it contains only one citation because metadataJSON.value.citation_id and citation_title are single values.
+const publicationCitation = computed(() => {
+  return metadataJSON.value.citations?.length ? metadataJSON.value.citations[0] : null
+})
 
 const handleKeywordClick = (kind: string, keyword: string) => {
   const currentQuery = router.currentRoute.value.query
@@ -432,64 +491,87 @@ const checkOtherRelatedModels = async () => {
   }
 }
 
+// Reset all state variables that are specific to a file or view.
+const resetState = () => {
+  availableViews.value = []
+  detailHTML.value = ''
+  exposureFileId.value = Number.NaN
+  exposureFilePath.value = ''
+  generatedCode.value = ''
+  generatedCodeFilename.value = ''
+  hasOtherRelatedModels.value = false
+  licenseInfo.value = DEFAULT_LICENSE
+  metadataJSON.value = {}
+  rawMathsData.value = []
+}
+
 const loadInitialView = async () => {
   if (!exposureInfo.value) return
 
-  const filesWithViews = exposureInfo.value.exposure?.files?.filter(
-    (file) => file.views && file.views.length > 0,
-  )
-  let fileWithViews = filesWithViews?.find((file) => file.workspace_file_path.endsWith('.cellml'))
+  // Reset per-file state before selecting a new file to avoid stale view content.
+  resetState()
+  exposureId.value = exposureInfo.value.exposure?.id
+  const exposureFiles = exposureInfo.value.exposure?.files || []
+  const filesWithViews = exposureFiles.filter((file) => file.views?.length > 0)
+  const defaultFileWithViews =
+    filesWithViews.find((file) => file.workspace_file_path.endsWith('.cellml')) || filesWithViews[0]
+  let fileWithViews: (typeof filesWithViews)[number] | undefined = defaultFileWithViews
 
   if (props.file) {
-    fileWithViews = filesWithViews?.find((file) => file.workspace_file_path === props.file)
+    exposureFilePath.value = props.file
+    fileWithViews = filesWithViews.find((file) => file.workspace_file_path === props.file)
+  } else {
+    exposureFilePath.value = defaultFileWithViews?.workspace_file_path || ''
   }
 
-  if (fileWithViews) {
-    availableViews.value = AVAILABLE_VIEWS.filter((view) =>
-      fileWithViews.views.some((v) => v.view_key === view.view_key),
+  if (!fileWithViews) {
+    return
+  }
+
+  availableViews.value = AVAILABLE_VIEWS.filter((view) =>
+    fileWithViews.views.some((v) => v.view_key === view.view_key),
+  )
+  exposureFileId.value = fileWithViews.id
+  exposureFilePath.value = fileWithViews.workspace_file_path
+  exposureId.value = fileWithViews.exposure_id
+
+  const viewEntry = fileWithViews.views.find((v) => v.view_key === 'view')
+  const licenseEntry = fileWithViews.views.find((v) => v.view_key === 'license_citation')
+  const metaEntry = fileWithViews.views.find((v) => v.view_key === 'cellml_metadata')
+
+  // Show metadata onload.
+  if (metaEntry) {
+    await generateMetadata()
+  }
+  await checkOtherRelatedModels()
+
+  if (viewEntry) {
+    detailHTML.value = await exposureStore.getExposureSafeHTML(
+      exposureId.value,
+      viewEntry.exposure_file_id,
+      'view',
+      'index.html',
+      routePath,
     )
-    exposureFileId.value = fileWithViews.id
-    exposureFilePath.value = fileWithViews.workspace_file_path
-    exposureId.value = fileWithViews.exposure_id
+  }
 
-    const viewEntry = fileWithViews.views.find((v) => v.view_key === 'view')
-    const licenseEntry = fileWithViews.views.find((v) => v.view_key === 'license_citation')
-    const metaEntry = fileWithViews.views.find((v) => v.view_key === 'cellml_metadata')
+  if (licenseEntry) {
+    licenseInfo.value = await exposureStore.getExposureSafeHTML(
+      exposureId.value,
+      licenseEntry.exposure_file_id,
+      'license_citation',
+      'license.txt',
+      routePath,
+    )
+  }
 
-    // Show metadata onload.
-    if (metaEntry) {
-      await generateMetadata()
-    }
-    await checkOtherRelatedModels()
+  // Load codegen view with default language.
+  if (props.view === 'cellml_codegen') {
+    await loadCodegenView()
+  }
 
-    if (viewEntry) {
-      detailHTML.value = await exposureStore.getExposureSafeHTML(
-        exposureId.value,
-        viewEntry.exposure_file_id,
-        'view',
-        'index.html',
-        routePath,
-      )
-    }
-
-    if (licenseEntry) {
-      licenseInfo.value = await exposureStore.getExposureSafeHTML(
-        exposureId.value,
-        licenseEntry.exposure_file_id,
-        'license_citation',
-        'license.txt',
-        routePath,
-      )
-    }
-
-    // Load codegen view with default language.
-    if (props.view === 'cellml_codegen') {
-      await loadCodegenView()
-    }
-
-    if (props.view === 'cellml_math') {
-      await generateMath()
-    }
+  if (props.view === 'cellml_math') {
+    await generateMath()
   }
 }
 
@@ -679,7 +761,10 @@ onMounted(async () => {
           </RouterLink>.
         </div>
       </section>
-      <section v-if="metadataJSON.model_title" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+      <section
+        v-if="isAboutSectionAvailable"
+        class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700"
+      >
         <h4 class="text-lg font-semibold mb-3">About</h4>
         <dl class="text-sm leading-relaxed space-y-4">
           <div v-if="metadataJSON.model_title">
@@ -702,6 +787,17 @@ onMounted(async () => {
             <dd>{{ metadataJSON.model_author_org }}</dd>
           </div>
         </dl>
+      </section>
+      <section class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex flex-row justify-between mb-3">
+          <h4 class="text-lg font-semibold">Citation</h4>
+          <CopyButton
+            :text="formatCitation(modelCitation)"
+            title="Copy citation"
+            :withHTML="true"
+          />
+        </div>
+        <Citation :content="formatCitation(modelCitation)" />
       </section>
       <section v-if="metadataJSON.keywords?.length" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Keywords</h4>
@@ -819,21 +915,18 @@ onMounted(async () => {
           </ul>
         </nav>
       </section>
-      <section v-if="metadataJSON.citations?.length" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
-        <h4 class="text-lg font-semibold mb-3">References</h4>
-        <ul class="space-y-4 text-sm mb-2" v-if="metadataJSON.citations && metadataJSON.citations.length > 0">
-          <li v-for="citation in metadataJSON.citations" :key="citation.id">
-            <div class="group p-4 pr-8 bg-gray-50 dark:bg-gray-800 rounded-md relative">
-              {{ formatCitation(citation) }}
-              <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <CopyButton
-                  :text="formatCitation(citation)"
-                  title="Copy citation"
-                />
-              </div>
-            </div>
-          </li>
-        </ul>
+      <section v-if="publicationCitation" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex flex-row justify-between mb-3">
+          <h4 class="text-lg font-semibold">References</h4>
+          <CopyButton
+            :text="formatCitation(publicationCitation)"
+            title="Copy citation"
+          />
+        </div>
+        <Citation
+          :content="formatCitation(publicationCitation)"
+          class="mb-4"
+        />
         <div v-if="hasOtherRelatedModels" class="mb-4">
           <RouterLink
             :to="{ path: '/search', query: { citation_id: metadataJSON.citation_id } }"
@@ -843,7 +936,7 @@ onMounted(async () => {
             See other models using this reference
           </RouterLink>
         </div>
-        <div>
+        <div class="mt-4">
           <button
             @click="isCitationDetailsOpen = !isCitationDetailsOpen"
             class="text-link text-sm flex items-center gap-2 text-left"
@@ -937,6 +1030,15 @@ onMounted(async () => {
     @apply text-link dark:underline dark:decoration-dotted hover:text-link-hover transition;
   }
 
+  & :deep(h1) {
+    @apply text-3xl font-bold mt-8 mb-8;
+  }
+
+  & :deep(> h1:first-child),
+  & :deep(> div > h1:first-child) {
+    @apply mt-0;
+  }
+
   & :deep(h2) {
     @apply text-2xl font-semibold mt-0 mb-8;
   }
@@ -979,6 +1081,60 @@ onMounted(async () => {
 
   & :deep(table td) {
     @apply align-top text-sm;
+  }
+
+  & :deep(blockquote) {
+    @apply border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic text-gray-600 dark:text-gray-400 my-4;
+  }
+
+  & :deep(ul) {
+    @apply list-disc pl-6 mb-4;
+  }
+
+  & :deep(ol) {
+    @apply list-decimal pl-6 mb-4;
+  }
+
+  & :deep(li) {
+    @apply mb-2;
+
+    p {
+      @apply mb-0;
+    }
+
+    p + p {
+      @apply mt-2;
+    }
+  }
+
+  & :deep(dd) {
+    @apply pl-4 mb-2;
+  }
+
+  & :deep(strong),
+  & :deep(b) {
+    @apply font-semibold;
+  }
+
+  & :deep(em),
+  & :deep(i) {
+    @apply italic;
+  }
+
+  & :deep(code) {
+    @apply font-mono bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 rounded text-sm px-1 py-[0.125em];
+  }
+
+  & :deep(pre) {
+    @apply bg-gray-100 dark:bg-gray-800 rounded p-4 overflow-auto mb-4 text-sm font-mono;
+  }
+
+  & :deep(pre code) {
+    @apply bg-transparent p-0;
+  }
+
+  & :deep(hr) {
+    @apply border-t border-gray-300 dark:border-gray-600 my-6;
   }
 }
 

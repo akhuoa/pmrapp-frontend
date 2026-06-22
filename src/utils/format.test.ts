@@ -6,6 +6,7 @@ import {
   formatNumber,
   formatSearchKey,
   formatTermKey,
+  formatYear,
 } from './format'
 
 describe('formatNumber', () => {
@@ -21,6 +22,14 @@ describe('formatDate', () => {
     const results = formatDate(1704499200)
 
     expect(results).toBe('6 January 2024')
+  })
+})
+
+describe('formatYear', () => {
+  it('returns formatted year only', () => {
+    const results = formatYear(1704499200)
+
+    expect(results).toBe('2024')
   })
 })
 
