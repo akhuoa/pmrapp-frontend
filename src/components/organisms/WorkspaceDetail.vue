@@ -89,6 +89,20 @@ const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
   }
 }
 
+const pageTitle = computed(() => {
+  return workspaceInfo.value?.workspace.description || props.alias
+})
+
+watch(
+  pageTitle,
+  (newTitle) => {
+    if (newTitle) {
+      document.title = newTitle
+    }
+  },
+  { immediate: true },
+)
+
 const loadWorkspaceInfo = async () => {
   isLoading.value = true
   error.value = null
@@ -151,7 +165,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
 
   <div v-else-if="workspaceInfo">
     <PageHeader
-      :title="workspaceInfo.workspace.description || alias"
+      :title="pageTitle"
     />
 
     <div class="mb-6 space-y-4">
