@@ -188,6 +188,14 @@ watch(
   { immediate: true },
 )
 
+watch(
+  fileBrowserPath,
+  (newPath) => {
+    document.title = pageTitle.value
+  },
+  { immediate: true },
+)
+
 const openCORFiles = computed(() => {
   if (!exposureInfo.value) return []
 
