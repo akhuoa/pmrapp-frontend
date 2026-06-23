@@ -51,7 +51,7 @@ const resolveExposureTitle = async (to: RouteLocationNormalized) => {
 
   try {
     const exposureInfo = await useExposureStore().getExposureInfo(alias)
-    return exposureInfo?.exposure?.description
+    return exposureInfo?.exposure?.description || alias
   } catch (error) {
     console.error(`Error fetching exposure info for alias ${alias}:`, error)
   }
@@ -69,7 +69,7 @@ const resolveWorkspaceTitle = async (to: RouteLocationNormalized) => {
     const commitId = typeof commitIdParam === 'string' ? commitIdParam : ''
     const path = typeof pathParam === 'string' ? pathParam : ''
     const workspaceInfo = await useWorkspaceStore().getWorkspaceInfo(alias, commitId, path)
-    return workspaceInfo?.workspace?.description
+    return workspaceInfo?.workspace?.description || alias
   } catch (error) {
     console.error(`Error fetching workspace info for alias ${alias}:`, error)
   }
