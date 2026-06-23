@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, type NavigationGuard } from 'vue-router'
+import { createRouter, createWebHistory, type RouteLocationNormalized } from 'vue-router'
 import { useExposureStore } from '@/stores/exposure'
 import { useWorkspaceStore } from '@/stores/workspace'
 import ExposureDetailView from '@/views/ExposureDetailView.vue'
@@ -43,30 +43,23 @@ const createPluralRouteAliases = (pluralBase: string, aliasBases: string[], suff
   ...createAliases(aliasBases, ...suffixes),
 ]
 
-const exposureBeforeEnter: NavigationGuard = async (to, _from, next) => {
+const resolveExposureTitle = async (to: RouteLocationNormalized) => {
   const alias = to.params?.alias as string | undefined
   if (!alias) {
-    next()
     return
   }
 
   try {
     const exposureInfo = await useExposureStore().getExposureInfo(alias)
-    const title = exposureInfo?.exposure?.description
-    if (title) {
-      to.meta.title = title
-    }
-    next()
+    return exposureInfo?.exposure?.description
   } catch (error) {
     console.error(`Error fetching exposure info for alias ${alias}:`, error)
-    next()
   }
 }
 
-const workspaceBeforeEnter: NavigationGuard = async (to, _from, next) => {
+const resolveWorkspaceTitle = async (to: RouteLocationNormalized) => {
   const alias = to.params?.alias as string | undefined
   if (!alias) {
-    next()
     return
   }
 
@@ -74,15 +67,24 @@ const workspaceBeforeEnter: NavigationGuard = async (to, _from, next) => {
     const commitId = to.params?.commitId as string | ''
     const path = to.params?.path as string | ''
     const workspaceInfo = await useWorkspaceStore().getWorkspaceInfo(alias, commitId, path)
-    const title = workspaceInfo?.workspace?.description
-    if (title) {
-      to.meta.title = title
-    }
-    next()
+    return workspaceInfo?.workspace?.description
   } catch (error) {
     console.error(`Error fetching workspace info for alias ${alias}:`, error)
-    next()
   }
+}
+
+const resolveRouteTitle = async (to: RouteLocationNormalized) => {
+  const currentTitle = to.meta.title as string | undefined
+
+  if (to.name?.toString().startsWith('exposure')) {
+    return (await resolveExposureTitle(to)) || currentTitle
+  }
+
+  if (to.name?.toString().startsWith('workspace')) {
+    return (await resolveWorkspaceTitle(to)) || currentTitle
+  }
+
+  return currentTitle
 }
 
 const router = createRouter({
@@ -120,7 +122,6 @@ const router = createRouter({
         workspaceDetailRouteSuffixes,
       ),
       meta: { title: `Workspace Detail – ${title}` },
-      beforeEnter: workspaceBeforeEnter,
     },
     {
       path: '/workspaces/:alias/file/:commitId/:path(.+)',
@@ -132,7 +133,6 @@ const router = createRouter({
         workspaceFileRouteSuffixes,
       ),
       meta: { title: `Workspace File – ${title}` },
-      beforeEnter: workspaceBeforeEnter,
     },
     {
       path: '/exposures',
@@ -147,7 +147,6 @@ const router = createRouter({
       component: ExposureDetailView,
       alias: createAliases(exposureAliasBases, '/:alias', '/:alias/view'),
       meta: { title: `Exposure Detail – ${title}` },
-      beforeEnter: exposureBeforeEnter,
     },
     {
       path: '/exposures/:alias/:file(.+)/:view([^./]+)',
@@ -160,7 +159,6 @@ const router = createRouter({
         exposureFileViewRouteSuffixes
       ),
       meta: { title: `Exposure File – ${title}` },
-      beforeEnter: exposureBeforeEnter,
     },
     {
       path: '/exposures/:alias/:file(.+)',
@@ -173,7 +171,6 @@ const router = createRouter({
         exposureFileRouteSuffixes
       ),
       meta: { title: `Exposure File – ${title}` },
-      beforeEnter: exposureBeforeEnter,
     },
     {
       path: '/search',
@@ -194,6 +191,13 @@ const router = createRouter({
       meta: { title: `Page Not Found – ${title}` },
     },
   ],
+})
+
+router.beforeResolve(async (to) => {
+  const resolvedTitle = await resolveRouteTitle(to)
+  if (resolvedTitle) {
+    to.meta.title = resolvedTitle
+  }
 })
 
 router.afterEach((to) => {

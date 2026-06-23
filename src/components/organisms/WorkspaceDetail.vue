@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
@@ -30,11 +30,6 @@ const isLoading = ref(true)
 const isDownloadingWorkspaceZip = ref(false)
 const isDownloadingWorkspaceTgz = ref(false)
 const requestCounter = ref(0)
-const isUnmounted = ref(false)
-
-onBeforeUnmount(() => {
-  isUnmounted.value = true
-})
 
 const backPath = computed(() => {
   if (!props.path) {
@@ -98,12 +93,6 @@ const pageTitle = computed(() => {
   return workspaceInfo.value?.workspace.description || props.alias
 })
 
-watch(pageTitle, (newTitle) => {
-  if (newTitle) {
-    document.title = newTitle
-  }
-})
-
 const loadWorkspaceInfo = async () => {
   isLoading.value = true
   error.value = null
@@ -118,9 +107,6 @@ const loadWorkspaceInfo = async () => {
 
     if (currentRequest === requestCounter.value) {
       workspaceInfo.value = workspaceData
-      if (!isUnmounted.value) {
-        document.title = workspaceData.workspace.description || alias
-      }
     }
   } catch (err) {
     if (currentRequest === requestCounter.value) {
