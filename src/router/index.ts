@@ -64,8 +64,10 @@ const resolveWorkspaceTitle = async (to: RouteLocationNormalized) => {
   }
 
   try {
-    const commitId = to.params?.commitId as string | ''
-    const path = to.params?.path as string | ''
+    const commitIdParam = to.params?.commitId
+    const pathParam = to.params?.path
+    const commitId = typeof commitIdParam === 'string' ? commitIdParam : ''
+    const path = typeof pathParam === 'string' ? pathParam : ''
     const workspaceInfo = await useWorkspaceStore().getWorkspaceInfo(alias, commitId, path)
     return workspaceInfo?.workspace?.description
   } catch (error) {
