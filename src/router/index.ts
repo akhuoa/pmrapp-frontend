@@ -198,7 +198,7 @@ const router = createRouter({
 router.beforeResolve(async (to) => {
   const resolvedTitle = await resolveRouteTitle(to)
   if (resolvedTitle) {
-    to.meta.title = resolvedTitle
+    to.meta.title = resolvedTitle.includes(title) ? resolvedTitle : `${resolvedTitle} – ${title}`
   }
 })
 
