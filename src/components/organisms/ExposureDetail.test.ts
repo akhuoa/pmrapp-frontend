@@ -6,6 +6,7 @@ import ExposureDetail from '@/components/organisms/ExposureDetail.vue'
 import { mockExposureInfo, mockGeneratedCode, mockMetadata } from '@/mocks/exposureInfo'
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
+import { TITLE } from '@/constants/global'
 
 // Mock Vue Router.
 vi.mock('vue-router', () => ({
@@ -187,7 +188,7 @@ describe('ExposureDetail', () => {
 
     const title = wrapper.find('h1')
     expect(title.exists()).toBe(true)
-    expect(title.text()).toBe(titleText)
+    expect(title.text()).toBe(`${titleText} – ${TITLE}`)
   })
 
   it('renders html-view with content', async () => {
@@ -364,7 +365,7 @@ describe('ExposureDetail', () => {
     expect(citationBlock?.textContent).toContain(
       'Comparison of Simulated and Measured Calcium Sparks in Intact Skeletal Muscle Fibers of the Frog (Reaction A)',
     )
-    expect(citationBlock?.textContent).toContain('Physiome Model Repository')
+    expect(citationBlock?.textContent).toContain(TITLE)
   })
 
   it('renders "Keywords" section with correct content', async () => {

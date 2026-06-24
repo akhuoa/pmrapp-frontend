@@ -424,7 +424,7 @@ const modelCitation = computed(() => {
     authors: citationAuthors.value,
     issued: createdYear.value,
     url: citationUrl.value,
-    publisher: 'Physiome Model Repository',
+    publisher: TITLE,
   }
 })
 
