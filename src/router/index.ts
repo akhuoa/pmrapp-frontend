@@ -1,6 +1,9 @@
 import { createRouter, createWebHistory, type RouteLocationNormalized } from 'vue-router'
+import { TITLE } from '@/constants/global'
 import { useExposureStore } from '@/stores/exposure'
 import { useWorkspaceStore } from '@/stores/workspace'
+import { generateExposureTitle } from '@/utils/exposure'
+import { generateWorkspaceTitle } from '@/utils/workspace'
 import ExposureDetailView from '@/views/ExposureDetailView.vue'
 import ExposureView from '@/views/ExposureView.vue'
 import HomeView from '@/views/HomeView.vue'
@@ -9,9 +12,6 @@ import NotFoundView from '@/views/NotFoundView.vue'
 import SearchView from '@/views/SearchView.vue'
 import WorkspaceDetailView from '@/views/WorkspaceDetailView.vue'
 import WorkspaceView from '@/views/WorkspaceView.vue'
-import { generateExposureTitle } from '@/utils/exposure'
-import { generateWorkspaceTitle } from '@/utils/workspace'
-import { TITLE } from '@/constants/global'
 
 const workspaceAliasBases = ['/workspace']
 const workspaceDetailRouteSuffixes = ['/:alias', '/:alias/file', '/:alias/@@file']
