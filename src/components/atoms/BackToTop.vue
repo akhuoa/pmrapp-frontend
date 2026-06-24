@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 import ArrowUpIcon from '@/components/icons/ArrowUpIcon.vue'
