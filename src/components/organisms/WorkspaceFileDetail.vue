@@ -40,10 +40,8 @@ const fileContent = ref<string>('')
 const fileBlob = ref<Blob>(new Blob())
 const fileBlobUrl = ref<string>('')
 const fileSizeBytes = ref(0)
-const workspaceURL = ref<string>('')
 const workspaceInfo = ref<WorkspaceInfo | null>(null)
 const workspaceInfoLoading = ref(true)
-const isOpenCORURLLoading = ref(false)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 const showCode = ref(false)
@@ -76,13 +74,14 @@ const isMarkdown = computed(() => isMarkdownFile(props.path))
 const isCode = computed(() => isCodeFile(props.path))
 const isOpenCOR = computed(() => isOpenCORFile(props.path))
 const canShowOpenCORButton = computed(
-  () => isOpenCOR.value && !isOpenCORURLLoading.value && !!openCORFileURL.value,
+  () => isOpenCOR.value && !!openCORFileURL.value,
 )
 
 const openCORFileURL = computed(() => {
-  if (!workspaceURL.value) return ''
+  const url = workspaceInfo.value?.workspace.url
+  if (!url) return ''
 
-  const rawFileURL = `${workspaceURL.value}rawfile/${props.commitId}/${props.path}`
+  const rawFileURL = `${url}rawfile/${props.commitId}/${props.path}`
   const opencorLink = `opencor://openFile/${rawFileURL}`
   return `//opencor.ws/app/?${opencorLink}`
 })
@@ -130,19 +129,6 @@ const loadWorkspaceInfo = async () => {
   }
 }
 
-const loadWorkspaceURLForOpenCOR = async () => {
-  if (!isOpenCOR.value || !workspaceInfo.value) return
-
-  isOpenCORURLLoading.value = true
-  try {
-    workspaceURL.value = workspaceInfo.value.workspace.url
-  } catch (workspaceErr) {
-    console.error('Error loading workspace URL for OpenCOR link:', workspaceErr)
-  } finally {
-    isOpenCORURLLoading.value = false
-  }
-}
-
 const pageTitle = computed(() => {
   const title = workspaceInfo.value?.workspace.description || workspaceInfo.value?.workspace.id
   const truncatedCommitId = workspaceInfo.value?.commit.commit_id.substring(0, 12)
@@ -153,9 +139,6 @@ const pageTitle = computed(() => {
 
 onMounted(async () => {
   void loadWorkspaceInfo()
-
-  // OpenCOR link data loads separately so file preview is not blocked.
-  void loadWorkspaceURLForOpenCOR()
 
   try {
     const blob = await getWorkspaceService().getRawFileBlob(props.alias, props.commitId, props.path)
