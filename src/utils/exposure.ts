@@ -20,13 +20,13 @@ export const getExposureIdFromResourcePath = (resourcePath: string): number | nu
  *
  * @param description The description of the exposure, if available.
  * @param id The ID of the exposure, used as a fallback if description is not available.
- * @param withTitleSuffix When true (default), appends the site title suffix.
+ * @param withTitleSuffix When true, appends the site title suffix. Defaults to false.
  * @returns A string representing the title for the exposure page.
  */
 export const generateExposureTitle = (
   description: string | null | undefined,
   id: number | null | undefined,
-  withTitleSuffix = true
+  withTitleSuffix = false
 ): string => {
   let title: string
 
