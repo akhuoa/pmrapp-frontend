@@ -1,6 +1,6 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
@@ -15,6 +15,7 @@ import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { getWorkspaceService } from '@/services'
 import { useWorkspaceStore } from '@/stores/workspace'
+import type { WorkspaceInfo } from '@/types/workspace'
 import { downloadFileFromBlob } from '@/utils/download'
 import {
   isCodeFile,
@@ -25,7 +26,7 @@ import {
   isSvgFile,
 } from '@/utils/file'
 import { renderMarkdown } from '@/utils/markdown'
-import ActionButton from '../atoms/ActionButton.vue'
+import { generateWorkspaceTitle } from '@/utils/workspace'
 
 // Files with size above this threshold are not rendered in the preview to prevent browser freeze.
 const MAX_PREVIEW_FILE_SIZE_BYTES = 500 * 1024 // ~500 KB
@@ -40,8 +41,8 @@ const fileContent = ref<string>('')
 const fileBlob = ref<Blob>(new Blob())
 const fileBlobUrl = ref<string>('')
 const fileSizeBytes = ref(0)
-const workspaceURL = ref<string>('')
-const isOpenCORURLLoading = ref(false)
+const workspaceInfo = ref<WorkspaceInfo | null>(null)
+const workspaceInfoLoading = ref(true)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 const showCode = ref(false)
@@ -73,14 +74,13 @@ const isSvg = computed(() => isSvgFile(props.path))
 const isMarkdown = computed(() => isMarkdownFile(props.path))
 const isCode = computed(() => isCodeFile(props.path))
 const isOpenCOR = computed(() => isOpenCORFile(props.path))
-const canShowOpenCORButton = computed(
-  () => isOpenCOR.value && !isOpenCORURLLoading.value && !!openCORFileURL.value,
-)
+const canShowOpenCORButton = computed(() => isOpenCOR.value && !!openCORFileURL.value)
 
 const openCORFileURL = computed(() => {
-  if (!workspaceURL.value) return ''
+  const url = workspaceInfo.value?.workspace.url
+  if (!url) return ''
 
-  const rawFileURL = `${workspaceURL.value}rawfile/${props.commitId}/${props.path}`
+  const rawFileURL = `${url}rawfile/${props.commitId}/${props.path}`
   const opencorLink = `opencor://openFile/${rawFileURL}`
   return `//opencor.ws/app/?${opencorLink}`
 })
@@ -118,23 +118,30 @@ const toggleCodeWrap = () => {
   codeBlockRef.value?.toggleWrap()
 }
 
-const loadWorkspaceURLForOpenCOR = async () => {
-  if (!isOpenCOR.value) return
-
-  isOpenCORURLLoading.value = true
+const loadWorkspaceInfo = async () => {
   try {
-    const workspaceInfo = await workspaceStore.getWorkspaceInfo(props.alias, props.commitId, '')
-    workspaceURL.value = workspaceInfo.workspace.url
+    workspaceInfo.value = await workspaceStore.getWorkspaceInfo(props.alias, props.commitId, '')
   } catch (workspaceErr) {
-    console.error('Error loading workspace URL for OpenCOR link:', workspaceErr)
+    console.error('Error loading workspace info:', workspaceErr)
   } finally {
-    isOpenCORURLLoading.value = false
+    workspaceInfoLoading.value = false
   }
 }
 
+const pageTitle = computed(() => {
+  const title = generateWorkspaceTitle(
+    workspaceInfo.value?.workspace.description,
+    workspaceInfo.value?.workspace.id,
+    props.commitId,
+    props.path,
+    false,
+  )
+
+  return title
+})
+
 onMounted(async () => {
-  // OpenCOR link data loads separately so file preview is not blocked.
-  void loadWorkspaceURLForOpenCOR()
+  void loadWorkspaceInfo()
 
   try {
     const blob = await getWorkspaceService().getRawFileBlob(props.alias, props.commitId, props.path)
@@ -178,6 +185,8 @@ onBeforeUnmount(() => {
     :on-click="goBack"
   />
 
+  <PageHeader v-if="!workspaceInfoLoading" :title="pageTitle" titleSize="small" />
+
   <ErrorBlock
     v-if="error"
     title="Error loading file"
@@ -187,10 +196,11 @@ onBeforeUnmount(() => {
   <LoadingBox v-else-if="isLoading" message="Loading file..." />
 
   <div v-else>
-    <PageHeader :title="path" />
-
     <div class="box p-0! overflow-hidden">
-      <div class="flex items-center justify-end px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+        <div>
+          {{ filename }}
+        </div>
         <div class="flex items-center gap-2">
           <button
             v-if="isSvg || isMarkdown"

@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -19,6 +18,7 @@ import MathTransformOptions from '@/components/molecules/MathTransformOptions.vu
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import WorkspaceFileBrowser from '@/components/molecules/WorkspaceFileBrowser.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
+import { TITLE } from '@/constants/global'
 import { getMathFormatOptionsStorageService } from '@/services'
 import { downloadCOMBINEArchive, downloadWorkspaceArchive } from '@/services/downloadUrlService'
 import { useExposureStore } from '@/stores/exposure'
@@ -28,7 +28,7 @@ import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
 import type { MathMLFormatOptions } from '@/types/mathml'
 import { formatCitation, formatCitationAuthor, parseFullNameToAuthor } from '@/utils/citation'
 import { downloadFileFromContent } from '@/utils/download'
-import { getExposureIdFromResourcePath } from '@/utils/exposure'
+import { generateExposureTitle, getExposureIdFromResourcePath } from '@/utils/exposure'
 import { getFileExtension, isOpenCORFile } from '@/utils/file'
 import { formatYear } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
@@ -174,8 +174,12 @@ const pageTitle = computed(() => {
       return `${viewEntry.name}`
     }
   }
-  if (!exposureInfo.value) return ''
-  return exposureInfo.value.exposure.description || `Exposure ${exposureInfo.value.exposure.id}`
+
+  return generateExposureTitle(
+    exposureInfo.value?.exposure.description,
+    exposureInfo.value?.exposure.id,
+    false,
+  )
 })
 
 const openCORFiles = computed(() => {
@@ -421,7 +425,7 @@ const modelCitation = computed(() => {
     authors: citationAuthors.value,
     issued: createdYear.value,
     url: citationUrl.value,
-    publisher: 'Physiome Model Repository',
+    publisher: TITLE,
   }
 })
 

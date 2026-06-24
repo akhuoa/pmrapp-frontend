@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
@@ -15,6 +14,7 @@ import { downloadWorkspaceArchive } from '@/services/downloadUrlService'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { ErrorInfo } from '@/types/error'
 import type { WorkspaceInfo } from '@/types/workspace'
+import { generateWorkspaceTitle } from '@/utils/workspace'
 
 const props = defineProps<{
   alias: string
@@ -89,6 +89,13 @@ const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
   }
 }
 
+const pageTitle = computed(() => {
+  return generateWorkspaceTitle(
+    workspaceInfo.value?.workspace.description,
+    workspaceInfo.value?.workspace.id,
+  )
+})
+
 const loadWorkspaceInfo = async () => {
   isLoading.value = true
   error.value = null
@@ -151,7 +158,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
 
   <div v-else-if="workspaceInfo">
     <PageHeader
-      :title="workspaceInfo.workspace.description || alias"
+      :title="pageTitle"
     />
 
     <div class="mb-6 space-y-4">

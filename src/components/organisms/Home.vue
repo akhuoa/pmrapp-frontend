@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import KeywordBrowser from '@/components/molecules/KeywordBrowser.vue'
 import NavigationCard from '@/components/molecules/NavigationCard.vue'

@@ -54,16 +54,16 @@ const disabledClasses = {
   icon: 'disabled:opacity-60 disabled:cursor-not-allowed',
 }
 
-const secondaryLightModeClasses = 'bg-gray-100 enabled:hover:bg-gray-100'
-const secondaryDarkModeClasses = 'dark:bg-gray-600 enabled:dark:hover:bg-gray-500'
+const secondaryLightModeClasses = 'bg-gray-100 hover:bg-gray-100'
+const secondaryDarkModeClasses = 'dark:bg-gray-600 dark:hover:bg-gray-500'
 
 const transitionClasses = 'transition duration-200 ease-linear'
 
 const variantClasses = {
-  primary: `px-3 py-1 rounded border border-primary bg-primary text-white enabled:hover:opacity-90 ${transitionClasses}`,
-  secondary: `px-3 py-1 rounded border border-primary text-link enabled:hover:text-link-hover ${transitionClasses} ${secondaryLightModeClasses} ${secondaryDarkModeClasses}`,
-  link: `text-primary enabled:hover:text-primary-hover ${transitionClasses}`,
-  icon: `p-2 rounded text-gray-700 dark:text-gray-300 enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 ${transitionClasses}`,
+  primary: `px-3 py-1 rounded border border-primary bg-primary text-white hover:opacity-90 ${transitionClasses}`,
+  secondary: `px-3 py-1 rounded border border-primary text-link hover:text-link-hover ${transitionClasses} ${secondaryLightModeClasses} ${secondaryDarkModeClasses}`,
+  link: `text-primary hover:text-primary-hover ${transitionClasses}`,
+  icon: `p-2 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 ${transitionClasses}`,
 }
 
 const sizeClasses = {

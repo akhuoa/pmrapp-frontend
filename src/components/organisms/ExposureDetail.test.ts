@@ -3,6 +3,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import ExposureDetail from '@/components/organisms/ExposureDetail.vue'
+import { TITLE } from '@/constants/global'
 import { mockExposureInfo, mockGeneratedCode, mockMetadata } from '@/mocks/exposureInfo'
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
@@ -187,7 +188,7 @@ describe('ExposureDetail', () => {
 
     const title = wrapper.find('h1')
     expect(title.exists()).toBe(true)
-    expect(title.text()).toBe(titleText)
+    expect(title.text()).toBe(`${titleText}`)
   })
 
   it('renders html-view with content', async () => {
@@ -364,7 +365,7 @@ describe('ExposureDetail', () => {
     expect(citationBlock?.textContent).toContain(
       'Comparison of Simulated and Measured Calcium Sparks in Intact Skeletal Muscle Fibers of the Frog (Reaction A)',
     )
-    expect(citationBlock?.textContent).toContain('Physiome Model Repository')
+    expect(citationBlock?.textContent).toContain(TITLE)
   })
 
   it('renders "Keywords" section with correct content', async () => {
