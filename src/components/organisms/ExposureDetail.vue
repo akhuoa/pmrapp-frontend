@@ -34,6 +34,8 @@ import { formatYear } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
 import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
 import { buildSearchQuery, isValidTerm } from '@/utils/search'
+import { generateExposureTitle } from '@/utils/exposure'
+import { TITLE } from '@/constants/global'
 
 type ExposureFileEntry = ExposureInfo['files'][number]
 
@@ -175,7 +177,7 @@ const pageTitle = computed(() => {
     }
   }
 
-  return exposureInfo.value?.exposure.description || props.alias
+  return generateExposureTitle(exposureInfo.value?.exposure.description, exposureInfo.value?.exposure.id)
 })
 
 const openCORFiles = computed(() => {

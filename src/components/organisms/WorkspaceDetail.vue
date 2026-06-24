@@ -15,6 +15,7 @@ import { downloadWorkspaceArchive } from '@/services/downloadUrlService'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { ErrorInfo } from '@/types/error'
 import type { WorkspaceInfo } from '@/types/workspace'
+import { generateWorkspaceTitle } from '@/utils/workspace'
 
 const props = defineProps<{
   alias: string
@@ -90,7 +91,7 @@ const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
 }
 
 const pageTitle = computed(() => {
-  return workspaceInfo.value?.workspace.description || props.alias
+  return generateWorkspaceTitle(workspaceInfo.value?.workspace.description, workspaceInfo.value?.workspace.id)
 })
 
 const loadWorkspaceInfo = async () => {

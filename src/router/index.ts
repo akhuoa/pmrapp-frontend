@@ -9,8 +9,10 @@ import NotFoundView from '@/views/NotFoundView.vue'
 import SearchView from '@/views/SearchView.vue'
 import WorkspaceDetailView from '@/views/WorkspaceDetailView.vue'
 import WorkspaceView from '@/views/WorkspaceView.vue'
+import { generateExposureTitle } from '@/utils/exposure'
+import { generateWorkspaceTitle } from '@/utils/workspace'
+import { TITLE } from '@/constants/global'
 
-const title = 'Physiome Model Repository'
 const workspaceAliasBases = ['/workspace']
 const workspaceDetailRouteSuffixes = ['/:alias', '/:alias/file', '/:alias/@@file']
 const workspaceFileRouteSuffixes = [
@@ -51,7 +53,8 @@ const resolveExposureTitle = async (to: RouteLocationNormalized) => {
 
   try {
     const exposureInfo = await useExposureStore().getExposureInfo(alias)
-    return exposureInfo?.exposure?.description || alias
+
+    return generateExposureTitle(exposureInfo?.exposure?.description, exposureInfo?.exposure?.id)
   } catch (error) {
     console.error(`Error fetching exposure info for alias ${alias}:`, error)
   }
@@ -69,7 +72,8 @@ const resolveWorkspaceTitle = async (to: RouteLocationNormalized) => {
     const commitId = typeof commitIdParam === 'string' ? commitIdParam : ''
     const path = typeof pathParam === 'string' ? pathParam : ''
     const workspaceInfo = await useWorkspaceStore().getWorkspaceInfo(alias, commitId, path)
-    return workspaceInfo?.workspace?.description || alias
+
+    return generateWorkspaceTitle(workspaceInfo?.workspace?.description, workspaceInfo?.workspace?.id)
   } catch (error) {
     console.error(`Error fetching workspace info for alias ${alias}:`, error)
   }
@@ -106,13 +110,13 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
-      meta: { title: title },
+      meta: { title: TITLE },
     },
     {
       path: '/workspaces',
       name: 'workspaces',
       component: WorkspaceView,
-      meta: { title: `Workspaces – ${title}` },
+      meta: { title: `Workspaces – ${TITLE}` },
     },
     {
       path: '/workspaces/:alias',
@@ -123,7 +127,7 @@ const router = createRouter({
         workspaceAliasBases,
         workspaceDetailRouteSuffixes,
       ),
-      meta: { title: `Workspace Detail – ${title}` },
+      meta: { title: `Workspace Detail – ${TITLE}` },
     },
     {
       path: '/workspaces/:alias/file/:commitId/:path(.+)',
@@ -134,21 +138,21 @@ const router = createRouter({
         workspaceAliasBases,
         workspaceFileRouteSuffixes,
       ),
-      meta: { title: `Workspace File – ${title}` },
+      meta: { title: `Workspace File – ${TITLE}` },
     },
     {
       path: '/exposures',
       name: 'exposures',
       component: ExposureView,
       alias: createAliases(exposureAliasBases, ''),
-      meta: { title: `Exposures – ${title}` },
+      meta: { title: `Exposures – ${TITLE}` },
     },
     {
       path: '/exposures/:alias',
       name: 'exposure-detail',
       component: ExposureDetailView,
       alias: createAliases(exposureAliasBases, '/:alias', '/:alias/view'),
-      meta: { title: `Exposure Detail – ${title}` },
+      meta: { title: `Exposure Detail – ${TITLE}` },
     },
     {
       path: '/exposures/:alias/:file(.+)/:view([^./]+)',
@@ -160,7 +164,7 @@ const router = createRouter({
         exposureAliasBases,
         exposureFileViewRouteSuffixes
       ),
-      meta: { title: `Exposure File – ${title}` },
+      meta: { title: `Exposure File – ${TITLE}` },
     },
     {
       path: '/exposures/:alias/:file(.+)',
@@ -172,25 +176,25 @@ const router = createRouter({
         exposureAliasBases,
         exposureFileRouteSuffixes
       ),
-      meta: { title: `Exposure File – ${title}` },
+      meta: { title: `Exposure File – ${TITLE}` },
     },
     {
       path: '/search',
       name: 'search-results',
       component: SearchView,
-      meta: { title: `Search Results – ${title}` },
+      meta: { title: `Search Results – ${TITLE}` },
     },
     {
       path: '/login',
       name: 'login',
       component: LoginView,
-      meta: { title: `Login – ${title}` },
+      meta: { title: `Login – ${TITLE}` },
     },
     {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: NotFoundView,
-      meta: { title: `Page Not Found – ${title}` },
+      meta: { title: `Page Not Found – ${TITLE}` },
     },
   ],
 })
@@ -198,7 +202,7 @@ const router = createRouter({
 router.beforeResolve(async (to) => {
   const resolvedTitle = await resolveRouteTitle(to)
   if (resolvedTitle) {
-    to.meta.title = resolvedTitle.includes(title) ? resolvedTitle : `${resolvedTitle} – ${title}`
+    to.meta.title = resolvedTitle.includes(TITLE) ? resolvedTitle : `${resolvedTitle} – ${TITLE}`
   }
 })
 
