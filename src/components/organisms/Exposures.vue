@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import List from '@/components/molecules/List.vue'

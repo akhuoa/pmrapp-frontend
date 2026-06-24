@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import Prism from 'prismjs'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
