@@ -74,9 +74,7 @@ const isSvg = computed(() => isSvgFile(props.path))
 const isMarkdown = computed(() => isMarkdownFile(props.path))
 const isCode = computed(() => isCodeFile(props.path))
 const isOpenCOR = computed(() => isOpenCORFile(props.path))
-const canShowOpenCORButton = computed(
-  () => isOpenCOR.value && !!openCORFileURL.value,
-)
+const canShowOpenCORButton = computed(() => isOpenCOR.value && !!openCORFileURL.value)
 
 const openCORFileURL = computed(() => {
   const url = workspaceInfo.value?.workspace.url

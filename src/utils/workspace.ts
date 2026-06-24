@@ -11,7 +11,7 @@ import { TITLE } from '@/constants/global'
 export const generateWorkspaceTitle = (
   description: string | null | undefined,
   id: number | null | undefined,
-  withTitleSuffix = false
+  withTitleSuffix = false,
 ): string => {
   let title: string
 

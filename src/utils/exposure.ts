@@ -26,7 +26,7 @@ export const getExposureIdFromResourcePath = (resourcePath: string): number | nu
 export const generateExposureTitle = (
   description: string | null | undefined,
   id: number | null | undefined,
-  withTitleSuffix = false
+  withTitleSuffix = false,
 ): string => {
   let title: string
 
