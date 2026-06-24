@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
@@ -25,7 +26,6 @@ import {
   isSvgFile,
 } from '@/utils/file'
 import { renderMarkdown } from '@/utils/markdown'
-import ActionButton from '@/components/atoms/ActionButton.vue'
 import { generateWorkspaceTitle } from '@/utils/workspace'
 
 // Files with size above this threshold are not rendered in the preview to prevent browser freeze.
