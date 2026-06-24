@@ -22,7 +22,10 @@ export const getExposureIdFromResourcePath = (resourcePath: string): number | nu
  * @param id The ID of the exposure, used as a fallback if description is not available.
  * @returns A string representing the title for the exposure page.
  */
-export const generateExposureTitle = (description: string | null | undefined, id: number | null | undefined): string => {
+export const generateExposureTitle = (
+  description: string | null | undefined,
+  id: number | null | undefined,
+): string => {
   // Generic title if neither description nor ID is available.
   if (!description && !id) {
     return `Exposure Detail – ${TITLE}`

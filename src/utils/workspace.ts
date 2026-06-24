@@ -7,7 +7,10 @@ import { TITLE } from '@/constants/global'
  * @param id The ID of the workspace, used as a fallback if description is not available.
  * @returns A string representing the title for the workspace page.
  */
-export const generateWorkspaceTitle = (description: string | null | undefined, id: number | null | undefined): string => {
+export const generateWorkspaceTitle = (
+  description: string | null | undefined,
+  id: number | null | undefined,
+): string => {
   // Generic title if neither description nor ID is available.
   if (!description && !id) {
     return `Workspace Detail – ${TITLE}`

@@ -91,7 +91,10 @@ const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
 }
 
 const pageTitle = computed(() => {
-  return generateWorkspaceTitle(workspaceInfo.value?.workspace.description, workspaceInfo.value?.workspace.id)
+  return generateWorkspaceTitle(
+    workspaceInfo.value?.workspace.description,
+    workspaceInfo.value?.workspace.id,
+  )
 })
 
 const loadWorkspaceInfo = async () => {

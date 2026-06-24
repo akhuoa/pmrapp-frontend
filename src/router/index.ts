@@ -73,7 +73,10 @@ const resolveWorkspaceTitle = async (to: RouteLocationNormalized) => {
     const path = typeof pathParam === 'string' ? pathParam : ''
     const workspaceInfo = await useWorkspaceStore().getWorkspaceInfo(alias, commitId, path)
 
-    return generateWorkspaceTitle(workspaceInfo?.workspace?.description, workspaceInfo?.workspace?.id)
+    return generateWorkspaceTitle(
+      workspaceInfo?.workspace?.description,
+      workspaceInfo?.workspace?.id,
+    )
   } catch (error) {
     console.error(`Error fetching workspace info for alias ${alias}:`, error)
   }
