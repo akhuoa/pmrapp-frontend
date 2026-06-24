@@ -25,6 +25,7 @@ import {
 } from '@/utils/file'
 import { renderMarkdown } from '@/utils/markdown'
 import ActionButton from '../atoms/ActionButton.vue'
+import type { WorkspaceInfo } from '@/types/workspace'
 
 // Files with size above this threshold are not rendered in the preview to prevent browser freeze.
 const MAX_PREVIEW_FILE_SIZE_BYTES = 500 * 1024 // ~500 KB
@@ -40,6 +41,8 @@ const fileBlob = ref<Blob>(new Blob())
 const fileBlobUrl = ref<string>('')
 const fileSizeBytes = ref(0)
 const workspaceURL = ref<string>('')
+const workspaceInfo = ref<WorkspaceInfo | null>(null)
+const workspaceInfoLoading = ref(true)
 const isOpenCORURLLoading = ref(false)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
@@ -117,13 +120,22 @@ const toggleCodeWrap = () => {
   codeBlockRef.value?.toggleWrap()
 }
 
+const loadWorkspaceInfo = async () => {
+  try {
+    workspaceInfo.value = await workspaceStore.getWorkspaceInfo(props.alias, props.commitId, '')
+  } catch (workspaceErr) {
+    console.error('Error loading workspace info:', workspaceErr)
+  } finally {
+    workspaceInfoLoading.value = false
+  }
+}
+
 const loadWorkspaceURLForOpenCOR = async () => {
-  if (!isOpenCOR.value) return
+  if (!isOpenCOR.value || !workspaceInfo.value) return
 
   isOpenCORURLLoading.value = true
   try {
-    const workspaceInfo = await workspaceStore.getWorkspaceInfo(props.alias, props.commitId, '')
-    workspaceURL.value = workspaceInfo.workspace.url
+    workspaceURL.value = workspaceInfo.value.workspace.url
   } catch (workspaceErr) {
     console.error('Error loading workspace URL for OpenCOR link:', workspaceErr)
   } finally {
@@ -131,7 +143,19 @@ const loadWorkspaceURLForOpenCOR = async () => {
   }
 }
 
+const pageTitle = computed(() => {
+  const title =
+    workspaceInfo.value?.workspace.description ||
+    workspaceInfo.value?.workspace.id
+  const truncatedCommitId = workspaceInfo.value?.commit.commit_id.substring(0, 12)
+  const pathsWithSpace = props.path.split('/').join(' / ')
+
+  return `${title} @ ${truncatedCommitId} / ${pathsWithSpace}`
+})
+
 onMounted(async () => {
+  void loadWorkspaceInfo()
+
   // OpenCOR link data loads separately so file preview is not blocked.
   void loadWorkspaceURLForOpenCOR()
 
@@ -177,6 +201,8 @@ onBeforeUnmount(() => {
     :on-click="goBack"
   />
 
+  <PageHeader v-if="!workspaceInfoLoading" :title="pageTitle" titleSize="small" />
+
   <ErrorBlock
     v-if="error"
     title="Error loading file"
@@ -186,10 +212,11 @@ onBeforeUnmount(() => {
   <LoadingBox v-else-if="isLoading" message="Loading file..." />
 
   <div v-else>
-    <PageHeader :title="path" />
-
     <div class="box p-0! overflow-hidden">
-      <div class="flex items-center justify-end px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+        <div>
+          {{ filename }}
+        </div>
         <div class="flex items-center gap-2">
           <button
             v-if="isSvg || isMarkdown"
