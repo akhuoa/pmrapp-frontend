@@ -144,9 +144,7 @@ const loadWorkspaceURLForOpenCOR = async () => {
 }
 
 const pageTitle = computed(() => {
-  const title =
-    workspaceInfo.value?.workspace.description ||
-    workspaceInfo.value?.workspace.id
+  const title = workspaceInfo.value?.workspace.description || workspaceInfo.value?.workspace.id
   const truncatedCommitId = workspaceInfo.value?.commit.commit_id.substring(0, 12)
   const pathsWithSpace = props.path.split('/').join(' / ')
 
