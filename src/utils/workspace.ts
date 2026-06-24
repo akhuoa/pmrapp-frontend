@@ -11,6 +11,8 @@ import { TITLE } from '@/constants/global'
 export const generateWorkspaceTitle = (
   description: string | null | undefined,
   id: number | null | undefined,
+  commitId?: string,
+  path?: string,
   withTitleSuffix = false,
 ): string => {
   let title: string
@@ -24,6 +26,12 @@ export const generateWorkspaceTitle = (
   } else {
     // Fallback title using ID.
     title = `Workspace ${id}`
+  }
+
+  if (commitId && path) {
+    const truncatedCommitId = commitId.substring(0, 12)
+    const pathsWithSpace = path.split('/').join(' / ')
+    title = `${title} @ ${truncatedCommitId} / ${pathsWithSpace}`
   }
 
   return withTitleSuffix ? `${title} – ${TITLE}` : title

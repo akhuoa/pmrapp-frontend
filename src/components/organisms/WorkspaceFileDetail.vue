@@ -132,12 +132,12 @@ const pageTitle = computed(() => {
   const title = generateWorkspaceTitle(
     workspaceInfo.value?.workspace.description,
     workspaceInfo.value?.workspace.id,
+    props.commitId,
+    props.path,
     false,
   )
-  const truncatedCommitId = props.commitId.substring(0, 12)
-  const pathsWithSpace = props.path.split('/').join(' / ')
 
-  return `${title} @ ${truncatedCommitId} / ${pathsWithSpace}`
+  return title
 })
 
 onMounted(async () => {

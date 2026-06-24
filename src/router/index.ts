@@ -80,6 +80,8 @@ const resolveWorkspaceTitle = async (to: RouteLocationNormalized) => {
     return generateWorkspaceTitle(
       workspaceInfo?.workspace?.description,
       workspaceInfo?.workspace?.id,
+      commitId,
+      path,
       true,
     )
   } catch (error) {
