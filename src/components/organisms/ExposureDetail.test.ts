@@ -188,7 +188,7 @@ describe('ExposureDetail', () => {
 
     const title = wrapper.find('h1')
     expect(title.exists()).toBe(true)
-    expect(title.text()).toBe(`${titleText} – ${TITLE}`)
+    expect(title.text()).toBe(`${titleText}`)
   })
 
   it('renders html-view with content', async () => {
