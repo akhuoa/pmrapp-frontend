@@ -93,6 +93,7 @@ const pageTitle = computed(() => {
   return generateWorkspaceTitle(
     workspaceInfo.value?.workspace.description,
     workspaceInfo.value?.workspace.id,
+    false,
   )
 })
 

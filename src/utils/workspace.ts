@@ -5,22 +5,26 @@ import { TITLE } from '@/constants/global'
  *
  * @param description The description of the workspace, if available.
  * @param id The ID of the workspace, used as a fallback if description is not available.
+ * @param withTitleSuffix When true (default), appends the site title suffix.
  * @returns A string representing the title for the workspace page.
  */
 export const generateWorkspaceTitle = (
   description: string | null | undefined,
   id: number | null | undefined,
+  withTitleSuffix = true
 ): string => {
+  let title: string
+
   // Generic title if neither description nor ID is available.
   if (!description && !id) {
-    return `Workspace Detail – ${TITLE}`
+    title = 'Workspace Detail'
+  } else if (description && description.trim() !== '') {
+    // Title using description.
+    title = description
+  } else {
+    // Fallback title using ID.
+    title = `Workspace ${id}`
   }
 
-  // Title using description.
-  if (description && description.trim() !== '') {
-    return `${description} – ${TITLE}`
-  }
-
-  // Fallback title using ID.
-  return `Workspace ${id} – ${TITLE}`
+  return withTitleSuffix ? `${title} – ${TITLE}` : title
 }

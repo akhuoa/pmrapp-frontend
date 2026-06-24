@@ -25,7 +25,8 @@ import {
   isSvgFile,
 } from '@/utils/file'
 import { renderMarkdown } from '@/utils/markdown'
-import ActionButton from '../atoms/ActionButton.vue'
+import ActionButton from '@/components/atoms/ActionButton.vue'
+import { generateWorkspaceTitle } from '@/utils/workspace'
 
 // Files with size above this threshold are not rendered in the preview to prevent browser freeze.
 const MAX_PREVIEW_FILE_SIZE_BYTES = 500 * 1024 // ~500 KB
@@ -130,8 +131,12 @@ const loadWorkspaceInfo = async () => {
 }
 
 const pageTitle = computed(() => {
-  const title = workspaceInfo.value?.workspace.description || workspaceInfo.value?.workspace.id
-  const truncatedCommitId = workspaceInfo.value?.commit.commit_id.substring(0, 12)
+  const title = generateWorkspaceTitle(
+    workspaceInfo.value?.workspace.description,
+    workspaceInfo.value?.workspace.id,
+    false,
+  )
+  const truncatedCommitId = props.commitId.substring(0, 12)
   const pathsWithSpace = props.path.split('/').join(' / ')
 
   return `${title} @ ${truncatedCommitId} / ${pathsWithSpace}`

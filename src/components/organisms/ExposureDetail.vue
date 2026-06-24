@@ -178,6 +178,7 @@ const pageTitle = computed(() => {
   return generateExposureTitle(
     exposureInfo.value?.exposure.description,
     exposureInfo.value?.exposure.id,
+    false,
   )
 })
 
