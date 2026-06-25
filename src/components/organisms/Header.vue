@@ -64,8 +64,8 @@ const isActive = (path: string) => computed(() => route.path.startsWith(path))
         </ul>
       </nav>
     </div>
-    <SearchOverlay :show="isSearchOverlayVisible" @close="isSearchOverlayVisible = false" />
   </header>
+  <SearchOverlay :show="isSearchOverlayVisible" @close="isSearchOverlayVisible = false" />
 </template>
 
 <style scoped>
