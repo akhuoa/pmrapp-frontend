@@ -80,17 +80,15 @@ const getInitialTerm = (): string => {
       Type a term and press <Keycap>Enter</Keycap> to search the repository,
       or use the more options to filter by category (author, keyword, publication references), or combine both.
     </div>
-    <div class="pb-4">
-      <SearchInput
-        ref="searchInputRef"
-        :inOverlay="true"
-        :initial-kind="''"
-        :initial-term="getInitialTerm()"
-        :initial-filters="parseQueryFiltersFromQuery(route.query, SEARCH_KIND_NAMES)"
-        @search="handleSearch"
-        @querySearch="handleQuerySearch"
-        @close="emit('close')"
-      />
-    </div>
+    <SearchInput
+      ref="searchInputRef"
+      :inOverlay="true"
+      :initial-kind="''"
+      :initial-term="getInitialTerm()"
+      :initial-filters="parseQueryFiltersFromQuery(route.query, SEARCH_KIND_NAMES)"
+      @search="handleSearch"
+      @querySearch="handleQuerySearch"
+      @close="emit('close')"
+    />
   </Dialog>
 </template>
