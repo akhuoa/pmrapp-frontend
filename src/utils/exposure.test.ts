@@ -1,10 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { TITLE } from '@/constants/global'
 import { mockExposureInfo } from '@/mocks/exposureInfo'
-import {
-  generateExposureTitle,
-  getExposureIdFromResourcePath,
-} from './exposure'
+import { generateExposureTitle, getExposureIdFromResourcePath } from './exposure'
 
 describe('getExposureIdFromResourcePath', () => {
   it('extracts exposure ID from a valid resource path', () => {
@@ -50,15 +47,11 @@ describe('generateExposureTitle', () => {
 
   describe('with title suffix', () => {
     it('appends site title suffix when withTitleSuffix is true', () => {
-      expect(generateExposureTitle(description, id, true)).toBe(
-        `${description} – ${TITLE}`,
-      )
+      expect(generateExposureTitle(description, id, true)).toBe(`${description} – ${TITLE}`)
     })
 
     it('appends suffix with generic title', () => {
-      expect(generateExposureTitle(null, null, true)).toBe(
-        `Exposure Detail – ${TITLE}`,
-      )
+      expect(generateExposureTitle(null, null, true)).toBe(`Exposure Detail – ${TITLE}`)
     })
 
     it('appends suffix with ID fallback', () => {

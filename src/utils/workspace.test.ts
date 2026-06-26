@@ -78,9 +78,9 @@ describe('generateWorkspaceTitle', () => {
     })
 
     it('appends suffix along with commit and path info', () => {
-      expect(
-        generateWorkspaceTitle(description, id, commitId, 'file.txt', true),
-      ).toBe(`${description} @ ${commitId.substring(0, 12)} / file.txt – ${TITLE}`)
+      expect(generateWorkspaceTitle(description, id, commitId, 'file.txt', true)).toBe(
+        `${description} @ ${commitId.substring(0, 12)} / file.txt – ${TITLE}`,
+      )
     })
   })
 })
