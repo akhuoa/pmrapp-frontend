@@ -5,7 +5,6 @@ import {
   formatKindLabel,
   formatNumber,
   formatSearchKey,
-  formatTermKey,
   formatYear,
 } from './format'
 
@@ -87,16 +86,6 @@ describe('formatSearchKey', () => {
 
     expect(results).toBe(
       '<span class="text-gray-700 dark:text-gray-200 font-semibold">&lt;script&gt;alert(&quot;hello&quot;)&lt;/script&gt;</span>',
-    )
-  })
-})
-
-describe('formatTermKey', () => {
-  it('returns formatted term key for normal string', () => {
-    const results = formatTermKey('Cells')
-
-    expect(results).toBe(
-      '<span class="text-gray-700 dark:text-gray-200 font-semibold">Cells</span>',
     )
   })
 })

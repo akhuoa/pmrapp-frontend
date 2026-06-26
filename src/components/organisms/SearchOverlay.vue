@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { nextTick, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import Keycap from '@/components/atoms/Keycap.vue'
+import Dialog from '@/components/molecules/Dialog.vue'
 import SearchInput from '@/components/molecules/SearchInput.vue'
 import { SEARCH_KIND_NAMES } from '@/constants/search'
 import { buildQuerySearchQuery, buildSearchQuery, parseQueryFiltersFromQuery } from '@/utils/search'
-import Keycap from '@/components/atoms/Keycap.vue'
-import Dialog from '@/components/molecules/Dialog.vue'
 
 const props = defineProps<{
   show: boolean
