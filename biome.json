@@ -5,6 +5,9 @@
       "tailwindDirectives": true
     }
   },
+  "files": {
+    "includes": ["**", "!src/vendor"]
+  },
   "formatter": {
     "indentStyle": "space",
     "lineWidth": 100,
@@ -32,6 +35,16 @@
           },
           "style": {
             "useImportType": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/*.ts", "**/*.vue"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useVueMultiWordComponentNames": "off"
           }
         }
       }

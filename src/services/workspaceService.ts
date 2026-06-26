@@ -45,6 +45,13 @@ export const workspaceService = {
     })
 
     if (!response.ok) {
+      const responseText = await response.text()
+
+      // Check for not found error.
+      if (response.status === 404 || responseText.includes('NotFound')) {
+        throw new Error('Workspace not found')
+      }
+
       throw new Error(`Request failed: ${response.status}`)
     }
 

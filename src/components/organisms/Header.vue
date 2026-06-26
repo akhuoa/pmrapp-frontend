@@ -1,11 +1,10 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import UserDropdown from '@/components/molecules/UserDropdown.vue'
+import ActionButton from '@/components/atoms/ActionButton.vue'
 import SearchIcon from '@/components/icons/SearchIcon.vue'
+import UserDropdown from '@/components/molecules/UserDropdown.vue'
 import SearchOverlay from '@/components/organisms/SearchOverlay.vue'
-import ActionButton from '../atoms/ActionButton.vue'
 import { useGlobalStateStore } from '@/stores/globalState'
 
 const route = useRoute()
@@ -21,15 +20,15 @@ const handleSearchClick = () => {
 }
 
 const navLinks = [
-  { path: '/workspaces', label: 'Workspaces' },
   { path: '/exposures', label: 'Exposures' },
+  { path: '/workspaces', label: 'Workspaces' },
 ]
 
 const isActive = (path: string) => computed(() => route.path.startsWith(path))
 </script>
 
 <template>
-  <header class="header-border-top bg-background border-b border-gray-200 dark:border-gray-700 sticky top-0 z-100">
+  <header class="header-border-top bg-surface border-b border-gray-200 dark:border-gray-700 sticky top-0 z-[100]">
     <div class="container mx-auto px-4 py-4 flex items-center justify-between">
       <RouterLink to="/" class="flex items-center nav-link">
         <img src="/logo.png" alt="Physiome Model Repository" width="48" height="48" />
@@ -59,15 +58,14 @@ const isActive = (path: string) => computed(() => route.path.startsWith(path))
               {{ link.label }}
             </RouterLink>
           </li>
-          <li class="h-6 border-l border-gray-300 dark:border-gray-600"></li>
-          <li>
+          <li class="user-dropdown-divider">
             <UserDropdown />
           </li>
         </ul>
       </nav>
     </div>
-    <SearchOverlay :show="isSearchOverlayVisible" @close="isSearchOverlayVisible = false" />
   </header>
+  <SearchOverlay :show="isSearchOverlayVisible" @close="isSearchOverlayVisible = false" />
 </template>
 
 <style scoped>
@@ -87,5 +85,22 @@ const isActive = (path: string) => computed(() => route.path.startsWith(path))
 
 .nav-link {
   @apply hover:opacity-80 transition-opacity;
+}
+
+.user-dropdown-divider {
+  @apply
+    relative
+    w-[5rem]
+    text-center
+    before:content-['']
+    before:absolute
+    before:left-0
+    before:top-1/2
+    before:h-6
+    before:-translate-y-1/2
+    before:transform
+    before:w-px
+    before:bg-gray-300
+    dark:before:bg-gray-600;
 }
 </style>

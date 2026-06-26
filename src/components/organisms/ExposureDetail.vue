@@ -1,30 +1,41 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
+import Citation from '@/components/atoms/Citation.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
+import TermButton from '@/components/atoms/TermButton.vue'
+import WrapButton from '@/components/atoms/WrapButton.vue'
 import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
-import FileIcon from '@/components/icons/FileIcon.vue'
+import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
 import LoadingIcon from '@/components/icons/LoadingIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
+import MathTransformOptions from '@/components/molecules/MathTransformOptions.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
+import WorkspaceFileBrowser from '@/components/molecules/WorkspaceFileBrowser.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
+import { TITLE } from '@/constants/global'
+import { getMathFormatOptionsStorageService } from '@/services'
 import { downloadCOMBINEArchive, downloadWorkspaceArchive } from '@/services/downloadUrlService'
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
+import type { ErrorInfo } from '@/types/error'
 import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
-import { formatCitation, formatCitationAuthor } from '@/utils/citation'
-import { downloadFileFromContent, downloadWorkspaceFile } from '@/utils/download'
-import { getExposureIdFromResourcePath } from '@/utils/exposure'
-import { formatFileCount } from '@/utils/format'
+import type { MathMLFormatOptions } from '@/types/mathml'
+import { formatCitation, formatCitationAuthor, parseFullNameToAuthor } from '@/utils/citation'
+import { downloadFileFromContent } from '@/utils/download'
+import { generateExposureTitle, getExposureIdFromResourcePath } from '@/utils/exposure'
+import { getFileExtension, isOpenCORFile } from '@/utils/file'
+import { formatYear } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
-import { isValidTerm } from '@/utils/search'
-import TermButton from '../atoms/TermButton.vue'
+import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
+import { buildSearchQuery, isValidTerm } from '@/utils/search'
+
+type ExposureFileEntry = ExposureInfo['files'][number]
 
 const props = defineProps<{
   alias: string
@@ -70,10 +81,15 @@ const CODEGEN_LANGUAGES = [
     fileName: 'code.py',
   },
 ]
+const DEFAULT_MATH_FORMAT_OPTIONS: Required<MathMLFormatOptions> = {
+  digitGrouping: false,
+  greekSymbols: false,
+  subscripts: false,
+}
 
 const exposureStore = useExposureStore()
 const exposureInfo = ref<ExposureInfo | null>(null)
-const error = ref<string | null>(null)
+const error = ref<ErrorInfo | null>(null)
 const isLoading = ref(true)
 const exposureId = ref<number>(NaN)
 const exposureFilePath = ref<string>(props.file)
@@ -81,7 +97,26 @@ const exposureFileId = ref<number>(NaN)
 const detailHTML = ref<string>('')
 const generatedCode = ref<string>('')
 const generatedCodeFilename = ref<string>('')
-const mathsJSON = ref<[string, string[]][]>([])
+const codeBlockRef = ref<InstanceType<typeof CodeBlock> | null>(null)
+const rawMathsData = ref<[string, string[]][]>([])
+const transformMaths = ref(false)
+const mathFormatOptions = ref<MathMLFormatOptions>({ ...DEFAULT_MATH_FORMAT_OPTIONS })
+const mathsJSON = computed<[string, string[]][]>(() => {
+  const appliedOptions = transformMaths.value
+    ? mathFormatOptions.value
+    : DEFAULT_MATH_FORMAT_OPTIONS
+
+  return rawMathsData.value.map((entry): [string, string[]] => {
+    const mathMLArray = entry[1].map((mathML) =>
+      formatMathMLTable(mathML, {
+        digitGrouping: appliedOptions.digitGrouping,
+        greekSymbols: appliedOptions.greekSymbols,
+        subscripts: appliedOptions.subscripts,
+      }),
+    )
+    return [entry[0], mathMLArray]
+  })
+})
 const metadataJSON = ref<Metadata>({})
 const htmlViewRef = ref<HTMLElement | null>(null)
 const licenseInfo = ref<string>(DEFAULT_LICENSE)
@@ -94,7 +129,35 @@ const isDownloadingCOMBINE = ref(false)
 const { goBack } = useBackNavigation('/exposures')
 
 const router = useRouter()
+const route = useRoute()
 const searchStore = useSearchStore()
+
+const fileBrowserPath = computed(() => {
+  const p = route.query.path
+  return typeof p === 'string' ? p : undefined
+})
+
+// Generates a citation URL from the current route, excluding query parameters and the hash.
+// It resolves the application's base path from vite.config to construct the complete URL.
+// It also maintains reactivity for navigations.
+const citationUrl = computed(() => {
+  const resolved = router.resolve({ name: route.name, params: route.params })
+  const resolvedURL = new URL(resolved.href, window.location.origin)
+  const decodedHref = decodeURIComponent(resolved.href)
+
+  return resolvedURL.origin + decodedHref
+})
+
+const handleFileBrowserFolderClick = (name: string) => {
+  const currentPath = fileBrowserPath.value
+  const newPath = currentPath ? `${currentPath}/${name}` : name
+  router.push({ query: { ...route.query, path: newPath } })
+}
+
+const handleFileBrowserPathChange = (newPath: string | undefined) => {
+  const { path: _removed, ...restQuery } = route.query
+  router.push({ query: newPath ? { ...restQuery, path: newPath } : restQuery })
+}
 
 // This route path is used to fix relative paths in the HTML content.
 // It is not a part of the API request parameters.
@@ -111,16 +174,22 @@ const pageTitle = computed(() => {
       return `${viewEntry.name}`
     }
   }
-  if (!exposureInfo.value) return ''
-  return exposureInfo.value.exposure.description || `Exposure ${exposureInfo.value.exposure.id}`
+
+  return generateExposureTitle(
+    exposureInfo.value?.exposure.description,
+    exposureInfo.value?.exposure.id,
+    false,
+  )
 })
 
 const openCORFiles = computed(() => {
   if (!exposureInfo.value) return []
 
   return exposureInfo.value.files.filter((entry) => {
-    const filename = entry[0]
-    return filename.endsWith('.omex') || filename.endsWith('.cellml') || filename.endsWith('.sedml')
+    if (props.file) {
+      return entry[0] === props.file && isOpenCORFile(entry[0])
+    }
+    return isOpenCORFile(entry[0])
   })
 })
 
@@ -130,9 +199,16 @@ const navigationFiles = computed(() => {
   return exposureInfo.value.files.filter((entry) => entry[1] === true)
 })
 
+const createdYear = computed(() => {
+  if (!exposureInfo.value) return ''
+
+  return formatYear(exposureInfo.value.exposure.created_ts)
+})
+
 const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
   if (!exposureInfo.value) return
 
+  const fileName = exposureInfo.value.exposure.description || ''
   const loadingRef = format === 'zip' ? isDownloadingWorkspaceZip : isDownloadingWorkspaceTgz
   loadingRef.value = true
 
@@ -142,6 +218,7 @@ const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
       exposureInfo.value.workspace_alias,
       exposureInfo.value.exposure.commit_id,
       format,
+      fileName,
     )
   } catch (err) {
     console.error('Error downloading workspace archive:', err)
@@ -167,29 +244,53 @@ const handleDownloadCOMBINEArchive = async () => {
   }
 }
 
-const buildOpenCORURL = (option?: string) => {
-  if (!exposureInfo.value || openCORFiles.value.length === 0) return ''
+const getOpenCORFilesToOpen = (files: ExposureFileEntry[], targetFile?: string) => {
+  let openCORFilesToOpen = files
+  const selectedCellmlFile = props.file?.endsWith('.cellml')
+    ? files.find((entry) => entry[0] === props.file)
+    : undefined
 
-  const baseURL = `${exposureInfo.value.workspace.url}rawfile/${exposureInfo.value.exposure.commit_id}`
+  if (targetFile) {
+    openCORFilesToOpen = files.filter((entry) => entry[0] === targetFile)
+  } else if (selectedCellmlFile) {
+    openCORFilesToOpen = [selectedCellmlFile]
+  }
 
-  const sortedFiles = [...openCORFiles.value].sort((a, b) => {
-    const getOrder = (filename: string) => {
-      if (filename.endsWith('.cellml')) return 1
-      if (filename.endsWith('.sedml')) return 2
-      if (filename.endsWith('.omex')) return 3
-      return 4
-    }
-    return getOrder(a[0]) - getOrder(b[0])
-  })
+  return openCORFilesToOpen
+}
 
-  const fileURLs = sortedFiles.map((entry) => `${baseURL}/${entry[0]}`).join('%7C')
-  const command = sortedFiles.length > 1 ? 'openFiles' : 'openFile'
+const getOrder = (filename: string) => {
+  const extension = getFileExtension(filename)
 
+  if (extension === 'cellml') return 1
+  if (extension === 'sedml') return 2
+  if (extension === 'omex') return 3
+  return 4
+}
+
+const sortOpenCORFiles = (files: ExposureFileEntry[]) => {
+  return [...files].sort((a, b) => getOrder(a[0]) - getOrder(b[0]))
+}
+
+const generateOpenCORLink = (files: ExposureFileEntry[], baseURL: string, option?: string) => {
+  const fileURLs = files.map((entry) => `${baseURL}/${entry[0]}`).join('%7C')
+  const command = files.length > 1 ? 'openFiles' : 'openFile'
   const opencorLink = `opencor://${command}/${fileURLs}`
+
   if (option !== 'desktop') {
     return `//opencor.ws/app/?${opencorLink}`
   }
   return opencorLink
+}
+
+const buildOpenCORURL = (option?: string, targetFile?: string) => {
+  if (!exposureInfo.value || openCORFiles.value.length === 0) return ''
+
+  const baseURL = `${exposureInfo.value.workspace.url}rawfile/${exposureInfo.value.exposure.commit_id}`
+  const filesToOpen = getOpenCORFilesToOpen(openCORFiles.value, targetFile)
+  const sortedFiles = sortOpenCORFiles(filesToOpen)
+
+  return generateOpenCORLink(sortedFiles, baseURL, option)
 }
 
 const convertFirstTextNodeToTitle = () => {
@@ -206,20 +307,6 @@ const convertFirstTextNodeToTitle = () => {
   }
 }
 
-const downloadFile = async (filename: string) => {
-  if (!exposureInfo.value) return
-
-  const alias = exposureInfo.value.workspace_alias
-  const commitId = exposureInfo.value.exposure.commit_id
-  if (!commitId) return
-  await downloadWorkspaceFile(alias, commitId, filename)
-}
-
-const fileCountText = computed(() => {
-  const count = exposureInfo.value?.files?.length
-  return formatFileCount(count)
-})
-
 const generateCode = async (langPath: string, fileName: string) => {
   const code = await exposureStore.getExposureRawContent(
     exposureId.value,
@@ -235,7 +322,15 @@ const downloadCode = () => {
   downloadFileFromContent(generatedCode.value, generatedCodeFilename.value)
 }
 
+const toggleCodeWrap = () => {
+  codeBlockRef.value?.toggleWrap()
+}
+
 const generateMath = async () => {
+  error.value = null
+
+  await initMathPolyfills()
+
   try {
     const response = await exposureStore.getExposureRawContent(
       exposureId.value,
@@ -243,14 +338,29 @@ const generateMath = async () => {
       'cellml_math',
       'math.json',
     )
-    mathsJSON.value = JSON.parse(response)
+    const mathResponseJSON = JSON.parse(response)
+    const filteredMathsJSON = Array.isArray(mathResponseJSON)
+      ? mathResponseJSON.filter(
+          (value): value is [string, string[]] => Array.isArray(value[1]) && value[1].length > 0,
+        )
+      : []
+    rawMathsData.value = filteredMathsJSON.map((entry): [string, string[]] => {
+      const mathMLArray = entry[1].map((mathML) => transformMathString(mathML))
+      return [entry[0], mathMLArray]
+    })
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to parse mathematics data'
+    const errorMessage = err instanceof Error ? err.message : 'Failed to parse mathematics data.'
+    error.value = {
+      title: 'Error parsing mathematics',
+      message: errorMessage,
+    }
     console.error('Error parsing mathematics JSON:', err)
   }
 }
 
 const generateMetadata = async () => {
+  error.value = null
+
   try {
     const metadata = await exposureStore.getExposureRawContent(
       exposureId.value,
@@ -260,18 +370,26 @@ const generateMetadata = async () => {
     )
     metadataJSON.value = JSON.parse(metadata)
   } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Failed to parse metadata JSON.'
+    error.value = {
+      title: 'Error parsing metadata',
+      message: errorMessage,
+    }
     console.error('Error parsing metadata JSON:', err)
   }
 }
 
 const loadDefaultView = async () => {
-  detailHTML.value = await exposureStore.getExposureSafeHTML(
-    exposureId.value,
-    exposureFileId.value,
-    'view',
-    'index.html',
-    routePath,
-  )
+  // Only load the HTML view if we have the necessary exposure ID and file ID.
+  if (exposureId.value && exposureFileId.value) {
+    detailHTML.value = await exposureStore.getExposureSafeHTML(
+      exposureId.value,
+      exposureFileId.value,
+      'view',
+      'index.html',
+      routePath,
+    )
+  }
 }
 
 const loadCodegenView = async () => {
@@ -283,8 +401,43 @@ const loadCodegenView = async () => {
   )
 }
 
+const isAboutSectionAvailable = computed(() => {
+  return (
+    metadataJSON.value.model_title ||
+    metadataJSON.value.model_author_org ||
+    (metadataJSON.value.model_author && isValidTerm(metadataJSON.value.model_author))
+  )
+})
+
+const citationTitle = computed(() => {
+  return metadataJSON.value.model_title || pageTitle.value
+})
+
+const citationAuthors = computed(() => {
+  if (!metadataJSON.value.model_author) return []
+  const author = parseFullNameToAuthor(metadataJSON.value.model_author)
+  return author ? [author] : []
+})
+
+const modelCitation = computed(() => {
+  return {
+    title: citationTitle.value,
+    authors: citationAuthors.value,
+    issued: createdYear.value,
+    url: citationUrl.value,
+    publisher: TITLE,
+  }
+})
+
+// Although metadataJSON.value.citations is an array,
+// it contains only one citation because metadataJSON.value.citation_id and citation_title are single values.
+const publicationCitation = computed(() => {
+  return metadataJSON.value.citations?.length ? metadataJSON.value.citations[0] : null
+})
+
 const handleKeywordClick = (kind: string, keyword: string) => {
-  router.push({ path: '/search', query: { kind, term: keyword } })
+  const currentQuery = router.currentRoute.value.query
+  router.push({ path: '/search', query: buildSearchQuery(kind, keyword, currentQuery) })
 }
 
 const handleCitationAuthorClick = (authorParts: string[]) => {
@@ -332,61 +485,87 @@ const checkOtherRelatedModels = async () => {
   }
 }
 
+// Reset all state variables that are specific to a file or view.
+const resetState = () => {
+  availableViews.value = []
+  detailHTML.value = ''
+  exposureFileId.value = Number.NaN
+  exposureFilePath.value = ''
+  generatedCode.value = ''
+  generatedCodeFilename.value = ''
+  hasOtherRelatedModels.value = false
+  licenseInfo.value = DEFAULT_LICENSE
+  metadataJSON.value = {}
+  rawMathsData.value = []
+}
+
 const loadInitialView = async () => {
   if (!exposureInfo.value) return
 
-  const filesWithViews = exposureInfo.value.exposure?.files?.filter(
-    (file) => file.views && file.views.length > 0,
-  )
-  let fileWithViews = filesWithViews?.[0]
+  // Reset per-file state before selecting a new file to avoid stale view content.
+  resetState()
+  exposureId.value = exposureInfo.value.exposure?.id
+  const exposureFiles = exposureInfo.value.exposure?.files || []
+  const filesWithViews = exposureFiles.filter((file) => file.views?.length > 0)
+  const defaultFileWithViews =
+    filesWithViews.find((file) => file.workspace_file_path.endsWith('.cellml')) || filesWithViews[0]
+  let fileWithViews: (typeof filesWithViews)[number] | undefined = defaultFileWithViews
 
   if (props.file) {
-    fileWithViews = filesWithViews?.find((file) => file.workspace_file_path === props.file)
+    exposureFilePath.value = props.file
+    fileWithViews = filesWithViews.find((file) => file.workspace_file_path === props.file)
+  } else {
+    exposureFilePath.value = defaultFileWithViews?.workspace_file_path || ''
   }
 
-  if (fileWithViews) {
-    availableViews.value = AVAILABLE_VIEWS.filter((view) =>
-      fileWithViews.views.some((v) => v.view_key === view.view_key),
-    )
-    exposureFileId.value = fileWithViews.id
-    exposureFilePath.value = fileWithViews.workspace_file_path
-    exposureId.value = fileWithViews.exposure_id
+  if (!fileWithViews) {
+    return
+  }
 
-    const viewEntry = fileWithViews.views.find((v) => v.view_key === 'view')
-    const licenseEntry = fileWithViews.views.find((v) => v.view_key === 'license_citation')
+  availableViews.value = AVAILABLE_VIEWS.filter((view) =>
+    fileWithViews.views.some((v) => v.view_key === view.view_key),
+  )
+  exposureFileId.value = fileWithViews.id
+  exposureFilePath.value = fileWithViews.workspace_file_path
+  exposureId.value = fileWithViews.exposure_id
 
-    // Show metadata onload.
+  const viewEntry = fileWithViews.views.find((v) => v.view_key === 'view')
+  const licenseEntry = fileWithViews.views.find((v) => v.view_key === 'license_citation')
+  const metaEntry = fileWithViews.views.find((v) => v.view_key === 'cellml_metadata')
+
+  // Show metadata onload.
+  if (metaEntry) {
     await generateMetadata()
-    await checkOtherRelatedModels()
+  }
+  await checkOtherRelatedModels()
 
-    if (viewEntry) {
-      detailHTML.value = await exposureStore.getExposureSafeHTML(
-        exposureId.value,
-        viewEntry.exposure_file_id,
-        'view',
-        'index.html',
-        routePath,
-      )
-    }
+  if (viewEntry) {
+    detailHTML.value = await exposureStore.getExposureSafeHTML(
+      exposureId.value,
+      viewEntry.exposure_file_id,
+      'view',
+      'index.html',
+      routePath,
+    )
+  }
 
-    if (licenseEntry) {
-      licenseInfo.value = await exposureStore.getExposureSafeHTML(
-        exposureId.value,
-        licenseEntry.exposure_file_id,
-        'license_citation',
-        'license.txt',
-        routePath,
-      )
-    }
+  if (licenseEntry) {
+    licenseInfo.value = await exposureStore.getExposureSafeHTML(
+      exposureId.value,
+      licenseEntry.exposure_file_id,
+      'license_citation',
+      'license.txt',
+      routePath,
+    )
+  }
 
-    // Load codegen view with default language.
-    if (props.view === 'cellml_codegen') {
-      await loadCodegenView()
-    }
+  // Load codegen view with default language.
+  if (props.view === 'cellml_codegen') {
+    await loadCodegenView()
+  }
 
-    if (props.view === 'cellml_math') {
-      await generateMath()
-    }
+  if (props.view === 'cellml_math') {
+    await generateMath()
   }
 }
 
@@ -396,6 +575,14 @@ watch(detailHTML, async () => {
     convertFirstTextNodeToTitle()
   }
 })
+
+watch(
+  [transformMaths, mathFormatOptions],
+  ([transformMathsEnabled, options]) => {
+    getMathFormatOptionsStorageService().save(transformMathsEnabled, options)
+  },
+  { deep: true },
+)
 
 watch(
   () => props.file,
@@ -419,11 +606,30 @@ watch(
 )
 
 onMounted(async () => {
+  const savedMathFormatState = getMathFormatOptionsStorageService().load()
+  if (savedMathFormatState) {
+    transformMaths.value = savedMathFormatState.transformMaths
+    mathFormatOptions.value = { ...savedMathFormatState.options }
+  }
+
+  error.value = null
+
   try {
     exposureInfo.value = await exposureStore.getExposureInfo(props.alias)
     await loadInitialView()
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to load exposure'
+    const errorMessage = err instanceof Error ? err.message : 'Failed to load exposure.'
+    if (errorMessage.toLowerCase().includes('not found')) {
+      error.value = {
+        title: 'Exposure not found',
+        message: 'The exposure you are looking for does not exist or has been removed.',
+      }
+    } else {
+      error.value = {
+        title: 'Error loading exposure',
+        message: errorMessage,
+      }
+    }
     console.error('Error loading exposure:', err)
   } finally {
     isLoading.value = false
@@ -440,8 +646,8 @@ onMounted(async () => {
 
   <ErrorBlock
     v-if="error"
-    title="Error loading exposure"
-    :error="error"
+    :title="error.title"
+    :error="error.message"
   />
 
   <LoadingBox v-else-if="isLoading" message="Loading exposure..." />
@@ -472,74 +678,62 @@ onMounted(async () => {
         <div class="box p-0! overflow-hidden">
           <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
             <span>{{ generatedCodeFilename }}</span>
-            <button
-              @click.prevent="downloadCode"
-              class="flex items-center cursor-pointer gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-              title="Download"
-              aria-label="Download"
-            >
-              <DownloadIcon class="w-4 h-4" />
-              Download
-            </button>
+            <div class="flex items-center gap-2">
+              <WrapButton :active="codeBlockRef?.isWrapped" @click="toggleCodeWrap" />
+              <CopyButton :text="generatedCode" title="Copy code" />
+              <ActionButton
+                @click="downloadCode"
+                variant="icon"
+                size="sm"
+                content-section="Exposure Detail"
+                tooltip="Download"
+                :aria-label="`Download ${generatedCodeFilename}`"
+              >
+                <DownloadIcon class="w-4 h-4" />
+                <span class="sr-only">Download {{ generatedCodeFilename }}</span>
+              </ActionButton>
+            </div>
           </div>
           <CodeBlock
+            ref="codeBlockRef"
             :code="generatedCode"
             :filename="generatedCodeFilename"
           />
         </div>
       </div>
 
-      <div v-else-if="props.view === 'cellml_math' && mathsJSON.length" class="box overflow-auto">
-        <div v-for="value in mathsJSON" :key="value[0]"
-          class="mb-6 pb-6 last:mb-0 last:pb-0 border-b border-gray-200 dark:border-gray-700 last:border-0"
-        >
-          <h4 class="font-semibold mb-4">Component: {{ value[0] }}</h4>
-          <div v-for="math in value[1]" :key="math">
-            <div v-html="math" class="text-sm math-view"></div>
+      <div v-else-if="props.view === 'cellml_math'" class="box">
+        <MathTransformOptions
+          :has-maths-data="rawMathsData.length > 0"
+          :transform-maths="transformMaths"
+          :options="mathFormatOptions"
+          @update:transform-maths="transformMaths = $event"
+          @update:options="mathFormatOptions = $event"
+        />
+        <p v-if="!mathsJSON.length" class="text-sm text-gray-500 dark:text-gray-400">No mathematics content available.</p>
+        <template v-else>
+          <div v-for="value in mathsJSON" :key="value[0]"
+            class="mb-6 pb-6 last:mb-0 last:pb-0 border-b border-gray-200 dark:border-gray-700 last:border-0"
+          >
+            <h4 class="font-semibold mb-4">{{ value[0] }}</h4>
+            <div v-for="(math, mathIndex) in value[1]" :key="`${value[0]}-${mathIndex}`">
+              <div v-html="math" class="math-view"></div>
+            </div>
           </div>
-        </div>
+        </template>
       </div>
 
       <div v-else-if="detailHTML" class="box">
         <div ref="htmlViewRef" v-html="detailHTML" class="html-view"></div>
       </div>
 
-      <div class="box p-0! overflow-hidden">
-        <div class="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-          <span class="text-gray-600 dark:text-gray-400">
-            {{ fileCountText }}
-          </span>
-        </div>
-        <ul class="divide-y divide-gray-200 dark:divide-gray-700">
-          <li
-            v-for="entry in exposureInfo.files"
-            :key="entry[0]"
-            class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-          >
-            <div class="px-4 py-3 flex items-center justify-between">
-              <div class="flex items-center gap-3 flex-1 min-w-0">
-                <FileIcon class="text-gray-500 dark:text-gray-400 flex-shrink-0 w-4 h-4" />
-                <RouterLink
-                  :to="`/workspaces/${exposureInfo.workspace_alias}/file/${exposureInfo.exposure.commit_id}/${entry[0]}`"
-                  class="text-link font-medium truncate"
-                >
-                  {{ entry[0] }}
-                </RouterLink>
-              </div>
-              <div class="flex items-center gap-2 ml-4 flex-shrink-0">
-                <button
-                  @click.prevent="downloadFile(entry[0])"
-                  class="ml-4 p-2 text-gray-500 cursor-pointer hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-                  :title="`Download ${entry[0]}`"
-                  :aria-label="`Download ${entry[0]}`"
-                >
-                  <DownloadIcon class="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </li>
-        </ul>
-      </div>
+      <WorkspaceFileBrowser
+        :alias="exposureInfo.workspace_alias"
+        :commit-id="exposureInfo.exposure.commit_id"
+        :path="fileBrowserPath"
+        :on-folder-click="handleFileBrowserFolderClick"
+        :on-path-change="handleFileBrowserPathChange"
+      />
     </article>
     <aside class="w-full lg:w-70 xl:w-80 lg:flex-shrink-0">
       <section class="pb-6">
@@ -548,20 +742,23 @@ onMounted(async () => {
           Derived from workspace
           <RouterLink
             :to="`/workspaces/${exposureInfo.workspace_alias}`"
-            class="text-link"
+            class="text-link dark:underline dark:decoration-dotted"
           >
             {{ exposureInfo.exposure.description }}
           </RouterLink>
           at changeset
           <RouterLink
             :to="`/workspaces/${exposureInfo.workspace_alias}/file/${exposureInfo.exposure.commit_id}`"
-            class="text-link font-mono"
+            class="text-link font-mono dark:underline dark:decoration-dotted"
           >
             {{ exposureInfo.exposure.commit_id.substring(0, 12) }}
           </RouterLink>.
         </div>
       </section>
-      <section v-if="metadataJSON.model_title" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+      <section
+        v-if="isAboutSectionAvailable"
+        class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700"
+      >
         <h4 class="text-lg font-semibold mb-3">About</h4>
         <dl class="text-sm leading-relaxed space-y-4">
           <div v-if="metadataJSON.model_title">
@@ -584,6 +781,17 @@ onMounted(async () => {
             <dd>{{ metadataJSON.model_author_org }}</dd>
           </div>
         </dl>
+      </section>
+      <section class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex flex-row justify-between mb-3">
+          <h4 class="text-lg font-semibold">Citation</h4>
+          <CopyButton
+            :text="formatCitation(modelCitation)"
+            title="Copy citation"
+            :withHTML="true"
+          />
+        </div>
+        <Citation :content="formatCitation(modelCitation)" />
       </section>
       <section v-if="metadataJSON.keywords?.length" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Keywords</h4>
@@ -609,7 +817,8 @@ onMounted(async () => {
                 rel="noopener noreferrer"
                 :content-section="`Exposure Detail - ${pageTitle}`"
               >
-                Open in OpenCOR's web app
+                Open with OpenCOR's Web app
+                <ExternalLinkIcon class="w-4 h-4" />
               </ActionButton>
             </li>
             <li
@@ -640,7 +849,12 @@ onMounted(async () => {
             >
               <RouterLink
                 :to="`/exposures/${props.alias}/${entry[0]}`"
-                class="text-link inline-flex items-center gap-2 break-all"
+                class="inline-flex items-center gap-2 break-all transition-colors"
+                :class="
+                  props.file === entry[0]
+                    ? 'text-foreground dark:text-primary cursor-default'
+                    : 'text-link'
+                "
               >
                 <span class="text-foreground">›</span>
                 {{ entry[0] }}
@@ -695,31 +909,28 @@ onMounted(async () => {
           </ul>
         </nav>
       </section>
-      <section v-if="metadataJSON.citations?.length" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
-        <h4 class="text-lg font-semibold mb-3">References</h4>
-        <ul class="space-y-4 text-sm mb-2" v-if="metadataJSON.citations && metadataJSON.citations.length > 0">
-          <li v-for="citation in metadataJSON.citations" :key="citation.id">
-            <div class="group p-4 pr-8 bg-gray-50 dark:bg-gray-800 rounded-md relative">
-              {{ formatCitation(citation) }}
-              <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <CopyButton
-                  :text="formatCitation(citation)"
-                  title="Copy citation"
-                />
-              </div>
-            </div>
-          </li>
-        </ul>
+      <section v-if="publicationCitation" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex flex-row justify-between mb-3">
+          <h4 class="text-lg font-semibold">References</h4>
+          <CopyButton
+            :text="formatCitation(publicationCitation)"
+            title="Copy citation"
+          />
+        </div>
+        <Citation
+          :content="formatCitation(publicationCitation)"
+          class="mb-4"
+        />
         <div v-if="hasOtherRelatedModels" class="mb-4">
           <RouterLink
-            :to="`/search?kind=citation_id&term=${metadataJSON.citation_id}`"
+            :to="{ path: '/search', query: { citation_id: metadataJSON.citation_id } }"
             class="text-link text-sm inline-flex items-center gap-2 break-all"
           >
             <span class="text-foreground">›</span>
             See other models using this reference
           </RouterLink>
         </div>
-        <div>
+        <div class="mt-4">
           <button
             @click="isCitationDetailsOpen = !isCitationDetailsOpen"
             class="text-link text-sm flex items-center gap-2 text-left"
@@ -810,7 +1021,16 @@ onMounted(async () => {
   @apply text-sm;
 
   & :deep(a) {
-    @apply text-link;
+    @apply text-link dark:underline dark:decoration-dotted hover:text-link-hover transition;
+  }
+
+  & :deep(h1) {
+    @apply text-3xl font-bold mt-8 mb-8;
+  }
+
+  & :deep(> h1:first-child),
+  & :deep(> div > h1:first-child) {
+    @apply mt-0;
   }
 
   & :deep(h2) {
@@ -856,11 +1076,144 @@ onMounted(async () => {
   & :deep(table td) {
     @apply align-top text-sm;
   }
+
+  & :deep(blockquote) {
+    @apply border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic text-gray-600 dark:text-gray-400 my-4;
+  }
+
+  & :deep(ul) {
+    @apply list-disc pl-6 mb-4;
+  }
+
+  & :deep(ol) {
+    @apply list-decimal pl-6 mb-4;
+  }
+
+  & :deep(li) {
+    @apply mb-2;
+
+    p {
+      @apply mb-0;
+    }
+
+    p + p {
+      @apply mt-2;
+    }
+  }
+
+  & :deep(dd) {
+    @apply pl-4 mb-2;
+  }
+
+  & :deep(strong),
+  & :deep(b) {
+    @apply font-semibold;
+  }
+
+  & :deep(em),
+  & :deep(i) {
+    @apply italic;
+  }
+
+  & :deep(code) {
+    @apply font-mono bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 rounded text-sm px-1 py-[0.125em];
+  }
+
+  & :deep(pre) {
+    @apply bg-gray-100 dark:bg-gray-800 rounded p-4 overflow-auto mb-4 text-sm font-mono;
+  }
+
+  & :deep(pre code) {
+    @apply bg-transparent p-0;
+  }
+
+  & :deep(hr) {
+    @apply border-t border-gray-300 dark:border-gray-600 my-6;
+  }
 }
 
 .math-view {
-  & :deep(math) {
-    @apply flex flex-col gap-4;
+  @apply p-2 text-center text-base overflow-auto;
+
+  & :deep(math > mtable) {
+    border-spacing: 0.5em 0.75em;
+  }
+
+  & :deep(math mi),
+  & :deep(math mo),
+  & :deep(math mn) {
+    line-height: 1.4;
+    padding-left: 0.05em;
+    padding-right: 0.05em;
+  }
+
+  & :deep(math mi) {
+    font-style: italic;
+  }
+
+  /* Override sup and sub script text size for nested levels. */
+  & :deep(math msub > msub > :nth-child(2)),
+  & :deep(math msup > :nth-child(2)) {
+    font-size: 0.7rem;
+  }
+
+  & :deep(math msub > msub + mi),
+  & :deep(math msup msup > :nth-child(2)) {
+    font-size: 0.58rem;
+  }
+
+  /* Keep first-level fraction content at the parent math font size. */
+  & :deep(math mfrac > :first-child),
+  & :deep(math mfrac > :nth-child(2)) {
+    font-size: 1em;
+  }
+
+  & :deep(math mfrac > :first-child) {
+    padding-bottom: 0.14em;
+  }
+
+  & :deep(math mfrac > :nth-child(2)) {
+    padding-top: 0.14em;
+  }
+
+  & :deep(math > mtable > mtr + mtr > mtd) {
+    padding-top: 0.5em;
+  }
+
+  & :deep(math > mtable > mtr > mtd:nth-child(1)) {
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 0.5em;
+  }
+
+  & :deep(math > mtable > mtr > mtd[data-math-operator='equals']) {
+    text-align: center;
+    padding-left: 0.25em;
+    padding-right: 0.25em;
+  }
+
+  & :deep(math > mtable > mtr > mtd:nth-child(3)) {
+    text-align: left;
+    padding-left: 0.5em;
+  }
+
+  & :deep(mtable[data-math-piecewise='true']) {
+    border-spacing: 0.5em 0.35em;
+  }
+
+  & :deep(mtable[data-math-piecewise='true'] > mtr > mtd[data-math-piecewise='expression']) {
+    white-space: nowrap;
+  }
+
+  & :deep(mtable[data-math-piecewise='true'] > mtr > mtd[data-math-piecewise='keyword']) {
+    text-align: left;
+    white-space: nowrap;
+    padding-left: 0.15em;
+    padding-right: 0.35em;
+  }
+
+  & :deep(mtable[data-math-piecewise='true'] > mtr > mtd[data-math-piecewise='condition']) {
+    white-space: nowrap;
   }
 }
 </style>

@@ -32,6 +32,13 @@ export const exposureService = {
     })
 
     if (!response.ok) {
+      const responseText = await response.text()
+
+      // Check for not found error.
+      if (response.status === 404 || responseText.includes('NotFound')) {
+        throw new Error('Exposure not found')
+      }
+
       throw new Error(`Request failed: ${response.status}`)
     }
 

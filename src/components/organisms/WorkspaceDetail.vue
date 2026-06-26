@@ -1,21 +1,20 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
+import FormattedEmailText from '@/components/atoms/FormattedEmailText.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
-import FileIcon from '@/components/icons/FileIcon.vue'
-import FolderIcon from '@/components/icons/FolderIcon.vue'
 import LoadingIcon from '@/components/icons/LoadingIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
+import WorkspaceFileBrowser from '@/components/molecules/WorkspaceFileBrowser.vue'
 import { downloadWorkspaceArchive } from '@/services/downloadUrlService'
 import { useWorkspaceStore } from '@/stores/workspace'
+import type { ErrorInfo } from '@/types/error'
 import type { WorkspaceInfo } from '@/types/workspace'
-import { downloadWorkspaceFile } from '@/utils/download'
-import { formatFileCount } from '@/utils/format'
+import { generateWorkspaceTitle } from '@/utils/workspace'
 
 const props = defineProps<{
   alias: string
@@ -26,7 +25,7 @@ const props = defineProps<{
 const router = useRouter()
 const workspaceStore = useWorkspaceStore()
 const workspaceInfo = ref<WorkspaceInfo | null>(null)
-const error = ref<string | null>(null)
+const error = ref<ErrorInfo | null>(null)
 const isLoading = ref(true)
 const isDownloadingWorkspaceZip = ref(false)
 const isDownloadingWorkspaceTgz = ref(false)
@@ -68,50 +67,10 @@ const backButtonText = computed(() => {
   return !props.path ? 'Back to workspaces' : `Back to ${props.path}`
 })
 
-const fileCountText = computed(() => {
-  const count = workspaceInfo.value?.target?.TreeInfo?.filecount
-  return formatFileCount(count)
-})
-
-const sortedEntries = computed(() => {
-  if (!workspaceInfo.value) return []
-
-  const treeInfo = workspaceInfo.value.target?.TreeInfo
-  if (!treeInfo || !treeInfo.entries) return []
-
-  const entries = [...treeInfo.entries]
-
-  return entries.sort((a, b) => {
-    // Folders first.
-    if (a.kind === 'tree' && b.kind !== 'tree') return -1
-    if (a.kind !== 'tree' && b.kind === 'tree') return 1
-
-    // Both folders or both files - sort by name.
-    // Dotfiles (starting with ".") come before other files.
-    const aIsDotfile = a.name.startsWith('.')
-    const bIsDotfile = b.name.startsWith('.')
-
-    if (aIsDotfile && !bIsDotfile) return -1
-    if (!aIsDotfile && bIsDotfile) return 1
-
-    // Alphabetically (case-insensitive, but capitals before lowercase for same letter).
-    return a.name.localeCompare(b.name, 'en', { numeric: true })
-  })
-})
-
-const downloadFile = async (filename: string) => {
-  if (!workspaceInfo.value) return
-
-  const alias = props.alias
-  const commitId = workspaceInfo.value?.commit.commit_id
-  const fullFilename = (props.path ? `${props.path}/` : '') + filename
-  if (!commitId) return
-  await downloadWorkspaceFile(alias, commitId, fullFilename)
-}
-
 const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
   if (!workspaceInfo.value) return
 
+  const fileName = workspaceInfo.value.workspace.description || ''
   const loadingRef = format === 'zip' ? isDownloadingWorkspaceZip : isDownloadingWorkspaceTgz
   loadingRef.value = true
 
@@ -120,7 +79,8 @@ const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
       workspaceInfo.value.workspace.url,
       props.alias,
       workspaceInfo.value.commit.commit_id,
-      format
+      format,
+      fileName,
     )
   } catch (err) {
     console.error('Error downloading workspace archive:', err)
@@ -128,6 +88,13 @@ const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
     loadingRef.value = false
   }
 }
+
+const pageTitle = computed(() => {
+  return generateWorkspaceTitle(
+    workspaceInfo.value?.workspace.description,
+    workspaceInfo.value?.workspace.id,
+  )
+})
 
 const loadWorkspaceInfo = async () => {
   isLoading.value = true
@@ -146,7 +113,19 @@ const loadWorkspaceInfo = async () => {
     }
   } catch (err) {
     if (currentRequest === requestCounter.value) {
-      error.value = err instanceof Error ? err.message : 'Failed to load workspace.'
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load workspace.'
+
+      if (errorMessage.toLowerCase().includes('not found')) {
+        error.value = {
+          title: 'Workspace not found',
+          message: 'The workspace you are looking for does not exist or has been removed.',
+        }
+      } else {
+        error.value = {
+          title: 'Error loading workspace',
+          message: errorMessage,
+        }
+      }
       console.error('Error loading workspace:', err)
     }
   } finally {
@@ -171,15 +150,15 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
 
   <ErrorBlock
     v-if="error"
-    title="Error loading workspace"
-    :error="error"
+    :title="error.title"
+    :error="error.message"
   />
 
   <LoadingBox v-else-if="isLoading" message="Loading workspace..." />
 
   <div v-else-if="workspaceInfo">
     <PageHeader
-      :title="workspaceInfo.workspace.description || alias"
+      :title="pageTitle"
     />
 
     <div class="mb-6 space-y-4">
@@ -197,7 +176,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
 
       <div class="flex flex-col lg:flex-row items-start lg:items-center gap-2" v-if="workspaceInfo.commit.author">
         <span class="font-bold text-gray-600 dark:text-gray-400">Author:</span>
-        <span>{{ workspaceInfo.commit.author }}</span>
+        <FormattedEmailText :text="workspaceInfo.commit.author" />
       </div>
 
       <div class="flex flex-col lg:flex-row items-start lg:items-center gap-2">
@@ -229,43 +208,11 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
       </div>
     </div>
 
-    <div class="box p-0! overflow-hidden">
-      <div class="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-        <span class="text-gray-600 dark:text-gray-400">
-          {{ fileCountText }}
-        </span>
-      </div>
-      <ul class="divide-y divide-gray-200 dark:divide-gray-700">
-        <li
-          v-for="entry in sortedEntries"
-          :key="entry.id"
-          class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-        >
-          <div class="px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center gap-3 flex-1 min-w-0">
-              <FolderIcon v-if="entry.kind === 'tree'" class="text-gray-500 dark:text-gray-400 flex-shrink-0 w-4 h-4" />
-              <FileIcon v-else class="text-gray-500 dark:text-gray-400 flex-shrink-0 w-4 h-4" />
-
-              <RouterLink
-                :to="`/workspaces/${props.alias}/file/${workspaceInfo.commit.commit_id}/${(props.path ? props.path + '/' : '') + entry.name}`"
-                class="text-link font-medium truncate"
-              >
-                {{ entry.name }}
-              </RouterLink>
-            </div>
-            <button
-              v-if="entry.kind !== 'tree'"
-              @click.prevent="downloadFile(entry.name)"
-              class="ml-4 p-2 text-gray-500 cursor-pointer hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-              :title="`Download ${entry.name}`"
-              :aria-label="`Download ${entry.name}`"
-            >
-              <DownloadIcon class="w-4 h-4" />
-            </button>
-          </div>
-        </li>
-      </ul>
-    </div>
+    <WorkspaceFileBrowser
+      :alias="props.alias"
+      :commit-id="workspaceInfo.commit.commit_id"
+      :path="props.path"
+    />
   </div>
 </template>
 

@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { ref, watch, nextTick, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
-import CloseButton from '@/components/atoms/CloseButton.vue'
+import { nextTick, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import Keycap from '@/components/atoms/Keycap.vue'
+import Dialog from '@/components/molecules/Dialog.vue'
 import SearchInput from '@/components/molecules/SearchInput.vue'
+import { SEARCH_KIND_NAMES } from '@/constants/search'
+import { buildQuerySearchQuery, buildSearchQuery, parseQueryFiltersFromQuery } from '@/utils/search'
 
 const props = defineProps<{
   show: boolean
@@ -11,58 +14,81 @@ const props = defineProps<{
 const emit = defineEmits<(e: 'close') => void>()
 
 const router = useRouter()
+const route = useRoute()
 const searchInputRef = ref<InstanceType<typeof SearchInput> | null>(null)
-
-const handleKeyDown = (event: KeyboardEvent) => {
-  if (event.key === 'Escape') {
-    emit('close')
-  }
-}
 
 watch(
   () => props.show,
   (newVal) => {
     if (newVal) {
+      // Double nextTick to ensure focus happens
+      // after Dialog's own nextTick callback
+      // that focuses dialogRef (which steals focus).
       nextTick(() => {
-        searchInputRef.value?.searchInputRef?.focus()
+        nextTick(() => {
+          searchInputRef.value?.searchInputRef?.focus()
+        })
       })
-      document.addEventListener('keydown', handleKeyDown)
-    } else {
-      document.removeEventListener('keydown', handleKeyDown)
     }
   },
 )
 
-onUnmounted(() => {
-  document.removeEventListener('keydown', handleKeyDown)
-})
+watch(
+  () => route.fullPath,
+  () => {
+    if (props.show) {
+      emit('close')
+    }
+  },
+)
 
 const handleSearch = (searchKind: string, searchTerm: string) => {
-  router.push({ path: '/search', query: { kind: searchKind, term: searchTerm } })
+  router.push({ path: '/search', query: buildSearchQuery(searchKind, searchTerm, route.query) })
   emit('close')
+}
+
+const handleQuerySearch = (request: {
+  query?: string
+  filters?: Array<{ kind: string; term: string }>
+}) => {
+  router.push({
+    path: '/search',
+    query: buildQuerySearchQuery(request.query ?? '', request.filters ?? [], route.query),
+  })
+  emit('close')
+}
+
+const getInitialTerm = (): string => {
+  const queryParam = route.query.query
+
+  if (typeof queryParam === 'string') {
+    return queryParam
+  }
+
+  return ''
 }
 </script>
 
 <template>
-  <div
-    v-if="show"
-    class="fixed inset-0 bg-gray-800/75 dark:bg-gray-900/75 z-50 flex justify-center items-start pt-20"
-    @click.self="emit('close')"
+  <Dialog
+    :show="show"
+    title="Search"
+    position="top"
+    @close="emit('close')"
   >
-    <div class="w-full max-w-4xl bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
-      <div class="flex justify-between items-center mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
-        <h2 class="text-lg font-semibold">Search</h2>
-        <CloseButton @click="emit('close')" />
-      </div>
-      <div class="my-4 text-sm text-gray-500 dark:text-gray-400">
-        <p class="lg:w-3/4">
-          Search for models across authors, CellML keywords, and publication references.
-          Start typing to see available terms grouped by category.
-        </p>
-      </div>
-      <div class="py-4">
-        <SearchInput ref="searchInputRef" :inOverlay="true" initial-kind="" initial-term="" @search="handleSearch" />
-      </div>
+    <div class="mb-4 text-sm text-gray-500 dark:text-gray-400">
+      Type a term and press <Keycap>Enter</Keycap> to search the repository,
+      or use the more options to filter by category (author, keyword, publication references), or combine both.
     </div>
-  </div>
+    <SearchInput
+      ref="searchInputRef"
+      :inOverlay="true"
+      :initial-kind="''"
+      :initial-term="getInitialTerm()"
+      :initial-filters="parseQueryFiltersFromQuery(route.query, SEARCH_KIND_NAMES)"
+      @search="handleSearch"
+      @querySearch="handleQuerySearch"
+      @close="emit('close')"
+    />
+  </Dialog>
 </template>

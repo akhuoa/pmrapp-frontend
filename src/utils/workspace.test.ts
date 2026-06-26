@@ -1,0 +1,86 @@
+import { describe, expect, it } from 'vitest'
+import { TITLE } from '@/constants/global'
+import { mockWorkspaceInfo } from '@/mocks/workspaceInfo'
+import { generateWorkspaceTitle } from './workspace'
+
+describe('generateWorkspaceTitle', () => {
+  const { description, id } = mockWorkspaceInfo.workspace
+  const commitId = mockWorkspaceInfo.commit.commit_id
+
+  it('returns generic title when both description and id are null', () => {
+    expect(generateWorkspaceTitle(null, null)).toBe('Workspace Detail')
+  })
+
+  it('uses description from mock data', () => {
+    expect(generateWorkspaceTitle(description, id)).toBe(description)
+  })
+
+  it('accepts description with surrounding whitespace', () => {
+    expect(generateWorkspaceTitle('  My Workspace  ', id)).toBe('  My Workspace  ')
+  })
+
+  it('falls back to ID when description is null', () => {
+    expect(generateWorkspaceTitle(null, id)).toBe(`Workspace ${id}`)
+  })
+
+  it('falls back to ID when description is empty', () => {
+    expect(generateWorkspaceTitle('', id)).toBe(`Workspace ${id}`)
+  })
+
+  describe('with commitId and path', () => {
+    const filePath = 'baylor_hollingworth_chandler_2002_a.cellml'
+
+    it('appends commit hash and path when both are provided', () => {
+      expect(generateWorkspaceTitle(description, id, commitId, filePath)).toBe(
+        `${description} @ ${commitId.substring(0, 12)} / ${filePath}`,
+      )
+    })
+
+    it('does not append commit info when commitId is undefined', () => {
+      expect(generateWorkspaceTitle(description, id, undefined, filePath)).toBe(description)
+    })
+
+    it('does not append commit info when path is undefined', () => {
+      expect(generateWorkspaceTitle(description, id, commitId, undefined)).toBe(description)
+    })
+
+    it('replaces forward slashes with space-slash-space in path', () => {
+      const nestedPath = 'a/b/c/file.txt'
+      expect(generateWorkspaceTitle(description, id, commitId, nestedPath)).toBe(
+        `${description} @ ${commitId.substring(0, 12)} / a / b / c / file.txt`,
+      )
+    })
+
+    it('works with generic title when description and id are null', () => {
+      expect(generateWorkspaceTitle(null, null, commitId, 'path/to/file')).toBe(
+        `Workspace Detail @ ${commitId.substring(0, 12)} / path / to / file`,
+      )
+    })
+  })
+
+  describe('with title suffix', () => {
+    it('appends site title suffix when withTitleSuffix is true', () => {
+      expect(generateWorkspaceTitle(description, id, undefined, undefined, true)).toBe(
+        `${description} – ${TITLE}`,
+      )
+    })
+
+    it('appends suffix with generic title', () => {
+      expect(generateWorkspaceTitle(null, null, undefined, undefined, true)).toBe(
+        `Workspace Detail – ${TITLE}`,
+      )
+    })
+
+    it('appends suffix with ID fallback', () => {
+      expect(generateWorkspaceTitle(null, id, undefined, undefined, true)).toBe(
+        `Workspace ${id} – ${TITLE}`,
+      )
+    })
+
+    it('appends suffix along with commit and path info', () => {
+      expect(generateWorkspaceTitle(description, id, commitId, 'file.txt', true)).toBe(
+        `${description} @ ${commitId.substring(0, 12)} / file.txt – ${TITLE}`,
+      )
+    })
+  })
+})

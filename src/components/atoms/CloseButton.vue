@@ -1,7 +1,14 @@
+<script setup lang="ts">
+withDefaults(defineProps<{ class?: string }>(), {
+  class: 'w-6 h-6 hover:opacity-70 transition-opacity',
+})
+</script>
+
 <template>
   <button
     @click="$emit('click')"
-    class="w-6 h-6 hover:opacity-70 transition-opacity cursor-pointer"
+    class="cursor-pointer"
+    :class="$props.class"
     aria-label="Close"
     type="button"
   >

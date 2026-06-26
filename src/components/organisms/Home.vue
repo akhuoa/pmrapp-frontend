@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import KeywordBrowser from '@/components/molecules/KeywordBrowser.vue'
 import NavigationCard from '@/components/molecules/NavigationCard.vue'
@@ -17,15 +16,15 @@ import NavigationCard from '@/components/molecules/NavigationCard.vue'
 
   <section class="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto mb-12">
     <NavigationCard
-      to="/workspaces"
-      title="Workspaces"
-      description="Access project files and Git-based version history for all models."
-    />
-
-    <NavigationCard
       to="/exposures"
       title="Exposures"
       description="Explore published models and simulation results for citation and public use."
+    />
+
+    <NavigationCard
+      to="/workspaces"
+      title="Workspaces"
+      description="Access project files and Git-based version history for all models."
     />
   </section>
 

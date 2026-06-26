@@ -1,3 +1,5 @@
+import type { SortableEntity } from './common'
+
 export interface IndexesResponse {
   indexes: string[]
 }
@@ -23,6 +25,8 @@ export interface SearchResult {
     citation_author_family_name: string[]
     citation_id: string[]
     model_author: string[]
+    _title?: string[]
+    _brief?: string[]
   }
   resource_path: string
 }
@@ -34,4 +38,28 @@ export interface IndexSearchResult {
   }
   resource_paths: SearchResult[]
   term: string
+}
+
+export interface SearchQueryResponse {
+  results: SearchResult[]
+}
+
+export interface SearchFilter {
+  kind: string
+  term: string
+}
+
+export interface SearchQueryRequest {
+  query?: string
+  filters?: SearchFilter[]
+}
+
+export interface TextSegment {
+  text: string
+  highlighted: boolean
+}
+
+export interface QueryFilterOptions<T extends SortableEntity> {
+  query: string
+  items: T[]
 }

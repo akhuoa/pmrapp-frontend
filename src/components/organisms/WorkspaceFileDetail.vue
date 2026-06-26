@@ -1,20 +1,35 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
+import CopyButton from '@/components/atoms/CopyButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
+import WrapButton from '@/components/atoms/WrapButton.vue'
 import CodeIcon from '@/components/icons/CodeIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
+import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
 import PreviewIcon from '@/components/icons/PreviewIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { getWorkspaceService } from '@/services'
-import { downloadFileFromBlob, downloadFileFromContent } from '@/utils/download'
-import { isCodeFile, isImageFile, isMarkdownFile, isPdfFile, isSvgFile } from '@/utils/file'
+import { useWorkspaceStore } from '@/stores/workspace'
+import type { WorkspaceInfo } from '@/types/workspace'
+import { downloadFileFromBlob } from '@/utils/download'
+import {
+  isCodeFile,
+  isImageFile,
+  isMarkdownFile,
+  isOpenCORFile,
+  isPdfFile,
+  isSvgFile,
+} from '@/utils/file'
 import { renderMarkdown } from '@/utils/markdown'
-import ActionButton from '../atoms/ActionButton.vue'
+import { generateWorkspaceTitle } from '@/utils/workspace'
+
+// Files with size above this threshold are not rendered in the preview to prevent browser freeze.
+const MAX_PREVIEW_FILE_SIZE_BYTES = 500 * 1024 // ~500 KB
 
 const props = defineProps<{
   alias: string
@@ -25,9 +40,13 @@ const props = defineProps<{
 const fileContent = ref<string>('')
 const fileBlob = ref<Blob>(new Blob())
 const fileBlobUrl = ref<string>('')
+const fileSizeBytes = ref(0)
+const workspaceInfo = ref<WorkspaceInfo | null>(null)
+const workspaceInfoLoading = ref(true)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 const showCode = ref(false)
+const codeBlockRef = ref<InstanceType<typeof CodeBlock> | null>(null)
 
 // Extract filename from full path for download purposes.
 const filename = computed(() => {
@@ -47,12 +66,24 @@ const backPath = computed(() => {
 })
 
 const { goBack } = useBackNavigation(backPath.value)
+const workspaceStore = useWorkspaceStore()
 
 const isImage = computed(() => isImageFile(props.path))
 const isPDF = computed(() => isPdfFile(props.path))
 const isSvg = computed(() => isSvgFile(props.path))
 const isMarkdown = computed(() => isMarkdownFile(props.path))
 const isCode = computed(() => isCodeFile(props.path))
+const isOpenCOR = computed(() => isOpenCORFile(props.path))
+const canShowOpenCORButton = computed(() => isOpenCOR.value && !!openCORFileURL.value)
+
+const openCORFileURL = computed(() => {
+  const url = workspaceInfo.value?.workspace.url
+  if (!url) return ''
+
+  const rawFileURL = `${url}rawfile/${props.commitId}/${props.path}`
+  const opencorLink = `opencor://openFile/${rawFileURL}`
+  return `//opencor.ws/app/?${opencorLink}`
+})
 
 const shouldShowAsText = computed(() => {
   return isCode.value || (isSvg.value && showCode.value) || (isMarkdown.value && showCode.value)
@@ -72,28 +103,53 @@ const imageDataUrl = computed(() => {
   return fileBlobUrl.value
 })
 
+// Fast guard: avoid rendering very large payloads in the browser preview.
+const isTooLargeForPreview = computed(() => fileSizeBytes.value > MAX_PREVIEW_FILE_SIZE_BYTES)
+
 const downloadFile = () => {
-  if (isImage.value || isSvg.value || isPDF.value) {
-    downloadFileFromBlob(fileBlob.value, filename.value)
-  } else {
-    downloadFileFromContent(fileContent.value, filename.value)
-  }
+  downloadFileFromBlob(fileBlob.value, filename.value)
 }
 
 const toggleCodeView = () => {
   showCode.value = !showCode.value
 }
 
-onMounted(async () => {
+const toggleCodeWrap = () => {
+  codeBlockRef.value?.toggleWrap()
+}
+
+const loadWorkspaceInfo = async () => {
   try {
-    // Fetch images, SVGs, and PDFs as blobs.
+    workspaceInfo.value = await workspaceStore.getWorkspaceInfo(props.alias, props.commitId, '')
+  } catch (workspaceErr) {
+    console.error('Error loading workspace info:', workspaceErr)
+  } finally {
+    workspaceInfoLoading.value = false
+  }
+}
+
+const pageTitle = computed(() => {
+  const title = generateWorkspaceTitle(
+    workspaceInfo.value?.workspace.description,
+    workspaceInfo.value?.workspace.id,
+    props.commitId,
+    props.path,
+    false,
+  )
+
+  return title
+})
+
+onMounted(async () => {
+  void loadWorkspaceInfo()
+
+  try {
+    const blob = await getWorkspaceService().getRawFileBlob(props.alias, props.commitId, props.path)
+    fileBlob.value = blob
+    fileSizeBytes.value = blob.size
+
+    // Image-like previews use an object URL from the blob.
     if (isImage.value || isSvg.value || isPDF.value) {
-      const blob = await getWorkspaceService().getRawFileBlob(
-        props.alias,
-        props.commitId,
-        props.path,
-      )
-      fileBlob.value = blob
       fileBlobUrl.value = URL.createObjectURL(blob)
 
       // For SVG, also get text content for code view.
@@ -101,12 +157,10 @@ onMounted(async () => {
         fileContent.value = await blob.text()
       }
     } else {
-      // Fetch text files as text.
-      fileContent.value = await getWorkspaceService().getRawFile(
-        props.alias,
-        props.commitId,
-        props.path,
-      )
+      // Skip text decode for oversized code-like previews; download remains available via blob.
+      if (!isTooLargeForPreview.value || isMarkdown.value) {
+        fileContent.value = await blob.text()
+      }
     }
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to load file.'
@@ -131,6 +185,8 @@ onBeforeUnmount(() => {
     :on-click="goBack"
   />
 
+  <PageHeader v-if="!workspaceInfoLoading" :title="pageTitle" titleSize="small" />
+
   <ErrorBlock
     v-if="error"
     title="Error loading file"
@@ -140,57 +196,98 @@ onBeforeUnmount(() => {
   <LoadingBox v-else-if="isLoading" message="Loading file..." />
 
   <div v-else>
-    <PageHeader :title="path" />
-
     <div class="box p-0! overflow-hidden">
-      <div class="flex items-center justify-end px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+        <div>
+          {{ filename }}
+        </div>
         <div class="flex items-center gap-2">
           <button
             v-if="isSvg || isMarkdown"
             @click="toggleCodeView"
             class="flex items-center cursor-pointer gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-            :title="showCode ? 'Show preview' : 'Show code'"
-            :aria-label="showCode ? 'Show preview' : 'Show code'"
           >
             <PreviewIcon class="w-4 h-4" v-if="showCode" />
             <CodeIcon class="w-4 h-4" v-else />
             {{ showCode ? 'Preview' : 'Code' }}
           </button>
-          <button
+          <WrapButton
+            v-if="shouldShowAsText && !isTooLargeForPreview"
+            :disabled="(isSvg || isMarkdown) ? !showCode : false"
+            :active="codeBlockRef?.isWrapped"
+            @click="toggleCodeWrap"
+          />
+          <CopyButton
+            v-if="shouldShowAsText && !isTooLargeForPreview"
+            :text="fileContent"
+            title="Copy code"
+          />
+          <ActionButton
+            v-if="canShowOpenCORButton"
+            variant="icon"
+            size="sm"
+            content-section="Workspace File Detail"
+            :href="openCORFileURL"
+            target="_blank"
+            rel="noopener noreferrer"
+            tooltip="Open with OpenCOR's Web app"
+            aria-label="Open with OpenCOR's Web app"
+          >
+            <ExternalLinkIcon class="w-4 h-4" />
+            <span class="sr-only">Open with OpenCOR's Web app</span>
+          </ActionButton>
+          <ActionButton
+            variant="icon"
+            size="sm"
+            content-section="Workspace File Detail"
             @click="downloadFile"
-            class="flex items-center cursor-pointer gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-            title="Download"
-            :aria-label="'Download'"
+            tooltip="Download"
+            aria-label="Download"
           >
             <DownloadIcon class="w-4 h-4" />
-            Download
-          </button>
+            <span class="sr-only">Download</span>
+          </ActionButton>
         </div>
       </div>
 
       <!-- SVG Rendered View -->
-      <div v-if="isSvg && shouldShowPreview" class="flex justify-center p-8 bg-gray-50 dark:bg-gray-900 rounded">
+      <div v-if="isSvg && shouldShowPreview" class="flex justify-center p-4 bg-gray-50 dark:bg-gray-900 rounded">
         <img :src="fileBlobUrl" :alt="path" class="max-w-full h-auto" />
       </div>
 
       <!-- Markdown Preview -->
-      <div v-else-if="isMarkdown && shouldShowPreview" class="p-8">
+      <div v-else-if="isMarkdown && shouldShowPreview" class="p-4">
         <div class="max-w-none" v-html="renderedMarkdown"></div>
       </div>
 
       <!-- Image View -->
-      <div v-else-if="isImage && imageDataUrl" class="flex justify-center p-8 bg-gray-50 dark:bg-gray-900 rounded">
+      <div v-else-if="isImage && imageDataUrl" class="flex justify-center p-4 bg-gray-50 dark:bg-gray-900 rounded">
         <img :src="imageDataUrl" :alt="path" class="max-w-full h-auto" />
       </div>
 
       <!-- PDF View -->
-      <div v-else-if="isPDF" class="flex justify-center p-8 bg-gray-50 dark:bg-gray-900 rounded">
+      <div v-else-if="isPDF" class="flex justify-center">
         <embed :src="fileBlobUrl" type="application/pdf" width="100%" height="800px" />
+      </div>
+
+      <!-- Code/Text View (Too Large) -->
+      <div v-else-if="shouldShowAsText && isTooLargeForPreview" class="text-center py-8 text-gray-500 dark:text-gray-400">
+        <p class="mb-4">This file is too large to preview in the browser.</p>
+        <ActionButton
+          variant="primary"
+          size="lg"
+          @click="downloadFile"
+          content-section="Workspace File Detail"
+        >
+          <DownloadIcon class="w-4 h-4" />
+          Download
+        </ActionButton>
       </div>
 
       <!-- Code/Text View -->
       <div v-else-if="shouldShowAsText" class="relative">
         <CodeBlock
+          ref="codeBlockRef"
           :code="fileContent"
           :filename="filename"
         />
