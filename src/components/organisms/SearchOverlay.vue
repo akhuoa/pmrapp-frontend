@@ -27,9 +27,13 @@ watch(
   () => props.show,
   (newVal) => {
     if (newVal) {
+      // Double nextTick to ensure focus happens
+      // after Dialog's own nextTick callback
+      // that focuses dialogRef (which steals focus).
       nextTick(() => {
-        // TODO: Fix the focus issue.
-        searchInputRef.value?.searchInputRef?.focus()
+        nextTick(() => {
+          searchInputRef.value?.searchInputRef?.focus()
+        })
       })
       document.addEventListener('keydown', handleKeyDown)
     } else {
