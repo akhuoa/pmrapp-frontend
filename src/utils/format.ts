@@ -61,11 +61,6 @@ export function formatSearchKey(key: string): string {
   return `<span class="text-gray-700 dark:text-gray-200 font-semibold">${safeKey}</span>`
 }
 
-export function formatTermKey(key: string): string {
-  const safeKey = escapeHtml(key)
-  return `<span class="text-gray-700 dark:text-gray-200 font-semibold">${safeKey}</span>`
-}
-
 export function formatKindLabel(label: string): string {
   const safeLabel = escapeHtml(label)
   return `<span class="text-gray-600 dark:text-gray-300">${safeLabel}</span>`
