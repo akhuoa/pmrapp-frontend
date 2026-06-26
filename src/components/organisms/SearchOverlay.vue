@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onUnmounted, ref, watch } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import SearchInput from '@/components/molecules/SearchInput.vue'
 import { SEARCH_KIND_NAMES } from '@/constants/search'
@@ -17,12 +17,6 @@ const router = useRouter()
 const route = useRoute()
 const searchInputRef = ref<InstanceType<typeof SearchInput> | null>(null)
 
-const handleKeyDown = (event: KeyboardEvent) => {
-  if (event.key === 'Escape') {
-    emit('close')
-  }
-}
-
 watch(
   () => props.show,
   (newVal) => {
@@ -35,9 +29,6 @@ watch(
           searchInputRef.value?.searchInputRef?.focus()
         })
       })
-      document.addEventListener('keydown', handleKeyDown)
-    } else {
-      document.removeEventListener('keydown', handleKeyDown)
     }
   },
 )
@@ -50,10 +41,6 @@ watch(
     }
   },
 )
-
-onUnmounted(() => {
-  document.removeEventListener('keydown', handleKeyDown)
-})
 
 const handleSearch = (searchKind: string, searchTerm: string) => {
   router.push({ path: '/search', query: buildSearchQuery(searchKind, searchTerm, route.query) })
