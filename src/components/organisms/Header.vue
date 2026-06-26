@@ -5,7 +5,7 @@ import SearchIcon from '@/components/icons/SearchIcon.vue'
 import UserDropdown from '@/components/molecules/UserDropdown.vue'
 import SearchOverlay from '@/components/organisms/SearchOverlay.vue'
 import { useGlobalStateStore } from '@/stores/globalState'
-import ActionButton from '../atoms/ActionButton.vue'
+import ActionButton from '@/components/atoms/ActionButton.vue'
 
 const route = useRoute()
 const isSearchOverlayVisible = ref(false)
