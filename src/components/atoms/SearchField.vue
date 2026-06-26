@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import SearchIcon from '../icons/SearchIcon.vue'
+import SearchIcon from '@/components/icons/SearchIcon.vue'
 import CloseButton from './CloseButton.vue'
 
 interface Props {
