@@ -27,6 +27,17 @@ describe('Navigation and Routing', () => {
       cy.get('header').contains('a', 'Log in').click()
       cy.url().should('include', '/login')
     })
+
+    it('opens search dialog when clicking search icon in header', () => {
+      cy.visit('/')
+      cy.get('header').contains('button', 'Open search').click()
+
+      const searchDialog = cy.get('[role="dialog"][aria-label="Search"]')
+      searchDialog.should('be.visible')
+      searchDialog.contains('h2', 'Search').should('be.visible')
+      searchDialog.get('button[aria-label="Close"]').should('be.visible')
+      searchDialog.get('input[type="text"][aria-label="Search term"]').should('be.visible')
+    })
   })
 
   describe('Footer', () => {
