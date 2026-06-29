@@ -1,4 +1,25 @@
 describe('Search Page', () => {
+  const selectors = {
+    searchInput: 'input[type="text"][aria-label="Search term"]',
+    searchButton: 'button[aria-label="Search"]',
+    clearSearchButton: 'button[aria-label="Clear search"]',
+    advancedSearchButton: 'button[aria-label="Advanced Search"]',
+    filterInput: 'input[type="text"][aria-label="Filter search terms"]',
+    resultItems: 'main .box > div',
+  }
+
+  const runSearch = () => cy.get(selectors.searchButton).click()
+
+  const expectResults = (summaryText: string, itemCount: number) => {
+    cy.contains(summaryText).should('exist')
+    cy.get(selectors.resultItems).should('have.length', itemCount)
+  }
+
+  const chooseAdvancedSearchTerm = (filter: string, optionLabel: string) => {
+    cy.get(selectors.filterInput).clear().type(filter)
+    cy.get(`button[aria-label="Search for ${optionLabel}"]`).contains(optionLabel).should('exist').click()
+  }
+
   beforeEach(() => {
     cy.visit('/search')
   })
@@ -22,28 +43,19 @@ describe('Search Page', () => {
   })
 
   it('displays search results for a valid query', () => {
-    cy.get('input[type="text"][aria-label="Search term"]').type('mnt')
-    cy.get('button[aria-label="Search"]').click()
-    cy.contains('5 results for mnt.').should('exist')
-    cy.get('main .box > div').should('have.length', 5)
+    cy.get(selectors.searchInput).type('mnt')
+    runSearch()
+    expectResults('5 results for mnt.', 5)
 
-    cy.get('button[aria-label="Clear search"]').should('exist')
-    cy.get('button[aria-label="Clear search"]').click()
+    cy.get(selectors.clearSearchButton).should('exist').click()
 
-    cy.get('button[aria-label="Advanced Search"]').contains('More...').should('exist')
-    cy.get('button[aria-label="Advanced Search"]').contains('More...').click()
+    cy.get(selectors.advancedSearchButton).contains('More...').should('exist').click()
+    cy.get(selectors.filterInput).should('exist')
 
-    cy.get('input[type="text"][aria-label="Filter search terms"]').should('exist')
-    cy.get('input[type="text"][aria-label="Filter search terms"]').type('catherine')
-    cy.get('button[aria-label="Search for Catherine Lloyd"]').contains('Catherine Lloyd').should('exist')
-    cy.get('button[aria-label="Search for Catherine Lloyd"]').contains('Catherine Lloyd').click()
+    chooseAdvancedSearchTerm('catherine', 'Catherine Lloyd')
+    chooseAdvancedSearchTerm('beeler', 'Beeler')
 
-    cy.get('input[type="text"][aria-label="Filter search terms"]').clear().type('beeler')
-    cy.get('button[aria-label="Search for Beeler"]').contains('Beeler').should('exist')
-    cy.get('button[aria-label="Search for Beeler"]').contains('Beeler').click()
-
-    cy.get('button[aria-label="Search"]').click()
-    cy.contains('3 results for Publication author: Beeler and Model author: Catherine Lloyd.').should('exist')
-    cy.get('main .box > div').should('have.length', 3)
+    runSearch()
+    expectResults('3 results for Publication author: Beeler and Model author: Catherine Lloyd.', 3)
   })
 })
