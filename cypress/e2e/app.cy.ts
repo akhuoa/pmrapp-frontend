@@ -32,7 +32,7 @@ describe('Navigation and Routing', () => {
       cy.visit('/')
       cy.get('header').contains('button', 'Open search').click()
 
-      const searchDialog = cy.get('[role="dialog"][aria-label="Search"]')
+      const searchDialog = cy.get('div[role="dialog"][aria-label="Search"]')
       searchDialog.should('be.visible')
       searchDialog.contains('h2', 'Search').should('be.visible')
       searchDialog.get('button[aria-label="Close"]').should('be.visible')
