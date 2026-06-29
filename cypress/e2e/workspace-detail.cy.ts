@@ -3,7 +3,7 @@ describe('Workspace detail page', () => {
     cy.visit('/workspaces/da8')
   })
 
-  it('has the correct URL and title.', () => {
+  it('has the correct title.', () => {
     cy.title().should('include', 'Noble, Denyer, Brown, DiFrancesco, 1992')
     cy.title().should('include', 'Physiome Model Repository')
   })

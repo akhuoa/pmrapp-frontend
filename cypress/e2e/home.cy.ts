@@ -3,6 +3,10 @@ describe('Home page', () => {
     cy.visit('/')
   })
 
+  it('has the correct title.', () => {
+    cy.title().should('eq', 'Physiome Model Repository')
+  })
+
   it('renders a header component.', () => {
     cy.get('header').should('be.visible')
   })
@@ -19,11 +23,6 @@ describe('Home page', () => {
   it('renders a description after the <h1> element.', () => {
     cy.get('h1 + p').should('exist')
     cy.get('h1 + p').should('contain.text', 'CellML models')
-  })
-
-  it('sets the document title.', () => {
-    cy.contains('h1', 'Physiome Model Repository')
-    cy.title().should('eq', 'Physiome Model Repository')
   })
 
   it('displays navigation cards for Workspaces and Exposures.', () => {

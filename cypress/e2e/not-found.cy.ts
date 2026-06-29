@@ -1,8 +1,11 @@
 describe('Not found page', () => {
   beforeEach(() => {
     cy.visit('/this-page-does-not-exist', { failOnStatusCode: false })
-    cy.url().should('include', '/this-page-does-not-exist')
+  })
+
+  it('has the correct title.', () => {
     cy.title().should('include', 'Page Not Found')
+    cy.title().should('include', 'Physiome Model Repository')
   })
 
   it('renders a header component.', () => {

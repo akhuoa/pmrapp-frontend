@@ -3,9 +3,9 @@ describe('Login page', () => {
     cy.visit('/login')
   })
 
-  it('has the correct URL and title.', () => {
-    cy.url().should('include', '/login')
+  it('has the correct title.', () => {
     cy.title().should('include', 'Login')
+    cy.title().should('include', 'Physiome Model Repository')
   })
 
   it('renders a header component.', () => {
