@@ -17,7 +17,10 @@ describe('Search Page', () => {
 
   const chooseAdvancedSearchTerm = (filter: string, optionLabel: string) => {
     cy.get(selectors.filterInput).clear().type(filter)
-    cy.get(`button[aria-label="Search for ${optionLabel}"]`).contains(optionLabel).should('exist').click()
+    cy.get(`button[aria-label="Search for ${optionLabel}"]`)
+      .contains(optionLabel)
+      .should('exist')
+      .click()
   }
 
   beforeEach(() => {

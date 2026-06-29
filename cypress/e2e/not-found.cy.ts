@@ -25,7 +25,10 @@ describe('Not Found Page', () => {
 
   it('has a description text', () => {
     cy.get('p').should('exist')
-    cy.get('p').should('contain.text', "The page you are looking for doesn't exist or has been moved.")
+    cy.get('p').should(
+      'contain.text',
+      "The page you are looking for doesn't exist or has been moved.",
+    )
   })
 })
 

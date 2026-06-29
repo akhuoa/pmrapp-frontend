@@ -8,7 +8,6 @@ describe('Workspace Detail Page', () => {
     cy.title().should('include', 'Physiome Model Repository')
   })
 
-
   it('has a header component', () => {
     cy.get('header').should('be.visible')
   })
