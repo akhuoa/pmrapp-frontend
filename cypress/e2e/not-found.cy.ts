@@ -1,29 +1,29 @@
-describe('Not Found Page', () => {
+describe('Not found page', () => {
   beforeEach(() => {
     cy.visit('/this-page-does-not-exist', { failOnStatusCode: false })
     cy.url().should('include', '/this-page-does-not-exist')
     cy.title().should('include', 'Page Not Found')
   })
 
-  it('has a header component', () => {
+  it('renders a header component.', () => {
     cy.get('header').should('be.visible')
   })
 
-  it('has a footer component', () => {
+  it('renders a footer component.', () => {
     cy.get('footer').should('be.visible')
   })
 
-  it('has an <h1> tag', () => {
+  it('renders an <h1> element.', () => {
     cy.get('h1').should('exist')
     cy.get('h1').should('contain.text', '404')
   })
 
-  it('has an <h2> tag', () => {
+  it('renders an <h2> element.', () => {
     cy.get('h2').should('exist')
     cy.get('h2').should('contain.text', 'Page not found')
   })
 
-  it('has a description text', () => {
+  it('renders the description text.', () => {
     cy.get('p').should('exist')
     cy.get('p').should(
       'contain.text',
@@ -32,8 +32,8 @@ describe('Not Found Page', () => {
   })
 })
 
-describe('Navigation from Not Found Page', () => {
-  it('has a link to go back to the home page', () => {
+describe('Navigation from the not found page.', () => {
+  it('provides a link to return to the home page.', () => {
     cy.visit('/')
     cy.visit('/this-page-does-not-exist', { failOnStatusCode: false })
 

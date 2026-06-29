@@ -1,4 +1,4 @@
-describe('Search Page', () => {
+describe('Search page', () => {
   const selectors = {
     searchInput: 'input[type="text"][aria-label="Search term"]',
     searchButton: 'button[aria-label="Search"]',
@@ -27,25 +27,25 @@ describe('Search Page', () => {
     cy.visit('/search')
   })
 
-  it('has the correct URL and title', () => {
+  it('has the correct URL and title.', () => {
     cy.url().should('include', '/search')
     cy.title().should('include', 'Search')
   })
 
-  it('has a header component', () => {
+  it('renders a header component.', () => {
     cy.get('header').should('be.visible')
   })
 
-  it('has a footer component', () => {
+  it('renders a footer component.', () => {
     cy.get('footer').should('be.visible')
   })
 
-  it('has an <h1> tag', () => {
+  it('renders an <h1> element.', () => {
     cy.get('h1').should('exist')
     cy.get('h1').should('contain.text', 'Search')
   })
 
-  it('displays search results for a valid query', () => {
+  it('displays search results for a valid query.', () => {
     cy.get(selectors.searchInput).type('mnt')
     runSearch()
     expectResults('5 results for mnt.', 5)

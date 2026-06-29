@@ -1,8 +1,8 @@
 // https://on.cypress.io/api
 
-describe('Navigation and Routing', () => {
+describe('It covers navigation and routing.', () => {
   describe('Header', () => {
-    it('displays header with logo and navigation links', () => {
+    it('displays the header with the logo and navigation links.', () => {
       cy.visit('/')
       cy.get('header').should('be.visible')
       cy.get('header').contains('Workspaces')
@@ -10,13 +10,13 @@ describe('Navigation and Routing', () => {
       cy.get('header').contains('Log in')
     })
 
-    it('navigates to home when clicking logo', () => {
+    it('navigates to the home page when clicking the logo.', () => {
       cy.visit('/workspaces')
       cy.get('header .nav-link').first().click()
       cy.url().should('eq', Cypress.config().baseUrl)
     })
 
-    it('navigates between pages using header links', () => {
+    it('navigates between pages using the header links.', () => {
       cy.visit('/')
       cy.get('header').contains('a', 'Workspaces').click()
       cy.url().should('include', '/workspaces')
@@ -28,7 +28,7 @@ describe('Navigation and Routing', () => {
       cy.url().should('include', '/login')
     })
 
-    it('opens search dialog when clicking search icon in header', () => {
+    it('opens the search dialog when clicking the search icon in the header.', () => {
       cy.visit('/')
       cy.get('header').contains('button', 'Open search').click()
 
@@ -41,14 +41,14 @@ describe('Navigation and Routing', () => {
   })
 
   describe('Footer', () => {
-    it('displays footer with copyright information', () => {
+    it('displays the footer with copyright information.', () => {
       cy.visit('/')
       cy.get('footer').should('be.visible')
       cy.get('footer').contains('IUPS Physiome project')
       cy.get('footer').contains(new Date().getFullYear().toString())
     })
 
-    it('footer contains GitHub repository links', () => {
+    it('contains GitHub repository links.', () => {
       cy.visit('/')
       cy.get('footer a[href*="github.com"]').should('have.length', 2)
     })
