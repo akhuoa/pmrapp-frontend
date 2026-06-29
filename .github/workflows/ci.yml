@@ -35,3 +35,6 @@ jobs:
 
       - name: Run e2e tests
         run: bun run test:e2e
+        env:
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+          VITE_DOWNLOAD_API: ${{ secrets.VITE_DOWNLOAD_API }}
