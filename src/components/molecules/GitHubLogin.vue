@@ -4,6 +4,7 @@ import GitHubIcon from '@/components/icons/GitHubIcon.vue'
 import { GITHUB_OAUTH_AUTHORIZE_URL } from '@/constants/auth'
 import router from '@/router'
 import { useAuthStore } from '@/stores/auth'
+import type { GitHubAuthData } from '@/types/auth'
 import { getGitHubOAuthParams, getGitHubRedirectUri } from '@/utils/auth'
 import { onMounted } from 'vue'
 
@@ -12,13 +13,6 @@ const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID
 const APP_BASE_URL = import.meta.env.BASE_URL
 const REDIRECT_URI = getGitHubRedirectUri(APP_BASE_URL)
 const GITHUB_OAUTH_PARAMS = getGitHubOAuthParams(GITHUB_CLIENT_ID, REDIRECT_URI)
-
-interface GitHubAuthData {
-  token: string
-  username: string
-  name: string
-  email: string
-}
 
 const authStore = useAuthStore()
 
