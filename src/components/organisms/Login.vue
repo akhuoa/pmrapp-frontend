@@ -97,8 +97,8 @@ const handleSubmit = async () => {
     // Store auth state.
     authStore.setAuth(token, username.value)
 
-    // Redirect to home page.
-    router.push('/')
+    // Redirect to profile page.
+    router.push('/profile')
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Login failed'
     focusUsernameInput()

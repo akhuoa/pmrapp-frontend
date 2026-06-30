@@ -67,7 +67,7 @@ onMounted(async () => {
       const { token, username } = data
 
       authStore.setAuth(token, username)
-      router.push('/')
+      router.push('/profile')
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : defaultErrorMessage
       emit('error', errorMessage)

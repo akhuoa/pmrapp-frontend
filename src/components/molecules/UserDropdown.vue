@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ConfirmDialog from '@/components/atoms/ConfirmDialog.vue'
+import LogoutIcon from '@/components/icons/LogoutIcon.vue'
 import UserIcon from '@/components/icons/UserIcon.vue'
 import { getAuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth'
@@ -103,13 +104,28 @@ onUnmounted(() => {
       role="menu"
       class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50"
     >
-      <button
-        @click="confirmLogout"
-        class="w-full cursor-pointer text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-        role="menuitem"
-      >
-        Log out
-      </button>
+      <ul>
+        <li>
+          <RouterLink
+            to="/profile"
+            class="flex items-center w-full cursor-pointer px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            role="menuitem"
+          >
+            <UserIcon class="w-4 h-4 shrink-0 mr-2" />
+            Profile
+          </RouterLink>
+        </li>
+        <li>
+          <button
+            @click="confirmLogout"
+            class="flex items-center w-full cursor-pointer px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            role="menuitem"
+          >
+            <LogoutIcon class="w-4 h-4 shrink-0 mr-2" />
+            Log out
+          </button>
+        </li>
+      </ul>
     </div>
   </div>
 
