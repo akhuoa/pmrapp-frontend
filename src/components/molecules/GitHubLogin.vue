@@ -1,14 +1,14 @@
 <script setup lang="ts">
+import { computed, onMounted, ref, watch } from 'vue'
 import ActionButton from '@/components/atoms/ActionButton.vue'
-import Dialog from '@/components/molecules/Dialog.vue'
 import GitHubIcon from '@/components/icons/GitHubIcon.vue'
 import LoadingIcon from '@/components/icons/LoadingIcon.vue'
+import Dialog from '@/components/molecules/Dialog.vue'
 import { GITHUB_OAUTH_AUTHORIZE_URL } from '@/constants/auth'
 import router from '@/router'
 import { useAuthStore } from '@/stores/auth'
 import type { GitHubAuthData } from '@/types/auth'
 import { getGitHubOAuthParams, getGitHubRedirectUri } from '@/utils/auth'
-import { computed, onMounted, ref, watch } from 'vue'
 
 const API_BASE_URL = import.meta.env.VITE_AUTH_API
 const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID
