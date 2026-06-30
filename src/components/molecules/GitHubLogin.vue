@@ -1,20 +1,17 @@
 <script setup lang="ts">
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import GitHubIcon from '@/components/icons/GitHubIcon.vue'
+import { GITHUB_OAUTH_AUTHORIZE_URL } from '@/constants/auth'
 import router from '@/router'
 import { useAuthStore } from '@/stores/auth'
+import { getGitHubOAuthParams, getGitHubRedirectUri } from '@/utils/auth'
 import { onMounted } from 'vue'
 
 const API_BASE_URL = import.meta.env.VITE_AUTH_API
 const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID
 const APP_BASE_URL = import.meta.env.BASE_URL
-const GITHUB_OAUTH_AUTHORIZE_URL = 'https://github.com/login/oauth/authorize'
-const REDIRECT_URI = new URL('login', new URL(APP_BASE_URL, window.location.origin)).toString()
-const GITHUB_OAUTH_PARAMS = {
-  client_id: GITHUB_CLIENT_ID,
-  redirect_uri: REDIRECT_URI,
-  scope: 'user:email',
-}
+const REDIRECT_URI = getGitHubRedirectUri(APP_BASE_URL)
+const GITHUB_OAUTH_PARAMS = getGitHubOAuthParams(GITHUB_CLIENT_ID, REDIRECT_URI)
 
 interface GitHubAuthData {
   token: string
