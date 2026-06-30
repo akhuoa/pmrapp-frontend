@@ -61,6 +61,8 @@ const handleClickOutside = (event: MouseEvent) => {
   }
 }
 
+const isActive = (path: string) => computed(() => route.path.startsWith(path))
+
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
 })
@@ -133,6 +135,7 @@ onUnmounted(() => {
     v-else
     to="/login"
     class="nav-link"
+    :class="{ 'text-primary': isActive('/login').value }"
     @click="handleLoginClick"
   >
     Log in
