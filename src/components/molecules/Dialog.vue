@@ -6,6 +6,7 @@ const props = defineProps<{
   show: boolean
   title?: string
   position?: 'center' | 'top'
+  isStatic?: boolean
 }>()
 
 const emit = defineEmits<(e: 'close') => void>()
@@ -19,9 +20,12 @@ const positionClasses = computed(() => {
 })
 
 const headerClasses = computed(() => {
-  return props.title
-    ? 'justify-between items-center border-b border-gray-200 dark:border-gray-700'
-    : 'justify-end'
+  if (!props.title) {
+    return 'justify-end'
+  }
+
+  const withTitle = 'items-center border-b border-gray-200 dark:border-gray-700'
+  return props.isStatic ? `justify-center ${withTitle}` : `justify-between ${withTitle}`
 })
 
 const handleBackdropMouseDown = (event: MouseEvent) => {
@@ -81,7 +85,7 @@ onUnmounted(() => {
     >
       <div class="flex p-4" :class="headerClasses">
         <h2 v-if="title" class="text-lg font-semibold">{{ title }}</h2>
-        <CloseButton @click="emit('close')" />
+        <CloseButton @click="emit('close')" v-if="!props.isStatic" />
       </div>
       <div class="min-h-0 flex-1 p-4 overflow-y-auto">
         <slot />

@@ -100,6 +100,7 @@ onMounted(async () => {
   <Dialog
     :show="isAuthenticating"
     title="Signing in with GitHub"
+    :isStatic="true"
     @close="() => {}"
   >
     <div class="flex flex-col items-center justify-center py-6 text-center">
