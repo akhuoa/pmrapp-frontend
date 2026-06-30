@@ -165,14 +165,8 @@ const handleSubmit = async () => {
       </ActionButton>
     </form>
 
-    <div class="mt-6 pt-6">
-      <div class="flex items-center gap-3 mb-4">
-        <span class="h-px flex-1 bg-gray-200 dark:bg-gray-700"></span>
-        <span class="text-sm text-gray-600 dark:text-gray-400 tracking-wide">
-          or
-        </span>
-        <span class="h-px flex-1 bg-gray-200 dark:bg-gray-700"></span>
-      </div>
+    <div class="mt-6">
+      <div class="auth-divider text-gray-600 dark:text-gray-400 mb-5">or</div>
 
       <GitHubLogin />
     </div>
@@ -184,4 +178,21 @@ const handleSubmit = async () => {
 @import '@/assets/input.css';
 @import '@/assets/box.css';
 @import '@/assets/error-box.css';
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: currentColor;
+    opacity: 0.35;
+  }
+}
 </style>
