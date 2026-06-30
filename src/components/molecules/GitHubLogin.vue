@@ -32,20 +32,18 @@ const handleGitHubLoginClick = () => {
 }
 
 onMounted(async () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const code = urlParams.get('code');
+  const urlParams = new URLSearchParams(window.location.search)
+  const code = urlParams.get('code')
 
   if (code) {
-    // Clean the code out of the URL bar immediately for aesthetics
-    window.history.replaceState({}, document.title, window.location.pathname);
+    window.history.replaceState({}, document.title, window.location.pathname)
 
     try {
-      // Send the code to our secure Cloudflare Function
       const response = await fetch(`${API_BASE_URL}/api/auth`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code })
-      });
+        body: JSON.stringify({ code }),
+      })
 
       const data: GitHubAuthData = await response.json()
       const { token, username } = data
@@ -53,10 +51,10 @@ onMounted(async () => {
       authStore.setAuth(token, username)
       router.push('/')
     } catch (err) {
-      console.error("Auth failed:", err)
+      console.error('Auth failed:', err)
     }
   }
-});
+})
 </script>
 
 <template>
