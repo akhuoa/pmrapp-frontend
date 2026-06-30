@@ -50,6 +50,7 @@ onMounted(async () => {
   if (code) {
     isAuthenticating.value = true
     window.history.replaceState({}, document.title, window.location.pathname)
+    const defaultErrorMessage = 'GitHub authentication failed. Please try again.'
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth`, {
@@ -59,7 +60,7 @@ onMounted(async () => {
       })
 
       if (!response.ok) {
-        throw new Error('GitHub authentication failed. Please try again.')
+        throw new Error(defaultErrorMessage)
       }
 
       const data: GitHubAuthData = await response.json()
@@ -68,7 +69,7 @@ onMounted(async () => {
       authStore.setAuth(token, username)
       router.push('/')
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'GitHub authentication failed. Please try again.'
+      const errorMessage = err instanceof Error ? err.message : defaultErrorMessage
       emit('error', errorMessage)
       isAuthenticating.value = false
     }
