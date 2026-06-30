@@ -16,6 +16,7 @@ const usernameInput = ref<HTMLInputElement | null>(null)
 const password = ref('')
 const error = ref<string | null>(null)
 const isLoading = ref(false)
+const isGitHubLoading = ref(false)
 const ERROR_AUTO_HIDE_MS = 5000
 let errorTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -73,6 +74,10 @@ onBeforeUnmount(() => {
 })
 
 const handleSubmit = async () => {
+  if (isGitHubLoading.value) {
+    return
+  }
+
   error.value = null
 
   if (!username.value || !password.value) {
@@ -131,6 +136,7 @@ const handleSubmit = async () => {
           type="text"
           autocomplete="username"
           required
+          :disabled="isGitHubLoading"
           class="input-field w-full"
           placeholder="Enter your username"
         />
@@ -147,6 +153,7 @@ const handleSubmit = async () => {
           type="password"
           autocomplete="current-password"
           required
+          :disabled="isGitHubLoading"
           class="input-field w-full"
           placeholder="Enter your password"
         />
@@ -157,7 +164,7 @@ const handleSubmit = async () => {
         type="submit"
         variant="primary"
         size="lg"
-        :disabled="isLoading"
+        :disabled="isLoading || isGitHubLoading"
         class="w-full"
         contentSection="login_page"
       >
@@ -168,7 +175,10 @@ const handleSubmit = async () => {
     <div class="mt-6">
       <div class="auth-divider text-gray-600 dark:text-gray-400 mb-5">or</div>
 
-      <GitHubLogin />
+      <GitHubLogin
+        @error="error = $event"
+        @busy-change="isGitHubLoading = $event"
+      />
     </div>
   </div>
 </template>
