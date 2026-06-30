@@ -11,38 +11,38 @@ const authStore = useAuthStore()
 const router = useRouter()
 const authService = getAuthService()
 
-const showLogoutConfirm = ref(false)
+const showLogOutConfirm = ref(false)
 
-/** Derive initials from username for the avatar circle */
+/** Derive initials from the username for the avatar circle. */
 const avatarInitials = computed(() => {
   const name = authStore.username ?? ''
   return name.slice(0, 2).toUpperCase() || '?'
 })
 
-const confirmLogout = () => {
-  showLogoutConfirm.value = true
+const confirmLogOut = () => {
+  showLogOutConfirm.value = true
 }
 
-const handleLogout = async () => {
-  showLogoutConfirm.value = false
+const handleLogOut = async () => {
+  showLogOutConfirm.value = false
   try {
     await authService.logout()
     authStore.clearAuth()
     router.push('/')
   } catch (error) {
-    console.error('Logout failed:', error)
+    console.error('Log out failed:', error)
   }
 }
 
-const cancelLogout = () => {
-  showLogoutConfirm.value = false
+const cancelLogOut = () => {
+  showLogOutConfirm.value = false
 }
 </script>
 
 <template>
   <div class="max-w-2xl mx-auto space-y-6">
 
-    <!-- Avatar & display name -->
+    <!-- Avatar and display name. -->
     <div class="box flex items-center gap-5">
       <div
         class="avatar"
@@ -54,11 +54,11 @@ const cancelLogout = () => {
         <p class="text-xl font-semibold truncate text-heading">
           {{ authStore.username }}
         </p>
-        <!-- Future: full name / bio can go here -->
+        <!-- In future, the full name or biography can go here. -->
       </div>
     </div>
 
-    <!-- Account information -->
+    <!-- Account information. -->
     <section class="box space-y-5" aria-labelledby="account-info-heading">
       <h2 id="account-info-heading" class="section-heading">Account information</h2>
 
@@ -67,7 +67,7 @@ const cancelLogout = () => {
         <span class="info-value">{{ authStore.username }}</span>
       </div>
 
-      <!-- Placeholders — will be populated when the data becomes available -->
+      <!-- Placeholders — they will be populated when the data become available. -->
       <div class="info-row">
         <span class="label-field">Full name</span>
         <span class="info-value text-muted-fg italic">Not available</span>
@@ -79,7 +79,7 @@ const cancelLogout = () => {
       </div>
     </section>
 
-    <!-- Account actions -->
+    <!-- Account actions. -->
     <section class="box" aria-labelledby="account-actions-heading">
       <h2 id="account-actions-heading" class="section-heading mb-4">Account actions</h2>
       <ActionButton
@@ -87,7 +87,7 @@ const cancelLogout = () => {
         variant="secondary"
         size="md"
         contentSection="profile_page"
-        @click="confirmLogout"
+        @click="confirmLogOut"
       >
         <LogoutIcon class="w-4 h-4" />
         Log out
@@ -97,13 +97,13 @@ const cancelLogout = () => {
   </div>
 
   <ConfirmDialog
-    :show="showLogoutConfirm"
+    :show="showLogOutConfirm"
     title="Log out"
     message="Are you sure you want to log out?"
     confirm-label="Log out"
     cancel-label="Cancel"
-    @confirm="handleLogout"
-    @cancel="cancelLogout"
+    @confirm="handleLogOut"
+    @cancel="cancelLogOut"
   />
 </template>
 
