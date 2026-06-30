@@ -6,16 +6,16 @@ import LoadingIcon from '@/components/icons/LoadingIcon.vue'
 import Dialog from '@/components/molecules/Dialog.vue'
 import { GITHUB_OAUTH_AUTHORIZE_URL } from '@/constants/auth'
 import router from '@/router'
+import { getAuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth'
-import type { GitHubAuthData } from '@/types/auth'
 import { getGitHubOAuthParams, getGitHubRedirectUri } from '@/utils/auth'
 
-const API_BASE_URL = import.meta.env.VITE_AUTH_API
 const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID
 const APP_BASE_URL = import.meta.env.BASE_URL
 const REDIRECT_URI = getGitHubRedirectUri(APP_BASE_URL)
 const GITHUB_OAUTH_PARAMS = getGitHubOAuthParams(GITHUB_CLIENT_ID, REDIRECT_URI)
 
+const authService = getAuthService()
 const authStore = useAuthStore()
 const emit = defineEmits<{
   error: [message: string]
@@ -53,18 +53,7 @@ onMounted(async () => {
     const defaultErrorMessage = 'GitHub authentication failed. Please try again.'
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code }),
-      })
-
-      if (!response.ok) {
-        throw new Error(defaultErrorMessage)
-      }
-
-      const data: GitHubAuthData = await response.json()
-      const { token, username, name, email } = data
+      const { token, username, name, email } = await authService.loginWithGitHub(code)
 
       authStore.setAuth(token, username, name, email)
       router.push('/profile')

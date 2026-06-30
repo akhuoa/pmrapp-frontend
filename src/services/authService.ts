@@ -1,6 +1,7 @@
-import type { LoginCredentials } from '@/types/auth'
+import type { GitHubAuthData, LoginCredentials } from '@/types/auth'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+const AUTH_API_BASE_URL = import.meta.env.VITE_AUTH_API
 
 const LOGIN_ERROR_MESSAGES = {
   invalidCredentials: 'Incorrect username or password. Please try again.',
@@ -85,6 +86,20 @@ export const authService = {
 
     const token = await response.text()
     return token
+  },
+
+  async loginWithGitHub(code: string): Promise<GitHubAuthData> {
+    const response = await fetch(`${AUTH_API_BASE_URL}/api/auth`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code }),
+    })
+
+    if (!response.ok) {
+      throw new Error('GitHub authentication failed. Please try again.')
+    }
+
+    return response.json() as Promise<GitHubAuthData>
   },
 
   async logout(): Promise<void> {
