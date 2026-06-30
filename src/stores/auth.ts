@@ -8,7 +8,12 @@ export const useAuthStore = defineStore('auth', () => {
   const email = ref<string | null>(null)
   const isAuthenticated = ref(false)
 
-  function setAuth(authToken: string, user: string, fullName?: string | null, userEmail?: string | null) {
+  function setAuth(
+    authToken: string,
+    user: string,
+    fullName?: string | null,
+    userEmail?: string | null,
+  ) {
     token.value = authToken
     username.value = user
     name.value = fullName ?? null
