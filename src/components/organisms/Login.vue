@@ -3,7 +3,7 @@ import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import CloseButton from '@/components/atoms/CloseButton.vue'
-import GitHubIcon from '@/components/icons/GitHubIcon.vue'
+import GitHubLogin from '@/components/molecules/GitHubLogin.vue'
 import { getAuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth'
 import { useGlobalStateStore } from '@/stores/globalState'
@@ -20,8 +20,6 @@ const ERROR_AUTO_HIDE_MS = 5000
 let errorTimer: ReturnType<typeof setTimeout> | null = null
 
 const authService = getAuthService()
-
-const handleGitHubLoginClick = () => {}
 
 const clearErrorTimer = () => {
   if (!errorTimer) {
@@ -176,17 +174,7 @@ const handleSubmit = async () => {
         <span class="h-px flex-1 bg-gray-200 dark:bg-gray-700"></span>
       </div>
 
-      <ActionButton
-        type="button"
-        variant="secondary"
-        size="lg"
-        class="w-full"
-        contentSection="login_page"
-        @click="handleGitHubLoginClick"
-      >
-        <GitHubIcon class="w-5 h-5" />
-        Continue with GitHub
-      </ActionButton>
+      <GitHubLogin />
     </div>
   </div>
 </template>
