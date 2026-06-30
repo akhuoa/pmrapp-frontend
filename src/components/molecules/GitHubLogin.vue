@@ -64,9 +64,9 @@ onMounted(async () => {
       }
 
       const data: GitHubAuthData = await response.json()
-      const { token, username } = data
+      const { token, username, name, email } = data
 
-      authStore.setAuth(token, username)
+      authStore.setAuth(token, username, name, email)
       router.push('/profile')
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : defaultErrorMessage

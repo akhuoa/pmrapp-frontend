@@ -13,6 +13,8 @@ describe('useAuthStore', () => {
     expect(store.isAuthenticated).toBe(false)
     expect(store.token).toBeNull()
     expect(store.username).toBeNull()
+    expect(store.name).toBeNull()
+    expect(store.email).toBeNull()
   })
 
   describe('setAuth', () => {
@@ -22,6 +24,15 @@ describe('useAuthStore', () => {
       expect(store.isAuthenticated).toBe(true)
       expect(store.token).toBe('test-token')
       expect(store.username).toBe('testuser')
+      expect(store.name).toBeNull()
+      expect(store.email).toBeNull()
+    })
+
+    it('stores name and email when provided', () => {
+      const store = useAuthStore()
+      store.setAuth('test-token', 'testuser', 'Test User', 'test@example.com')
+      expect(store.name).toBe('Test User')
+      expect(store.email).toBe('test@example.com')
     })
 
     it('persists auth token and username to localStorage', () => {
@@ -30,24 +41,44 @@ describe('useAuthStore', () => {
       expect(localStorage.getItem('auth_token')).toBe('test-token')
       expect(localStorage.getItem('username')).toBe('testuser')
     })
+
+    it('persists name and email to localStorage when provided', () => {
+      const store = useAuthStore()
+      store.setAuth('test-token', 'testuser', 'Test User', 'test@example.com')
+      expect(localStorage.getItem('name')).toBe('Test User')
+      expect(localStorage.getItem('email')).toBe('test@example.com')
+    })
+
+    it('removes name and email from localStorage when not provided', () => {
+      const store = useAuthStore()
+      localStorage.setItem('name', 'Old Name')
+      localStorage.setItem('email', 'old@example.com')
+      store.setAuth('test-token', 'testuser')
+      expect(localStorage.getItem('name')).toBeNull()
+      expect(localStorage.getItem('email')).toBeNull()
+    })
   })
 
   describe('clearAuth', () => {
     it('clears authenticated state from the store', () => {
       const store = useAuthStore()
-      store.setAuth('test-token', 'testuser')
+      store.setAuth('test-token', 'testuser', 'Test User', 'test@example.com')
       store.clearAuth()
       expect(store.isAuthenticated).toBe(false)
       expect(store.token).toBeNull()
       expect(store.username).toBeNull()
+      expect(store.name).toBeNull()
+      expect(store.email).toBeNull()
     })
 
-    it('removes auth token and username from localStorage', () => {
+    it('removes auth token, username, name and email from localStorage', () => {
       const store = useAuthStore()
-      store.setAuth('test-token', 'testuser')
+      store.setAuth('test-token', 'testuser', 'Test User', 'test@example.com')
       store.clearAuth()
       expect(localStorage.getItem('auth_token')).toBeNull()
       expect(localStorage.getItem('username')).toBeNull()
+      expect(localStorage.getItem('name')).toBeNull()
+      expect(localStorage.getItem('email')).toBeNull()
     })
   })
 
@@ -55,11 +86,15 @@ describe('useAuthStore', () => {
     it('restores authenticated state from localStorage', () => {
       localStorage.setItem('auth_token', 'stored-token')
       localStorage.setItem('username', 'storeduser')
+      localStorage.setItem('name', 'Stored User')
+      localStorage.setItem('email', 'stored@example.com')
       const store = useAuthStore()
       store.initAuth()
       expect(store.isAuthenticated).toBe(true)
       expect(store.token).toBe('stored-token')
       expect(store.username).toBe('storeduser')
+      expect(store.name).toBe('Stored User')
+      expect(store.email).toBe('stored@example.com')
     })
 
     it('remains unauthenticated when localStorage has no stored credentials', () => {

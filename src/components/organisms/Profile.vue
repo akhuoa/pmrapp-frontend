@@ -67,15 +67,16 @@ const cancelLogOut = () => {
         <span class="info-value">{{ authStore.username }}</span>
       </div>
 
-      <!-- Placeholders — they will be populated when the data become available. -->
       <div class="info-row">
         <span class="label-field">Full name</span>
-        <span class="info-value text-muted-fg italic">Not available</span>
+        <span v-if="authStore.name" class="info-value">{{ authStore.name }}</span>
+        <span v-else class="info-value text-muted-fg italic">Not available</span>
       </div>
 
       <div class="info-row">
         <span class="label-field">Email</span>
-        <span class="info-value text-muted-fg italic">Not available</span>
+        <span v-if="authStore.email" class="info-value">{{ authStore.email }}</span>
+        <span v-else class="info-value text-muted-fg italic">Not available</span>
       </div>
     </section>
 
