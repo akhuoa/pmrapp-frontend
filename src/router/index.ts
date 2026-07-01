@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, type RouteLocationNormalized } from 'vue-router'
 import { TITLE } from '@/constants/global'
+import { useAuthStore } from '@/stores/auth'
 import { useExposureStore } from '@/stores/exposure'
 import { useWorkspaceStore } from '@/stores/workspace'
 import { generateExposureTitle } from '@/utils/exposure'
@@ -9,6 +10,7 @@ import ExposureView from '@/views/ExposureView.vue'
 import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
+import ProfileView from '@/views/ProfileView.vue'
 import SearchView from '@/views/SearchView.vue'
 import WorkspaceDetailView from '@/views/WorkspaceDetailView.vue'
 import WorkspaceView from '@/views/WorkspaceView.vue'
@@ -201,12 +203,30 @@ const router = createRouter({
       meta: { title: `Login – ${TITLE}` },
     },
     {
+      path: '/profile',
+      name: 'profile',
+      component: ProfileView,
+      meta: { title: `Profile – ${TITLE}`, requiresAuth: true },
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: NotFoundView,
       meta: { title: `Page Not Found – ${TITLE}` },
     },
   ],
+})
+
+router.beforeEach((to) => {
+  const authStore = useAuthStore()
+
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    return { name: 'login' }
+  }
+
+  if (to.name === 'login' && authStore.isAuthenticated) {
+    return { name: 'profile' }
+  }
 })
 
 router.beforeResolve(async (to) => {
