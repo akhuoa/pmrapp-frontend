@@ -11,6 +11,12 @@ const LOGIN_ERROR_MESSAGES = {
   generic: 'Unable to sign in right now. Please try again.',
 } as const
 
+export const GITHUB_LOGIN_ERROR_MESSAGES = {
+  generic: 'GitHub authentication failed. Please try again.',
+  stateVerification: 'Sign-in could not be verified. Please try again.',
+  oAuthErrorPrefix: 'GitHub sign-in failed.',
+} as const
+
 const normaliseErrorText = (errorText: string): string => {
   const trimmed = errorText.trim()
   return trimmed.replace(/^['"]|['"]$/g, '')
@@ -96,7 +102,7 @@ export const authService = {
     })
 
     if (!response.ok) {
-      throw new Error('GitHub authentication failed. Please try again.')
+      throw new Error(GITHUB_LOGIN_ERROR_MESSAGES.generic)
     }
 
     return response.json() as Promise<GitHubAuthData>
