@@ -40,14 +40,14 @@ const handleBackdropMouseDown = (event: MouseEvent) => {
 }
 
 const handleBackdropMouseUp = (event: MouseEvent) => {
-  if (isMouseDownOnBackdrop && event.target === event.currentTarget) {
+  if (isMouseDownOnBackdrop && event.target === event.currentTarget && !props.isStatic) {
     emit('close')
   }
   isMouseDownOnBackdrop = false
 }
 
 const handleKeyDown = (event: KeyboardEvent) => {
-  if (event.key === 'Escape') {
+  if (event.key === 'Escape' && !props.isStatic) {
     emit('close')
   }
 }

@@ -55,8 +55,8 @@ onMounted(async () => {
     try {
       const { token, username, name, email } = await authService.loginWithGitHub(code)
 
-      // authStore.setAuth(token, username, name, email)
-      // router.push('/profile')
+      authStore.setAuth(token, username, name, email)
+      router.push('/profile')
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : defaultErrorMessage
       emit('error', errorMessage)
@@ -91,7 +91,6 @@ onMounted(async () => {
     :show="isAuthenticating"
     title="Signing in with GitHub"
     :isStatic="true"
-    @close="() => {}"
   >
     <div class="flex flex-col items-center justify-center py-6 text-center">
       <div class="mb-6 flex items-center gap-3 relative">
