@@ -52,9 +52,8 @@ const cancelLogOut = () => {
       </div>
       <div class="min-w-0">
         <p class="text-xl font-semibold truncate text-heading">
-          {{ authStore.username }}
+          {{ authStore.name || authStore.username }}
         </p>
-        <!-- In future, the full name or biography can go here. -->
       </div>
     </div>
 
