@@ -18,7 +18,7 @@ let isMouseDownOnBackdrop = false
 const dialogClasses = [
   'relative flex max-h-[calc(100vh-4rem)] w-full max-w-4xl flex-col',
   'bg-white dark:bg-gray-800 shadow-lg',
-  'rounded-lg overflow-hidden focus-visible:outline-none'
+  'rounded-lg overflow-hidden focus-visible:outline-none',
 ]
 
 const positionClasses = computed(() => {
