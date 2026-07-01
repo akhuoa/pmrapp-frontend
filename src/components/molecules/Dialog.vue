@@ -15,6 +15,12 @@ const dialogRef = ref<HTMLElement | null>(null)
 
 let isMouseDownOnBackdrop = false
 
+const dialogClasses = [
+  'relative flex max-h-[calc(100vh-4rem)] w-full max-w-4xl flex-col',
+  'bg-white dark:bg-gray-800 shadow-lg',
+  'rounded-lg overflow-hidden focus-visible:outline-none'
+]
+
 const positionClasses = computed(() => {
   return props.position === 'top' ? 'items-start pt-8' : 'items-center'
 })
@@ -81,7 +87,7 @@ onUnmounted(() => {
       role="dialog"
       aria-modal="true"
       :aria-label="title || 'Dialog'"
-      class="relative flex max-h-[calc(100vh-4rem)] w-full max-w-4xl flex-col overflow-hidden rounded-lg bg-white shadow-lg dark:bg-gray-800"
+      :class="dialogClasses"
     >
       <div class="flex p-4" :class="headerClasses">
         <h2 v-if="title" class="text-lg font-semibold">{{ title }}</h2>
