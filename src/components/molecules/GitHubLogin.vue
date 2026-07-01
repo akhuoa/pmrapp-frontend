@@ -55,8 +55,8 @@ onMounted(async () => {
     try {
       const { token, username, name, email } = await authService.loginWithGitHub(code)
 
-      authStore.setAuth(token, username, name, email)
-      router.push('/profile')
+      // authStore.setAuth(token, username, name, email)
+      // router.push('/profile')
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : defaultErrorMessage
       emit('error', errorMessage)
@@ -103,7 +103,7 @@ onMounted(async () => {
       </p>
       <p class="mt-4 text-sm text-gray-600 dark:text-gray-400">
         This may take a few seconds.
-        After sign-in, you will be taken to the home page automatically.
+        After sign-in, you will be taken to the profile page automatically.
       </p>
     </div>
   </Dialog>
