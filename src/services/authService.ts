@@ -1,5 +1,5 @@
-import type { GitHubAuthData, LoginCredentials } from '@/types/auth'
 import { GITHUB_LOGIN_ERROR_MESSAGES, LOGIN_ERROR_MESSAGES } from '@/constants/auth'
+import type { GitHubAuthData, LoginCredentials } from '@/types/auth'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 const GITHUB_AUTH_API = import.meta.env.VITE_GITHUB_AUTH_API
