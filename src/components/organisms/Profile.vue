@@ -126,7 +126,7 @@ const cancelLogOut = () => {
 }
 
 .info-row .label-field {
-  @apply sm:w-32 shrink-0;
+  @apply sm:w-32 shrink-0 font-bold;
 }
 
 .info-value {
