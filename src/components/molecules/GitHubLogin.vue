@@ -8,7 +8,13 @@ import { GITHUB_OAUTH_AUTHORIZE_URL } from '@/constants/auth'
 import router from '@/router'
 import { getAuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth'
-import { getGitHubOAuthParams, getGitHubRedirectUri } from '@/utils/auth'
+import {
+  generateOAuthState,
+  getGitHubOAuthParams,
+  getGitHubRedirectUri,
+  storeOAuthState,
+  validateOAuthState,
+} from '@/utils/auth'
 
 const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID
 const APP_BASE_URL = import.meta.env.BASE_URL
@@ -38,8 +44,14 @@ watch(
 const handleGitHubLoginClick = () => {
   isRedirectingToGitHub.value = true
 
+  const state = generateOAuthState()
+  storeOAuthState(state)
+
   const githubUrl = new URL(GITHUB_OAUTH_AUTHORIZE_URL)
-  githubUrl.search = new URLSearchParams(GITHUB_OAUTH_PARAMS).toString()
+  githubUrl.search = new URLSearchParams({
+    ...GITHUB_OAUTH_PARAMS,
+    state,
+  }).toString()
   window.location.href = githubUrl.toString()
 }
 
@@ -47,10 +59,26 @@ onMounted(async () => {
   const urlParams = new URLSearchParams(window.location.search)
   const code = urlParams.get('code')
 
+  // Handle explicit GitHub OAuth error responses (e.g. user denied access)
+  const oauthError = urlParams.get('error')
+  if (oauthError) {
+    const errorDescription = urlParams.get('error_description') ?? oauthError
+    emit('error', `GitHub sign-in failed: ${errorDescription}`)
+    return
+  }
+
   if (code) {
     isAuthenticating.value = true
     window.history.replaceState({}, document.title, window.location.pathname)
     const defaultErrorMessage = 'GitHub authentication failed. Please try again.'
+
+    // Validate the state parameter to prevent CSRF/login injection attacks
+    const state = urlParams.get('state')
+    if (!validateOAuthState(state)) {
+      emit('error', 'OAuth state mismatch. Authentication aborted for security reasons.')
+      isAuthenticating.value = false
+      return
+    }
 
     try {
       const { token, username, name, email } = await authService.loginWithGitHub(code)
