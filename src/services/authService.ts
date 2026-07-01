@@ -1,21 +1,8 @@
 import type { GitHubAuthData, LoginCredentials } from '@/types/auth'
+import { GITHUB_LOGIN_ERROR_MESSAGES, LOGIN_ERROR_MESSAGES } from '@/constants/auth'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 const GITHUB_AUTH_API = import.meta.env.VITE_GITHUB_AUTH_API
-
-const LOGIN_ERROR_MESSAGES = {
-  invalidCredentials: 'Incorrect username or password. Please try again.',
-  forbidden: 'Your account does not have permission to sign in here.',
-  tooManyRequests: 'Too many login attempts. Please wait a moment and try again.',
-  serviceUnavailable: 'The sign-in service is temporarily unavailable. Please try again later.',
-  generic: 'Unable to sign in right now. Please try again.',
-} as const
-
-export const GITHUB_LOGIN_ERROR_MESSAGES = {
-  generic: 'GitHub authentication failed. Please try again.',
-  stateVerification: 'Sign-in could not be verified. Please try again.',
-  oAuthErrorPrefix: 'GitHub sign-in failed.',
-} as const
 
 const normaliseErrorText = (errorText: string): string => {
   const trimmed = errorText.trim()
