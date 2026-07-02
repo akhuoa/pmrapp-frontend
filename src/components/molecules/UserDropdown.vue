@@ -7,6 +7,7 @@ import UserIcon from '@/components/icons/UserIcon.vue'
 import { getAuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth'
 import { useGlobalStateStore } from '@/stores/globalState'
+import { LOGOUT_ERROR_MESSAGES } from '@/constants/auth'
 
 const authStore = useAuthStore()
 const globalStateStore = useGlobalStateStore()
@@ -58,7 +59,7 @@ const handleLogout = async () => {
     authStore.clearAuth()
     router.push('/')
   } catch (error) {
-    console.error('Logout failed:', error)
+    console.error(LOGOUT_ERROR_MESSAGES.generic, error)
   }
 }
 

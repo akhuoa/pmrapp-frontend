@@ -96,6 +96,7 @@ const handleSubmit = async () => {
 
     // Store auth state.
     authStore.setAuth(token, username.value)
+    authStore.setLoginMethod('password')
 
     // Redirect to profile page.
     router.push('/profile')

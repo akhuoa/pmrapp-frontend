@@ -15,3 +15,11 @@ export const GITHUB_LOGIN_ERROR_MESSAGES = {
   stateVerification: 'Sign-in could not be verified. Please try again.',
   oAuthErrorPrefix: 'GitHub sign-in failed.',
 } as const
+
+export const LOGOUT_ERROR_MESSAGES = {
+  generic: 'Failed to log out. Please try again.',
+} as const
+
+export const GITHUB_REVOKE_ERROR_MESSAGES = {
+  generic: 'Failed to disconnect GitHub account. Please try again.',
+} as const

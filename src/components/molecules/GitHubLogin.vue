@@ -82,6 +82,7 @@ onMounted(async () => {
       const { token, username, name, email, avatar_url } = await authService.loginWithGitHub(code)
 
       authStore.setAuth(token, username, name, email, avatar_url)
+      authStore.setLoginMethod('github')
       router.push('/profile')
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : GITHUB_LOGIN_ERROR_MESSAGES.generic

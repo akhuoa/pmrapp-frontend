@@ -1,4 +1,4 @@
-import { GITHUB_LOGIN_ERROR_MESSAGES, LOGIN_ERROR_MESSAGES } from '@/constants/auth'
+import { GITHUB_LOGIN_ERROR_MESSAGES, GITHUB_REVOKE_ERROR_MESSAGES, LOGIN_ERROR_MESSAGES } from '@/constants/auth'
 import type { GitHubAuthData, LoginCredentials } from '@/types/auth'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
@@ -108,6 +108,22 @@ export const authService = {
 
     if (!response.ok) {
       throw new Error(`Logout failed: ${response.status}`)
+    }
+  },
+
+  async revokeGitHub(): Promise<void> {
+    const token = localStorage.getItem('auth_token')
+
+    const response = await fetch(`${GITHUB_AUTH_API}/api/auth/revoke`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(GITHUB_REVOKE_ERROR_MESSAGES.generic)
     }
   },
 }
