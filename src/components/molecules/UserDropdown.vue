@@ -24,16 +24,19 @@ const buttonLabel = computed(() =>
   authStore.username ? `${authStore.username} – user menu` : 'User menu',
 )
 
+const menuDividerClasses = [
+  'relative before:absolute before:top-0 before:left-0 before:right-0',
+  'before:border-t before:border-gray-200 dark:before:border-gray-700'
+]
+
 const accountButtonClasses = computed(() => {
   const buttonClasses = [
-    'transition-colors cursor-pointer relative rounded-full',
-    'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600',
+    'block cursor-pointer relative rounded-full',
+    'bg-gray-200 dark:bg-gray-700',
   ]
 
-  if (authStore.avatarUrl) {
+  if (!authStore.avatarUrl) {
     buttonClasses.push('p-1')
-  } else {
-    buttonClasses.push('p-2')
   }
 
   return buttonClasses
@@ -115,7 +118,7 @@ onUnmounted(() => {
         />
       </template>
       <template v-else>
-        <UserIcon class="w-5 h-5" />
+        <UserIcon class="w-6 h-6" />
       </template>
       <span class="sr-only sm:hidden">
         {{ authStore.username }}
@@ -126,14 +129,30 @@ onUnmounted(() => {
       v-if="isOpen"
       :id="menuId"
       role="menu"
-      class="absolute right-0 mt-2 min-w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-50"
+      class="absolute right-0 mt-2 min-w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-50"
     >
       <ul>
-        <li class="flex flex-col gap-1 w-full px-4 py-3 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
-          <span class="text-gray-400">{{ authStore.username }}</span>
-          <span class="font-medium" v-if="authStore.name">{{ authStore.name }}</span>
+        <li class="flex items-center gap-2 w-full px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+          <div class="shrink-0">
+            <template v-if="authStore.avatarUrl">
+              <img
+                :src="authStore.avatarUrl"
+                :alt="authStore.username ?? ''"
+                class="w-8 h-8 rounded-full object-cover"
+                width="32"
+                height="32"
+              />
+            </template>
+            <template v-else>
+              <UserIcon class="w-6 h-6" />
+            </template>
+          </div>
+          <div class="flex flex-col items-start text-left min-w-0">
+            <span class="text-gray-400 truncate max-w-45">{{ authStore.username }}</span>
+            <span class="font-medium truncate max-w-45" v-if="authStore.name">{{ authStore.name }}</span>
+          </div>
         </li>
-        <li>
+        <li :class="menuDividerClasses">
           <RouterLink
             to="/profile"
             class="flex items-center w-full cursor-pointer px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -143,7 +162,7 @@ onUnmounted(() => {
             Profile
           </RouterLink>
         </li>
-        <li>
+        <li :class="menuDividerClasses">
           <button
             @click="confirmLogout"
             class="flex items-center w-full cursor-pointer px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
