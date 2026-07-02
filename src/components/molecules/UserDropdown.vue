@@ -24,6 +24,11 @@ const buttonLabel = computed(() =>
   authStore.username ? `${authStore.username} – user menu` : 'User menu',
 )
 
+const menuDividerClasses = [
+  'relative before:absolute before:top-0 before:left-0 before:right-0',
+  'before:border-t before:border-gray-200 dark:before:border-gray-700'
+]
+
 const accountButtonClasses = computed(() => {
   const buttonClasses = [
     'block cursor-pointer relative rounded-full',
@@ -127,7 +132,7 @@ onUnmounted(() => {
       class="absolute right-0 mt-2 min-w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-50"
     >
       <ul>
-        <li class="flex items-center gap-2 w-full px-4 py-3 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
+        <li class="flex items-center gap-2 w-full px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
           <div class="shrink-0">
             <template v-if="authStore.avatarUrl">
               <img
@@ -147,7 +152,7 @@ onUnmounted(() => {
             <span class="font-medium truncate max-w-45" v-if="authStore.name">{{ authStore.name }}</span>
           </div>
         </li>
-        <li>
+        <li :class="menuDividerClasses">
           <RouterLink
             to="/profile"
             class="flex items-center w-full cursor-pointer px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -157,7 +162,7 @@ onUnmounted(() => {
             Profile
           </RouterLink>
         </li>
-        <li class="border-t border-gray-200 dark:border-gray-700">
+        <li :class="menuDividerClasses">
           <button
             @click="confirmLogout"
             class="flex items-center w-full cursor-pointer px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
