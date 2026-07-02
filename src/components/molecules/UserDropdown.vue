@@ -124,12 +124,28 @@ onUnmounted(() => {
       v-if="isOpen"
       :id="menuId"
       role="menu"
-      class="absolute right-0 mt-2 min-w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-50"
+      class="absolute right-0 mt-2 min-w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-50"
     >
       <ul>
-        <li class="flex flex-col items-start gap-1 w-full px-4 py-3 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
-          <span class="text-gray-400">{{ authStore.username }}</span>
-          <span class="font-medium" v-if="authStore.name">{{ authStore.name }}</span>
+        <li class="flex items-center gap-2 w-full px-4 py-3 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
+          <div class="shrink-0">
+            <template v-if="authStore.avatarUrl">
+              <img
+                :src="authStore.avatarUrl"
+                :alt="authStore.username ?? ''"
+                class="w-8 h-8 rounded-full object-cover"
+                width="32"
+                height="32"
+              />
+            </template>
+            <template v-else>
+              <UserIcon class="w-6 h-6" />
+            </template>
+          </div>
+          <div class="flex flex-col items-start text-left min-w-0">
+            <span class="text-gray-400 truncate max-w-45">{{ authStore.username }}</span>
+            <span class="font-medium truncate max-w-45" v-if="authStore.name">{{ authStore.name }}</span>
+          </div>
         </li>
         <li>
           <RouterLink
