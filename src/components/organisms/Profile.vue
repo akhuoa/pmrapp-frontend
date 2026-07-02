@@ -8,7 +8,7 @@ import LogoutIcon from '@/components/icons/LogoutIcon.vue'
 import UserIcon from '@/components/icons/UserIcon.vue'
 import { getAuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth'
-import { LOGOUT_ERROR_MESSAGES, GITHUB_REVOKE_ERROR_MESSAGES } from '@/constants/auth'
+import { LOGOUT_ERROR_MESSAGES, GITHUB_AUTH_ERROR_MESSAGES } from '@/constants/auth'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -49,7 +49,7 @@ const handleDisconnectGitHub = async () => {
     authStore.clearAuth()
     router.push('/')
   } catch (error) {
-    console.error(GITHUB_REVOKE_ERROR_MESSAGES.generic, error)
+    console.error(GITHUB_AUTH_ERROR_MESSAGES.revoke, error)
   }
 }
 

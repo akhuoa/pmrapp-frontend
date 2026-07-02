@@ -4,7 +4,7 @@ import ActionButton from '@/components/atoms/ActionButton.vue'
 import GitHubIcon from '@/components/icons/GitHubIcon.vue'
 import LoadingIcon from '@/components/icons/LoadingIcon.vue'
 import Dialog from '@/components/molecules/Dialog.vue'
-import { GITHUB_LOGIN_ERROR_MESSAGES, GITHUB_OAUTH_AUTHORIZE_URL } from '@/constants/auth'
+import { GITHUB_AUTH_ERROR_MESSAGES, GITHUB_OAUTH_AUTHORIZE_URL } from '@/constants/auth'
 import router from '@/router'
 import { getAuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth'
@@ -63,7 +63,7 @@ onMounted(async () => {
   const oauthError = urlParams.get('error')
   if (oauthError) {
     const errorDescription = urlParams.get('error_description') ?? oauthError
-    emit('error', `${GITHUB_LOGIN_ERROR_MESSAGES.oAuthErrorPrefix} ${errorDescription}`)
+    emit('error', `${GITHUB_AUTH_ERROR_MESSAGES.oAuthErrorPrefix} ${errorDescription}`)
     return
   }
 
@@ -73,7 +73,7 @@ onMounted(async () => {
     // Validate the state parameter to prevent CSRF/login injection attacks.
     const state = urlParams.get('state')
     if (!validateOAuthState(state)) {
-      emit('error', GITHUB_LOGIN_ERROR_MESSAGES.stateVerification)
+      emit('error', GITHUB_AUTH_ERROR_MESSAGES.stateVerification)
       isAuthenticating.value = false
       return
     }
@@ -85,7 +85,7 @@ onMounted(async () => {
       authStore.setLoginMethod('github')
       router.push('/profile')
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : GITHUB_LOGIN_ERROR_MESSAGES.generic
+      const errorMessage = err instanceof Error ? err.message : GITHUB_AUTH_ERROR_MESSAGES.generic
       emit('error', errorMessage)
       isAuthenticating.value = false
     }
