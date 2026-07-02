@@ -10,8 +10,13 @@ export const LOGIN_ERROR_MESSAGES = {
   generic: 'Unable to sign in right now. Please try again.',
 } as const
 
-export const GITHUB_LOGIN_ERROR_MESSAGES = {
+export const GITHUB_AUTH_ERROR_MESSAGES = {
   generic: 'GitHub authentication failed. Please try again.',
   stateVerification: 'Sign-in could not be verified. Please try again.',
   oAuthErrorPrefix: 'GitHub sign-in failed.',
+  revoke: 'Failed to disconnect GitHub account. Please try again.',
+} as const
+
+export const LOGOUT_ERROR_MESSAGES = {
+  generic: 'Failed to log out. Please try again.',
 } as const

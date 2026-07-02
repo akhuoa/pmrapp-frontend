@@ -8,6 +8,7 @@ export const useAuthStore = defineStore('auth', () => {
   const email = ref<string | null>(null)
   const avatarUrl = ref<string | null>(null)
   const isAuthenticated = ref(false)
+  const loginMethod = ref<'password' | 'github' | null>(null)
 
   function setAuth(
     authToken: string,
@@ -37,6 +38,11 @@ export const useAuthStore = defineStore('auth', () => {
     else localStorage.removeItem('avatar_url')
   }
 
+  function setLoginMethod(method: 'password' | 'github') {
+    loginMethod.value = method
+    localStorage.setItem('auth_method', method)
+  }
+
   function clearAuth() {
     token.value = null
     username.value = null
@@ -44,12 +50,15 @@ export const useAuthStore = defineStore('auth', () => {
     email.value = null
     avatarUrl.value = null
     isAuthenticated.value = false
+    loginMethod.value = null
 
     // Clear authentication data from localStorage.
     localStorage.removeItem('auth_token')
     localStorage.removeItem('username')
     localStorage.removeItem('name')
     localStorage.removeItem('email')
+    localStorage.removeItem('avatar_url')
+    localStorage.removeItem('auth_method')
   }
 
   function initAuth() {
@@ -62,6 +71,7 @@ export const useAuthStore = defineStore('auth', () => {
       name.value = localStorage.getItem('name')
       email.value = localStorage.getItem('email')
       avatarUrl.value = localStorage.getItem('avatar_url')
+      loginMethod.value = localStorage.getItem('auth_method') as 'password' | 'github' | null
       isAuthenticated.value = true
     } else {
       token.value = null
@@ -69,6 +79,7 @@ export const useAuthStore = defineStore('auth', () => {
       name.value = null
       email.value = null
       avatarUrl.value = null
+      loginMethod.value = null
       isAuthenticated.value = false
     }
   }
@@ -80,7 +91,9 @@ export const useAuthStore = defineStore('auth', () => {
     email,
     avatarUrl,
     isAuthenticated,
+    loginMethod,
     setAuth,
+    setLoginMethod,
     clearAuth,
     initAuth,
   }

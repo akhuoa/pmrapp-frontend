@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import ConfirmDialog from '@/components/atoms/ConfirmDialog.vue'
 import LogoutIcon from '@/components/icons/LogoutIcon.vue'
 import UserIcon from '@/components/icons/UserIcon.vue'
+import { LOGOUT_ERROR_MESSAGES } from '@/constants/auth'
 import { getAuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth'
 import { useGlobalStateStore } from '@/stores/globalState'
@@ -58,7 +59,7 @@ const handleLogout = async () => {
     authStore.clearAuth()
     router.push('/')
   } catch (error) {
-    console.error('Logout failed:', error)
+    console.error(LOGOUT_ERROR_MESSAGES.generic, error)
   }
 }
 

@@ -15,6 +15,7 @@ describe('useAuthStore', () => {
     expect(store.username).toBeNull()
     expect(store.name).toBeNull()
     expect(store.email).toBeNull()
+    expect(store.loginMethod).toBeNull()
   })
 
   describe('setAuth', () => {
@@ -59,16 +60,34 @@ describe('useAuthStore', () => {
     })
   })
 
+  describe('setLoginMethod', () => {
+    it('sets login method to password', () => {
+      const store = useAuthStore()
+      store.setLoginMethod('password')
+      expect(store.loginMethod).toBe('password')
+      expect(localStorage.getItem('auth_method')).toBe('password')
+    })
+
+    it('sets login method to github', () => {
+      const store = useAuthStore()
+      store.setLoginMethod('github')
+      expect(store.loginMethod).toBe('github')
+      expect(localStorage.getItem('auth_method')).toBe('github')
+    })
+  })
+
   describe('clearAuth', () => {
     it('clears authenticated state from the store', () => {
       const store = useAuthStore()
       store.setAuth('test-token', 'testuser', 'Test User', 'test@example.com')
+      store.setLoginMethod('github')
       store.clearAuth()
       expect(store.isAuthenticated).toBe(false)
       expect(store.token).toBeNull()
       expect(store.username).toBeNull()
       expect(store.name).toBeNull()
       expect(store.email).toBeNull()
+      expect(store.loginMethod).toBeNull()
     })
 
     it('removes auth token, username, name and email from localStorage', () => {
@@ -79,6 +98,7 @@ describe('useAuthStore', () => {
       expect(localStorage.getItem('username')).toBeNull()
       expect(localStorage.getItem('name')).toBeNull()
       expect(localStorage.getItem('email')).toBeNull()
+      expect(localStorage.getItem('auth_method')).toBeNull()
     })
   })
 
@@ -95,6 +115,17 @@ describe('useAuthStore', () => {
       expect(store.username).toBe('storeduser')
       expect(store.name).toBe('Stored User')
       expect(store.email).toBe('stored@example.com')
+      expect(store.loginMethod).toBeNull()
+    })
+
+    it('restores login method from localStorage', () => {
+      localStorage.setItem('auth_token', 'stored-token')
+      localStorage.setItem('username', 'storeduser')
+      localStorage.setItem('auth_method', 'github')
+      const store = useAuthStore()
+      store.initAuth()
+      expect(store.isAuthenticated).toBe(true)
+      expect(store.loginMethod).toBe('github')
     })
 
     it('remains unauthenticated when localStorage has no stored credentials', () => {

@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import ConfirmDialog from '@/components/atoms/ConfirmDialog.vue'
+import GitHubIcon from '@/components/icons/GitHubIcon.vue'
 import LogoutIcon from '@/components/icons/LogoutIcon.vue'
 import UserIcon from '@/components/icons/UserIcon.vue'
+import { GITHUB_AUTH_ERROR_MESSAGES, LOGOUT_ERROR_MESSAGES } from '@/constants/auth'
 import { getAuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth'
 
@@ -12,7 +14,10 @@ const authStore = useAuthStore()
 const router = useRouter()
 const authService = getAuthService()
 
+const isGitHubUser = computed(() => authStore.loginMethod === 'github')
+
 const showLogOutConfirm = ref(false)
+const showDisconnectGitHubConfirm = ref(false)
 
 const confirmLogOut = () => {
   showLogOutConfirm.value = true
@@ -25,12 +30,31 @@ const handleLogOut = async () => {
     authStore.clearAuth()
     router.push('/')
   } catch (error) {
-    console.error('Log out failed:', error)
+    console.error(LOGOUT_ERROR_MESSAGES.generic, error)
   }
 }
 
 const cancelLogOut = () => {
   showLogOutConfirm.value = false
+}
+
+const confirmDisconnectGitHub = () => {
+  showDisconnectGitHubConfirm.value = true
+}
+
+const handleDisconnectGitHub = async () => {
+  showDisconnectGitHubConfirm.value = false
+  try {
+    await authService.revokeGitHub()
+    authStore.clearAuth()
+    router.push('/')
+  } catch (error) {
+    console.error(GITHUB_AUTH_ERROR_MESSAGES.revoke, error)
+  }
+}
+
+const cancelDisconnectGitHub = () => {
+  showDisconnectGitHubConfirm.value = false
 }
 </script>
 
@@ -83,7 +107,23 @@ const cancelLogOut = () => {
     <!-- Account actions. -->
     <section class="box" aria-labelledby="account-actions-heading">
       <h2 id="account-actions-heading" class="section-heading mb-4">Account actions</h2>
+
+      <!-- GitHub user: show disconnect option. -->
       <ActionButton
+        v-if="isGitHubUser"
+        type="button"
+        variant="secondary"
+        size="md"
+        contentSection="profile_page"
+        @click="confirmDisconnectGitHub"
+      >
+        <GitHubIcon class="w-4 h-4" />
+        Disconnect GitHub
+      </ActionButton>
+
+      <!-- Password user: show logout option. -->
+      <ActionButton
+        v-else
         type="button"
         variant="secondary"
         size="md"
@@ -105,6 +145,16 @@ const cancelLogOut = () => {
     cancel-label="Cancel"
     @confirm="handleLogOut"
     @cancel="cancelLogOut"
+  />
+
+  <ConfirmDialog
+    :show="showDisconnectGitHubConfirm"
+    title="Disconnect GitHub"
+    message="Are you sure you want to disconnect your GitHub account? This will revoke the application's authorisation."
+    confirm-label="Disconnect"
+    cancel-label="Cancel"
+    @confirm="handleDisconnectGitHub"
+    @cancel="cancelDisconnectGitHub"
   />
 </template>
 
