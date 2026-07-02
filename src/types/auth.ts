@@ -8,4 +8,5 @@ export interface GitHubAuthData {
   username: string
   name: string
   email: string
+  avatar_url: string
 }

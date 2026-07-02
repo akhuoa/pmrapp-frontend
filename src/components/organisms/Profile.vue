@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import ConfirmDialog from '@/components/atoms/ConfirmDialog.vue'
 import LogoutIcon from '@/components/icons/LogoutIcon.vue'
+import UserIcon from '@/components/icons/UserIcon.vue'
 import { getAuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth'
 
@@ -12,12 +13,6 @@ const router = useRouter()
 const authService = getAuthService()
 
 const showLogOutConfirm = ref(false)
-
-/** Derive initials from the username for the avatar circle. */
-const avatarInitials = computed(() => {
-  const name = authStore.username ?? ''
-  return name.slice(0, 2).toUpperCase() || '?'
-})
 
 const confirmLogOut = () => {
   showLogOutConfirm.value = true
@@ -48,7 +43,13 @@ const cancelLogOut = () => {
         class="avatar"
         aria-hidden="true"
       >
-        {{ avatarInitials }}
+        <img
+          v-if="authStore.avatarUrl"
+          :src="authStore.avatarUrl"
+          alt="Profile picture"
+          class="avatar-img"
+        />
+        <UserIcon v-else class="w-8 h-8" />
       </div>
       <div class="min-w-0">
         <p class="text-xl font-semibold truncate text-heading">
@@ -113,7 +114,11 @@ const cancelLogOut = () => {
 
 .avatar {
   @apply flex-shrink-0 w-16 h-16 rounded-full bg-primary text-white
-         flex items-center justify-center text-xl font-bold select-none;
+         flex items-center justify-center text-xl font-bold select-none overflow-hidden;
+}
+
+.avatar-img {
+  @apply w-full h-full object-cover;
 }
 
 .section-heading {

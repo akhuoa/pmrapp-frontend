@@ -6,6 +6,7 @@ export const useAuthStore = defineStore('auth', () => {
   const username = ref<string | null>(null)
   const name = ref<string | null>(null)
   const email = ref<string | null>(null)
+  const avatarUrl = ref<string | null>(null)
   const isAuthenticated = ref(false)
 
   function setAuth(
@@ -13,11 +14,13 @@ export const useAuthStore = defineStore('auth', () => {
     user: string,
     fullName?: string | null,
     userEmail?: string | null,
+    avatarUrlParam?: string | null,
   ) {
     token.value = authToken
     username.value = user
     name.value = fullName ?? null
     email.value = userEmail ?? null
+    avatarUrl.value = avatarUrlParam ?? null
     isAuthenticated.value = true
 
     // TEMPORARY: Using localStorage for token persistence
@@ -30,6 +33,8 @@ export const useAuthStore = defineStore('auth', () => {
     else localStorage.removeItem('name')
     if (userEmail) localStorage.setItem('email', userEmail)
     else localStorage.removeItem('email')
+    if (avatarUrlParam) localStorage.setItem('avatar_url', avatarUrlParam)
+    else localStorage.removeItem('avatar_url')
   }
 
   function clearAuth() {
@@ -37,6 +42,7 @@ export const useAuthStore = defineStore('auth', () => {
     username.value = null
     name.value = null
     email.value = null
+    avatarUrl.value = null
     isAuthenticated.value = false
 
     // Clear authentication data from localStorage.
@@ -55,12 +61,14 @@ export const useAuthStore = defineStore('auth', () => {
       username.value = storedUsername
       name.value = localStorage.getItem('name')
       email.value = localStorage.getItem('email')
+      avatarUrl.value = localStorage.getItem('avatar_url')
       isAuthenticated.value = true
     } else {
       token.value = null
       username.value = null
       name.value = null
       email.value = null
+      avatarUrl.value = null
       isAuthenticated.value = false
     }
   }
@@ -70,6 +78,7 @@ export const useAuthStore = defineStore('auth', () => {
     username,
     name,
     email,
+    avatarUrl,
     isAuthenticated,
     setAuth,
     clearAuth,
