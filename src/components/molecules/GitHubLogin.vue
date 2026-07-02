@@ -4,7 +4,7 @@ import ActionButton from '@/components/atoms/ActionButton.vue'
 import GitHubIcon from '@/components/icons/GitHubIcon.vue'
 import LoadingIcon from '@/components/icons/LoadingIcon.vue'
 import Dialog from '@/components/molecules/Dialog.vue'
-import { GITHUB_OAUTH_AUTHORIZE_URL } from '@/constants/auth'
+import { GITHUB_LOGIN_ERROR_MESSAGES, GITHUB_OAUTH_AUTHORIZE_URL } from '@/constants/auth'
 import router from '@/router'
 import { getAuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth'
@@ -59,34 +59,32 @@ onMounted(async () => {
   const urlParams = new URLSearchParams(window.location.search)
   const code = urlParams.get('code')
 
-  // Handle explicit GitHub OAuth error responses (e.g. user denied access)
+  // Handle explicit GitHub OAuth error responses (e.g. user denied access).
   const oauthError = urlParams.get('error')
   if (oauthError) {
     const errorDescription = urlParams.get('error_description') ?? oauthError
-    emit('error', `GitHub sign-in failed: ${errorDescription}`)
+    emit('error', `${GITHUB_LOGIN_ERROR_MESSAGES.oAuthErrorPrefix} ${errorDescription}`)
     return
   }
 
   if (code) {
     isAuthenticating.value = true
     window.history.replaceState({}, document.title, window.location.pathname)
-    const defaultErrorMessage = 'GitHub authentication failed. Please try again.'
-
-    // Validate the state parameter to prevent CSRF/login injection attacks
+    // Validate the state parameter to prevent CSRF/login injection attacks.
     const state = urlParams.get('state')
     if (!validateOAuthState(state)) {
-      emit('error', 'OAuth state mismatch. Authentication aborted for security reasons.')
+      emit('error', GITHUB_LOGIN_ERROR_MESSAGES.stateVerification)
       isAuthenticating.value = false
       return
     }
 
     try {
-      const { token, username, name, email } = await authService.loginWithGitHub(code)
+      const { token, username, name, email, avatar_url } = await authService.loginWithGitHub(code)
 
-      authStore.setAuth(token, username, name, email)
+      authStore.setAuth(token, username, name, email, avatar_url)
       router.push('/profile')
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : defaultErrorMessage
+      const errorMessage = err instanceof Error ? err.message : GITHUB_LOGIN_ERROR_MESSAGES.generic
       emit('error', errorMessage)
       isAuthenticating.value = false
     }

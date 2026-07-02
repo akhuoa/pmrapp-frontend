@@ -23,6 +23,21 @@ const buttonLabel = computed(() =>
   authStore.username ? `${authStore.username} – user menu` : 'User menu',
 )
 
+const accountButtonClasses = computed(() => {
+  const buttonClasses = [
+    'transition-colors cursor-pointer relative rounded-full',
+    'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600',
+  ]
+
+  if (authStore.avatarUrl) {
+    buttonClasses.push('p-1')
+  } else {
+    buttonClasses.push('p-2')
+  }
+
+  return buttonClasses
+})
+
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value
 }
@@ -82,19 +97,25 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div v-if="authStore.isAuthenticated" ref="dropdownRef" class="relative">
+  <div v-if="authStore.isAuthenticated" ref="dropdownRef" class="relative pl-4">
     <button
       @click="toggleDropdown"
-      class="nav-link p-2 transition-colors cursor-pointer relative"
+      :class="accountButtonClasses"
       :aria-label="buttonLabel"
       aria-haspopup="true"
       :aria-expanded="isOpen"
       :aria-controls="menuId"
     >
-      <UserIcon class="w-5 h-5" />
-      <span class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-2 text-xs text-gray-700 dark:text-gray-300 max-w-[4.6rem] truncate hidden sm:inline">
-        {{ authStore.username }}
-      </span>
+      <template v-if="authStore.avatarUrl">
+        <img
+          :src="authStore.avatarUrl"
+          :alt="authStore.username ?? ''"
+          class="w-8 h-8 rounded-full object-cover"
+        />
+      </template>
+      <template v-else>
+        <UserIcon class="w-5 h-5" />
+      </template>
       <span class="sr-only sm:hidden">
         {{ authStore.username }}
       </span>
@@ -104,13 +125,17 @@ onUnmounted(() => {
       v-if="isOpen"
       :id="menuId"
       role="menu"
-      class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50"
+      class="absolute right-0 mt-2 min-w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-50"
     >
       <ul>
+        <li class="flex flex-col gap-1 w-full px-4 py-3 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
+          <span class="text-gray-400">{{ authStore.username }}</span>
+          <span class="font-medium" v-if="authStore.name">{{ authStore.name }}</span>
+        </li>
         <li>
           <RouterLink
             to="/profile"
-            class="flex items-center w-full cursor-pointer px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            class="flex items-center w-full cursor-pointer px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             role="menuitem"
           >
             <UserIcon class="w-4 h-4 shrink-0 mr-2" />
@@ -120,7 +145,7 @@ onUnmounted(() => {
         <li>
           <button
             @click="confirmLogout"
-            class="flex items-center w-full cursor-pointer px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            class="flex items-center w-full cursor-pointer px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             role="menuitem"
           >
             <LogoutIcon class="w-4 h-4 shrink-0 mr-2" />
@@ -134,7 +159,7 @@ onUnmounted(() => {
   <RouterLink
     v-else
     to="/login"
-    class="nav-link"
+    class="nav-link ml-4"
     :class="{ 'text-primary': isActive('/login') }"
     @click="handleLoginClick"
   >
