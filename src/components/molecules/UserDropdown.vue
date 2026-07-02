@@ -127,7 +127,7 @@ onUnmounted(() => {
       class="absolute right-0 mt-2 min-w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-50"
     >
       <ul>
-        <li class="flex flex-col gap-1 w-full px-4 py-3 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
+        <li class="flex flex-col items-start gap-1 w-full px-4 py-3 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
           <span class="text-gray-400">{{ authStore.username }}</span>
           <span class="font-medium" v-if="authStore.name">{{ authStore.name }}</span>
         </li>
