@@ -90,7 +90,6 @@ const isActive = (path: string) => computed(() => route.path.startsWith(path))
 .user-dropdown-divider {
   @apply
     relative
-    w-[5rem]
     text-center
     before:content-['']
     before:absolute
