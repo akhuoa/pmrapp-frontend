@@ -6,9 +6,9 @@ import ConfirmDialog from '@/components/atoms/ConfirmDialog.vue'
 import GitHubIcon from '@/components/icons/GitHubIcon.vue'
 import LogoutIcon from '@/components/icons/LogoutIcon.vue'
 import UserIcon from '@/components/icons/UserIcon.vue'
+import { GITHUB_AUTH_ERROR_MESSAGES, LOGOUT_ERROR_MESSAGES } from '@/constants/auth'
 import { getAuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth'
-import { LOGOUT_ERROR_MESSAGES, GITHUB_AUTH_ERROR_MESSAGES } from '@/constants/auth'
 
 const authStore = useAuthStore()
 const router = useRouter()

@@ -4,10 +4,10 @@ import { useRoute, useRouter } from 'vue-router'
 import ConfirmDialog from '@/components/atoms/ConfirmDialog.vue'
 import LogoutIcon from '@/components/icons/LogoutIcon.vue'
 import UserIcon from '@/components/icons/UserIcon.vue'
+import { LOGOUT_ERROR_MESSAGES } from '@/constants/auth'
 import { getAuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth'
 import { useGlobalStateStore } from '@/stores/globalState'
-import { LOGOUT_ERROR_MESSAGES } from '@/constants/auth'
 
 const authStore = useAuthStore()
 const globalStateStore = useGlobalStateStore()
