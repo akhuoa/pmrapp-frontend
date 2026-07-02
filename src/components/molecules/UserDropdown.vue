@@ -26,14 +26,12 @@ const buttonLabel = computed(() =>
 
 const accountButtonClasses = computed(() => {
   const buttonClasses = [
-    'transition-colors cursor-pointer relative rounded-full',
-    'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600',
+    'block cursor-pointer relative rounded-full',
+    'bg-gray-200 dark:bg-gray-700',
   ]
 
-  if (authStore.avatarUrl) {
+  if (!authStore.avatarUrl) {
     buttonClasses.push('p-1')
-  } else {
-    buttonClasses.push('p-2')
   }
 
   return buttonClasses
@@ -115,7 +113,7 @@ onUnmounted(() => {
         />
       </template>
       <template v-else>
-        <UserIcon class="w-5 h-5" />
+        <UserIcon class="w-6 h-6" />
       </template>
       <span class="sr-only sm:hidden">
         {{ authStore.username }}
