@@ -157,7 +157,7 @@ onUnmounted(() => {
             Profile
           </RouterLink>
         </li>
-        <li>
+        <li class="border-t border-gray-200 dark:border-gray-700">
           <button
             @click="confirmLogout"
             class="flex items-center w-full cursor-pointer px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
