@@ -129,7 +129,7 @@ onUnmounted(() => {
       v-if="isOpen"
       :id="menuId"
       role="menu"
-      class="absolute right-0 mt-2 min-w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-50"
+      class="absolute right-0 mt-2 min-w-64 bg-white dark:bg-gray-800 rounded-md overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700 z-50"
     >
       <ul>
         <li class="flex items-center gap-2 w-full px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
