@@ -91,16 +91,14 @@ const cancelDisconnectGitHub = () => {
         <span class="info-value">{{ authStore.username }}</span>
       </div>
 
-      <div class="info-row">
+      <div class="info-row" v-if="authStore.name">
         <span class="label-field">Full name</span>
-        <span v-if="authStore.name" class="info-value">{{ authStore.name }}</span>
-        <span v-else class="info-value text-muted-fg italic">Not available</span>
+        <span class="info-value">{{ authStore.name }}</span>
       </div>
 
-      <div class="info-row">
+      <div class="info-row" v-if="authStore.email">
         <span class="label-field">Email</span>
-        <span v-if="authStore.email" class="info-value">{{ authStore.email }}</span>
-        <span v-else class="info-value text-muted-fg italic">Not available</span>
+        <span class="info-value">{{ authStore.email }}</span>
       </div>
     </section>
 
