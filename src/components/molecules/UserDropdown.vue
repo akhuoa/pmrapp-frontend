@@ -26,7 +26,7 @@ const buttonLabel = computed(() =>
 
 const menuDividerClasses = [
   'relative before:absolute before:top-0 before:left-0 before:right-0',
-  'before:border-t before:border-gray-200 dark:before:border-gray-700'
+  'before:border-t before:border-gray-200 dark:before:border-gray-700',
 ]
 
 const accountButtonClasses = computed(() => {
