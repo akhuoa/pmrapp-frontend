@@ -3,6 +3,7 @@ import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import CloseButton from '@/components/atoms/CloseButton.vue'
+import GitHubLogin from '@/components/molecules/GitHubLogin.vue'
 import { getAuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth'
 import { useGlobalStateStore } from '@/stores/globalState'
@@ -15,6 +16,7 @@ const usernameInput = ref<HTMLInputElement | null>(null)
 const password = ref('')
 const error = ref<string | null>(null)
 const isLoading = ref(false)
+const isGitHubLoading = ref(false)
 const ERROR_AUTO_HIDE_MS = 5000
 let errorTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -72,6 +74,10 @@ onBeforeUnmount(() => {
 })
 
 const handleSubmit = async () => {
+  if (isGitHubLoading.value) {
+    return
+  }
+
   error.value = null
 
   if (!username.value || !password.value) {
@@ -90,9 +96,10 @@ const handleSubmit = async () => {
 
     // Store auth state.
     authStore.setAuth(token, username.value)
+    authStore.setLoginMethod('password')
 
-    // Redirect to home page.
-    router.push('/')
+    // Redirect to profile page.
+    router.push('/profile')
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Login failed'
     focusUsernameInput()
@@ -130,6 +137,7 @@ const handleSubmit = async () => {
           type="text"
           autocomplete="username"
           required
+          :disabled="isGitHubLoading"
           class="input-field w-full"
           placeholder="Enter your username"
         />
@@ -146,6 +154,7 @@ const handleSubmit = async () => {
           type="password"
           autocomplete="current-password"
           required
+          :disabled="isGitHubLoading"
           class="input-field w-full"
           placeholder="Enter your password"
         />
@@ -156,13 +165,22 @@ const handleSubmit = async () => {
         type="submit"
         variant="primary"
         size="lg"
-        :disabled="isLoading"
+        :disabled="isLoading || isGitHubLoading"
         class="w-full"
         contentSection="login_page"
       >
         {{ isLoading ? 'Logging in...' : 'Login' }}
       </ActionButton>
     </form>
+
+    <div class="mt-6">
+      <div class="auth-divider text-gray-600 dark:text-gray-400 mb-5">or</div>
+
+      <GitHubLogin
+        @error="error = $event"
+        @busy-change="isGitHubLoading = $event"
+      />
+    </div>
   </div>
 </template>
 
@@ -171,4 +189,21 @@ const handleSubmit = async () => {
 @import '@/assets/input.css';
 @import '@/assets/box.css';
 @import '@/assets/error-box.css';
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: currentColor;
+    opacity: 0.35;
+  }
+}
 </style>

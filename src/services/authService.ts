@@ -1,14 +1,8 @@
-import type { LoginCredentials } from '@/types/auth'
+import { GITHUB_AUTH_ERROR_MESSAGES, LOGIN_ERROR_MESSAGES } from '@/constants/auth'
+import type { GitHubAuthData, LoginCredentials } from '@/types/auth'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
-
-const LOGIN_ERROR_MESSAGES = {
-  invalidCredentials: 'Incorrect username or password. Please try again.',
-  forbidden: 'Your account does not have permission to sign in here.',
-  tooManyRequests: 'Too many login attempts. Please wait a moment and try again.',
-  serviceUnavailable: 'The sign-in service is temporarily unavailable. Please try again later.',
-  generic: 'Unable to sign in right now. Please try again.',
-} as const
+const GITHUB_AUTH_API = import.meta.env.VITE_GITHUB_AUTH_API
 
 const normaliseErrorText = (errorText: string): string => {
   const trimmed = errorText.trim()
@@ -87,6 +81,20 @@ export const authService = {
     return token
   },
 
+  async loginWithGitHub(code: string): Promise<GitHubAuthData> {
+    const response = await fetch(`${GITHUB_AUTH_API}/api/auth`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code }),
+    })
+
+    if (!response.ok) {
+      throw new Error(GITHUB_AUTH_ERROR_MESSAGES.generic)
+    }
+
+    return response.json() as Promise<GitHubAuthData>
+  },
+
   async logout(): Promise<void> {
     const token = localStorage.getItem('auth_token')
 
@@ -100,6 +108,22 @@ export const authService = {
 
     if (!response.ok) {
       throw new Error(`Logout failed: ${response.status}`)
+    }
+  },
+
+  async revokeGitHub(): Promise<void> {
+    const token = localStorage.getItem('auth_token')
+
+    const response = await fetch(`${GITHUB_AUTH_API}/api/auth/revoke`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(GITHUB_AUTH_ERROR_MESSAGES.revoke)
     }
   },
 }
