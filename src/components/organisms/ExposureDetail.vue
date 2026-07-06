@@ -173,8 +173,9 @@ const loadTitle = async (file: string) =>
   resolveExposureFileTitle(props.alias, file, (request) => searchStore.searchQuery(request))
 
 const refreshLoadedFileTitle = async () => {
+  loadedFileTitle.value = ''
+
   if (!props.file) {
-    loadedFileTitle.value = ''
     return
   }
 
@@ -182,7 +183,6 @@ const refreshLoadedFileTitle = async () => {
     loadedFileTitle.value = await loadTitle(props.file)
   } catch (err) {
     console.error('Error loading exposure title:', err)
-    loadedFileTitle.value = ''
   }
 }
 
