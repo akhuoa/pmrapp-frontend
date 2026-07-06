@@ -28,7 +28,7 @@ import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
 import type { MathMLFormatOptions } from '@/types/mathml'
 import { formatCitation, formatCitationAuthor, parseFullNameToAuthor } from '@/utils/citation'
 import { downloadFileFromContent } from '@/utils/download'
-import { generateExposureTitle, getExposureIdFromResourcePath } from '@/utils/exposure'
+import { generateExposureTitle, getExposureIdFromResourcePath, resolveExposureFileTitle } from '@/utils/exposure'
 import { getFileExtension, isOpenCORFile } from '@/utils/file'
 import { formatYear } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
@@ -165,28 +165,8 @@ const handleFileBrowserPathChange = (newPath: string | undefined) => {
 // Note: Keep as "exposure" (singular) to match server file paths, not the router path.
 const routePath = `/exposure/${props.alias}`
 
-const loadTitle = async (file: string) => {
-  const results = await searchStore.searchQuery(
-    {
-      filters: [{
-        kind: 'exposure_alias',
-        term: props.alias,
-      }],
-    },
-  )
-
-  if (!results || !Array.isArray(results)) {
-    return ''
-  }
-
-  const matchFileResult = results.find((result) => result.resource_path.endsWith(file))
-
-  if (matchFileResult && matchFileResult.data._title?.[0]) {
-    return matchFileResult.data._title?.[0]
-  }
-
-  return ''
-}
+const loadTitle = async (file: string) =>
+  resolveExposureFileTitle(props.alias, file, searchStore.searchQuery)
 
 const refreshLoadedFileTitle = async () => {
   if (!props.file) {

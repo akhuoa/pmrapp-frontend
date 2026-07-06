@@ -1,4 +1,5 @@
 import { TITLE } from '@/constants/global'
+import type { SearchQueryRequest, SearchResult } from '@/types/search'
 
 /**
  * Utility function to extract the exposure ID from a resource path string.
@@ -42,4 +43,40 @@ export const generateExposureTitle = (
   }
 
   return withTitleSuffix ? `${title} – ${TITLE}` : title
+}
+
+const findExposureFileTitle = (results: SearchResult[], file: string): string => {
+  const decodedFile = decodeURIComponent(file)
+  const match = results.find((result) =>
+    result.resource_path.endsWith(file) || result.resource_path.endsWith(decodedFile),
+  )
+
+  return match?.data._title?.[0] || ''
+}
+
+/**
+ * Resolve an exposure file title from search index results.
+ *
+ * @param alias Exposure alias used by the exposure_alias filter.
+ * @param file Workspace file path from route or props.
+ * @param searchQuery Function used to execute the search query.
+ * @returns A resolved title string or empty string when unavailable.
+ */
+export const resolveExposureFileTitle = async (
+  alias: string,
+  file: string,
+  searchQuery: (request: SearchQueryRequest) => Promise<SearchResult[]>,
+): Promise<string> => {
+  const results = await searchQuery({
+    filters: [{
+      kind: 'exposure_alias',
+      term: alias,
+    }],
+  })
+
+  if (!Array.isArray(results)) {
+    return ''
+  }
+
+  return findExposureFileTitle(results, file)
 }
