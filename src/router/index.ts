@@ -2,8 +2,9 @@ import { createRouter, createWebHistory, type RouteLocationNormalized } from 'vu
 import { TITLE } from '@/constants/global'
 import { useAuthStore } from '@/stores/auth'
 import { useExposureStore } from '@/stores/exposure'
+import { useSearchStore } from '@/stores/search'
 import { useWorkspaceStore } from '@/stores/workspace'
-import { generateExposureTitle } from '@/utils/exposure'
+import { generateExposureTitle, resolveExposureFileTitle } from '@/utils/exposure'
 import { generateWorkspaceTitle } from '@/utils/workspace'
 import ExposureDetailView from '@/views/ExposureDetailView.vue'
 import ExposureView from '@/views/ExposureView.vue'
@@ -51,6 +52,19 @@ const resolveExposureTitle = async (to: RouteLocationNormalized) => {
   const alias = to.params?.alias as string | undefined
   if (!alias) {
     return
+  }
+
+  const fileParam = to.params?.file
+  const file = typeof fileParam === 'string' ? fileParam : undefined
+  if (file) {
+    try {
+      const fileTitle = await resolveExposureFileTitle(alias, file, useSearchStore().searchQuery)
+      if (fileTitle) {
+        return fileTitle
+      }
+    } catch (error) {
+      console.error(`Error fetching exposure file title for alias ${alias}:`, error)
+    }
   }
 
   try {
