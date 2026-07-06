@@ -2,6 +2,7 @@ import { createRouter, createWebHistory, type RouteLocationNormalized } from 'vu
 import { TITLE } from '@/constants/global'
 import { useAuthStore } from '@/stores/auth'
 import { useExposureStore } from '@/stores/exposure'
+import { useSearchStore } from '@/stores/search'
 import { useWorkspaceStore } from '@/stores/workspace'
 import { generateExposureTitle } from '@/utils/exposure'
 import { generateWorkspaceTitle } from '@/utils/workspace'
@@ -47,10 +48,43 @@ const createPluralRouteAliases = (pluralBase: string, aliasBases: string[], suff
   ...createAliases(aliasBases, ...suffixes),
 ]
 
+const resolveExposureFileTitle = async (alias: string, file: string) => {
+  try {
+    const searchResults = await useSearchStore().searchQuery({
+      filters: [{
+        kind: 'exposure_alias',
+        term: alias,
+      }],
+    })
+
+    if (!Array.isArray(searchResults)) {
+      return
+    }
+
+    const decodedFile = decodeURIComponent(file)
+    const match = searchResults.find((result) =>
+      result.resource_path.endsWith(file) || result.resource_path.endsWith(decodedFile),
+    )
+
+    return match?.data._title?.[0]
+  } catch (error) {
+    console.error(`Error fetching exposure file title for alias ${alias}:`, error)
+  }
+}
+
 const resolveExposureTitle = async (to: RouteLocationNormalized) => {
   const alias = to.params?.alias as string | undefined
   if (!alias) {
     return
+  }
+
+  const fileParam = to.params?.file
+  const file = typeof fileParam === 'string' ? fileParam : undefined
+  if (file) {
+    const fileTitle = await resolveExposureFileTitle(alias, file)
+    if (fileTitle) {
+      return fileTitle
+    }
   }
 
   try {
