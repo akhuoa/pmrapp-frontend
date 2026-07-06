@@ -46,11 +46,12 @@ export const generateExposureTitle = (
 }
 
 const findExposureFileTitle = (results: SearchResult[], file: string): string => {
-  const decodedFile = decodeURIComponent(file)
-  const match = results.find(
-    (result) => result.resource_path.endsWith(file) || result.resource_path.endsWith(decodedFile),
-  )
-
+  const match = results.find((result) => {
+    const resourcePath = result.resource_path
+    const parts = resourcePath.split('/')
+    const lastPart = parts[parts.length - 1]
+    return lastPart === file
+  })
   return match?.data._title?.[0] || ''
 }
 
