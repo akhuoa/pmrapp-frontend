@@ -170,7 +170,7 @@ const handleFileBrowserPathChange = (newPath: string | undefined) => {
 const routePath = `/exposure/${props.alias}`
 
 const loadTitle = async (file: string) =>
-  resolveExposureFileTitle(props.alias, file, searchStore.searchQuery)
+  resolveExposureFileTitle(props.alias, file, (request) => searchStore.searchQuery(request))
 
 const refreshLoadedFileTitle = async () => {
   if (!props.file) {
@@ -618,7 +618,7 @@ watch(
   () => props.file,
   async (newFile, oldFile) => {
     if (newFile === oldFile) return
-    await refreshLoadedFileTitle()
+    void refreshLoadedFileTitle()
     await loadInitialView()
   },
 )
@@ -654,7 +654,7 @@ onMounted(async () => {
   error.value = null
 
   try {
-    await refreshLoadedFileTitle()
+    void refreshLoadedFileTitle()
     exposureInfo.value = await exposureStore.getExposureInfo(props.alias)
     await loadInitialView()
   } catch (err) {
