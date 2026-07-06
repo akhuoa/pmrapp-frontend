@@ -47,8 +47,8 @@ export const generateExposureTitle = (
 
 const findExposureFileTitle = (results: SearchResult[], file: string): string => {
   const decodedFile = decodeURIComponent(file)
-  const match = results.find((result) =>
-    result.resource_path.endsWith(file) || result.resource_path.endsWith(decodedFile),
+  const match = results.find(
+    (result) => result.resource_path.endsWith(file) || result.resource_path.endsWith(decodedFile),
   )
 
   return match?.data._title?.[0] || ''
@@ -68,10 +68,12 @@ export const resolveExposureFileTitle = async (
   searchQuery: (request: SearchQueryRequest) => Promise<SearchResult[]>,
 ): Promise<string> => {
   const results = await searchQuery({
-    filters: [{
-      kind: 'exposure_alias',
-      term: alias,
-    }],
+    filters: [
+      {
+        kind: 'exposure_alias',
+        term: alias,
+      },
+    ],
   })
 
   if (!Array.isArray(results)) {

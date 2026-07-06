@@ -28,7 +28,11 @@ import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
 import type { MathMLFormatOptions } from '@/types/mathml'
 import { formatCitation, formatCitationAuthor, parseFullNameToAuthor } from '@/utils/citation'
 import { downloadFileFromContent } from '@/utils/download'
-import { generateExposureTitle, getExposureIdFromResourcePath, resolveExposureFileTitle } from '@/utils/exposure'
+import {
+  generateExposureTitle,
+  getExposureIdFromResourcePath,
+  resolveExposureFileTitle,
+} from '@/utils/exposure'
 import { getFileExtension, isOpenCORFile } from '@/utils/file'
 import { formatYear } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
