@@ -126,6 +126,7 @@ const hasOtherRelatedModels = ref(false)
 const isDownloadingWorkspaceZip = ref(false)
 const isDownloadingWorkspaceTgz = ref(false)
 const isDownloadingCOMBINE = ref(false)
+const loadedFileTitle = ref('')
 const { goBack } = useBackNavigation('/exposures')
 
 const router = useRouter()
@@ -164,7 +165,48 @@ const handleFileBrowserPathChange = (newPath: string | undefined) => {
 // Note: Keep as "exposure" (singular) to match server file paths, not the router path.
 const routePath = `/exposure/${props.alias}`
 
+const loadTitle = async (file: string) => {
+  const results = await searchStore.searchQuery(
+    {
+      filters: [{
+        kind: 'exposure_alias',
+        term: props.alias,
+      }],
+    },
+  )
+
+  if (!results || !Array.isArray(results)) {
+    return ''
+  }
+
+  const matchFileResult = results.find((result) => result.resource_path.endsWith(file))
+
+  if (matchFileResult && matchFileResult.data._title?.[0]) {
+    return matchFileResult.data._title?.[0]
+  }
+
+  return ''
+}
+
+const refreshLoadedFileTitle = async () => {
+  if (!props.file) {
+    loadedFileTitle.value = ''
+    return
+  }
+
+  try {
+    loadedFileTitle.value = await loadTitle(props.file)
+  } catch (err) {
+    console.error('Error loading exposure title:', err)
+    loadedFileTitle.value = ''
+  }
+}
+
 const exposureTitle = computed(() => {
+  if (loadedFileTitle.value) {
+    return loadedFileTitle.value
+  }
+
   return generateExposureTitle(
     exposureInfo.value?.exposure.description,
     exposureInfo.value?.exposure.id,
@@ -592,7 +634,16 @@ watch(
   () => props.file,
   async (newFile, oldFile) => {
     if (newFile === oldFile) return
+    await refreshLoadedFileTitle()
     await loadInitialView()
+  },
+)
+
+watch(
+  () => props.alias,
+  async (newAlias, oldAlias) => {
+    if (newAlias === oldAlias) return
+    await refreshLoadedFileTitle()
   },
 )
 
@@ -619,6 +670,7 @@ onMounted(async () => {
   error.value = null
 
   try {
+    await refreshLoadedFileTitle()
     exposureInfo.value = await exposureStore.getExposureInfo(props.alias)
     await loadInitialView()
   } catch (err) {
