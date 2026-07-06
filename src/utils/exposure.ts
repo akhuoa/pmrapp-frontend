@@ -59,7 +59,7 @@ const findExposureFileTitle = (results: SearchResult[], file: string): string =>
  * Resolve an exposure file title from search index results.
  *
  * @param alias Exposure alias used by the exposure_alias filter.
- * @param file Workspace file path from route or props.
+ * @param file Exposure file path from route or props.
  * @param searchQuery Function used to execute the search query.
  * @returns A resolved title string or empty string when unavailable.
  */
