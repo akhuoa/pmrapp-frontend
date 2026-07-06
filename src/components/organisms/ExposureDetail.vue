@@ -164,6 +164,14 @@ const handleFileBrowserPathChange = (newPath: string | undefined) => {
 // Note: Keep as "exposure" (singular) to match server file paths, not the router path.
 const routePath = `/exposure/${props.alias}`
 
+const exposureTitle = computed(() => {
+  return generateExposureTitle(
+    exposureInfo.value?.exposure.description,
+    exposureInfo.value?.exposure.id,
+    false,
+  )
+})
+
 const pageTitle = computed(() => {
   if (props.view) {
     const viewEntry = AVAILABLE_VIEWS.find((v) => v.view_key === props.view)
@@ -175,11 +183,7 @@ const pageTitle = computed(() => {
     }
   }
 
-  return generateExposureTitle(
-    exposureInfo.value?.exposure.description,
-    exposureInfo.value?.exposure.id,
-    false,
-  )
+  return exposureTitle.value
 })
 
 const openCORFiles = computed(() => {
@@ -410,7 +414,7 @@ const isAboutSectionAvailable = computed(() => {
 })
 
 const citationTitle = computed(() => {
-  return metadataJSON.value.model_title || pageTitle.value
+  return metadataJSON.value.model_title || exposureTitle.value
 })
 
 const citationAuthors = computed(() => {
