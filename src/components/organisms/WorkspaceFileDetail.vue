@@ -68,6 +68,10 @@ const backPath = computed(() => {
 const { goBack } = useBackNavigation(backPath.value)
 const workspaceStore = useWorkspaceStore()
 
+const activeTabClass = 'text-gray-900 dark:text-gray-100 bg-gray-200 dark:bg-gray-700 font-medium'
+const inactiveTabClass =
+  'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer'
+
 const isImage = computed(() => isImageFile(props.path))
 const isPDF = computed(() => isPdfFile(props.path))
 const isSvg = computed(() => isSvgFile(props.path))
@@ -108,10 +112,6 @@ const isTooLargeForPreview = computed(() => fileSizeBytes.value > MAX_PREVIEW_FI
 
 const downloadFile = () => {
   downloadFileFromBlob(fileBlob.value, filename.value)
-}
-
-const toggleCodeView = () => {
-  showCode.value = !showCode.value
 }
 
 const toggleCodeWrap = () => {
@@ -202,15 +202,27 @@ onBeforeUnmount(() => {
           {{ filename }}
         </div>
         <div class="flex items-center gap-2">
-          <button
+          <div
             v-if="isSvg || isMarkdown"
-            @click="toggleCodeView"
-            class="flex items-center cursor-pointer gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+            class="flex items-center border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden text-sm"
           >
-            <PreviewIcon class="w-4 h-4" v-if="showCode" />
-            <CodeIcon class="w-4 h-4" v-else />
-            {{ showCode ? 'Preview' : 'Code' }}
-          </button>
+            <button
+              @click="showCode = false"
+              class="flex items-center gap-1.5 px-3 py-1.5 transition-colors"
+              :class="showCode ? inactiveTabClass : activeTabClass"
+            >
+              <PreviewIcon class="w-4 h-4" />
+              Preview
+            </button>
+            <button
+              @click="showCode = true"
+              class="flex items-center gap-1.5 px-3 py-1.5 transition-colors"
+              :class="showCode ? activeTabClass : inactiveTabClass"
+            >
+              <CodeIcon class="w-4 h-4" />
+              Code
+            </button>
+          </div>
           <WrapButton
             v-if="shouldShowAsText && !isTooLargeForPreview"
             :disabled="(isSvg || isMarkdown) ? !showCode : false"
