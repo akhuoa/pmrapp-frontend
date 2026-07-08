@@ -103,10 +103,9 @@ const generatedCode = ref<string>('')
 const generatedCodeFilename = ref<string>('')
 const codeBlockRef = ref<InstanceType<typeof CodeBlock> | null>(null)
 const rawMathsData = ref<[string, string[]][]>([])
-const transformMaths = ref(false)
 const mathFormatOptions = ref<MathMLFormatOptions>({ ...DEFAULT_MATH_FORMAT_OPTIONS })
 const mathsJSON = computed<[string, string[]][]>(() => {
-  const appliedOptions = transformMaths.value
+  const appliedOptions = Object.values(mathFormatOptions.value).some(Boolean)
     ? mathFormatOptions.value
     : DEFAULT_MATH_FORMAT_OPTIONS
 
@@ -607,9 +606,9 @@ watch(detailHTML, async () => {
 })
 
 watch(
-  [transformMaths, mathFormatOptions],
-  ([transformMathsEnabled, options]) => {
-    getMathFormatOptionsStorageService().save(transformMathsEnabled, options)
+  mathFormatOptions,
+  (options) => {
+    getMathFormatOptionsStorageService().save(options)
   },
   { deep: true },
 )
@@ -645,10 +644,9 @@ watch(
 )
 
 onMounted(async () => {
-  const savedMathFormatState = getMathFormatOptionsStorageService().load()
-  if (savedMathFormatState) {
-    transformMaths.value = savedMathFormatState.transformMaths
-    mathFormatOptions.value = { ...savedMathFormatState.options }
+  const savedOptions = getMathFormatOptionsStorageService().load()
+  if (savedOptions) {
+    mathFormatOptions.value = { ...savedOptions }
   }
 
   error.value = null
@@ -745,9 +743,7 @@ onMounted(async () => {
       <div v-else-if="props.view === 'cellml_math'" class="box">
         <MathTransformOptions
           :has-maths-data="rawMathsData.length > 0"
-          :transform-maths="transformMaths"
           :options="mathFormatOptions"
-          @update:transform-maths="transformMaths = $event"
           @update:options="mathFormatOptions = $event"
         />
         <p v-if="!mathsJSON.length" class="text-sm text-gray-500 dark:text-gray-400">No mathematics content available.</p>

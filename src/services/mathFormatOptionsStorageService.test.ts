@@ -14,11 +14,10 @@ describe('mathFormatOptionsStorageService', () => {
       expect(mathFormatOptionsStorageService.load()).toBeNull()
     })
 
-    it('loads saved state when payload is valid', () => {
+    it('loads saved options when payload is valid', () => {
       localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify({
-          transformMaths: true,
           options: {
             digitGrouping: false,
             greekSymbols: true,
@@ -28,12 +27,9 @@ describe('mathFormatOptionsStorageService', () => {
       )
 
       expect(mathFormatOptionsStorageService.load()).toEqual({
-        transformMaths: true,
-        options: {
-          digitGrouping: false,
-          greekSymbols: true,
-          subscripts: true,
-        },
+        digitGrouping: false,
+        greekSymbols: true,
+        subscripts: true,
       })
     })
 
@@ -41,7 +37,6 @@ describe('mathFormatOptionsStorageService', () => {
       localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify({
-          transformMaths: false,
           options: {
             subscripts: true,
           },
@@ -49,12 +44,9 @@ describe('mathFormatOptionsStorageService', () => {
       )
 
       expect(mathFormatOptionsStorageService.load()).toEqual({
-        transformMaths: false,
-        options: {
-          digitGrouping: false,
-          greekSymbols: false,
-          subscripts: true,
-        },
+        digitGrouping: false,
+        greekSymbols: false,
+        subscripts: true,
       })
     })
 
@@ -62,7 +54,6 @@ describe('mathFormatOptionsStorageService', () => {
       localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify({
-          transformMaths: true,
           options: {
             digitGrouping: 1,
             greekSymbols: null,
@@ -72,35 +63,30 @@ describe('mathFormatOptionsStorageService', () => {
       )
 
       expect(mathFormatOptionsStorageService.load()).toEqual({
-        transformMaths: true,
-        options: {
-          digitGrouping: false,
-          greekSymbols: false,
-          subscripts: false,
-        },
+        digitGrouping: false,
+        greekSymbols: false,
+        subscripts: false,
       })
     })
 
-    it('derives transformMaths from enabled options when saved transformMaths is missing', () => {
+    it('handles legacy payload with transformMaths field', () => {
+      // Old format that included transformMaths — the service should ignore it and just return options.
       localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify({
           transformMaths: true,
           options: {
-            digitGrouping: false,
+            digitGrouping: true,
             greekSymbols: false,
-            subscripts: false,
+            subscripts: true,
           },
         }),
       )
 
       expect(mathFormatOptionsStorageService.load()).toEqual({
-        transformMaths: true,
-        options: {
-          digitGrouping: false,
-          greekSymbols: false,
-          subscripts: false,
-        },
+        digitGrouping: true,
+        greekSymbols: false,
+        subscripts: true,
       })
     })
 
@@ -120,8 +106,8 @@ describe('mathFormatOptionsStorageService', () => {
   })
 
   describe('save', () => {
-    it('writes normalised state to localStorage', () => {
-      mathFormatOptionsStorageService.save(true, {
+    it('writes normalised options to localStorage', () => {
+      mathFormatOptionsStorageService.save({
         digitGrouping: false,
         greekSymbols: true,
         subscripts: true,
@@ -129,7 +115,6 @@ describe('mathFormatOptionsStorageService', () => {
 
       expect(localStorage.getItem(STORAGE_KEY)).toBe(
         JSON.stringify({
-          transformMaths: true,
           options: {
             digitGrouping: false,
             greekSymbols: true,
@@ -145,7 +130,7 @@ describe('mathFormatOptionsStorageService', () => {
       })
 
       expect(() =>
-        mathFormatOptionsStorageService.save(false, {
+        mathFormatOptionsStorageService.save({
           digitGrouping: false,
           greekSymbols: false,
           subscripts: false,
