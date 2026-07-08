@@ -69,7 +69,8 @@ const { goBack } = useBackNavigation(backPath.value)
 const workspaceStore = useWorkspaceStore()
 
 const activeTabClass = 'text-gray-900 dark:text-gray-100 bg-gray-200 dark:bg-gray-700 font-medium'
-const inactiveTabClass = 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer'
+const inactiveTabClass =
+  'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer'
 
 const isImage = computed(() => isImageFile(props.path))
 const isPDF = computed(() => isPdfFile(props.path))
