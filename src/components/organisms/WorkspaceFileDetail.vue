@@ -68,9 +68,40 @@ const backPath = computed(() => {
 const { goBack } = useBackNavigation(backPath.value)
 const workspaceStore = useWorkspaceStore()
 
-const activeTabClass = 'text-gray-900 dark:text-gray-100 bg-gray-200 dark:bg-gray-700 font-medium'
-const inactiveTabClass =
-  'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer'
+const tabButtonClasses = {
+  base: 'flex items-center gap-1.5 px-3 py-1.5 transition-colors',
+  active: 'text-gray-900 dark:text-gray-100 bg-gray-200 dark:bg-gray-700 z-0',
+  inactive:
+    'text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-900 cursor-pointer z-1',
+  hover: 'hover:text-gray-700 dark:hover:text-gray-200',
+  shadow: 'shadow-[0_0_12px_6px_rgba(0,0,0,0.15)] dark:shadow-none',
+}
+
+const previewButtonClass = computed(() => {
+  const classes = [tabButtonClasses.base]
+
+  if (showCode.value) {
+    classes.push(tabButtonClasses.inactive)
+    classes.push(tabButtonClasses.hover)
+    classes.push(tabButtonClasses.shadow)
+  } else {
+    classes.push(tabButtonClasses.active)
+  }
+  return classes
+})
+
+const codeButtonClass = computed(() => {
+  const classes = [tabButtonClasses.base]
+
+  if (showCode.value) {
+    classes.push(tabButtonClasses.active)
+  } else {
+    classes.push(tabButtonClasses.inactive)
+    classes.push(tabButtonClasses.hover)
+    classes.push(tabButtonClasses.shadow)
+  }
+  return classes
+})
 
 const isImage = computed(() => isImageFile(props.path))
 const isPDF = computed(() => isPdfFile(props.path))
@@ -208,16 +239,14 @@ onBeforeUnmount(() => {
           >
             <button
               @click="showCode = false"
-              class="flex items-center gap-1.5 px-3 py-1.5 transition-colors"
-              :class="showCode ? inactiveTabClass : activeTabClass"
+              :class="previewButtonClass"
             >
               <PreviewIcon class="w-4 h-4" />
               Preview
             </button>
             <button
               @click="showCode = true"
-              class="flex items-center gap-1.5 px-3 py-1.5 transition-colors"
-              :class="showCode ? activeTabClass : inactiveTabClass"
+              :class="codeButtonClass"
             >
               <CodeIcon class="w-4 h-4" />
               Code
