@@ -238,14 +238,18 @@ onBeforeUnmount(() => {
             class="flex items-center border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden text-sm"
           >
             <button
+              type="button"
               @click="showCode = false"
+              :aria-pressed="!showCode"
               :class="previewButtonClass"
             >
               <PreviewIcon class="w-4 h-4" />
               Preview
             </button>
             <button
+              type="button"
               @click="showCode = true"
+              :aria-pressed="showCode"
               :class="codeButtonClass"
             >
               <CodeIcon class="w-4 h-4" />
