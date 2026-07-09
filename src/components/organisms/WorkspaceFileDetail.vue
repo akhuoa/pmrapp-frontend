@@ -71,8 +71,7 @@ const workspaceStore = useWorkspaceStore()
 const tabButtonClasses = {
   base: 'flex items-center gap-1.5 px-3 py-1.5 transition-colors',
   active: 'text-gray-900 dark:text-gray-100 bg-gray-200 dark:bg-gray-700 z-0',
-  inactive:
-    'text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-900 cursor-pointer z-1',
+  inactive: 'text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-900 cursor-pointer z-1',
   hover: 'hover:text-gray-700 dark:hover:text-gray-200',
   shadow: 'shadow-[0_0_12px_6px_rgba(0,0,0,0.15)] dark:shadow-none',
 }
@@ -121,7 +120,7 @@ const openCORFileURL = computed(() => {
 })
 
 const shouldShowAsText = computed(() => {
-  return isCode.value || (isSvg.value) || (isMarkdown.value)
+  return isCode.value || isSvg.value || isMarkdown.value
 })
 
 const shouldShowPreview = computed(() => {

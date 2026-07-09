@@ -58,11 +58,14 @@ beforeEach(() => {
   )
 
   // jsdom does not implement requestIdleCallback/cancelIdleCallback; provide stubs.
-  vi.stubGlobal('requestIdleCallback', vi.fn((cb) => {
-    // Execute the callback synchronously so highlighting runs during tests.
-    cb({ didTimeout: false, timeRemaining: () => 50 })
-    return 1
-  }))
+  vi.stubGlobal(
+    'requestIdleCallback',
+    vi.fn((cb) => {
+      // Execute the callback synchronously so highlighting runs during tests.
+      cb({ didTimeout: false, timeRemaining: () => 50 })
+      return 1
+    }),
+  )
   vi.stubGlobal('cancelIdleCallback', vi.fn())
 })
 
