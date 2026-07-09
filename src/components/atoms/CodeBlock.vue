@@ -109,6 +109,7 @@ const performHighlight = async () => {
   }
 
   try {
+    // Clear previous highlighting.
     codeBlock.value.removeAttribute('data-highlighted')
 
     if (detectedLanguage.value !== 'none') {
