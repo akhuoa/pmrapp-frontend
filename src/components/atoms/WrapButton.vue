@@ -6,6 +6,7 @@ import WrapIcon from '@/components/icons/WrapIcon.vue'
 const props = defineProps<{
   title?: string
   active?: boolean
+  disabled?: boolean
 }>()
 
 const buttonRef = ref<HTMLElement | null>(null)
@@ -20,6 +21,7 @@ const buttonTitle = computed(() => {
 <template>
   <button
     ref="buttonRef"
+    :disabled="props.disabled"
     :class="[
       'relative p-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed rounded transition-all',
       'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',

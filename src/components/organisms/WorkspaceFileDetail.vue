@@ -121,7 +121,7 @@ const openCORFileURL = computed(() => {
 })
 
 const shouldShowAsText = computed(() => {
-  return isCode.value || (isSvg.value && showCode.value) || (isMarkdown.value && showCode.value)
+  return isCode.value || (isSvg.value) || (isMarkdown.value)
 })
 
 const shouldShowPreview = computed(() => {
@@ -258,12 +258,13 @@ onBeforeUnmount(() => {
           </div>
           <WrapButton
             v-if="shouldShowAsText && !isTooLargeForPreview"
-            :disabled="(isSvg || isMarkdown) ? !showCode : false"
+            :disabled="!shouldShowAsText || isTooLargeForPreview || ((isSvg || isMarkdown) ? !showCode : false)"
             :active="codeBlockRef?.isWrapped"
             @click="toggleCodeWrap"
           />
           <CopyButton
             v-if="shouldShowAsText && !isTooLargeForPreview"
+            :disabled="!shouldShowAsText || isTooLargeForPreview || (isSvg ? !showCode : false)"
             :text="fileContent"
             title="Copy code"
           />

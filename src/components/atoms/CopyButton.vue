@@ -7,6 +7,7 @@ const props = defineProps<{
   text: string
   title?: string
   withHTML?: boolean
+  disabled?: boolean
 }>()
 
 const isCopied = ref(false)
@@ -81,6 +82,7 @@ onBeforeUnmount(() => {
 <template>
   <button
     ref="buttonRef"
+    :disabled="props.disabled"
     @click="handleCopy"
     class="relative p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
     :aria-label="isCopied ? 'Copied!' : (title || 'Copy')"
