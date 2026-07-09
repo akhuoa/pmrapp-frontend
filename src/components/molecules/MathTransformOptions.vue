@@ -32,7 +32,7 @@ const containerClasses = [
   'sticky top-20 left-0 right-0 px-4 py-3 z-20',
   'flex items-center justify-end gap-2',
   'border-b border-gray-200 dark:border-gray-700 rounded-t-lg',
-  'bg-gray-50 dark:bg-gray-800'
+  'bg-gray-50 dark:bg-gray-800',
 ]
 
 const toggleOption = (key: keyof MathMLFormatOptions) => {
