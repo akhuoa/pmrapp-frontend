@@ -740,23 +740,25 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div v-else-if="props.view === 'cellml_math'" class="box">
+      <div v-else-if="props.view === 'cellml_math'" class="box p-0!">
         <MathTransformOptions
           :has-maths-data="rawMathsData.length > 0"
           :options="mathFormatOptions"
           @update:options="mathFormatOptions = $event"
         />
-        <p v-if="!mathsJSON.length" class="text-sm text-gray-500 dark:text-gray-400">No mathematics content available.</p>
-        <template v-else>
-          <div v-for="value in mathsJSON" :key="value[0]"
-            class="mb-6 pb-6 last:mb-0 last:pb-0 border-b border-gray-200 dark:border-gray-700 last:border-0"
-          >
-            <h4 class="font-semibold mb-4">{{ value[0] }}</h4>
-            <div v-for="(math, mathIndex) in value[1]" :key="`${value[0]}-${mathIndex}`">
-              <div v-html="math" class="math-view"></div>
+        <div class="p-4">
+          <p v-if="!mathsJSON.length" class="text-sm text-gray-500 dark:text-gray-400">No mathematics content available.</p>
+          <template v-else>
+            <div v-for="value in mathsJSON" :key="value[0]"
+              class="mb-6 pb-6 last:mb-0 last:pb-0 border-b border-gray-200 dark:border-gray-700 last:border-0"
+            >
+              <h4 class="font-semibold mb-4">{{ value[0] }}</h4>
+              <div v-for="(math, mathIndex) in value[1]" :key="`${value[0]}-${mathIndex}`">
+                <div v-html="math" class="math-view"></div>
+              </div>
             </div>
-          </div>
-        </template>
+          </template>
+        </div>
       </div>
 
       <div v-else-if="detailHTML" class="box">
