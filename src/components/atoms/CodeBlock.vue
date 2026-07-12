@@ -13,7 +13,6 @@ import 'prismjs/components/prism-markdown'
 import 'prismjs/components/prism-matlab'
 import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
 import 'prismjs/plugins/line-numbers/prism-line-numbers'
-import LoadingSkeleton from '@/components/atoms/LoadingSkeleton.vue'
 
 const props = defineProps<{
   code: string
@@ -24,9 +23,7 @@ const codeBlock = ref<HTMLElement | null>(null)
 const preBlock = ref<HTMLElement | null>(null)
 const darkThemeMediaQuery = ref<MediaQueryList | null>(null)
 const isWrapped = ref(false)
-const isHighlighting = ref(true)
 let observer: ResizeObserver | null = null
-let highlightIdle: number | null = null
 
 const preformatClass = computed(() =>
   [
@@ -82,45 +79,20 @@ const detectedLanguage = computed(() => {
   return ext ? languageMap[ext] || 'plaintext' : 'none'
 })
 
-const scheduleHighlight = () => {
-  // Cancel any pending idle callback.
-  if (highlightIdle !== null) {
-    cancelIdleCallback(highlightIdle)
-    highlightIdle = null
-  }
-
-  isHighlighting.value = true
-
-  // Use requestIdleCallback to defer highlighting so it doesn't block painting.
-  highlightIdle = requestIdleCallback(
-    () => {
-      highlightIdle = null
-      void performHighlight()
-    },
-    { timeout: 300 },
-  )
-}
-
-const performHighlight = async () => {
+const highlightCode = async () => {
   await nextTick()
-  if (!codeBlock.value || !props.code) {
-    isHighlighting.value = false
-    return
-  }
+  if (codeBlock.value && props.code) {
+    try {
+      // Clear previous highlighting.
+      codeBlock.value.removeAttribute('data-highlighted')
 
-  try {
-    // Clear previous highlighting.
-    codeBlock.value.removeAttribute('data-highlighted')
-
-    if (detectedLanguage.value !== 'none') {
-      Prism.highlightElement(codeBlock.value)
+      if (detectedLanguage.value !== 'none') {
+        Prism.highlightElement(codeBlock.value)
+      }
+    } catch (err) {
+      console.error('Error highlighting code:', err)
     }
-  } catch (err) {
-    console.error('Error highlighting code:', err)
   }
-
-  await syncWrapAndLineNumbers()
-  isHighlighting.value = false
 }
 
 const syncWrapAndLineNumbers = async () => {
@@ -146,6 +118,11 @@ const syncWrapAndLineNumbers = async () => {
   if (Prism.plugins.lineNumbers?.resize) {
     Prism.plugins.lineNumbers.resize(preBlock.value)
   }
+}
+
+const refreshCodeBlock = async () => {
+  await highlightCode()
+  await syncWrapAndLineNumbers()
 }
 
 const toggleWrap = async () => {
@@ -189,7 +166,7 @@ const handleThemeChange = (e: MediaQueryListEvent) => {
 }
 
 onMounted(() => {
-  scheduleHighlight()
+  void refreshCodeBlock()
 
   darkThemeMediaQuery.value = window.matchMedia('(prefers-color-scheme: dark)')
 
@@ -213,11 +190,6 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  if (highlightIdle !== null) {
-    cancelIdleCallback(highlightIdle)
-    highlightIdle = null
-  }
-
   if (darkThemeMediaQuery.value) {
     darkThemeMediaQuery.value.removeEventListener('change', handleThemeChange)
   }
@@ -230,24 +202,19 @@ onBeforeUnmount(() => {
 watch(
   () => props.code,
   () => {
-    scheduleHighlight()
+    void refreshCodeBlock()
   },
 )
 </script>
 
 <template>
-  <div class="relative">
-    <LoadingSkeleton v-if="isHighlighting" />
-
-    <pre
-      ref="preBlock"
-      :class="preformatClass"
-      :style="isHighlighting ? 'visibility: hidden; position: absolute;' : ''"
-    ><code
-      ref="codeBlock"
-      :class="`language-${detectedLanguage}`"
-    >{{ code }}</code></pre>
-  </div>
+  <pre
+    ref="preBlock"
+    :class="preformatClass"
+  ><code
+    ref="codeBlock"
+    :class="`language-${detectedLanguage}`"
+  >{{ code }}</code></pre>
 </template>
 
 <style scoped>

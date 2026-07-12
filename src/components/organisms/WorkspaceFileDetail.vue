@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId } from 'vue'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
@@ -45,7 +45,10 @@ const workspaceInfo = ref<WorkspaceInfo | null>(null)
 const workspaceInfoLoading = ref(true)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
-const showCode = ref(false)
+const isCodeButtonActive = ref(false)
+const isCodeViewVisible = ref(false)
+const previewPanelId = useId()
+const codePanelId = useId()
 const codeBlockRef = ref<InstanceType<typeof CodeBlock> | null>(null)
 
 // Extract filename from full path for download purposes.
@@ -79,7 +82,7 @@ const tabButtonClasses = {
 const previewButtonClass = computed(() => {
   const classes = [tabButtonClasses.base]
 
-  if (showCode.value) {
+  if (isCodeButtonActive.value) {
     classes.push(tabButtonClasses.inactive)
     classes.push(tabButtonClasses.hover)
     classes.push(tabButtonClasses.shadow)
@@ -92,7 +95,7 @@ const previewButtonClass = computed(() => {
 const codeButtonClass = computed(() => {
   const classes = [tabButtonClasses.base]
 
-  if (showCode.value) {
+  if (isCodeButtonActive.value) {
     classes.push(tabButtonClasses.active)
   } else {
     classes.push(tabButtonClasses.inactive)
@@ -124,7 +127,7 @@ const shouldShowAsText = computed(() => {
 })
 
 const shouldShowPreview = computed(() => {
-  return (isSvg.value || isMarkdown.value) && !showCode.value
+  return (isSvg.value || isMarkdown.value) && !isCodeViewVisible.value
 })
 
 const renderedMarkdown = computed(() => {
@@ -206,6 +209,18 @@ onBeforeUnmount(() => {
     URL.revokeObjectURL(fileBlobUrl.value)
   }
 })
+
+// Update button styling state separately from the actual view state
+// so the button appearance can change independently while the view finishes rendering.
+const switchCodeView = async (showCodeView: boolean) => {
+  isCodeButtonActive.value = showCodeView
+
+  // Wait for DOM updates and a short delay for smooth transition.
+  await nextTick()
+  await new Promise((resolve) => setTimeout(resolve, 100))
+
+  isCodeViewVisible.value = showCodeView
+}
 </script>
 
 <template>
@@ -235,11 +250,15 @@ onBeforeUnmount(() => {
           <div
             v-if="isSvg || isMarkdown"
             class="flex items-center border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden text-sm"
+            role="tablist"
+            aria-label="File view tabs"
           >
             <button
               type="button"
-              @click="showCode = false"
-              :aria-pressed="!showCode"
+              role="tab"
+              @click="switchCodeView(false)"
+              :aria-selected="!isCodeViewVisible"
+              :aria-controls="previewPanelId"
               :class="previewButtonClass"
             >
               <PreviewIcon class="w-4 h-4" />
@@ -247,8 +266,10 @@ onBeforeUnmount(() => {
             </button>
             <button
               type="button"
-              @click="showCode = true"
-              :aria-pressed="showCode"
+              role="tab"
+              @click="switchCodeView(true)"
+              :aria-selected="isCodeViewVisible"
+              :aria-controls="codePanelId"
               :class="codeButtonClass"
             >
               <CodeIcon class="w-4 h-4" />
@@ -257,13 +278,13 @@ onBeforeUnmount(() => {
           </div>
           <WrapButton
             v-if="shouldShowAsText && !isTooLargeForPreview"
-            :disabled="!shouldShowAsText || isTooLargeForPreview || ((isSvg || isMarkdown) ? !showCode : false)"
+            :disabled="!shouldShowAsText || isTooLargeForPreview || ((isSvg || isMarkdown) ? !isCodeViewVisible : false)"
             :active="codeBlockRef?.isWrapped"
             @click="toggleCodeWrap"
           />
           <CopyButton
             v-if="shouldShowAsText && !isTooLargeForPreview"
-            :disabled="!shouldShowAsText || isTooLargeForPreview || (isSvg ? !showCode : false)"
+            :disabled="!shouldShowAsText || isTooLargeForPreview || (isSvg ? !isCodeViewVisible : false)"
             :text="fileContent"
             title="Copy code"
           />
@@ -296,12 +317,12 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- SVG Rendered View -->
-      <div v-if="isSvg && shouldShowPreview" class="flex justify-center p-4 bg-gray-50 dark:bg-gray-900 rounded">
+      <div :id="previewPanelId" role="tabpanel" v-if="isSvg && shouldShowPreview" class="flex justify-center p-4 bg-gray-50 dark:bg-gray-900 rounded">
         <img :src="fileBlobUrl" :alt="path" class="max-w-full h-auto" />
       </div>
 
       <!-- Markdown Preview -->
-      <div v-else-if="isMarkdown && shouldShowPreview" class="p-4">
+      <div :id="previewPanelId" role="tabpanel" v-else-if="isMarkdown && shouldShowPreview" class="p-4">
         <div class="max-w-none" v-html="renderedMarkdown"></div>
       </div>
 
@@ -330,7 +351,7 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- Code/Text View -->
-      <div v-else-if="shouldShowAsText" class="relative">
+      <div :id="codePanelId" role="tabpanel" v-else-if="shouldShowAsText" class="relative">
         <CodeBlock
           ref="codeBlockRef"
           :code="fileContent"
