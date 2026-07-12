@@ -16,6 +16,7 @@ import { useBackNavigation } from '@/composables/useBackNavigation'
 import { getWorkspaceService } from '@/services'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { WorkspaceInfo } from '@/types/workspace'
+import { trackButtonClick } from '@/utils/analytics'
 import { downloadFileFromBlob } from '@/utils/download'
 import {
   isCodeFile,
@@ -27,7 +28,6 @@ import {
 } from '@/utils/file'
 import { renderMarkdown } from '@/utils/markdown'
 import { generateWorkspaceTitle } from '@/utils/workspace'
-import { trackButtonClick } from '@/utils/analytics'
 
 // Files with size above this threshold are not rendered in the preview to prevent browser freeze.
 const MAX_PREVIEW_FILE_SIZE_BYTES = 500 * 1024 // ~500 KB
