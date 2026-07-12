@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId } from 'vue'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
@@ -47,6 +47,8 @@ const error = ref<string | null>(null)
 const isLoading = ref(true)
 const isCodeButtonActive = ref(false)
 const isCodeViewVisible = ref(false)
+const previewPanelId = useId()
+const codePanelId = useId()
 const codeBlockRef = ref<InstanceType<typeof CodeBlock> | null>(null)
 
 // Extract filename from full path for download purposes.
@@ -248,11 +250,15 @@ const switchCodeView = async (showCodeView: boolean) => {
           <div
             v-if="isSvg || isMarkdown"
             class="flex items-center border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden text-sm"
+            role="tablist"
+            aria-label="File view tabs"
           >
             <button
               type="button"
+              role="tab"
               @click="switchCodeView(false)"
-              :aria-pressed="!isCodeViewVisible"
+              :aria-selected="!isCodeViewVisible"
+              :aria-controls="previewPanelId"
               :class="previewButtonClass"
             >
               <PreviewIcon class="w-4 h-4" />
@@ -260,8 +266,10 @@ const switchCodeView = async (showCodeView: boolean) => {
             </button>
             <button
               type="button"
+              role="tab"
               @click="switchCodeView(true)"
-              :aria-pressed="isCodeViewVisible"
+              :aria-selected="isCodeViewVisible"
+              :aria-controls="codePanelId"
               :class="codeButtonClass"
             >
               <CodeIcon class="w-4 h-4" />
@@ -309,12 +317,12 @@ const switchCodeView = async (showCodeView: boolean) => {
       </div>
 
       <!-- SVG Rendered View -->
-      <div v-if="isSvg && shouldShowPreview" class="flex justify-center p-4 bg-gray-50 dark:bg-gray-900 rounded">
+      <div :id="previewPanelId" role="tabpanel" v-if="isSvg && shouldShowPreview" class="flex justify-center p-4 bg-gray-50 dark:bg-gray-900 rounded">
         <img :src="fileBlobUrl" :alt="path" class="max-w-full h-auto" />
       </div>
 
       <!-- Markdown Preview -->
-      <div v-else-if="isMarkdown && shouldShowPreview" class="p-4">
+      <div :id="previewPanelId" role="tabpanel" v-else-if="isMarkdown && shouldShowPreview" class="p-4">
         <div class="max-w-none" v-html="renderedMarkdown"></div>
       </div>
 
@@ -343,7 +351,7 @@ const switchCodeView = async (showCodeView: boolean) => {
       </div>
 
       <!-- Code/Text View -->
-      <div v-else-if="shouldShowAsText" class="relative">
+      <div :id="codePanelId" role="tabpanel" v-else-if="shouldShowAsText" class="relative">
         <CodeBlock
           ref="codeBlockRef"
           :code="fileContent"
