@@ -16,6 +16,7 @@ import { useBackNavigation } from '@/composables/useBackNavigation'
 import { getWorkspaceService } from '@/services'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { WorkspaceInfo } from '@/types/workspace'
+import { trackButtonClick } from '@/utils/analytics'
 import { downloadFileFromBlob } from '@/utils/download'
 import {
   isCodeFile,
@@ -212,7 +213,9 @@ onBeforeUnmount(() => {
 
 // Update button styling state separately from the actual view state
 // so the button appearance can change independently while the view finishes rendering.
-const switchCodeView = async (showCodeView: boolean) => {
+const switchCodeView = async (event: Event, showCodeView: boolean) => {
+  const buttonText = (event.currentTarget as HTMLElement)?.textContent?.trim() || ''
+
   isCodeButtonActive.value = showCodeView
 
   // Wait for DOM updates and a short delay for smooth transition.
@@ -220,13 +223,19 @@ const switchCodeView = async (showCodeView: boolean) => {
   await new Promise((resolve) => setTimeout(resolve, 100))
 
   isCodeViewVisible.value = showCodeView
+
+  trackButtonClick({
+    button_name: buttonText,
+    content_section: pageTitle.value,
+    link_category: `/workspaces/${props.alias}/file/${props.commitId}/${props.path}`,
+  })
 }
 </script>
 
 <template>
   <BackButton
     label="Back"
-    content-section="Workspace File Detail"
+    :contentSection="pageTitle"
     :on-click="goBack"
   />
 
@@ -256,7 +265,7 @@ const switchCodeView = async (showCodeView: boolean) => {
             <button
               type="button"
               role="tab"
-              @click="switchCodeView(false)"
+              @click="switchCodeView($event, false)"
               :aria-selected="!isCodeViewVisible"
               :aria-controls="previewPanelId"
               :class="previewButtonClass"
@@ -267,7 +276,7 @@ const switchCodeView = async (showCodeView: boolean) => {
             <button
               type="button"
               role="tab"
-              @click="switchCodeView(true)"
+              @click="switchCodeView($event, true)"
               :aria-selected="isCodeViewVisible"
               :aria-controls="codePanelId"
               :class="codeButtonClass"
@@ -292,7 +301,7 @@ const switchCodeView = async (showCodeView: boolean) => {
             v-if="canShowOpenCORButton"
             variant="icon"
             size="sm"
-            content-section="Workspace File Detail"
+            :contentSection="pageTitle"
             :href="openCORFileURL"
             target="_blank"
             rel="noopener noreferrer"
@@ -305,7 +314,7 @@ const switchCodeView = async (showCodeView: boolean) => {
           <ActionButton
             variant="icon"
             size="sm"
-            content-section="Workspace File Detail"
+            :contentSection="pageTitle"
             @click="downloadFile"
             tooltip="Download"
             aria-label="Download"
@@ -343,7 +352,7 @@ const switchCodeView = async (showCodeView: boolean) => {
           variant="primary"
           size="lg"
           @click="downloadFile"
-          content-section="Workspace File Detail"
+          :contentSection="pageTitle"
         >
           <DownloadIcon class="w-4 h-4" />
           Download
@@ -366,7 +375,7 @@ const switchCodeView = async (showCodeView: boolean) => {
           variant="primary"
           size="lg"
           @click="downloadFile"
-          content-section="Workspace File Detail"
+          :contentSection="pageTitle"
         >
           <DownloadIcon class="w-4 h-4" />
           Download
