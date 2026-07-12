@@ -235,7 +235,7 @@ const switchCodeView = async (event: Event, showCodeView: boolean) => {
 <template>
   <BackButton
     label="Back"
-    content-section="Workspace File Detail"
+    :contentSection="pageTitle"
     :on-click="goBack"
   />
 
@@ -301,7 +301,7 @@ const switchCodeView = async (event: Event, showCodeView: boolean) => {
             v-if="canShowOpenCORButton"
             variant="icon"
             size="sm"
-            content-section="Workspace File Detail"
+            :contentSection="pageTitle"
             :href="openCORFileURL"
             target="_blank"
             rel="noopener noreferrer"
@@ -314,7 +314,7 @@ const switchCodeView = async (event: Event, showCodeView: boolean) => {
           <ActionButton
             variant="icon"
             size="sm"
-            content-section="Workspace File Detail"
+            :contentSection="pageTitle"
             @click="downloadFile"
             tooltip="Download"
             aria-label="Download"
@@ -352,7 +352,7 @@ const switchCodeView = async (event: Event, showCodeView: boolean) => {
           variant="primary"
           size="lg"
           @click="downloadFile"
-          content-section="Workspace File Detail"
+          :contentSection="pageTitle"
         >
           <DownloadIcon class="w-4 h-4" />
           Download
@@ -375,7 +375,7 @@ const switchCodeView = async (event: Event, showCodeView: boolean) => {
           variant="primary"
           size="lg"
           @click="downloadFile"
-          content-section="Workspace File Detail"
+          :contentSection="pageTitle"
         >
           <DownloadIcon class="w-4 h-4" />
           Download
