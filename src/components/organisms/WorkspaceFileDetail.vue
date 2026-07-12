@@ -27,6 +27,7 @@ import {
 } from '@/utils/file'
 import { renderMarkdown } from '@/utils/markdown'
 import { generateWorkspaceTitle } from '@/utils/workspace'
+import { trackButtonClick } from '@/utils/analytics'
 
 // Files with size above this threshold are not rendered in the preview to prevent browser freeze.
 const MAX_PREVIEW_FILE_SIZE_BYTES = 500 * 1024 // ~500 KB
@@ -212,7 +213,9 @@ onBeforeUnmount(() => {
 
 // Update button styling state separately from the actual view state
 // so the button appearance can change independently while the view finishes rendering.
-const switchCodeView = async (showCodeView: boolean) => {
+const switchCodeView = async (event: Event, showCodeView: boolean) => {
+  const buttonText = (event.currentTarget as HTMLElement)?.textContent?.trim() || ''
+
   isCodeButtonActive.value = showCodeView
 
   // Wait for DOM updates and a short delay for smooth transition.
@@ -220,6 +223,12 @@ const switchCodeView = async (showCodeView: boolean) => {
   await new Promise((resolve) => setTimeout(resolve, 100))
 
   isCodeViewVisible.value = showCodeView
+
+  trackButtonClick({
+    button_name: buttonText,
+    content_section: pageTitle.value,
+    link_category: `/workspaces/${props.alias}/file/${props.commitId}/${props.path}`,
+  })
 }
 </script>
 
@@ -256,7 +265,7 @@ const switchCodeView = async (showCodeView: boolean) => {
             <button
               type="button"
               role="tab"
-              @click="switchCodeView(false)"
+              @click="switchCodeView($event, false)"
               :aria-selected="!isCodeViewVisible"
               :aria-controls="previewPanelId"
               :class="previewButtonClass"
@@ -267,7 +276,7 @@ const switchCodeView = async (showCodeView: boolean) => {
             <button
               type="button"
               role="tab"
-              @click="switchCodeView(true)"
+              @click="switchCodeView($event, true)"
               :aria-selected="isCodeViewVisible"
               :aria-controls="codePanelId"
               :class="codeButtonClass"
