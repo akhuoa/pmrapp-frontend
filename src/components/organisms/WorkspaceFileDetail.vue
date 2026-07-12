@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
@@ -45,6 +45,7 @@ const workspaceInfo = ref<WorkspaceInfo | null>(null)
 const workspaceInfoLoading = ref(true)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
+const showCodeActive = ref(false)
 const showCode = ref(false)
 const codeBlockRef = ref<InstanceType<typeof CodeBlock> | null>(null)
 
@@ -79,7 +80,7 @@ const tabButtonClasses = {
 const previewButtonClass = computed(() => {
   const classes = [tabButtonClasses.base]
 
-  if (showCode.value) {
+  if (showCodeActive.value) {
     classes.push(tabButtonClasses.inactive)
     classes.push(tabButtonClasses.hover)
     classes.push(tabButtonClasses.shadow)
@@ -92,7 +93,7 @@ const previewButtonClass = computed(() => {
 const codeButtonClass = computed(() => {
   const classes = [tabButtonClasses.base]
 
-  if (showCode.value) {
+  if (showCodeActive.value) {
     classes.push(tabButtonClasses.active)
   } else {
     classes.push(tabButtonClasses.inactive)
@@ -206,6 +207,16 @@ onBeforeUnmount(() => {
     URL.revokeObjectURL(fileBlobUrl.value)
   }
 })
+
+const switchCodeView = async (showCodeView: boolean) => {
+  showCodeActive.value = showCodeView
+
+  // Wait for DOM updates and a short delay for smooth transition.
+  await nextTick();
+  await new Promise(resolve => setTimeout(resolve, 100));
+
+  showCode.value = showCodeView
+}
 </script>
 
 <template>
@@ -238,7 +249,7 @@ onBeforeUnmount(() => {
           >
             <button
               type="button"
-              @click="showCode = false"
+              @click="switchCodeView(false)"
               :aria-pressed="!showCode"
               :class="previewButtonClass"
             >
@@ -247,7 +258,7 @@ onBeforeUnmount(() => {
             </button>
             <button
               type="button"
-              @click="showCode = true"
+              @click="switchCodeView(true)"
               :aria-pressed="showCode"
               :class="codeButtonClass"
             >
