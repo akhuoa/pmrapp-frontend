@@ -216,8 +216,8 @@ const switchCodeView = async (showCodeView: boolean) => {
   isCodeButtonActive.value = showCodeView
 
   // Wait for DOM updates and a short delay for smooth transition.
-  await nextTick();
-  await new Promise(resolve => setTimeout(resolve, 100));
+  await nextTick()
+  await new Promise((resolve) => setTimeout(resolve, 100))
 
   isCodeViewVisible.value = showCodeView
 }

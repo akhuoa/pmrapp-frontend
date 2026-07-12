@@ -19,7 +19,7 @@ const buttonClasses = [
   'relative p-2 rounded transition-colors',
   'text-gray-700 dark:text-gray-300 ',
   'hover:enabled:bg-gray-100 dark:hover:enabled:bg-gray-700',
-  'cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
+  'cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
 ]
 
 const handleCopy = async () => {
