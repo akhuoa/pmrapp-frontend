@@ -30,14 +30,6 @@ vi.mock('prismjs/plugins/line-numbers/prism-line-numbers', () => ({}))
 vi.mock('prismjs/themes/prism-okaidia.css?url', () => ({ default: '' }))
 vi.mock('prismjs/themes/prism.css?url', () => ({ default: '' }))
 
-// Mock LoadingSkeleton to avoid importing its dependencies.
-vi.mock('@/components/atoms/LoadingSkeleton.vue', () => ({
-  default: {
-    name: 'LoadingSkeleton',
-    template: '<div class="mock-loading-skeleton" />',
-  },
-}))
-
 beforeEach(() => {
   // ResizeObserver must be a proper constructor for the component's typeof check.
   class MockResizeObserver {
@@ -56,17 +48,6 @@ beforeEach(() => {
       removeEventListener: vi.fn(),
     })),
   )
-
-  // jsdom does not implement requestIdleCallback/cancelIdleCallback; provide stubs.
-  vi.stubGlobal(
-    'requestIdleCallback',
-    vi.fn((cb) => {
-      // Execute the callback synchronously so highlighting runs during tests.
-      cb({ didTimeout: false, timeRemaining: () => 50 })
-      return 1
-    }),
-  )
-  vi.stubGlobal('cancelIdleCallback', vi.fn())
 })
 
 const smallCode = 'const x = 1'
