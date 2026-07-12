@@ -45,8 +45,8 @@ const workspaceInfo = ref<WorkspaceInfo | null>(null)
 const workspaceInfoLoading = ref(true)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
-const showCodeActive = ref(false)
-const showCode = ref(false)
+const isCodeButtonActive = ref(false)
+const isCodeViewVisible = ref(false)
 const codeBlockRef = ref<InstanceType<typeof CodeBlock> | null>(null)
 
 // Extract filename from full path for download purposes.
@@ -80,7 +80,7 @@ const tabButtonClasses = {
 const previewButtonClass = computed(() => {
   const classes = [tabButtonClasses.base]
 
-  if (showCodeActive.value) {
+  if (isCodeButtonActive.value) {
     classes.push(tabButtonClasses.inactive)
     classes.push(tabButtonClasses.hover)
     classes.push(tabButtonClasses.shadow)
@@ -93,7 +93,7 @@ const previewButtonClass = computed(() => {
 const codeButtonClass = computed(() => {
   const classes = [tabButtonClasses.base]
 
-  if (showCodeActive.value) {
+  if (isCodeButtonActive.value) {
     classes.push(tabButtonClasses.active)
   } else {
     classes.push(tabButtonClasses.inactive)
@@ -125,7 +125,7 @@ const shouldShowAsText = computed(() => {
 })
 
 const shouldShowPreview = computed(() => {
-  return (isSvg.value || isMarkdown.value) && !showCode.value
+  return (isSvg.value || isMarkdown.value) && !isCodeViewVisible.value
 })
 
 const renderedMarkdown = computed(() => {
@@ -208,14 +208,16 @@ onBeforeUnmount(() => {
   }
 })
 
+// Update button styling state separately from the actual view state
+// so the button appearance can change independently while the view finishes rendering.
 const switchCodeView = async (showCodeView: boolean) => {
-  showCodeActive.value = showCodeView
+  isCodeButtonActive.value = showCodeView
 
   // Wait for DOM updates and a short delay for smooth transition.
   await nextTick();
   await new Promise(resolve => setTimeout(resolve, 100));
 
-  showCode.value = showCodeView
+  isCodeViewVisible.value = showCodeView
 }
 </script>
 
@@ -250,7 +252,7 @@ const switchCodeView = async (showCodeView: boolean) => {
             <button
               type="button"
               @click="switchCodeView(false)"
-              :aria-pressed="!showCode"
+              :aria-pressed="!isCodeViewVisible"
               :class="previewButtonClass"
             >
               <PreviewIcon class="w-4 h-4" />
@@ -259,7 +261,7 @@ const switchCodeView = async (showCodeView: boolean) => {
             <button
               type="button"
               @click="switchCodeView(true)"
-              :aria-pressed="showCode"
+              :aria-pressed="isCodeViewVisible"
               :class="codeButtonClass"
             >
               <CodeIcon class="w-4 h-4" />
@@ -268,13 +270,13 @@ const switchCodeView = async (showCodeView: boolean) => {
           </div>
           <WrapButton
             v-if="shouldShowAsText && !isTooLargeForPreview"
-            :disabled="!shouldShowAsText || isTooLargeForPreview || ((isSvg || isMarkdown) ? !showCode : false)"
+            :disabled="!shouldShowAsText || isTooLargeForPreview || ((isSvg || isMarkdown) ? !isCodeViewVisible : false)"
             :active="codeBlockRef?.isWrapped"
             @click="toggleCodeWrap"
           />
           <CopyButton
             v-if="shouldShowAsText && !isTooLargeForPreview"
-            :disabled="!shouldShowAsText || isTooLargeForPreview || (isSvg ? !showCode : false)"
+            :disabled="!shouldShowAsText || isTooLargeForPreview || (isSvg ? !isCodeViewVisible : false)"
             :text="fileContent"
             title="Copy code"
           />
