@@ -6,11 +6,6 @@ type NormalisedMathFormatOptions = Required<MathMLFormatOptions>
 
 const normaliseOptionFlag = (value: unknown): boolean => value === true
 
-export type SavedMathFormatState = {
-  transformMaths: boolean
-  options: NormalisedMathFormatOptions
-}
-
 const normaliseMathFormatOptions = (
   options: Partial<MathMLFormatOptions> | null | undefined,
 ): NormalisedMathFormatOptions => ({
@@ -20,34 +15,24 @@ const normaliseMathFormatOptions = (
 })
 
 export const mathFormatOptionsStorageService = {
-  load(): SavedMathFormatState | null {
+  load(): NormalisedMathFormatOptions | null {
     if (typeof window === 'undefined') return null
 
     try {
       const raw = localStorage.getItem(MATH_FORMAT_OPTIONS_STORAGE_KEY)
       if (!raw) return null
 
-      const parsed = JSON.parse(raw) as Partial<SavedMathFormatState>
-      const options = normaliseMathFormatOptions(parsed.options)
-      const hasEnabledOption = Object.values(options).some(Boolean)
-
-      return {
-        transformMaths:
-          typeof parsed.transformMaths === 'boolean' ? parsed.transformMaths : hasEnabledOption,
-        options,
-      }
+      const parsed = JSON.parse(raw) as { options?: Partial<MathMLFormatOptions> }
+      return normaliseMathFormatOptions(parsed.options)
     } catch {
       return null
     }
   },
 
-  save(transformMathsEnabled: boolean, options: MathMLFormatOptions) {
+  save(options: MathMLFormatOptions) {
     if (typeof window === 'undefined') return
 
-    const payload: SavedMathFormatState = {
-      transformMaths: transformMathsEnabled,
-      options: normaliseMathFormatOptions(options),
-    }
+    const payload = { options: normaliseMathFormatOptions(options) }
 
     try {
       localStorage.setItem(MATH_FORMAT_OPTIONS_STORAGE_KEY, JSON.stringify(payload))
