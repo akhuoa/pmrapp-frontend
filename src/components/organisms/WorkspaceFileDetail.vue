@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId } from 'vue'
 import ActionButton from '@/components/atoms/ActionButton.vue'
 import BackButton from '@/components/atoms/BackButton.vue'
 import CodeBlock from '@/components/atoms/CodeBlock.vue'
@@ -16,6 +16,7 @@ import { useBackNavigation } from '@/composables/useBackNavigation'
 import { getWorkspaceService } from '@/services'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { WorkspaceInfo } from '@/types/workspace'
+import { trackButtonClick } from '@/utils/analytics'
 import { downloadFileFromBlob } from '@/utils/download'
 import {
   isCodeFile,
@@ -45,8 +46,11 @@ const workspaceInfo = ref<WorkspaceInfo | null>(null)
 const workspaceInfoLoading = ref(true)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
-const showCode = ref(false)
-const codeBlockRef = ref<InstanceType<typeof CodeBlock> | null>(null)
+const isCodeButtonActive = ref(false)
+const isCodeViewVisible = ref(false)
+const previewPanelId = useId()
+const codePanelId = useId()
+const codeWrapActive = ref(false)
 
 // Extract filename from full path for download purposes.
 const filename = computed(() => {
@@ -68,6 +72,40 @@ const backPath = computed(() => {
 const { goBack } = useBackNavigation(backPath.value)
 const workspaceStore = useWorkspaceStore()
 
+const tabButtonClasses = {
+  base: 'flex items-center gap-1.5 px-3 py-1.5 transition-colors',
+  active: 'text-gray-900 dark:text-gray-100 bg-gray-200 dark:bg-gray-700 z-0',
+  inactive: 'text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-900 cursor-pointer z-1',
+  hover: 'hover:text-gray-700 dark:hover:text-gray-200',
+  shadow: 'shadow-[0_0_12px_6px_rgba(0,0,0,0.15)] dark:shadow-none',
+}
+
+const previewButtonClass = computed(() => {
+  const classes = [tabButtonClasses.base]
+
+  if (isCodeButtonActive.value) {
+    classes.push(tabButtonClasses.inactive)
+    classes.push(tabButtonClasses.hover)
+    classes.push(tabButtonClasses.shadow)
+  } else {
+    classes.push(tabButtonClasses.active)
+  }
+  return classes
+})
+
+const codeButtonClass = computed(() => {
+  const classes = [tabButtonClasses.base]
+
+  if (isCodeButtonActive.value) {
+    classes.push(tabButtonClasses.active)
+  } else {
+    classes.push(tabButtonClasses.inactive)
+    classes.push(tabButtonClasses.hover)
+    classes.push(tabButtonClasses.shadow)
+  }
+  return classes
+})
+
 const isImage = computed(() => isImageFile(props.path))
 const isPDF = computed(() => isPdfFile(props.path))
 const isSvg = computed(() => isSvgFile(props.path))
@@ -86,11 +124,11 @@ const openCORFileURL = computed(() => {
 })
 
 const shouldShowAsText = computed(() => {
-  return isCode.value || (isSvg.value && showCode.value) || (isMarkdown.value && showCode.value)
+  return isCode.value || isSvg.value || isMarkdown.value
 })
 
 const shouldShowPreview = computed(() => {
-  return (isSvg.value || isMarkdown.value) && !showCode.value
+  return (isSvg.value || isMarkdown.value) && !isCodeViewVisible.value
 })
 
 const renderedMarkdown = computed(() => {
@@ -110,12 +148,8 @@ const downloadFile = () => {
   downloadFileFromBlob(fileBlob.value, filename.value)
 }
 
-const toggleCodeView = () => {
-  showCode.value = !showCode.value
-}
-
 const toggleCodeWrap = () => {
-  codeBlockRef.value?.toggleWrap()
+  codeWrapActive.value = !codeWrapActive.value
 }
 
 const loadWorkspaceInfo = async () => {
@@ -176,12 +210,32 @@ onBeforeUnmount(() => {
     URL.revokeObjectURL(fileBlobUrl.value)
   }
 })
+
+// Update button styling state separately from the actual view state
+// so the button appearance can change independently while the view finishes rendering.
+const switchCodeView = async (event: Event, showCodeView: boolean) => {
+  const buttonText = (event.currentTarget as HTMLElement)?.textContent?.trim() || ''
+
+  isCodeButtonActive.value = showCodeView
+
+  // Wait for DOM updates and a short delay for smooth transition.
+  await nextTick()
+  await new Promise((resolve) => setTimeout(resolve, 100))
+
+  isCodeViewVisible.value = showCodeView
+
+  trackButtonClick({
+    button_name: buttonText,
+    content_section: pageTitle.value,
+    link_category: `/workspaces/${props.alias}/file/${props.commitId}/${props.path}`,
+  })
+}
 </script>
 
 <template>
   <BackButton
     label="Back"
-    content-section="Workspace File Detail"
+    :contentSection="pageTitle"
     :on-click="goBack"
   />
 
@@ -202,23 +256,44 @@ onBeforeUnmount(() => {
           {{ filename }}
         </div>
         <div class="flex items-center gap-2">
-          <button
+          <div
             v-if="isSvg || isMarkdown"
-            @click="toggleCodeView"
-            class="flex items-center cursor-pointer gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+            class="flex items-center border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden text-sm"
+            role="tablist"
+            aria-label="File view tabs"
           >
-            <PreviewIcon class="w-4 h-4" v-if="showCode" />
-            <CodeIcon class="w-4 h-4" v-else />
-            {{ showCode ? 'Preview' : 'Code' }}
-          </button>
+            <button
+              type="button"
+              role="tab"
+              @click="switchCodeView($event, false)"
+              :aria-selected="!isCodeViewVisible"
+              :aria-controls="previewPanelId"
+              :class="previewButtonClass"
+            >
+              <PreviewIcon class="w-4 h-4" />
+              Preview
+            </button>
+            <button
+              type="button"
+              role="tab"
+              @click="switchCodeView($event, true)"
+              :aria-selected="isCodeViewVisible"
+              :aria-controls="codePanelId"
+              :class="codeButtonClass"
+            >
+              <CodeIcon class="w-4 h-4" />
+              Code
+            </button>
+          </div>
           <WrapButton
             v-if="shouldShowAsText && !isTooLargeForPreview"
-            :disabled="(isSvg || isMarkdown) ? !showCode : false"
-            :active="codeBlockRef?.isWrapped"
+            :disabled="!shouldShowAsText || isTooLargeForPreview || ((isSvg || isMarkdown) ? !isCodeViewVisible : false)"
+            :active="codeWrapActive"
             @click="toggleCodeWrap"
           />
           <CopyButton
             v-if="shouldShowAsText && !isTooLargeForPreview"
+            :disabled="!shouldShowAsText || isTooLargeForPreview || (isSvg ? !isCodeViewVisible : false)"
             :text="fileContent"
             title="Copy code"
           />
@@ -226,7 +301,7 @@ onBeforeUnmount(() => {
             v-if="canShowOpenCORButton"
             variant="icon"
             size="sm"
-            content-section="Workspace File Detail"
+            :contentSection="pageTitle"
             :href="openCORFileURL"
             target="_blank"
             rel="noopener noreferrer"
@@ -239,7 +314,7 @@ onBeforeUnmount(() => {
           <ActionButton
             variant="icon"
             size="sm"
-            content-section="Workspace File Detail"
+            :contentSection="pageTitle"
             @click="downloadFile"
             tooltip="Download"
             aria-label="Download"
@@ -251,12 +326,12 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- SVG Rendered View -->
-      <div v-if="isSvg && shouldShowPreview" class="flex justify-center p-4 bg-gray-50 dark:bg-gray-900 rounded">
+      <div :id="previewPanelId" role="tabpanel" v-if="isSvg && shouldShowPreview" class="flex justify-center p-4 bg-gray-50 dark:bg-gray-900 rounded">
         <img :src="fileBlobUrl" :alt="path" class="max-w-full h-auto" />
       </div>
 
       <!-- Markdown Preview -->
-      <div v-else-if="isMarkdown && shouldShowPreview" class="p-4">
+      <div :id="previewPanelId" role="tabpanel" v-else-if="isMarkdown && shouldShowPreview" class="p-4">
         <div class="max-w-none" v-html="renderedMarkdown"></div>
       </div>
 
@@ -277,7 +352,7 @@ onBeforeUnmount(() => {
           variant="primary"
           size="lg"
           @click="downloadFile"
-          content-section="Workspace File Detail"
+          :contentSection="pageTitle"
         >
           <DownloadIcon class="w-4 h-4" />
           Download
@@ -285,11 +360,11 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- Code/Text View -->
-      <div v-else-if="shouldShowAsText" class="relative">
+      <div :id="codePanelId" role="tabpanel" v-else-if="shouldShowAsText" class="relative">
         <CodeBlock
-          ref="codeBlockRef"
           :code="fileContent"
           :filename="filename"
+          :startWrapped="codeWrapActive"
         />
       </div>
 
@@ -300,7 +375,7 @@ onBeforeUnmount(() => {
           variant="primary"
           size="lg"
           @click="downloadFile"
-          content-section="Workspace File Detail"
+          :contentSection="pageTitle"
         >
           <DownloadIcon class="w-4 h-4" />
           Download
