@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { MathMLFormatOptions } from '@/types/mathml'
 import Popover from '@/components/atoms/Popover.vue'
+import Checkbox from '@/components/atoms/Checkbox.vue'
 
 interface Props {
   hasMathsData: boolean
@@ -69,35 +70,34 @@ const toggleOption = (key: keyof MathMLFormatOptions) => {
   >
     <div :class="stickyContainerInner">
       <span class="hidden md:inline text-sm font-semibold text-gray-500 dark:text-gray-400">Formatting:</span>
-      <label
+      <div
         v-for="option in optionItems"
         :key="option.key"
         class="flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 select-none"
       >
         <Popover>
           <template #trigger>
-            <span class="flex items-center gap-1.5 text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
-              <input
-                type="checkbox"
-                class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                :checked="options[option.key]"
-                @change="toggleOption(option.key)"
-              />
-              <span class="hidden sm:inline">{{ option.label }}</span>
-              <span
-                class="inline-flex shrink-0 items-center rounded-full border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-medium tracking-wide text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
-                aria-hidden="true"
-              >
-                <span v-html="option.preview"></span>
+            <Checkbox
+              :model-value="!!options[option.key]"
+              @update:model-value="toggleOption(option.key)"
+            >
+              <span class="flex items-center gap-1.5 text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
+                <span class="hidden sm:inline">{{ option.label }}</span>
+                <span
+                  class="inline-flex shrink-0 items-center rounded-full border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-medium tracking-wide text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
+                  aria-hidden="true"
+                >
+                  <span v-html="option.preview"></span>
+                </span>
               </span>
-            </span>
+            </Checkbox>
           </template>
           <template #content>
             <p class="mb-3 text-gray-500">{{ option.description }}</p>
             <code class="block font-mono text-xs text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-900 p-2 rounded" v-html="option.example"></code>
           </template>
         </Popover>
-      </label>
+      </div>
     </div>
   </div>
 </template>
