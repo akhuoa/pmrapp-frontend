@@ -16,14 +16,17 @@ const optionItems = [
   {
     key: 'digitGrouping',
     label: 'Digit Grouping',
+    preview: '#,###',
   },
   {
     key: 'greekSymbols',
     label: 'Greek Symbols',
+    preview: 'α β',
   },
   {
     key: 'subscripts',
     label: 'Subscripts',
+    preview: 'x<sub class="text-[0.7em] leading-none">n</sub>',
   },
 ] as const
 
@@ -67,9 +70,7 @@ const toggleOption = (key: keyof MathMLFormatOptions) => {
         class="inline-flex shrink-0 items-center rounded-full border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-medium tracking-wide text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
         aria-hidden="true"
       >
-        <span v-if="option.key === 'digitGrouping'">#,###</span>
-        <span v-else-if="option.key === 'greekSymbols'">α β</span>
-        <span v-else-if="option.key === 'subscripts'">x<sub class="text-[0.7em] leading-none">n</sub></span>
+        <span v-html="option.preview"></span>
       </span>
     </label>
   </div>
