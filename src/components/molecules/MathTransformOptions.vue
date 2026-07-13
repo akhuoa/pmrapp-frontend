@@ -88,10 +88,8 @@ const toggleOption = (key: keyof MathMLFormatOptions) => {
           </span>
         </template>
         <template #content>
-          <div class="max-w-[260px] rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs leading-relaxed text-gray-700 shadow-lg dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300">
-            <p class="mb-3">{{ option.description }}</p>
-            <code class="block font-mono text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-900 p-2 rounded" v-html="option.example"></code>
-          </div>
+          <p class="mb-3">{{ option.description }}</p>
+          <code class="block font-mono text-xs text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-900 p-2 rounded" v-html="option.example"></code>
         </template>
       </Popover>
     </label>

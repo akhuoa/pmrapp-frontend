@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const props = withDefaults(defineProps<{
   disabled?: boolean
   offset?: number
+  maxWidth?: string
 }>(), {
   disabled: false,
   offset: 6,
+  maxWidth: '260px',
 })
 
 const active = ref(false)
@@ -87,6 +89,15 @@ const hide = () => {
   }, 100)
 }
 
+const popupContainerClasses = computed(() => [
+  'fixed z-[9999] p-3',
+  'leading-relaxed text-sm text-gray-700 dark:text-gray-300',
+  'bg-white dark:bg-gray-800',
+  'rounded-lg border border-gray-200 dark:border-gray-600',
+  'opacity-0 shadow-lg transition-opacity duration-100',
+  { 'opacity-100': positioned.value },
+])
+
 const handleViewportChange = () => {
   if (active.value) updatePosition()
 }
@@ -116,9 +127,8 @@ onBeforeUnmount(() => {
       <div
         v-if="active"
         ref="popoverEl"
-        class="fixed z-[9999] opacity-0 transition-opacity duration-100"
-        :class="{ 'opacity-100': positioned }"
-        :style="{ top: `${top}px`, left: `${left}px` }"
+        :class="popupContainerClasses"
+        :style="{ top: `${top}px`, left: `${left}px`, maxWidth: props.maxWidth }"
         @mouseenter="show"
         @mouseleave="hide"
       >
