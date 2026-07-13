@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { MathMLFormatOptions } from '@/types/mathml'
+import Popover from '@/components/atoms/Popover.vue'
 
 interface Props {
   hasMathsData: boolean
@@ -17,16 +18,25 @@ const optionItems = [
     key: 'digitGrouping',
     label: 'Digit Grouping',
     preview: '#,###',
+    description:
+      'Inserts commas between every three digits, making large numbers easier to read and compare.',
+    example: '1234567.89 → 1,234,567.89',
   },
   {
     key: 'greekSymbols',
     label: 'Greek Symbols',
     preview: 'α β',
+    description:
+      'Converts spelled-out Greek letter names (alpha, beta, gamma, etc.) into proper Greek symbols.',
+    example: 'alpha + beta → α + β',
   },
   {
     key: 'subscripts',
     label: 'Subscripts',
     preview: 'x<sub class="text-[0.7em] leading-none">n</sub>',
+    description:
+      'Splits underscore-delimited identifiers into nested subscripts for clearer mathematical notation.',
+    example: 'q_Ca_o → <math><msub><msub><mi>q</mi><mi>Ca</mi></msub><mi>o</mi></msub></math>',
   },
 ] as const
 
@@ -65,13 +75,23 @@ const toggleOption = (key: keyof MathMLFormatOptions) => {
         :checked="options[option.key]"
         @change="toggleOption(option.key)"
       />
-      <span>{{ option.label }}</span>
-      <span
-        class="inline-flex shrink-0 items-center rounded-full border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-medium tracking-wide text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
-        aria-hidden="true"
-      >
-        <span v-html="option.preview"></span>
-      </span>
+      <Popover>
+        <template #trigger>
+          <span class="flex items-center gap-1 text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
+            <span>{{ option.label }}</span>
+            <span
+              class="inline-flex shrink-0 items-center rounded-full border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-medium tracking-wide text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
+              aria-hidden="true"
+            >
+              <span v-html="option.preview"></span>
+            </span>
+          </span>
+        </template>
+        <div class="max-w-[260px] rounded-lg bg-gray-800 px-3 py-2 text-xs leading-relaxed text-white shadow-lg dark:bg-gray-700">
+          <p class="mb-1.5">{{ option.description }}</p>
+          <code class="block font-mono text-gray-300" v-html="option.example"></code>
+        </div>
+      </Popover>
     </label>
   </div>
 </template>
