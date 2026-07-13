@@ -34,9 +34,6 @@ const preformatClass = computed(() =>
     'overflow-x-auto',
     'text-sm!',
     'm-0!',
-    'transition-all',
-    'duration-200',
-    'ease-in-out',
   ].join(' '),
 )
 
@@ -220,16 +217,14 @@ watch(
 <style scoped>
 pre {
   margin: 0;
+  padding: 1em;
+  padding-left: 3.8em;
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
   line-height: 1.5;
 }
 
 code {
   font-family: inherit;
-}
-
-:deep(.line-numbers-rows > span) {
-  transition: height 0.2s ease-in-out;
 }
 </style>
 
