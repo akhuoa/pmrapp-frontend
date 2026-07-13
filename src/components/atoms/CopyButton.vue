@@ -7,12 +7,20 @@ const props = defineProps<{
   text: string
   title?: string
   withHTML?: boolean
+  disabled?: boolean
 }>()
 
 const isCopied = ref(false)
 const isHovered = ref(false)
 const buttonRef = ref<HTMLElement | null>(null)
 let copiedTimer: ReturnType<typeof setTimeout> | null = null
+
+const buttonClasses = [
+  'relative p-2 rounded transition-colors',
+  'text-gray-700 dark:text-gray-300 ',
+  'hover:enabled:bg-gray-100 dark:hover:enabled:bg-gray-700',
+  'cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
+]
 
 const handleCopy = async () => {
   if (props.withHTML) {
@@ -81,8 +89,9 @@ onBeforeUnmount(() => {
 <template>
   <button
     ref="buttonRef"
+    :disabled="props.disabled"
     @click="handleCopy"
-    class="relative p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
+    :class="buttonClasses"
     :aria-label="isCopied ? 'Copied!' : (title || 'Copy')"
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
@@ -91,7 +100,7 @@ onBeforeUnmount(() => {
   >
     <CopyIcon class="w-4 h-4" />
     <Tooltip
-      :visible="isHovered || isCopied"
+      :visible="(isHovered || isCopied) && !props.disabled"
       :anchor-el="buttonRef"
     >
       {{ isCopied ? 'Copied!' : (title || 'Copy') }}
