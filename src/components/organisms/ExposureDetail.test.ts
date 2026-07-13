@@ -337,9 +337,7 @@ describe('ExposureDetail', () => {
     expect(srOnlyText.text()).toContain('Download')
   })
 
-  it('calls CodeBlock.toggleWrap when clicking the wrap button in codegen view', async () => {
-    const toggleWrapMock = vi.fn()
-
+  it('toggles wrap active state when clicking the wrap button in codegen view', async () => {
     const wrapper = await mountComponent({
       props: {
         view: 'cellml_codegen',
@@ -348,26 +346,29 @@ describe('ExposureDetail', () => {
       stubs: {
         CodeBlock: {
           name: 'CodeBlock',
-          props: ['code', 'filename'],
-          methods: {
-            toggleWrap: toggleWrapMock,
-          },
+          props: ['code', 'filename', 'startWrapped'],
           template: '<div class="code-block-stub" />',
         },
         WrapButton: {
           name: 'WrapButton',
           props: ['active'],
-          template: '<button class="wrap-button-stub">Wrap</button>',
+          emits: ['click'],
+          template: '<button class="wrap-button-stub" @click="$emit(\'click\')">Wrap</button>',
         },
       },
     })
 
-    const wrapButton = wrapper.find('.wrap-button-stub')
-    expect(wrapButton.exists()).toBe(true)
+    const wrapButtonComponent = wrapper.findComponent({ name: 'WrapButton' })
+    expect(wrapButtonComponent.exists()).toBe(true)
+    expect(wrapButtonComponent.props('active')).toBe(false)
 
-    await wrapButton.trigger('click')
+    // Click to enable wrap.
+    await wrapButtonComponent.trigger('click')
+    expect(wrapButtonComponent.props('active')).toBe(true)
 
-    expect(toggleWrapMock).toHaveBeenCalledTimes(1)
+    // Click to disable wrap.
+    await wrapButtonComponent.trigger('click')
+    expect(wrapButtonComponent.props('active')).toBe(false)
   })
 
   it('renders WorkspaceFileBrowser with the exposure workspace and commit', async () => {

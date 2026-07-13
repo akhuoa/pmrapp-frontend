@@ -12,15 +12,15 @@ const props = defineProps<{
 const buttonRef = ref<HTMLElement | null>(null)
 const isHovered = ref(false)
 
-const buttonClasses = [
+const buttonClasses = computed(() => [
   'relative p-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed rounded transition-all',
   'text-gray-700 dark:text-gray-300 hover:enabled:bg-gray-100 dark:hover:enabled:bg-gray-700',
   { 'bg-gray-100 dark:bg-gray-700': props.active },
-]
+])
 
 const buttonTitle = computed(() => {
   if (props.title) return props.title
-  return props.active ? 'Unwrap lines' : 'Wrap long lines'
+  return props.active ? 'Unwrap words' : 'Wrap words'
 })
 </script>
 
