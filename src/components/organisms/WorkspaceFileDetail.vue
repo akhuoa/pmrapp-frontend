@@ -50,7 +50,6 @@ const isCodeButtonActive = ref(false)
 const isCodeViewVisible = ref(false)
 const previewPanelId = useId()
 const codePanelId = useId()
-const codeBlockRef = ref<InstanceType<typeof CodeBlock> | null>(null)
 const codeWrapActive = ref(false)
 
 // Extract filename from full path for download purposes.
@@ -363,7 +362,6 @@ const switchCodeView = async (event: Event, showCodeView: boolean) => {
       <!-- Code/Text View -->
       <div :id="codePanelId" role="tabpanel" v-else-if="shouldShowAsText" class="relative">
         <CodeBlock
-          ref="codeBlockRef"
           :code="fileContent"
           :filename="filename"
           :startWrapped="codeWrapActive"

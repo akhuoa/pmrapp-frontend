@@ -101,7 +101,6 @@ const exposureFileId = ref<number>(NaN)
 const detailHTML = ref<string>('')
 const generatedCode = ref<string>('')
 const generatedCodeFilename = ref<string>('')
-const codeBlockRef = ref<InstanceType<typeof CodeBlock> | null>(null)
 const codeWrapActive = ref(false)
 const rawMathsData = ref<[string, string[]][]>([])
 const transformMaths = ref(false)
@@ -736,7 +735,6 @@ onMounted(async () => {
             </div>
           </div>
           <CodeBlock
-            ref="codeBlockRef"
             :code="generatedCode"
             :filename="generatedCodeFilename"
             :startWrapped="codeWrapActive"
