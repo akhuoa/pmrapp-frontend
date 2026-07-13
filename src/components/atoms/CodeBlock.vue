@@ -17,6 +17,7 @@ import 'prismjs/plugins/line-numbers/prism-line-numbers'
 const props = defineProps<{
   code: string
   filename: string
+  startWrapped?: boolean
 }>()
 
 const codeBlock = ref<HTMLElement | null>(null)
@@ -122,18 +123,6 @@ const refreshCodeBlock = async () => {
   await syncWrapAndLineNumbers()
 }
 
-const toggleWrap = async () => {
-  if (!preBlock.value || !codeBlock.value) return
-
-  isWrapped.value = !isWrapped.value
-  await syncWrapAndLineNumbers()
-}
-
-defineExpose({
-  toggleWrap,
-  isWrapped,
-})
-
 const loadPrismTheme = async (isDark: boolean) => {
   // Remove existing Prism theme stylesheets.
   const existingThemes = document.querySelectorAll('link[data-prism-theme]')
@@ -163,6 +152,10 @@ const handleThemeChange = (e: MediaQueryListEvent) => {
 }
 
 onMounted(() => {
+  if (props.startWrapped) {
+    isWrapped.value = true
+  }
+
   void refreshCodeBlock()
 
   darkThemeMediaQuery.value = window.matchMedia('(prefers-color-scheme: dark)')
@@ -200,6 +193,18 @@ watch(
   () => props.code,
   () => {
     void refreshCodeBlock()
+  },
+)
+
+watch(
+  () => props.startWrapped,
+  (newVal) => {
+    if (!preBlock.value || !codeBlock.value) return
+
+    if (newVal !== undefined) {
+      isWrapped.value = newVal
+      void syncWrapAndLineNumbers()
+    }
   },
 )
 </script>

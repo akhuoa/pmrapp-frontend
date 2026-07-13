@@ -51,6 +51,7 @@ const isCodeViewVisible = ref(false)
 const previewPanelId = useId()
 const codePanelId = useId()
 const codeBlockRef = ref<InstanceType<typeof CodeBlock> | null>(null)
+const codeWrapActive = ref(false)
 
 // Extract filename from full path for download purposes.
 const filename = computed(() => {
@@ -149,7 +150,7 @@ const downloadFile = () => {
 }
 
 const toggleCodeWrap = () => {
-  codeBlockRef.value?.toggleWrap()
+  codeWrapActive.value = !codeWrapActive.value
 }
 
 const loadWorkspaceInfo = async () => {
@@ -288,7 +289,7 @@ const switchCodeView = async (event: Event, showCodeView: boolean) => {
           <WrapButton
             v-if="shouldShowAsText && !isTooLargeForPreview"
             :disabled="!shouldShowAsText || isTooLargeForPreview || ((isSvg || isMarkdown) ? !isCodeViewVisible : false)"
-            :active="codeBlockRef?.isWrapped"
+            :active="codeWrapActive"
             @click="toggleCodeWrap"
           />
           <CopyButton
@@ -365,6 +366,7 @@ const switchCodeView = async (event: Event, showCodeView: boolean) => {
           ref="codeBlockRef"
           :code="fileContent"
           :filename="filename"
+          :startWrapped="codeWrapActive"
         />
       </div>
 
