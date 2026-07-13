@@ -20,7 +20,7 @@ const buttonClasses = computed(() => [
 
 const buttonTitle = computed(() => {
   if (props.title) return props.title
-  return props.active ? 'Unwrap lines' : 'Wrap long lines'
+  return props.active ? 'Unwrap words' : 'Wrap words'
 })
 </script>
 
