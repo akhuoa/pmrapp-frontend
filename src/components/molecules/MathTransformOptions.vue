@@ -85,8 +85,8 @@ const toggleOption = (key: keyof MathMLFormatOptions) => {
     content: '';
     position: absolute;
     top: 0;
-    left: 0;
-    right: 0;
+    left: -1px;
+    right: -1px;
     bottom: 0;
     background-color: transparent;
     z-index: -1;
@@ -95,7 +95,7 @@ const toggleOption = (key: keyof MathMLFormatOptions) => {
 
 @container scroll-state(stuck: top) {
   .sticky-container::before {
-    @apply bg-gray-50 dark:bg-gray-800 shadow-lg;
+    @apply bg-gray-200 dark:bg-gray-700 shadow-lg;
   }
 }
 </style>
