@@ -101,6 +101,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', handleViewportChange)
   if (hideTimer) clearTimeout(hideTimer)
 })
+
 </script>
 
 <template>
@@ -121,7 +122,7 @@ onBeforeUnmount(() => {
         @mouseenter="show"
         @mouseleave="hide"
       >
-        <slot />
+        <slot name="content" />
       </div>
     </Teleport>
   </span>
