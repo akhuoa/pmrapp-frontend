@@ -34,6 +34,14 @@ const stickyContainerInner = computed(() => [
   collapsed.value ? 'p-1 gap-2' : 'p-3 gap-4',
 ])
 
+const collapseButtonClasses = computed(() => [
+  'shrink-0 flex items-center justify-center w-7 h-7 cursor-pointer',
+  'rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white',
+  'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700',
+  'transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary',
+  'shadow-xs dark:shadow-gray-900',
+])
+
 const collapsedOptions = computed(() => {
   const active = MATHML_FORMAT_OPTIONS.filter((o) => !!props.options[o.key])
   return active.length > 0 ? active : [MATHML_FORMAT_OPTIONS[MATHML_FORMAT_OPTIONS.length - 1]]
@@ -85,13 +93,13 @@ watch(
     <div :class="stickyContainerInner">
       <!-- Collapse/expand toggle button -->
       <button
-        class="shrink-0 flex items-center justify-center w-7 h-7 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-200 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+        :class="collapseButtonClasses"
         :aria-label="mathToolbarLabel"
         :title="mathToolbarLabel"
         @click="toggleCollapsed"
       >
         <ChevronRightIcon
-          class="w-4 h-4 cursor-pointer transition-transform"
+          class="w-4 h-4 transition-transform"
           :class="collapsed ? 'rotate-180' : ''"
         />
         <span class="sr-only">{{ mathToolbarLabel }}</span>
