@@ -40,7 +40,6 @@ const toggleOption = (key: keyof MathMLFormatOptions) => {
     :class="stickyContainer"
   >
     <div :class="stickyContainerInner">
-      <span class="hidden md:inline font-semibold text-gray-500 dark:text-gray-400">Formatting:</span>
       <div
         v-for="option in MATHML_FORMAT_OPTIONS"
         :key="option.key"
