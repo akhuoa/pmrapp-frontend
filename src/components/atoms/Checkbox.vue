@@ -49,7 +49,7 @@ const toggle = () => {
         aria-hidden="true"
       >
         <path
-          d="M2.5 6L5 8.5L9.5 3.5"
+          d="M2 6L5 9L10 3"
           stroke="currentColor"
           stroke-width="2"
           stroke-linecap="round"
