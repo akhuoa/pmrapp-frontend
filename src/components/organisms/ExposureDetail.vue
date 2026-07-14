@@ -19,7 +19,6 @@ import PageHeader from '@/components/molecules/PageHeader.vue'
 import WorkspaceFileBrowser from '@/components/molecules/WorkspaceFileBrowser.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
 import { TITLE } from '@/constants/global'
-import { getMathFormatOptionsStorageService } from '@/services'
 import { downloadCOMBINEArchive, downloadWorkspaceArchive } from '@/services/downloadUrlService'
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
@@ -606,14 +605,6 @@ watch(detailHTML, async () => {
 })
 
 watch(
-  mathFormatOptions,
-  (options) => {
-    getMathFormatOptionsStorageService().save(options)
-  },
-  { deep: true },
-)
-
-watch(
   () => props.file,
   async (newFile, oldFile) => {
     if (newFile === oldFile) return
@@ -644,11 +635,6 @@ watch(
 )
 
 onMounted(async () => {
-  const savedOptions = getMathFormatOptionsStorageService().load()
-  if (savedOptions) {
-    mathFormatOptions.value = { ...savedOptions }
-  }
-
   error.value = null
 
   try {

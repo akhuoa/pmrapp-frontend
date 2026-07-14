@@ -42,6 +42,11 @@ const toggleCollapsed = () => {
 }
 
 onMounted(() => {
+  const savedOptions = getMathFormatOptionsStorageService().load()
+  if (savedOptions) {
+    emit('update:options', { ...savedOptions })
+  }
+
   const savedCollapsed = getMathFormatOptionsStorageService().loadCollapsed()
   if (savedCollapsed !== null) {
     collapsed.value = savedCollapsed
@@ -51,6 +56,14 @@ onMounted(() => {
 watch(collapsed, (value) => {
   getMathFormatOptionsStorageService().saveCollapsed(value)
 })
+
+watch(
+  () => props.options,
+  (options) => {
+    getMathFormatOptionsStorageService().save(options)
+  },
+  { deep: true },
+)
 </script>
 
 <template>
