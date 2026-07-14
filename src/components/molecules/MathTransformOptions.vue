@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import Checkbox from '@/components/atoms/Checkbox.vue'
+import Popover from '@/components/atoms/Popover.vue'
 import type { MathMLFormatOptions } from '@/types/mathml'
 
 interface Props {
@@ -16,22 +18,34 @@ const optionItems = [
   {
     key: 'digitGrouping',
     label: 'Digit Grouping',
+    preview: '#,###',
+    description: 'Formats numeric literals with thousands separators.',
+    example: '<math><mn>1234567.89</mn></math> → <math><mn>1,234,567.89</mn></math>',
   },
   {
     key: 'greekSymbols',
     label: 'Greek Symbols',
+    preview: 'α β',
+    description: 'Converts Greek letter names into Greek symbols.',
+    example:
+      '<math><mi>alpha</mi><mo>+</mo><mi>beta</mi></math> → <math><mi>α</mi><mo>+</mo><mi>β</mi></math>',
   },
   {
     key: 'subscripts',
     label: 'Subscripts',
+    preview: 'x<sub class="text-[0.7em] leading-none">n</sub>',
+    description: 'Splits underscore-delimited identifiers into nested subscripts.',
+    example:
+      '<math><mi>q_Ca_o</mi></math> → <math><msub><msub><mi>q</mi><mi>Ca</mi></msub><mi>o</mi></msub></math>',
   },
 ] as const
 
-const containerClasses = [
-  'sticky-container',
-  'sticky top-20 left-0 right-0 px-4 py-3 z-20',
-  'flex items-center justify-end gap-2',
-  'border-b border-gray-200 dark:border-gray-700 rounded-t-lg',
+const stickyContainer = ['sticky-container', 'sticky top-20 left-0 right-0 px-4 py-3 z-20']
+
+const stickyContainerInner = [
+  'sticky-container-inner',
+  'px-3 py-2 ml-auto w-fit flex items-center justify-end gap-2',
+  'border border-gray-200 dark:border-gray-700 rounded-lg',
   'bg-gray-50 dark:bg-gray-800',
 ]
 
@@ -48,54 +62,64 @@ const toggleOption = (key: keyof MathMLFormatOptions) => {
 <template>
   <div
     v-if="hasMathsData"
-    :class="containerClasses"
+    :class="stickyContainer"
   >
-    <span class="text-sm font-semibold text-gray-500 dark:text-gray-400">Formatting:</span>
-    <label
-      v-for="option in optionItems"
-      :key="option.key"
-      class="flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 select-none"
-    >
-      <input
-        type="checkbox"
-        class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-        :checked="options[option.key]"
-        @change="toggleOption(option.key)"
-      />
-      <span>{{ option.label }}</span>
-      <span
-        class="inline-flex shrink-0 items-center rounded-full border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-medium tracking-wide text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
-        aria-hidden="true"
+    <div :class="stickyContainerInner">
+      <span class="hidden md:inline text-sm font-semibold text-gray-500 dark:text-gray-400">Formatting:</span>
+      <div
+        v-for="option in optionItems"
+        :key="option.key"
+        class="flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 select-none"
       >
-        <span v-if="option.key === 'digitGrouping'">#,###</span>
-        <span v-else-if="option.key === 'greekSymbols'">α β</span>
-        <span v-else-if="option.key === 'subscripts'">x<sub class="text-[0.7em] leading-none">n</sub></span>
-      </span>
-    </label>
+        <Popover>
+          <template #trigger>
+            <Checkbox
+              :model-value="!!options[option.key]"
+              @update:model-value="toggleOption(option.key)"
+            >
+              <span class="flex items-center gap-1.5 text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
+                <span class="hidden sm:inline">{{ option.label }}</span>
+                <span
+                  class="inline-flex shrink-0 items-center rounded-full border bg-white px-1.5 py-0.5 text-[10px] font-medium tracking-wide text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                  :class="!!options[option.key] ? 'border-primary': 'border-gray-200 dark:border-gray-700'"
+                  aria-hidden="true"
+                >
+                  <span v-html="option.preview" :class="!!options[option.key] ? 'text-primary' : ''"></span>
+                </span>
+              </span>
+            </Checkbox>
+          </template>
+          <template #content>
+            <p class="mb-3 text-gray-500 dark:text-gray-400">{{ option.description }}</p>
+            <code
+              class="block text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-900 p-2 text-center rounded"
+              v-html="option.example"
+            ></code>
+          </template>
+        </Popover>
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
 @reference "tailwindcss";
 
+:deep(math mi) {
+  @apply italic;
+}
+
+:deep(math + math) {
+  @apply text-gray-700 dark:text-gray-300;
+}
+
 .sticky-container {
   container-type: scroll-state;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: transparent;
-    z-index: -1;
-  }
 }
 
 @container scroll-state(stuck: top) {
-  .sticky-container::before {
-    @apply bg-gray-50 dark:bg-gray-800 shadow-lg;
+  .sticky-container-inner {
+    @apply shadow-lg dark:shadow-gray-900;
   }
 }
 </style>
