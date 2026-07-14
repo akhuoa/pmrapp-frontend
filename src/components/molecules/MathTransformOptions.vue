@@ -80,7 +80,7 @@ const toggleOption = (key: keyof MathMLFormatOptions) => {
               <span class="flex items-center gap-1.5 text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
                 <span class="text-xs sm:text-sm">{{ option.label }}</span>
                 <span
-                  class="hidden md:inline-flex shrink-0 items-center rounded-full border bg-white px-1.5 py-0.5 text-xs  tracking-wide text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                  class="hidden md:inline-flex shrink-0 items-center rounded-full border bg-white px-1.5 py-0.5 text-xs tracking-wide text-gray-500 dark:bg-gray-800 dark:text-gray-400"
                   :class="!!options[option.key] ? 'border-primary': 'border-gray-200 dark:border-gray-700'"
                   aria-hidden="true"
                 >
