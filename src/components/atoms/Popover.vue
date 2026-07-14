@@ -123,6 +123,8 @@ onBeforeUnmount(() => {
     class="inline-flex"
     @mouseenter="show"
     @mouseleave="hide"
+    @focusin="show"
+    @focusout="hide"
   >
     <slot name="trigger" />
     <Teleport to="body">
