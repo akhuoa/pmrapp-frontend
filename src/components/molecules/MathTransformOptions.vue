@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { MathMLFormatOptions } from '@/types/mathml'
-import Popover from '@/components/atoms/Popover.vue'
 import Checkbox from '@/components/atoms/Checkbox.vue'
+import Popover from '@/components/atoms/Popover.vue'
+import type { MathMLFormatOptions } from '@/types/mathml'
 
 interface Props {
   hasMathsData: boolean
