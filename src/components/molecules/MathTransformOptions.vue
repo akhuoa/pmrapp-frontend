@@ -20,7 +20,7 @@ const optionItems = [
     label: 'Digit Grouping',
     preview: '#,###',
     description:
-      'Inserts commas between every three digits, making large numbers easier to read and compare.',
+      'Formats numeric literals with thousands separators.',
     example: '<math><mn>1234567.89</mn></math> → <math><mn>1,234,567.89</mn></math>',
   },
   {
@@ -28,7 +28,7 @@ const optionItems = [
     label: 'Greek Symbols',
     preview: 'α β',
     description:
-      'Converts spelled-out Greek letter names (alpha, beta, gamma, etc.) into proper Greek symbols.',
+      'Converts Greek letter names into Greek symbols.',
     example: '<math><mi>alpha</mi><mo>+</mo><mi>beta</mi></math> → <math><mi>α</mi><mo>+</mo><mi>β</mi></math>',
   },
   {
@@ -36,7 +36,7 @@ const optionItems = [
     label: 'Subscripts',
     preview: 'x<sub class="text-[0.7em] leading-none">n</sub>',
     description:
-      'Splits underscore-delimited identifiers into nested subscripts for clearer mathematical notation.',
+      'Splits underscore-delimited identifiers into nested subscripts.',
     example: '<math><mi>q_Ca_o</mi></math> → <math><msub><msub><mi>q</mi><mi>Ca</mi></msub><mi>o</mi></msub></math>',
   },
 ] as const
