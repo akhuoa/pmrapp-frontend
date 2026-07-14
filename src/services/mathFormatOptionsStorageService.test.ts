@@ -2,8 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { MATH_FORMAT_OPTIONS_STORAGE_KEY } from '@/constants/mathml'
 import { mathFormatOptionsStorageService } from './mathFormatOptionsStorageService'
 
-const STORAGE_KEY = MATH_FORMAT_OPTIONS_STORAGE_KEY
-
 describe('mathFormatOptionsStorageService', () => {
   beforeEach(() => {
     localStorage.clear()
@@ -17,7 +15,7 @@ describe('mathFormatOptionsStorageService', () => {
 
     it('loads saved options when payload is valid', () => {
       localStorage.setItem(
-        STORAGE_KEY,
+        MATH_FORMAT_OPTIONS_STORAGE_KEY,
         JSON.stringify({
           options: {
             digitGrouping: false,
@@ -36,7 +34,7 @@ describe('mathFormatOptionsStorageService', () => {
 
     it('defaults missing option fields to false', () => {
       localStorage.setItem(
-        STORAGE_KEY,
+        MATH_FORMAT_OPTIONS_STORAGE_KEY,
         JSON.stringify({
           options: {
             subscripts: true,
@@ -53,7 +51,7 @@ describe('mathFormatOptionsStorageService', () => {
 
     it('defaults malformed option values to false', () => {
       localStorage.setItem(
-        STORAGE_KEY,
+        MATH_FORMAT_OPTIONS_STORAGE_KEY,
         JSON.stringify({
           options: {
             digitGrouping: 1,
@@ -73,7 +71,7 @@ describe('mathFormatOptionsStorageService', () => {
     it('handles legacy payload with transformMaths field', () => {
       // Old format that included transformMaths — the service should ignore it and just return options.
       localStorage.setItem(
-        STORAGE_KEY,
+        MATH_FORMAT_OPTIONS_STORAGE_KEY,
         JSON.stringify({
           transformMaths: true,
           options: {
@@ -92,7 +90,7 @@ describe('mathFormatOptionsStorageService', () => {
     })
 
     it('returns null when saved payload is not valid JSON', () => {
-      localStorage.setItem(STORAGE_KEY, '{broken-json')
+      localStorage.setItem(MATH_FORMAT_OPTIONS_STORAGE_KEY, '{broken-json')
 
       expect(mathFormatOptionsStorageService.load()).toBeNull()
     })
@@ -114,7 +112,7 @@ describe('mathFormatOptionsStorageService', () => {
         subscripts: true,
       })
 
-      expect(localStorage.getItem(STORAGE_KEY)).toBe(
+      expect(localStorage.getItem(MATH_FORMAT_OPTIONS_STORAGE_KEY)).toBe(
         JSON.stringify({
           options: {
             digitGrouping: false,
@@ -141,7 +139,7 @@ describe('mathFormatOptionsStorageService', () => {
 
     it('preserves existing collapsed state when saving options', () => {
       localStorage.setItem(
-        STORAGE_KEY,
+        MATH_FORMAT_OPTIONS_STORAGE_KEY,
         JSON.stringify({
           options: { digitGrouping: true, greekSymbols: false, subscripts: false },
           collapsed: true,
@@ -154,7 +152,7 @@ describe('mathFormatOptionsStorageService', () => {
         subscripts: true,
       })
 
-      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
+      const stored = JSON.parse(localStorage.getItem(MATH_FORMAT_OPTIONS_STORAGE_KEY)!)
       expect(stored.collapsed).toBe(true)
       expect(stored.options).toEqual({
         digitGrouping: false,
@@ -171,7 +169,7 @@ describe('mathFormatOptionsStorageService', () => {
 
     it('returns the saved collapsed state', () => {
       localStorage.setItem(
-        STORAGE_KEY,
+        MATH_FORMAT_OPTIONS_STORAGE_KEY,
         JSON.stringify({
           options: { digitGrouping: false, greekSymbols: false, subscripts: false },
           collapsed: true,
@@ -183,7 +181,7 @@ describe('mathFormatOptionsStorageService', () => {
 
     it('returns false when collapsed is saved as false', () => {
       localStorage.setItem(
-        STORAGE_KEY,
+        MATH_FORMAT_OPTIONS_STORAGE_KEY,
         JSON.stringify({
           options: { digitGrouping: false, greekSymbols: false, subscripts: false },
           collapsed: false,
@@ -195,7 +193,7 @@ describe('mathFormatOptionsStorageService', () => {
 
     it('returns null when collapsed field is absent', () => {
       localStorage.setItem(
-        STORAGE_KEY,
+        MATH_FORMAT_OPTIONS_STORAGE_KEY,
         JSON.stringify({
           options: { digitGrouping: false, greekSymbols: false, subscripts: false },
         }),
@@ -217,7 +215,7 @@ describe('mathFormatOptionsStorageService', () => {
     it('writes collapsed state to localStorage', () => {
       mathFormatOptionsStorageService.saveCollapsed(true)
 
-      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
+      const stored = JSON.parse(localStorage.getItem(MATH_FORMAT_OPTIONS_STORAGE_KEY)!)
       expect(stored.collapsed).toBe(true)
       expect(stored.options).toBeUndefined()
     })
@@ -231,7 +229,7 @@ describe('mathFormatOptionsStorageService', () => {
 
       mathFormatOptionsStorageService.saveCollapsed(true)
 
-      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
+      const stored = JSON.parse(localStorage.getItem(MATH_FORMAT_OPTIONS_STORAGE_KEY)!)
       expect(stored.collapsed).toBe(true)
       expect(stored.options).toEqual({
         digitGrouping: true,
