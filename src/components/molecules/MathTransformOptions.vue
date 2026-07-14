@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Checkbox from '@/components/atoms/Checkbox.vue'
 import Popover from '@/components/atoms/Popover.vue'
+import { MATHML_FORMAT_OPTIONS } from '@/constants/mathml'
 import type { MathMLFormatOptions } from '@/types/mathml'
 
 interface Props {
@@ -13,32 +14,6 @@ const emit = defineEmits<{
 }>()
 
 const props = defineProps<Props>()
-
-const optionItems = [
-  {
-    key: 'digitGrouping',
-    label: 'Digit Grouping',
-    preview: '#,###',
-    description: 'Formats numeric literals with thousands separators.',
-    example: '<math><mn>1234567.89</mn></math> → <math><mn>1,234,567.89</mn></math>',
-  },
-  {
-    key: 'greekSymbols',
-    label: 'Greek Symbols',
-    preview: 'α β',
-    description: 'Converts Greek letter names into Greek symbols.',
-    example:
-      '<math><mi>alpha</mi><mo>+</mo><mi>beta</mi></math> → <math><mi>α</mi><mo>+</mo><mi>β</mi></math>',
-  },
-  {
-    key: 'subscripts',
-    label: 'Subscripts',
-    preview: 'x<sub class="text-[0.7em] leading-none">n</sub>',
-    description: 'Splits underscore-delimited identifiers into nested subscripts.',
-    example:
-      '<math><mi>q_Ca_o</mi></math> → <math><msub><msub><mi>q</mi><mi>Ca</mi></msub><mi>o</mi></msub></math>',
-  },
-] as const
 
 const stickyContainer = ['sticky-container', 'sticky top-20 left-0 right-0 p-4 z-20']
 
@@ -67,7 +42,7 @@ const toggleOption = (key: keyof MathMLFormatOptions) => {
     <div :class="stickyContainerInner">
       <span class="hidden md:inline font-semibold text-gray-500 dark:text-gray-400">Formatting:</span>
       <div
-        v-for="option in optionItems"
+        v-for="option in MATHML_FORMAT_OPTIONS"
         :key="option.key"
         class="flex"
       >
