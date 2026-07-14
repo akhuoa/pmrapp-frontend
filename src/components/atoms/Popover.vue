@@ -131,6 +131,7 @@ onBeforeUnmount(() => {
       <div
         v-if="active"
         ref="popoverEl"
+        role="tooltip"
         :class="popupContainerClasses"
         :style="{ top: `${top}px`, left: `${left}px`, maxWidth: props.maxWidth }"
         @mouseenter="show"
