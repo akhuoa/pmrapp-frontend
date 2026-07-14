@@ -142,7 +142,10 @@ describe('mathFormatOptionsStorageService', () => {
     it('preserves existing collapsed state when saving options', () => {
       localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify({ options: { digitGrouping: true, greekSymbols: false, subscripts: false }, collapsed: true }),
+        JSON.stringify({
+          options: { digitGrouping: true, greekSymbols: false, subscripts: false },
+          collapsed: true,
+        }),
       )
 
       mathFormatOptionsStorageService.save({
@@ -169,7 +172,10 @@ describe('mathFormatOptionsStorageService', () => {
     it('returns the saved collapsed state', () => {
       localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify({ options: { digitGrouping: false, greekSymbols: false, subscripts: false }, collapsed: true }),
+        JSON.stringify({
+          options: { digitGrouping: false, greekSymbols: false, subscripts: false },
+          collapsed: true,
+        }),
       )
 
       expect(mathFormatOptionsStorageService.loadCollapsed()).toBe(true)
@@ -178,7 +184,10 @@ describe('mathFormatOptionsStorageService', () => {
     it('returns false when collapsed is saved as false', () => {
       localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify({ options: { digitGrouping: false, greekSymbols: false, subscripts: false }, collapsed: false }),
+        JSON.stringify({
+          options: { digitGrouping: false, greekSymbols: false, subscripts: false },
+          collapsed: false,
+        }),
       )
 
       expect(mathFormatOptionsStorageService.loadCollapsed()).toBe(false)
@@ -187,7 +196,9 @@ describe('mathFormatOptionsStorageService', () => {
     it('returns null when collapsed field is absent', () => {
       localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify({ options: { digitGrouping: false, greekSymbols: false, subscripts: false } }),
+        JSON.stringify({
+          options: { digitGrouping: false, greekSymbols: false, subscripts: false },
+        }),
       )
 
       expect(mathFormatOptionsStorageService.loadCollapsed()).toBeNull()

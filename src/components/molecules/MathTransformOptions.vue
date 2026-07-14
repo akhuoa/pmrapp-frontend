@@ -22,7 +22,7 @@ const collapsed = ref(false)
 
 const expandLabel = 'Expand math toolbar'
 const collapseLabel = 'Collapse math toolbar'
-const mathToolbarLabel = computed(() => collapsed.value ? expandLabel : collapseLabel)
+const mathToolbarLabel = computed(() => (collapsed.value ? expandLabel : collapseLabel))
 
 const stickyContainer = ['sticky-container', 'sticky top-20 left-0 right-0 p-4 z-20']
 
