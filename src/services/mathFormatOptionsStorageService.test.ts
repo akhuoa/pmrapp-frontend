@@ -152,7 +152,7 @@ describe('mathFormatOptionsStorageService', () => {
         subscripts: true,
       })
 
-      const stored = JSON.parse(localStorage.getItem(MATH_FORMAT_OPTIONS_STORAGE_KEY)!)
+      const stored = JSON.parse(localStorage.getItem(MATH_FORMAT_OPTIONS_STORAGE_KEY) as string)
       expect(stored.collapsed).toBe(true)
       expect(stored.options).toEqual({
         digitGrouping: false,
@@ -215,7 +215,7 @@ describe('mathFormatOptionsStorageService', () => {
     it('writes collapsed state to localStorage', () => {
       mathFormatOptionsStorageService.saveCollapsed(true)
 
-      const stored = JSON.parse(localStorage.getItem(MATH_FORMAT_OPTIONS_STORAGE_KEY)!)
+      const stored = JSON.parse(localStorage.getItem(MATH_FORMAT_OPTIONS_STORAGE_KEY) as string)
       expect(stored.collapsed).toBe(true)
       expect(stored.options).toBeUndefined()
     })
@@ -229,7 +229,7 @@ describe('mathFormatOptionsStorageService', () => {
 
       mathFormatOptionsStorageService.saveCollapsed(true)
 
-      const stored = JSON.parse(localStorage.getItem(MATH_FORMAT_OPTIONS_STORAGE_KEY)!)
+      const stored = JSON.parse(localStorage.getItem(MATH_FORMAT_OPTIONS_STORAGE_KEY) as string)
       expect(stored.collapsed).toBe(true)
       expect(stored.options).toEqual({
         digitGrouping: true,
