@@ -44,7 +44,7 @@ const stickyContainer = ['sticky-container', 'sticky top-20 left-0 right-0 px-4 
 
 const stickyContainerInner = [
   'sticky-container-inner',
-  'px-3 py-2 ml-auto w-fit flex items-center justify-end gap-2',
+  'p-3 ml-auto w-fit text-sm flex items-center justify-end gap-4',
   'border border-gray-200 dark:border-gray-700 rounded-lg',
   'bg-gray-50 dark:bg-gray-800',
 ]
@@ -65,11 +65,11 @@ const toggleOption = (key: keyof MathMLFormatOptions) => {
     :class="stickyContainer"
   >
     <div :class="stickyContainerInner">
-      <span class="hidden md:inline text-sm font-semibold text-gray-500 dark:text-gray-400">Formatting:</span>
+      <span class="hidden md:inline font-semibold text-gray-500 dark:text-gray-400">Formatting:</span>
       <div
         v-for="option in optionItems"
         :key="option.key"
-        class="flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 select-none"
+        class="flex"
       >
         <Popover>
           <template #trigger>
@@ -78,9 +78,9 @@ const toggleOption = (key: keyof MathMLFormatOptions) => {
               @update:model-value="toggleOption(option.key)"
             >
               <span class="flex items-center gap-1.5 text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
-                <span class="hidden sm:inline">{{ option.label }}</span>
+                <span class="text-xs sm:text-sm">{{ option.label }}</span>
                 <span
-                  class="inline-flex shrink-0 items-center rounded-full border bg-white px-1.5 py-0.5 text-[10px] font-medium tracking-wide text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                  class="hidden md:inline-flex shrink-0 items-center rounded-full border bg-white px-1.5 py-0.5 text-xs  tracking-wide text-gray-500 dark:bg-gray-800 dark:text-gray-400"
                   :class="!!options[option.key] ? 'border-primary': 'border-gray-200 dark:border-gray-700'"
                   aria-hidden="true"
                 >
