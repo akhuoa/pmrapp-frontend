@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 
-const props = withDefaults(defineProps<{
-  disabled?: boolean
-  offset?: number
-  maxWidth?: string
-}>(), {
-  disabled: false,
-  offset: 6,
-  maxWidth: '260px',
-})
+const props = withDefaults(
+  defineProps<{
+    disabled?: boolean
+    offset?: number
+    maxWidth?: string
+  }>(),
+  {
+    disabled: false,
+    offset: 6,
+    maxWidth: '260px',
+  },
+)
 
 const active = ref(false)
 const positioned = ref(false)
@@ -112,7 +115,6 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', handleViewportChange)
   if (hideTimer) clearTimeout(hideTimer)
 })
-
 </script>
 
 <template>
