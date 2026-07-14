@@ -40,6 +40,16 @@
       }
     },
     {
+      "includes": ["**/*.ts", "**/*.vue"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useVueMultiWordComponentNames": "off"
+          }
+        }
+      }
+    },
+    {
       "assist": {
         "actions": {
           "source": {

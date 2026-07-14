@@ -5,7 +5,7 @@ import {
   formatKindLabel,
   formatNumber,
   formatSearchKey,
-  formatTermKey,
+  formatYear,
 } from './format'
 
 describe('formatNumber', () => {
@@ -21,6 +21,14 @@ describe('formatDate', () => {
     const results = formatDate(1704499200)
 
     expect(results).toBe('6 January 2024')
+  })
+})
+
+describe('formatYear', () => {
+  it('returns formatted year only', () => {
+    const results = formatYear(1704499200)
+
+    expect(results).toBe('2024')
   })
 })
 
@@ -78,16 +86,6 @@ describe('formatSearchKey', () => {
 
     expect(results).toBe(
       '<span class="text-gray-700 dark:text-gray-200 font-semibold">&lt;script&gt;alert(&quot;hello&quot;)&lt;/script&gt;</span>',
-    )
-  })
-})
-
-describe('formatTermKey', () => {
-  it('returns formatted term key for normal string', () => {
-    const results = formatTermKey('Cells')
-
-    expect(results).toBe(
-      '<span class="text-gray-700 dark:text-gray-200 font-semibold">Cells</span>',
     )
   })
 })

@@ -3,6 +3,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import ExposureDetail from '@/components/organisms/ExposureDetail.vue'
+import { TITLE } from '@/constants/global'
 import { mockExposureInfo, mockGeneratedCode, mockMetadata } from '@/mocks/exposureInfo'
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
@@ -15,6 +16,7 @@ vi.mock('vue-router', () => ({
   useRouter: () => ({
     push: vi.fn(),
     back: vi.fn(),
+    resolve: vi.fn(() => ({ href: '/exposures/test-alias' })),
     currentRoute: {
       value: {
         query: {},
@@ -186,7 +188,84 @@ describe('ExposureDetail', () => {
 
     const title = wrapper.find('h1')
     expect(title.exists()).toBe(true)
-    expect(title.text()).toBe(titleText)
+    expect(title.text()).toBe(`${titleText}`)
+  })
+
+  it('shows "Generate code" as page title when codegen view is active', async () => {
+    const wrapper = await mountComponent({
+      props: {
+        view: 'cellml_codegen',
+      },
+      generatedCode: mockGeneratedCode,
+    })
+
+    const title = wrapper.find('h1')
+    expect(title.exists()).toBe(true)
+    expect(title.text()).toBe('Generate code')
+  })
+
+  it('shows "Mathematics" as page title when math view is active', async () => {
+    const wrapper = await mountComponent({
+      props: {
+        view: 'cellml_math',
+      },
+    })
+
+    const title = wrapper.find('h1')
+    expect(title.exists()).toBe(true)
+    expect(title.text()).toBe('Mathematics')
+  })
+
+  it('uses model_title from metadata as the citation title', async () => {
+    const wrapper = await mountComponent()
+
+    const sectionHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'Citation')
+
+    expect(sectionHeading?.exists()).toBe(true)
+
+    const citationSection = sectionHeading?.element.closest('section')
+    expect(citationSection).toBeDefined()
+
+    const citationBlock = citationSection?.querySelector('.group')
+    expect(citationBlock).toBeDefined()
+
+    // citationTitle returns metadataJSON.model_title when metadata is loaded.
+    expect(citationBlock?.textContent).toContain(mockMetadata.model_title)
+  })
+
+  it('uses loaded file title from search results as the page title', async () => {
+    const fileTitle = mockMetadata.model_title
+
+    vi.spyOn(searchStore, 'searchQuery').mockResolvedValue([
+      {
+        resource_path: `/exposure/${mockExposureInfo.exposure.id}/baylor_hollingworth_chandler_2002_a.cellml`,
+        data: {
+          _title: [fileTitle],
+          aliased_uri: [],
+          cellml_keyword: [],
+          commit_authored_ts: [],
+          created_ts: [],
+          description: [],
+          exposure_alias: [],
+          citation_author_family_name: [],
+          citation_id: [],
+          model_author: [],
+        },
+      },
+    ])
+
+    const wrapper = await mountComponent({
+      props: {
+        file: 'baylor_hollingworth_chandler_2002_a.cellml',
+      },
+    })
+
+    const title = wrapper.find('h1')
+    expect(title.exists()).toBe(true)
+    expect(title.text()).toBe(fileTitle)
+    expect(title.text()).toContain('Reaction A')
   })
 
   it('renders html-view with content', async () => {
@@ -258,9 +337,7 @@ describe('ExposureDetail', () => {
     expect(srOnlyText.text()).toContain('Download')
   })
 
-  it('calls CodeBlock.toggleWrap when clicking the wrap button in codegen view', async () => {
-    const toggleWrapMock = vi.fn()
-
+  it('toggles wrap active state when clicking the wrap button in codegen view', async () => {
     const wrapper = await mountComponent({
       props: {
         view: 'cellml_codegen',
@@ -269,26 +346,29 @@ describe('ExposureDetail', () => {
       stubs: {
         CodeBlock: {
           name: 'CodeBlock',
-          props: ['code', 'filename'],
-          methods: {
-            toggleWrap: toggleWrapMock,
-          },
+          props: ['code', 'filename', 'startWrapped'],
           template: '<div class="code-block-stub" />',
         },
         WrapButton: {
           name: 'WrapButton',
           props: ['active'],
-          template: '<button class="wrap-button-stub">Wrap</button>',
+          emits: ['click'],
+          template: '<button class="wrap-button-stub" @click="$emit(\'click\')">Wrap</button>',
         },
       },
     })
 
-    const wrapButton = wrapper.find('.wrap-button-stub')
-    expect(wrapButton.exists()).toBe(true)
+    const wrapButtonComponent = wrapper.findComponent({ name: 'WrapButton' })
+    expect(wrapButtonComponent.exists()).toBe(true)
+    expect(wrapButtonComponent.props('active')).toBe(false)
 
-    await wrapButton.trigger('click')
+    // Click to enable wrap.
+    await wrapButtonComponent.trigger('click')
+    expect(wrapButtonComponent.props('active')).toBe(true)
 
-    expect(toggleWrapMock).toHaveBeenCalledTimes(1)
+    // Click to disable wrap.
+    await wrapButtonComponent.trigger('click')
+    expect(wrapButtonComponent.props('active')).toBe(false)
   })
 
   it('renders WorkspaceFileBrowser with the exposure workspace and commit', async () => {
@@ -342,6 +422,28 @@ describe('ExposureDetail', () => {
     expect(sectionContent).toContain('Catherine Lloyd')
     expect(sectionContent).toContain('Auckland Bioengineering Institute')
     expect(sectionContent).toContain('The University of Auckland')
+  })
+
+  it('renders "Citation" section with model citation content', async () => {
+    const wrapper = await mountComponent()
+
+    const sectionHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'Citation')
+
+    expect(sectionHeading?.exists()).toBe(true)
+    expect(sectionHeading?.text()).toBe('Citation')
+
+    const citationSection = sectionHeading?.element.closest('section')
+    expect(citationSection).toBeDefined()
+
+    const citationBlock = citationSection?.querySelector('.group')
+    expect(citationBlock).toBeDefined()
+    expect(citationBlock?.textContent).toContain('Lloyd, C.')
+    expect(citationBlock?.textContent).toContain(
+      'Comparison of Simulated and Measured Calcium Sparks in Intact Skeletal Muscle Fibers of the Frog (Reaction A)',
+    )
+    expect(citationBlock?.textContent).toContain(TITLE)
   })
 
   it('renders "Keywords" section with correct content', async () => {
@@ -502,25 +604,27 @@ describe('ExposureDetail', () => {
     expect(sectionHeading?.exists()).toBe(true)
     expect(sectionHeading?.text()).toBe('References')
 
-    const citationList = sectionHeading?.element.nextElementSibling
-    const citationItems = citationList?.querySelectorAll('li')
-    expect(citationItems?.length).toBeGreaterThan(0)
-    expect(citationList?.textContent).toContain(
+    const referencesSection = sectionHeading?.element.closest('section')
+    expect(referencesSection).toBeDefined()
+
+    const citationBlock = referencesSection?.querySelector('.group')
+    expect(citationBlock).toBeDefined()
+    expect(citationBlock?.textContent).toContain(
       'Baylor, S. M., Hollingworth, S., & Chandler, W. K. (2002)',
     )
-    expect(citationList?.textContent).toContain(
+    expect(citationBlock?.textContent).toContain(
       'Comparison of Simulated and Measured Calcium Sparks',
     )
-    expect(citationList?.textContent).toContain('in Intact Skeletal Muscle Fibers of the Frog.')
-    expect(citationList?.textContent).toContain('Journal of General Physiology, 120, 349-368.')
+    expect(citationBlock?.textContent).toContain('in Intact Skeletal Muscle Fibers of the Frog.')
+    expect(citationBlock?.textContent).toContain('Journal of General Physiology, 120, 349-368.')
 
-    const citationReferenceLink = citationList?.nextElementSibling
+    const citationReferenceLink = referencesSection?.querySelector('a')
     expect(citationReferenceLink).toBeDefined()
     expect(citationReferenceLink?.textContent).toContain('See other models using this reference')
 
-    const citationDetails = citationReferenceLink?.nextElementSibling
-    expect(citationDetails).toBeDefined()
-    const citationDetailsButton = citationDetails?.querySelector('button')
+    const citationDetailsButton = referencesSection?.querySelector(
+      'button[aria-controls="citation-details"]',
+    )
     expect(citationDetailsButton?.textContent).toBe('Details')
 
     citationDetailsButton?.dispatchEvent(new Event('click'))

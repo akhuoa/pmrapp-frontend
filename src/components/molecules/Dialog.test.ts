@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
-import Dialog from '@/components/atoms/Dialog.vue'
+import Dialog from '@/components/molecules/Dialog.vue'
 
 describe('Dialog', () => {
   it('does not render when show is false', () => {

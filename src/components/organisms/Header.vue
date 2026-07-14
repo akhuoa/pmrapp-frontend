@@ -1,12 +1,11 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import ActionButton from '@/components/atoms/ActionButton.vue'
 import SearchIcon from '@/components/icons/SearchIcon.vue'
 import UserDropdown from '@/components/molecules/UserDropdown.vue'
 import SearchOverlay from '@/components/organisms/SearchOverlay.vue'
 import { useGlobalStateStore } from '@/stores/globalState'
-import ActionButton from '../atoms/ActionButton.vue'
 
 const route = useRoute()
 const isSearchOverlayVisible = ref(false)
@@ -65,8 +64,8 @@ const isActive = (path: string) => computed(() => route.path.startsWith(path))
         </ul>
       </nav>
     </div>
-    <SearchOverlay :show="isSearchOverlayVisible" @close="isSearchOverlayVisible = false" />
   </header>
+  <SearchOverlay :show="isSearchOverlayVisible" @close="isSearchOverlayVisible = false" />
 </template>
 
 <style scoped>
@@ -91,7 +90,6 @@ const isActive = (path: string) => computed(() => route.path.startsWith(path))
 .user-dropdown-divider {
   @apply
     relative
-    w-[5rem]
     text-center
     before:content-['']
     before:absolute
