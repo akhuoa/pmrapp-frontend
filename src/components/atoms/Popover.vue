@@ -123,12 +123,15 @@ onBeforeUnmount(() => {
     class="inline-flex"
     @mouseenter="show"
     @mouseleave="hide"
+    @focusin="show"
+    @focusout="hide"
   >
     <slot name="trigger" />
     <Teleport to="body">
       <div
         v-if="active"
         ref="popoverEl"
+        role="tooltip"
         :class="popupContainerClasses"
         :style="{ top: `${top}px`, left: `${left}px`, maxWidth: props.maxWidth }"
         @mouseenter="show"
