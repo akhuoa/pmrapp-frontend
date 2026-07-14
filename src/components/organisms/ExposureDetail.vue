@@ -101,7 +101,7 @@ const exposureFileId = ref<number>(NaN)
 const detailHTML = ref<string>('')
 const generatedCode = ref<string>('')
 const generatedCodeFilename = ref<string>('')
-const codeBlockRef = ref<InstanceType<typeof CodeBlock> | null>(null)
+const codeWrapActive = ref(false)
 const rawMathsData = ref<[string, string[]][]>([])
 const mathFormatOptions = ref<MathMLFormatOptions>({ ...DEFAULT_MATH_FORMAT_OPTIONS })
 const mathsJSON = computed<[string, string[]][]>(() => {
@@ -352,7 +352,7 @@ const downloadCode = () => {
 }
 
 const toggleCodeWrap = () => {
-  codeBlockRef.value?.toggleWrap()
+  codeWrapActive.value = !codeWrapActive.value
 }
 
 const generateMath = async () => {
@@ -717,7 +717,7 @@ onMounted(async () => {
           <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
             <span>{{ generatedCodeFilename }}</span>
             <div class="flex items-center gap-2">
-              <WrapButton :active="codeBlockRef?.isWrapped" @click="toggleCodeWrap" />
+              <WrapButton :active="codeWrapActive" @click="toggleCodeWrap" />
               <CopyButton :text="generatedCode" title="Copy code" />
               <ActionButton
                 @click="downloadCode"
@@ -733,9 +733,9 @@ onMounted(async () => {
             </div>
           </div>
           <CodeBlock
-            ref="codeBlockRef"
             :code="generatedCode"
             :filename="generatedCodeFilename"
+            :startWrapped="codeWrapActive"
           />
         </div>
       </div>
