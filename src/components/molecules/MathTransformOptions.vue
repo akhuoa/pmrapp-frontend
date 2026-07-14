@@ -40,7 +40,7 @@ const optionItems = [
   },
 ] as const
 
-const stickyContainer = ['sticky-container', 'sticky top-20 left-0 right-0 px-4 py-3 z-20']
+const stickyContainer = ['sticky-container', 'sticky top-20 left-0 right-0 p-4 z-20']
 
 const stickyContainerInner = [
   'sticky-container-inner',
