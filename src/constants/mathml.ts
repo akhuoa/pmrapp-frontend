@@ -1,3 +1,5 @@
+export const MATH_FORMAT_OPTIONS_STORAGE_KEY = 'math_format_options_v1'
+
 export const MATHML_FORMAT_OPTIONS = [
   {
     key: 'digitGrouping',

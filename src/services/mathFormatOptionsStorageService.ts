@@ -1,6 +1,5 @@
+import { MATH_FORMAT_OPTIONS_STORAGE_KEY } from '@/constants/mathml'
 import type { MathMLFormatOptions } from '@/types/mathml'
-
-const MATH_FORMAT_OPTIONS_STORAGE_KEY = 'math_format_options_v1'
 
 type NormalisedMathFormatOptions = Required<MathMLFormatOptions>
 

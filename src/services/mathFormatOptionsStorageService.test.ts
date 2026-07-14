@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { MATH_FORMAT_OPTIONS_STORAGE_KEY } from '@/constants/mathml'
 import { mathFormatOptionsStorageService } from './mathFormatOptionsStorageService'
 
-const STORAGE_KEY = 'math_format_options_v1'
+const STORAGE_KEY = MATH_FORMAT_OPTIONS_STORAGE_KEY
 
 describe('mathFormatOptionsStorageService', () => {
   beforeEach(() => {
