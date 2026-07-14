@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import Checkbox from '@/components/atoms/Checkbox.vue'
 import ChevronRightIcon from '@/components/icons/ChevronRightIcon.vue'
 import Popover from '@/components/atoms/Popover.vue'
@@ -19,6 +19,10 @@ const emit = defineEmits<{
 const props = defineProps<Props>()
 
 const collapsed = ref(false)
+
+const expandLabel = 'Expand math toolbar'
+const collapseLabel = 'Collapse math toolbar'
+const mathToolbarLabel = computed(() => collapsed.value ? expandLabel : collapseLabel)
 
 const stickyContainer = ['sticky-container', 'sticky top-20 left-0 right-0 p-4 z-20']
 
@@ -76,15 +80,15 @@ watch(
       <!-- Collapse/expand toggle button -->
       <button
         class="shrink-0 flex items-center justify-center w-7 h-7 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-200 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
-        :aria-label="collapsed ? 'Expand math toolbar' : 'Collapse math toolbar'"
-        :title="collapsed ? 'Expand math toolbar' : 'Collapse math toolbar'"
+        :aria-label="mathToolbarLabel"
+        :title="mathToolbarLabel"
         @click="toggleCollapsed"
       >
         <ChevronRightIcon
           class="w-4 h-4 cursor-pointer transition-transform"
           :class="collapsed ? 'rotate-180' : ''"
         />
-        <span class="sr-only">{{ collapsed ? 'Expand math toolbar' : 'Collapse math toolbar' }}</span>
+        <span class="sr-only">{{ mathToolbarLabel }}</span>
       </button>
 
       <!-- Collapsed state -->
