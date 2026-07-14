@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import Checkbox from '@/components/atoms/Checkbox.vue'
+import ChevronRightIcon from '@/components/icons/ChevronRightIcon.vue'
 import Popover from '@/components/atoms/Popover.vue'
 import { MATHML_FORMAT_OPTIONS } from '@/constants/mathml'
 import { getMathFormatOptionsStorageService } from '@/services'
@@ -79,16 +80,10 @@ watch(
         :title="collapsed ? 'Expand math toolbar' : 'Collapse math toolbar'"
         @click="toggleCollapsed"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 16 16"
-          fill="currentColor"
-          class="w-4 h-4"
+        <ChevronRightIcon
+          class="w-4 h-4 cursor-pointer transition-transform"
           :class="collapsed ? 'rotate-180' : ''"
-          aria-hidden="true"
-        >
-          <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" clip-rule="evenodd" />
-        </svg>
+        />
         <span class="sr-only">{{ collapsed ? 'Expand math toolbar' : 'Collapse math toolbar' }}</span>
       </button>
 
