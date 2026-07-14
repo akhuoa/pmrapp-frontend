@@ -21,7 +21,7 @@ const toggle = () => {
 
 <template>
   <label
-    class="inline-flex cursor-pointer items-center gap-2 select-none"
+    class="group inline-flex cursor-pointer items-center gap-2 select-none focus:outline-none"
     :class="{ 'opacity-50 cursor-not-allowed': disabled }"
     role="checkbox"
     :aria-checked="modelValue"
@@ -37,7 +37,7 @@ const toggle = () => {
           ? 'bg-primary border-primary'
           : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600',
         !disabled && 'group-hover:border-primary dark:group-hover:border-primary',
-        !disabled && 'focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900',
+        !disabled && 'group-focus-visible:ring-2 group-focus-visible:ring-primary group-focus-visible:ring-offset-2 dark:group-focus-visible:ring-offset-gray-900',
       ]"
     >
       <!-- Checkmark icon -->
@@ -63,6 +63,8 @@ const toggle = () => {
       class="sr-only"
       :checked="modelValue"
       :disabled="disabled"
+      tabindex="-1"
+      aria-hidden="true"
       @change="toggle"
     />
 
