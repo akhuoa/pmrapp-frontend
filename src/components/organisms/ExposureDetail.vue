@@ -28,7 +28,11 @@ import type { ExposureInfo, Metadata, ViewEntry } from '@/types/exposure'
 import type { MathMLFormatOptions } from '@/types/mathml'
 import { formatCitation, formatCitationAuthor, parseFullNameToAuthor } from '@/utils/citation'
 import { downloadFileFromContent } from '@/utils/download'
-import { generateExposureTitle, getExposureIdFromResourcePath } from '@/utils/exposure'
+import {
+  generateExposureTitle,
+  getExposureIdFromResourcePath,
+  resolveExposureFileTitle,
+} from '@/utils/exposure'
 import { getFileExtension, isOpenCORFile } from '@/utils/file'
 import { formatYear } from '@/utils/format'
 import { formatLicenseUrl } from '@/utils/license'
@@ -97,7 +101,7 @@ const exposureFileId = ref<number>(NaN)
 const detailHTML = ref<string>('')
 const generatedCode = ref<string>('')
 const generatedCodeFilename = ref<string>('')
-const codeBlockRef = ref<InstanceType<typeof CodeBlock> | null>(null)
+const codeWrapActive = ref(false)
 const rawMathsData = ref<[string, string[]][]>([])
 const transformMaths = ref(false)
 const mathFormatOptions = ref<MathMLFormatOptions>({ ...DEFAULT_MATH_FORMAT_OPTIONS })
@@ -126,6 +130,7 @@ const hasOtherRelatedModels = ref(false)
 const isDownloadingWorkspaceZip = ref(false)
 const isDownloadingWorkspaceTgz = ref(false)
 const isDownloadingCOMBINE = ref(false)
+const loadedFileTitle = ref('')
 const { goBack } = useBackNavigation('/exposures')
 
 const router = useRouter()
@@ -164,6 +169,35 @@ const handleFileBrowserPathChange = (newPath: string | undefined) => {
 // Note: Keep as "exposure" (singular) to match server file paths, not the router path.
 const routePath = `/exposure/${props.alias}`
 
+const loadTitle = async (file: string) =>
+  resolveExposureFileTitle(props.alias, file, (request) => searchStore.searchQuery(request))
+
+const refreshLoadedFileTitle = async () => {
+  loadedFileTitle.value = ''
+
+  if (!props.file) {
+    return
+  }
+
+  try {
+    loadedFileTitle.value = await loadTitle(props.file)
+  } catch (err) {
+    console.error('Error loading exposure title:', err)
+  }
+}
+
+const exposureTitle = computed(() => {
+  if (loadedFileTitle.value) {
+    return loadedFileTitle.value
+  }
+
+  return generateExposureTitle(
+    exposureInfo.value?.exposure.description,
+    exposureInfo.value?.exposure.id,
+    false,
+  )
+})
+
 const pageTitle = computed(() => {
   if (props.view) {
     const viewEntry = AVAILABLE_VIEWS.find((v) => v.view_key === props.view)
@@ -175,11 +209,7 @@ const pageTitle = computed(() => {
     }
   }
 
-  return generateExposureTitle(
-    exposureInfo.value?.exposure.description,
-    exposureInfo.value?.exposure.id,
-    false,
-  )
+  return exposureTitle.value
 })
 
 const openCORFiles = computed(() => {
@@ -323,7 +353,7 @@ const downloadCode = () => {
 }
 
 const toggleCodeWrap = () => {
-  codeBlockRef.value?.toggleWrap()
+  codeWrapActive.value = !codeWrapActive.value
 }
 
 const generateMath = async () => {
@@ -410,7 +440,7 @@ const isAboutSectionAvailable = computed(() => {
 })
 
 const citationTitle = computed(() => {
-  return metadataJSON.value.model_title || pageTitle.value
+  return metadataJSON.value.model_title || exposureTitle.value
 })
 
 const citationAuthors = computed(() => {
@@ -588,7 +618,16 @@ watch(
   () => props.file,
   async (newFile, oldFile) => {
     if (newFile === oldFile) return
+    void refreshLoadedFileTitle()
     await loadInitialView()
+  },
+)
+
+watch(
+  () => props.alias,
+  async (newAlias, oldAlias) => {
+    if (newAlias === oldAlias) return
+    await refreshLoadedFileTitle()
   },
 )
 
@@ -615,6 +654,7 @@ onMounted(async () => {
   error.value = null
 
   try {
+    void refreshLoadedFileTitle()
     exposureInfo.value = await exposureStore.getExposureInfo(props.alias)
     await loadInitialView()
   } catch (err) {
@@ -679,7 +719,7 @@ onMounted(async () => {
           <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
             <span>{{ generatedCodeFilename }}</span>
             <div class="flex items-center gap-2">
-              <WrapButton :active="codeBlockRef?.isWrapped" @click="toggleCodeWrap" />
+              <WrapButton :active="codeWrapActive" @click="toggleCodeWrap" />
               <CopyButton :text="generatedCode" title="Copy code" />
               <ActionButton
                 @click="downloadCode"
@@ -695,9 +735,9 @@ onMounted(async () => {
             </div>
           </div>
           <CodeBlock
-            ref="codeBlockRef"
             :code="generatedCode"
             :filename="generatedCodeFilename"
+            :startWrapped="codeWrapActive"
           />
         </div>
       </div>

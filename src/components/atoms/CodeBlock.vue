@@ -17,6 +17,7 @@ import 'prismjs/plugins/line-numbers/prism-line-numbers'
 const props = defineProps<{
   code: string
   filename: string
+  startWrapped?: boolean
 }>()
 
 const codeBlock = ref<HTMLElement | null>(null)
@@ -34,9 +35,6 @@ const preformatClass = computed(() =>
     'overflow-x-auto',
     'text-sm!',
     'm-0!',
-    'transition-all',
-    'duration-200',
-    'ease-in-out',
   ].join(' '),
 )
 
@@ -125,18 +123,6 @@ const refreshCodeBlock = async () => {
   await syncWrapAndLineNumbers()
 }
 
-const toggleWrap = async () => {
-  if (!preBlock.value || !codeBlock.value) return
-
-  isWrapped.value = !isWrapped.value
-  await syncWrapAndLineNumbers()
-}
-
-defineExpose({
-  toggleWrap,
-  isWrapped,
-})
-
 const loadPrismTheme = async (isDark: boolean) => {
   // Remove existing Prism theme stylesheets.
   const existingThemes = document.querySelectorAll('link[data-prism-theme]')
@@ -166,6 +152,10 @@ const handleThemeChange = (e: MediaQueryListEvent) => {
 }
 
 onMounted(() => {
+  if (props.startWrapped) {
+    isWrapped.value = true
+  }
+
   void refreshCodeBlock()
 
   darkThemeMediaQuery.value = window.matchMedia('(prefers-color-scheme: dark)')
@@ -205,6 +195,18 @@ watch(
     void refreshCodeBlock()
   },
 )
+
+watch(
+  () => props.startWrapped,
+  (newVal) => {
+    if (!preBlock.value || !codeBlock.value) return
+
+    if (newVal !== undefined) {
+      isWrapped.value = newVal
+      void syncWrapAndLineNumbers()
+    }
+  },
+)
 </script>
 
 <template>
@@ -220,16 +222,14 @@ watch(
 <style scoped>
 pre {
   margin: 0;
+  padding: 1em;
+  padding-left: 3.8em;
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
   line-height: 1.5;
 }
 
 code {
   font-family: inherit;
-}
-
-:deep(.line-numbers-rows > span) {
-  transition: height 0.2s ease-in-out;
 }
 </style>
 

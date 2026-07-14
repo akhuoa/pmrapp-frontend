@@ -191,6 +191,83 @@ describe('ExposureDetail', () => {
     expect(title.text()).toBe(`${titleText}`)
   })
 
+  it('shows "Generate code" as page title when codegen view is active', async () => {
+    const wrapper = await mountComponent({
+      props: {
+        view: 'cellml_codegen',
+      },
+      generatedCode: mockGeneratedCode,
+    })
+
+    const title = wrapper.find('h1')
+    expect(title.exists()).toBe(true)
+    expect(title.text()).toBe('Generate code')
+  })
+
+  it('shows "Mathematics" as page title when math view is active', async () => {
+    const wrapper = await mountComponent({
+      props: {
+        view: 'cellml_math',
+      },
+    })
+
+    const title = wrapper.find('h1')
+    expect(title.exists()).toBe(true)
+    expect(title.text()).toBe('Mathematics')
+  })
+
+  it('uses model_title from metadata as the citation title', async () => {
+    const wrapper = await mountComponent()
+
+    const sectionHeading = wrapper
+      .findAll('h4')
+      .find((heading) => heading.text().trim() === 'Citation')
+
+    expect(sectionHeading?.exists()).toBe(true)
+
+    const citationSection = sectionHeading?.element.closest('section')
+    expect(citationSection).toBeDefined()
+
+    const citationBlock = citationSection?.querySelector('.group')
+    expect(citationBlock).toBeDefined()
+
+    // citationTitle returns metadataJSON.model_title when metadata is loaded.
+    expect(citationBlock?.textContent).toContain(mockMetadata.model_title)
+  })
+
+  it('uses loaded file title from search results as the page title', async () => {
+    const fileTitle = mockMetadata.model_title
+
+    vi.spyOn(searchStore, 'searchQuery').mockResolvedValue([
+      {
+        resource_path: `/exposure/${mockExposureInfo.exposure.id}/baylor_hollingworth_chandler_2002_a.cellml`,
+        data: {
+          _title: [fileTitle],
+          aliased_uri: [],
+          cellml_keyword: [],
+          commit_authored_ts: [],
+          created_ts: [],
+          description: [],
+          exposure_alias: [],
+          citation_author_family_name: [],
+          citation_id: [],
+          model_author: [],
+        },
+      },
+    ])
+
+    const wrapper = await mountComponent({
+      props: {
+        file: 'baylor_hollingworth_chandler_2002_a.cellml',
+      },
+    })
+
+    const title = wrapper.find('h1')
+    expect(title.exists()).toBe(true)
+    expect(title.text()).toBe(fileTitle)
+    expect(title.text()).toContain('Reaction A')
+  })
+
   it('renders html-view with content', async () => {
     const wrapper = await mountComponent()
 
@@ -260,9 +337,7 @@ describe('ExposureDetail', () => {
     expect(srOnlyText.text()).toContain('Download')
   })
 
-  it('calls CodeBlock.toggleWrap when clicking the wrap button in codegen view', async () => {
-    const toggleWrapMock = vi.fn()
-
+  it('toggles wrap active state when clicking the wrap button in codegen view', async () => {
     const wrapper = await mountComponent({
       props: {
         view: 'cellml_codegen',
@@ -271,26 +346,29 @@ describe('ExposureDetail', () => {
       stubs: {
         CodeBlock: {
           name: 'CodeBlock',
-          props: ['code', 'filename'],
-          methods: {
-            toggleWrap: toggleWrapMock,
-          },
+          props: ['code', 'filename', 'startWrapped'],
           template: '<div class="code-block-stub" />',
         },
         WrapButton: {
           name: 'WrapButton',
           props: ['active'],
-          template: '<button class="wrap-button-stub">Wrap</button>',
+          emits: ['click'],
+          template: '<button class="wrap-button-stub" @click="$emit(\'click\')">Wrap</button>',
         },
       },
     })
 
-    const wrapButton = wrapper.find('.wrap-button-stub')
-    expect(wrapButton.exists()).toBe(true)
+    const wrapButtonComponent = wrapper.findComponent({ name: 'WrapButton' })
+    expect(wrapButtonComponent.exists()).toBe(true)
+    expect(wrapButtonComponent.props('active')).toBe(false)
 
-    await wrapButton.trigger('click')
+    // Click to enable wrap.
+    await wrapButtonComponent.trigger('click')
+    expect(wrapButtonComponent.props('active')).toBe(true)
 
-    expect(toggleWrapMock).toHaveBeenCalledTimes(1)
+    // Click to disable wrap.
+    await wrapButtonComponent.trigger('click')
+    expect(wrapButtonComponent.props('active')).toBe(false)
   })
 
   it('renders WorkspaceFileBrowser with the exposure workspace and commit', async () => {
