@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import Checkbox from '@/components/atoms/Checkbox.vue'
-import ChevronRightIcon from '@/components/icons/ChevronRightIcon.vue'
 import Popover from '@/components/atoms/Popover.vue'
+import ChevronRightIcon from '@/components/icons/ChevronRightIcon.vue'
 import { MATHML_FORMAT_OPTIONS } from '@/constants/mathml'
 import { getMathFormatOptionsStorageService } from '@/services'
 import type { MathMLFormatOptions } from '@/types/mathml'
