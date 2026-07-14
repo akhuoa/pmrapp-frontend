@@ -34,6 +34,11 @@ const stickyContainerInner = computed(() => [
   collapsed.value ? 'p-1 gap-2' : 'p-3 gap-4',
 ])
 
+const collapsedOptions = computed(() => {
+  const active = MATHML_FORMAT_OPTIONS.filter((o) => !!props.options[o.key])
+  return active.length > 0 ? active : [MATHML_FORMAT_OPTIONS[MATHML_FORMAT_OPTIONS.length - 1]]
+})
+
 const toggleOption = (key: keyof MathMLFormatOptions) => {
   const nextOptions = {
     ...props.options,
@@ -98,11 +103,14 @@ watch(
           class="inline-flex mr-2 gap-2 shrink-0 items-center text-xs tracking-wide text-gray-500 dark:bg-gray-800 dark:text-gray-400"
         >
           <span
-            v-for="option in MATHML_FORMAT_OPTIONS"
+            v-for="option in collapsedOptions"
             :key="option.key"
             aria-hidden="true"
           >
-            <span v-html="option.preview" :class="!!options[option.key] ? 'text-primary' : ''"></span>
+            <span
+              v-html="option.preview"
+              :class="!!options[option.key] ? 'text-primary' : ''"
+            ></span>
           </span>
         </div>
       </template>
