@@ -44,6 +44,7 @@ const writePayload = (payload: StoredPayload) => {
 export const mathFormatOptionsStorageService = {
   load(): NormalisedMathFormatOptions | null {
     const payload = readPayload()
+    if (!payload) return null
     return normaliseMathFormatOptions(payload?.options)
   },
 

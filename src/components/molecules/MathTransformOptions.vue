@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import Checkbox from '@/components/atoms/Checkbox.vue'
-import ChevronRightIcon from '@/components/icons/ChevronRightIcon.vue'
 import Popover from '@/components/atoms/Popover.vue'
+import ChevronRightIcon from '@/components/icons/ChevronRightIcon.vue'
 import { MATHML_FORMAT_OPTIONS } from '@/constants/mathml'
 import { getMathFormatOptionsStorageService } from '@/services'
 import type { MathMLFormatOptions } from '@/types/mathml'
@@ -22,7 +22,7 @@ const collapsed = ref(false)
 
 const expandLabel = 'Expand math toolbar'
 const collapseLabel = 'Collapse math toolbar'
-const mathToolbarLabel = computed(() => collapsed.value ? expandLabel : collapseLabel)
+const mathToolbarLabel = computed(() => (collapsed.value ? expandLabel : collapseLabel))
 
 const stickyContainer = ['sticky-container', 'sticky top-20 left-0 right-0 p-4 z-20']
 
