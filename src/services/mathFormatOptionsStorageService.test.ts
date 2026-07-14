@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { MATH_FORMAT_OPTIONS_STORAGE_KEY } from '@/constants/mathml'
 import { mathFormatOptionsStorageService } from './mathFormatOptionsStorageService'
 
-const STORAGE_KEY = 'math_format_options_v1'
+const STORAGE_KEY = MATH_FORMAT_OPTIONS_STORAGE_KEY
 
 describe('mathFormatOptionsStorageService', () => {
   beforeEach(() => {
@@ -136,6 +137,104 @@ describe('mathFormatOptionsStorageService', () => {
           subscripts: false,
         }),
       ).not.toThrow()
+    })
+
+    it('preserves existing collapsed state when saving options', () => {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ options: { digitGrouping: true, greekSymbols: false, subscripts: false }, collapsed: true }),
+      )
+
+      mathFormatOptionsStorageService.save({
+        digitGrouping: false,
+        greekSymbols: true,
+        subscripts: true,
+      })
+
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
+      expect(stored.collapsed).toBe(true)
+      expect(stored.options).toEqual({
+        digitGrouping: false,
+        greekSymbols: true,
+        subscripts: true,
+      })
+    })
+  })
+
+  describe('loadCollapsed', () => {
+    it('returns null when there is no saved state', () => {
+      expect(mathFormatOptionsStorageService.loadCollapsed()).toBeNull()
+    })
+
+    it('returns the saved collapsed state', () => {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ options: { digitGrouping: false, greekSymbols: false, subscripts: false }, collapsed: true }),
+      )
+
+      expect(mathFormatOptionsStorageService.loadCollapsed()).toBe(true)
+    })
+
+    it('returns false when collapsed is saved as false', () => {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ options: { digitGrouping: false, greekSymbols: false, subscripts: false }, collapsed: false }),
+      )
+
+      expect(mathFormatOptionsStorageService.loadCollapsed()).toBe(false)
+    })
+
+    it('returns null when collapsed field is absent', () => {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ options: { digitGrouping: false, greekSymbols: false, subscripts: false } }),
+      )
+
+      expect(mathFormatOptionsStorageService.loadCollapsed()).toBeNull()
+    })
+
+    it('returns null when localStorage throws while loading', () => {
+      vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+        throw new Error('localStorage unavailable')
+      })
+
+      expect(mathFormatOptionsStorageService.loadCollapsed()).toBeNull()
+    })
+  })
+
+  describe('saveCollapsed', () => {
+    it('writes collapsed state to localStorage', () => {
+      mathFormatOptionsStorageService.saveCollapsed(true)
+
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
+      expect(stored.collapsed).toBe(true)
+      expect(stored.options).toBeUndefined()
+    })
+
+    it('persists collapsed state alongside existing options', () => {
+      mathFormatOptionsStorageService.save({
+        digitGrouping: true,
+        greekSymbols: false,
+        subscripts: false,
+      })
+
+      mathFormatOptionsStorageService.saveCollapsed(true)
+
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
+      expect(stored.collapsed).toBe(true)
+      expect(stored.options).toEqual({
+        digitGrouping: true,
+        greekSymbols: false,
+        subscripts: false,
+      })
+    })
+
+    it('swallows localStorage errors when saving', () => {
+      vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+        throw new Error('quota exceeded')
+      })
+
+      expect(() => mathFormatOptionsStorageService.saveCollapsed(true)).not.toThrow()
     })
   })
 })
