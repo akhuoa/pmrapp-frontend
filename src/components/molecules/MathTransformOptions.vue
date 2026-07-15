@@ -28,10 +28,9 @@ const stickyContainer = ['sticky-container', 'sticky top-20 left-0 right-0 p-4 z
 
 const stickyContainerInner = computed(() => [
   'sticky-container-inner',
-  'ml-auto w-fit text-sm flex items-center justify-end',
+  'ml-auto p-3 w-fit text-sm flex items-center justify-end gap-4',
   'border border-gray-200 dark:border-gray-700 rounded-lg',
   'bg-gray-50 dark:bg-gray-800',
-  collapsed.value ? 'p-1 gap-2' : 'p-3 gap-4',
 ])
 
 const collapseButtonClasses = computed(() => [
