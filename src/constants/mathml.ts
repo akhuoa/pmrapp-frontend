@@ -5,7 +5,7 @@ export const MATHML_FORMAT_OPTIONS = [
     key: 'digitGrouping',
     label: 'Digit grouping',
     preview: '#,###',
-    description: 'Format numeric literals with thousands separators.',
+    description: 'Format numeric literals with thousands separator.',
     example: '<math><mn>1234567.89</mn></math> → <math><mn>1,234,567.89</mn></math>',
   },
   {
