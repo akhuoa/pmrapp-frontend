@@ -24,7 +24,7 @@ const expandLabel = 'Expand math toolbar'
 const collapseLabel = 'Collapse math toolbar'
 const mathToolbarLabel = computed(() => (collapsed.value ? expandLabel : collapseLabel))
 
-const stickyContainer = ['sticky-container', 'sticky top-20 left-0 right-0 p-4 z-20']
+const stickyContainer = ['sticky-container', 'sticky top-20 left-0 right-0 p-4 pb-0 z-20']
 
 const stickyContainerInner = computed(() => [
   'sticky-container-inner',
@@ -40,11 +40,6 @@ const collapseButtonClasses = computed(() => [
   'transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary',
   'shadow-xs dark:shadow-gray-900',
 ])
-
-const collapsedOptions = computed(() => {
-  const active = MATHML_FORMAT_OPTIONS.filter((o) => !!props.options[o.key])
-  return active.length > 0 ? active : [MATHML_FORMAT_OPTIONS[MATHML_FORMAT_OPTIONS.length - 1]]
-})
 
 const toggleOption = (key: keyof MathMLFormatOptions) => {
   const nextOptions = {
@@ -104,26 +99,7 @@ watch(
         <span class="sr-only">{{ mathToolbarLabel }}</span>
       </button>
 
-      <!-- Collapsed state -->
-      <template v-if="collapsed">
-        <div
-          class="inline-flex mr-2 gap-2 shrink-0 items-center text-xs tracking-wide text-gray-500 dark:bg-gray-800 dark:text-gray-400"
-        >
-          <span
-            v-for="option in collapsedOptions"
-            :key="option.key"
-            aria-hidden="true"
-          >
-            <span
-              v-html="option.preview"
-              :class="!!options[option.key] ? 'text-primary' : ''"
-            ></span>
-          </span>
-        </div>
-      </template>
-
-      <!-- Expanded state -->
-      <template v-else>
+      <template v-if="!collapsed">
         <div
           v-for="option in MATHML_FORMAT_OPTIONS"
           :key="option.key"
