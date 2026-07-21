@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
 import { useWorkspaceStore } from '@/stores/workspace'
+import { isJwtExpired } from '@/utils/auth'
 import { generateExposureTitle, resolveExposureFileTitle } from '@/utils/exposure'
 import { generateWorkspaceTitle } from '@/utils/workspace'
 import ExposureDetailView from '@/views/ExposureDetailView.vue'
@@ -233,6 +234,12 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const authStore = useAuthStore()
+  const storedToken = localStorage.getItem('auth_token')
+
+  if (storedToken && isJwtExpired(storedToken)) {
+    authStore.clearAuth()
+    return { name: 'login' }
+  }
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     return { name: 'login' }
