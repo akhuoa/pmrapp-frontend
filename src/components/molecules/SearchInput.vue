@@ -128,6 +128,17 @@ const handleSuggestionsEscape = () => {
   showAdvancedSearch.value = false
 }
 
+const handleSuggestionsSearch = () => {
+  handleQuerySearch()
+}
+
+const handleSuggestionsCancel = () => {
+  searchInput.value = ''
+  selectedFilters.value = []
+  showAdvancedSearch.value = false
+  isSearchFocused.value = false
+}
+
 const toggleAdvancedSearch = () => {
   showAdvancedSearch.value = !showAdvancedSearch.value
 }
@@ -227,6 +238,8 @@ defineExpose({
       @search-term-click="handleSearchTermClick"
       @focus-search-input="focusSearchInput"
       @escape="handleSuggestionsEscape"
+      @search="handleSuggestionsSearch"
+      @cancel="handleSuggestionsCancel"
     />
   </div>
 </template>
