@@ -427,15 +427,13 @@ function handleTermMouseEnter(index: number) {
       </div>
 
       <!-- Clear button -->
-      <button
+      <div
         v-if="hasValues"
-        class="flex items-center justify-center px-2 py-1 shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer"
-        aria-label="Clear search"
-        type="button"
+        class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full cursor-pointer p-1 mr-1"
         @click.stop="clearAll"
       >
-        <CloseButton class="w-4 h-4" />
-      </button>
+        <CloseButton aria-label="Clear search" />
+      </div>
 
       <!-- Search button -->
       <button
