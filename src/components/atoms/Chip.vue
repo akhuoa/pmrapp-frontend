@@ -45,7 +45,7 @@ const handleRemoveChip = () => {
   <div
     :class="[chipClasses, removable ? 'pl-2.5 pr-1' : 'px-2.5']"
   >
-  <span class="truncate max-w-48 group-hover/chip:opacity-75" :class="[transitionClasses]">
+  <span class="group-hover/chip:opacity-75 whitespace-nowrap" :class="[transitionClasses]">
     {{ label }}
   </span>
   <CloseButton
