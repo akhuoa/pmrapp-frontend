@@ -36,6 +36,9 @@ const emit = defineEmits<{
 
 const searchStore = useSearchStore()
 
+const TEXT_QUERY_KIND = '_text_query'
+const TEXT_QUERY_LABEL = 'Free text'
+
 // ---- Refs ----
 const inputRef = ref<HTMLInputElement | null>(null)
 const wrapperRef = ref<HTMLDivElement | null>(null)
@@ -56,16 +59,24 @@ const hasValues = computed(() => {
 
 const categoryPrefix = computed(() => {
   if (!selectedCategoryKind.value) return ''
+  if (selectedCategoryKind.value === TEXT_QUERY_KIND) return TEXT_QUERY_LABEL
   return SEARCH_KIND_LABEL_SINGULAR_MAP[selectedCategoryKind.value] || selectedCategoryKind.value
 })
 
 const categoryMenuItems = computed(() => {
   const input = currentInput.value.trim().toLowerCase()
-  if (!input) return SEARCH_CATEGORIES
-  return SEARCH_CATEGORIES.filter(
-    (cat) => cat.label.toLowerCase().includes(input) || cat.value.toLowerCase().includes(input),
-  )
+  let filtered = [...SEARCH_CATEGORIES]
+  if (input) {
+    filtered = filtered.filter(
+      (cat) => cat.label.toLowerCase().includes(input) || cat.value.toLowerCase().includes(input),
+    )
+  }
+  return [...filtered, { value: TEXT_QUERY_KIND, label: TEXT_QUERY_LABEL }]
 })
+
+const hasCategoryMatches = computed(() =>
+  categoryMenuItems.value.some((item) => item.value !== TEXT_QUERY_KIND),
+)
 
 const showDropdown = computed(() => showCategoryMenu.value || showTermSuggestions.value)
 
@@ -74,10 +85,12 @@ const categoryIcons: Record<string, Component> = {
   model_author: UserIcon,
   cellml_keyword: CodeIcon,
   citation_id: FileIcon,
+  [TEXT_QUERY_KIND]: SearchIcon,
 }
 
 // ---- Helpers ----
 function getDisplayLabel(kind: string, term: string): string {
+  if (kind === TEXT_QUERY_KIND) return term
   const singularLabel = SEARCH_KIND_LABEL_SINGULAR_MAP[kind] || kind
   return `${singularLabel}: ${term}`
 }
@@ -105,7 +118,12 @@ function initialiseFromProps() {
       }))
   }
   if (props.initialQuery) {
-    currentInput.value = props.initialQuery
+    chips.value.push({
+      id: generateChipId(),
+      kind: TEXT_QUERY_KIND,
+      term: props.initialQuery,
+      displayLabel: getDisplayLabel(TEXT_QUERY_KIND, props.initialQuery),
+    })
   }
 }
 
@@ -151,7 +169,28 @@ function filterTermSuggestions(inputText: string) {
 }
 
 // ---- Category selection ----
-function selectCategory(category: (typeof SEARCH_CATEGORIES)[number]) {
+function selectCategory(category: { value: string; label: string }) {
+  if (category.value === TEXT_QUERY_KIND) {
+    selectedCategoryKind.value = TEXT_QUERY_KIND
+    showCategoryMenu.value = false
+
+    // If a Free-text chip already exists, remove it and pre-populate the input.
+    // Otherwise, keep whatever the user has already typed in currentInput.
+    const existing = chips.value.find((c) => c.kind === TEXT_QUERY_KIND)
+    if (existing) {
+      chips.value = chips.value.filter((c) => c.id !== existing.id)
+      currentInput.value = existing.term
+    }
+    // else: currentInput already holds the user's typed text — keep it.
+
+    showTermSuggestions.value = false
+    termSuggestions.value = []
+    activeSuggestionIndex.value = -1
+    focusInput()
+    return
+  }
+
+  // Real category – show term suggestions.
   selectedCategoryKind.value = category.value
   showCategoryMenu.value = false
   currentInput.value = ''
@@ -165,7 +204,7 @@ function selectCategory(category: (typeof SEARCH_CATEGORIES)[number]) {
   focusInput()
 }
 
-function handleCategoryClick(category: (typeof SEARCH_CATEGORIES)[number]) {
+function handleCategoryClick(category: { value: string; label: string }) {
   selectCategory(category)
 }
 
@@ -224,8 +263,13 @@ function clearAll() {
 
 // ---- Search ----
 function executeSearch() {
-  const queryText = currentInput.value.trim()
-  const filters: SearchFilter[] = chips.value.map((c) => ({ kind: c.kind, term: c.term }))
+  const textQueryChip = chips.value.find((c) => c.kind === TEXT_QUERY_KIND)
+  const queryText = selectedCategoryKind.value === TEXT_QUERY_KIND
+    ? currentInput.value.trim()
+    : (textQueryChip?.term || '')
+  const filters: SearchFilter[] = chips.value
+    .filter((c) => c.kind !== TEXT_QUERY_KIND)
+    .map((c) => ({ kind: c.kind, term: c.term }))
 
   if (!queryText && filters.length === 0) {
     focusInput()
@@ -282,6 +326,14 @@ function handleKeydown(event: KeyboardEvent) {
 
   // ---- Escape ----
   if (event.key === 'Escape') {
+    if (selectedCategoryKind.value === TEXT_QUERY_KIND) {
+      // Cancel free-text mode, go back to category menu.
+      selectedCategoryKind.value = null
+      showCategoryMenu.value = true
+      categoryMenuActiveIndex.value = -1
+      event.preventDefault()
+      return
+    }
     if (showTermSuggestions.value && selectedCategoryKind.value) {
       // Go back to category menu.
       cancelCategorySelection()
@@ -366,6 +418,28 @@ function handleKeydown(event: KeyboardEvent) {
       }
       return
     }
+    // ---- Free-text mode ----
+    if (selectedCategoryKind.value === TEXT_QUERY_KIND) {
+      event.preventDefault()
+      const term = currentInput.value.trim()
+      if (term) {
+        // Remove any existing Free-text chip, then add new one.
+        chips.value = chips.value.filter((c) => c.kind !== TEXT_QUERY_KIND)
+        chips.value.push({
+          id: generateChipId(),
+          kind: TEXT_QUERY_KIND,
+          term,
+          displayLabel: getDisplayLabel(TEXT_QUERY_KIND, term),
+        })
+        selectedCategoryKind.value = null
+        currentInput.value = ''
+        showCategoryMenu.value = true
+        categoryMenuActiveIndex.value = -1
+        focusInput()
+      }
+      return
+    }
+
     // Perform search
     event.preventDefault()
     executeSearch()
@@ -475,19 +549,29 @@ function handleTermMouseEnter(index: number) {
         Filter by category
       </div>
       <div class="max-h-80 overflow-y-auto">
-      <button
-        v-for="(cat, index) in categoryMenuItems"
-        :key="cat.value"
-        type="button"
-        class="w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors cursor-pointer focus:outline-none"
-        :class="categoryMenuActiveIndex === index ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-750'"
-        @click="handleCategoryClick(cat)"
-        @mouseenter="handleCategoryMouseEnter(index)"
-      >
-        <component :is="categoryIcons[cat.value]" class="w-4 h-4 shrink-0 text-gray-500 dark:text-gray-400" />
-        <span class="font-medium text-gray-800 dark:text-gray-200">{{ cat.label }}</span>
-      </button>
-    </div>
+        <div
+          v-if="!hasCategoryMatches && currentInput.trim()"
+          class="px-4 py-3 text-sm text-gray-400 dark:text-gray-500"
+        >
+          No matching category found. Try a different term or select
+          <strong>&ldquo;{{ TEXT_QUERY_LABEL }}&rdquo;</strong> below for a general keyword search.
+        </div>
+        <button
+          v-for="(cat, index) in categoryMenuItems"
+          :key="cat.value"
+          type="button"
+          class="w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors cursor-pointer focus:outline-none"
+          :class="[
+            cat.value === TEXT_QUERY_KIND ? 'border-t border-gray-100 dark:border-gray-700' : '',
+            categoryMenuActiveIndex === index ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-750',
+          ]"
+          @click="handleCategoryClick(cat)"
+          @mouseenter="handleCategoryMouseEnter(index)"
+        >
+          <component :is="categoryIcons[cat.value]" class="w-4 h-4 shrink-0 text-gray-500 dark:text-gray-400" />
+          <span class="font-medium text-gray-800 dark:text-gray-200">{{ cat.label }}</span>
+        </button>
+      </div>
     </div>
 
     <!-- Term suggestions dropdown (shown when typing a filter value) -->
