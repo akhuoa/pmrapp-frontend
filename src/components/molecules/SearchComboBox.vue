@@ -59,7 +59,13 @@ const categoryPrefix = computed(() => {
   return SEARCH_KIND_LABEL_SINGULAR_MAP[selectedCategoryKind.value] || selectedCategoryKind.value
 })
 
-const categoryMenuItems = computed(() => SEARCH_CATEGORIES)
+const categoryMenuItems = computed(() => {
+  const input = currentInput.value.trim().toLowerCase()
+  if (!input) return SEARCH_CATEGORIES
+  return SEARCH_CATEGORIES.filter(
+    (cat) => cat.label.toLowerCase().includes(input) || cat.value.toLowerCase().includes(input),
+  )
+})
 
 const showDropdown = computed(() => showCategoryMenu.value || showTermSuggestions.value)
 
@@ -265,6 +271,9 @@ function handleInput(_event: Event) {
 
   if (selectedCategoryKind.value) {
     filterTermSuggestions(input.value)
+  } else if (showCategoryMenu.value) {
+    // Reset the active index when category menu is filtered by input text.
+    categoryMenuActiveIndex.value = -1
   }
 }
 
@@ -458,7 +467,7 @@ function handleTermMouseEnter(index: number) {
 
     <!-- Category menu dropdown (shown on focus) -->
     <div
-      v-if="showCategoryMenu"
+      v-if="showCategoryMenu && categoryMenuItems.length > 0"
       class="absolute z-50 left-0 mt-1 w-80 min-w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
       @mousedown.prevent="focusInput"
     >
