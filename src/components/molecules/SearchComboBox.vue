@@ -603,6 +603,18 @@ function handleTermMouseEnter(index: number) {
         </button>
       </div>
     </div>
+
+    <!-- Free-text hint (shown when in free-text mode with text typed) -->
+    <div
+      v-if="selectedCategoryKind === TEXT_QUERY_KIND && currentInput.trim()"
+      class="absolute z-50 left-0 mt-1 w-80 min-w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
+      @mousedown.prevent="focusInput"
+    >
+      <div class="px-4 py-3 text-sm text-gray-400 dark:text-gray-500 flex items-center gap-2">
+        Press <kbd class="inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 min-w-[1.5rem] h-5">&#x23CE;</kbd>
+        <span>to confirm as keyword search</span>
+      </div>
+    </div>
   </div>
 </template>
 
