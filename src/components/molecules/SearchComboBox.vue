@@ -611,7 +611,8 @@ function handleTermMouseEnter(index: number) {
       @mousedown.prevent="focusInput"
     >
       <div class="px-4 py-3 text-sm text-gray-400 dark:text-gray-500 flex items-center gap-2">
-        Press <kbd class="inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 min-w-[1.5rem] h-5">&#x23CE;</kbd>
+        Press
+        <kbd class="inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 min-w-[1.5rem] h-5">&crarr;</kbd>
         <span>to confirm as keyword search</span>
       </div>
     </div>
