@@ -446,7 +446,7 @@ function handleTermMouseEnter(index: number) {
       <!-- Search button -->
       <button
         type="button"
-        class="flex items-center justify-center px-4 py-3 shrink-0 border-l border-gray-200 dark:border-gray-700 bg-gray-200 dark:bg-gray-700 cursor-pointer transition duration-200 ease-linear focus-visible:ring-2 focus-visible:ring-primary focus:outline-none"
+        class="flex items-center justify-center px-4 self-stretch shrink-0 border-l border-gray-200 dark:border-gray-700 bg-gray-200 dark:bg-gray-700 cursor-pointer transition duration-200 ease-linear focus-visible:ring-2 focus-visible:ring-primary focus:outline-none"
         :class="hasValues ? '' : 'opacity-50 cursor-default'"
         :disabled="!hasValues"
         aria-label="Search"
