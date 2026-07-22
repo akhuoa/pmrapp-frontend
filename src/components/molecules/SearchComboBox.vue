@@ -124,7 +124,9 @@ function filterTermSuggestions(inputText: string) {
   }
 
   const category = searchStore.categories.find((c) => c.kind === selectedCategoryKind.value)
-  const terms = (category?.kindInfo?.terms || []).filter((t) => t.trim().length > 0)
+  const terms = (category?.kindInfo?.terms || [])
+    .filter((t) => t.trim().length > 0)
+    .filter((t) => !chips.value.some((chip) => chip.kind === selectedCategoryKind.value && chip.term.toLowerCase() === t.toLowerCase()))
 
   if (!inputText.trim()) {
     termSuggestions.value = terms.slice(0, 50)
@@ -172,6 +174,12 @@ function cancelCategorySelection() {
 // ---- Term selection ----
 function selectTerm(term: string) {
   if (!selectedCategoryKind.value) return
+
+  // Prevent adding a duplicate term within the same category.
+  const alreadySelected = chips.value.some(
+    (chip) => chip.kind === selectedCategoryKind.value && chip.term.toLowerCase() === term.toLowerCase(),
+  )
+  if (alreadySelected) return
 
   chips.value.push({
     id: generateChipId(),
