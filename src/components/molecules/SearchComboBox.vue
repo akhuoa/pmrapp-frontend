@@ -9,6 +9,7 @@ import FileIcon from '@/components/icons/FileIcon.vue'
 import { SEARCH_CATEGORIES, SEARCH_KIND_LABEL_SINGULAR_MAP } from '@/constants/search'
 import { useSearchStore } from '@/stores/search'
 import type { SearchFilter, SearchQueryRequest } from '@/types/search'
+import Keycap from '@/components/atoms/Keycap.vue'
 
 interface FilterChip {
   id: string
@@ -596,7 +597,8 @@ function handleTermMouseEnter(index: number) {
           @mouseenter="handleCategoryMouseEnter(index)"
         >
           <component :is="categoryIcons[cat.value]" class="w-4 h-4 shrink-0 text-gray-500 dark:text-gray-400" />
-          <span class="font-medium text-gray-800 dark:text-gray-200">{{ cat.label }}</span>
+          <span class="font-medium text-gray-800 dark:text-gray-200 flex-1">{{ cat.label }}</span>
+          <Keycap v-if="categoryMenuActiveIndex === index" size="small">&crarr;</Keycap>
         </button>
       </div>
     </div>
@@ -621,12 +623,13 @@ function handleTermMouseEnter(index: number) {
           v-for="(term, index) in termSuggestions"
           :key="term"
           type="button"
-          class="w-full text-left px-4 py-2 text-sm transition-colors cursor-pointer focus:outline-none truncate"
+          class="w-full text-left px-4 py-2 text-sm transition-colors cursor-pointer focus:outline-none flex items-center gap-2"
           :class="activeSuggestionIndex === index ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-750'"
           @click="selectTerm(term)"
           @mouseenter="handleTermMouseEnter(index)"
         >
-          {{ term }}
+          <span class="truncate flex-1">{{ term }}</span>
+          <Keycap v-if="activeSuggestionIndex === index" size="small">&crarr;</Keycap>
         </button>
       </div>
     </div>
@@ -639,7 +642,7 @@ function handleTermMouseEnter(index: number) {
     >
       <div class="px-4 py-3 text-sm text-gray-400 dark:text-gray-500 flex items-center gap-2">
         Press
-        <kbd class="inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 min-w-[1.5rem] h-5">&crarr;</kbd>
+        <Keycap size="small">&crarr;</Keycap>
         <span>to confirm as keyword search</span>
       </div>
     </div>
