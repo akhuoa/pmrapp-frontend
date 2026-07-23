@@ -18,6 +18,7 @@ import {
   SORT_OPTIONS_GROUPED,
   sortSearchResults,
 } from '@/utils/sort'
+import SearchComboBox from '../molecules/SearchComboBox.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -157,7 +158,8 @@ const handleRefresh = async () => {
 
 <template>
   <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-    <SearchInput
+    <!-- TODO: search-combobox testing -->
+    <!-- <SearchInput
       class="flex-1 w-full sm:w-auto"
       ref="searchInputRef"
       :initial-kind="''"
@@ -165,6 +167,13 @@ const handleRefresh = async () => {
       :initial-filters="queryFilters"
       @search="handleSearch"
       @querySearch="handleQuerySearch"
+    /> -->
+    <SearchComboBox
+      class="flex-1 w-full sm:w-auto"
+      :initial-query="searchQueryParam"
+      :initial-filters="queryFilters"
+      :in-overlay="true"
+      @query-search="handleQuerySearch"
     />
     <SortDropdown
       :disabled="!(hasResults || isLoading)"
