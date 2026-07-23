@@ -168,7 +168,7 @@ onMounted(async () => {
 
 // ---- Dropdown helpers ----
 function filterTermSuggestions(inputText: string) {
-  if (!selectedCategoryKind.value) {
+  if (!selectedCategoryKind.value || selectedCategoryKind.value === TEXT_QUERY_KIND) {
     termSuggestions.value = []
     showTermSuggestions.value = false
     return
@@ -656,8 +656,13 @@ function handleTermMouseEnter(index: number) {
       @mousedown.prevent="focusInput"
     >
       <div class="max-h-80 overflow-y-auto">
-        <div class="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700">
-          {{ categoryPrefix }} suggestions
+        <div class="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+          <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            {{ categoryPrefix }} suggestions
+          </div>
+          <div v-if="termSuggestions.length > 0" class="mt-0.5 text-xs text-gray-400 dark:text-gray-500 italic">
+            Select one from the list
+          </div>
         </div>
         <div
           v-if="termSuggestions.length === 0"
