@@ -64,6 +64,25 @@ const categoryPrefix = computed(() => {
   return SEARCH_KIND_LABEL_SINGULAR_MAP[selectedCategoryKind.value] || selectedCategoryKind.value
 })
 
+const inputPlaceholder = computed(() => {
+  if (chips.value.length > 0) return 'Add another filter or press Enter to search…'
+  return 'Start typing to search, or select a filter category…'
+})
+
+const helpText = computed(() => {
+  if (!isFocused.value) return ''
+  if (selectedCategoryKind.value === TEXT_QUERY_KIND) {
+    return 'Press Enter to confirm as keyword search'
+  }
+  if (selectedCategoryKind.value) {
+    return 'Select or type a term from the suggestions below'
+  }
+  if (chips.value.length > 0) {
+    return 'Add another filter below to narrow your search'
+  }
+  return 'Select a filter category below, or just type to search freely'
+})
+
 const categoryMenuItems = computed(() => {
   const input = currentInput.value.trim().toLowerCase()
   let filtered = [...SEARCH_CATEGORIES]
@@ -80,6 +99,13 @@ const hasCategoryMatches = computed(() =>
 )
 
 const showDropdown = computed(() => showCategoryMenu.value || showTermSuggestions.value)
+
+const noTermMatchesMessage = computed(() => {
+  const input = currentInput.value.trim()
+  const label = categoryPrefix.value || 'this category'
+  if (!input) return `No ${label} suggestions available`
+  return `No ${label} available for "${input}". Try a different term or press Escape to pick another category.`
+})
 
 const categoryIcons: Record<string, Component> = {
   citation_author_family_name: UserIcon,
@@ -155,7 +181,7 @@ function filterTermSuggestions(inputText: string) {
 
   if (!inputText.trim()) {
     termSuggestions.value = terms.slice(0, 50)
-    showTermSuggestions.value = terms.length > 0
+    showTermSuggestions.value = true
     activeSuggestionIndex.value = -1
     return
   }
@@ -165,7 +191,7 @@ function filterTermSuggestions(inputText: string) {
     .slice(0, 50)
 
   termSuggestions.value = filtered
-  showTermSuggestions.value = filtered.length > 0
+  showTermSuggestions.value = true
   activeSuggestionIndex.value = -1
 }
 
@@ -319,10 +345,22 @@ function executeSearch() {
 // ---- Event handlers ----
 function handleFocus() {
   isFocused.value = true
-  if (!selectedCategoryKind.value && !showTermSuggestions.value) {
-    showCategoryMenu.value = true
-    categoryMenuActiveIndex.value = -1
+
+  if (selectedCategoryKind.value === TEXT_QUERY_KIND) {
+    // Free-text mode — the hint dropdown will show automatically via the template condition.
+    return
   }
+
+  if (selectedCategoryKind.value) {
+    // Category selected — show term suggestions.
+    filterTermSuggestions(currentInput.value)
+    showCategoryMenu.value = false
+    return
+  }
+
+  // No category selected — show the category menu.
+  showCategoryMenu.value = true
+  categoryMenuActiveIndex.value = -1
 }
 
 function handleBlur(event: FocusEvent) {
@@ -537,7 +575,7 @@ function handleTermMouseEnter(index: number) {
           type="text"
           class="flex-1 min-w-[120px] outline-none border-none bg-transparent px-1 py-1 text-sm"
           :class="{ 'pl-0': selectedCategoryKind !== null || chips.length > 0 }"
-          placeholder="Start typing to search..."
+          :placeholder="inputPlaceholder"
           @input="handleInput"
           @keydown="handleKeydown"
           @focus="handleFocus"
@@ -573,8 +611,16 @@ function handleTermMouseEnter(index: number) {
       class="absolute z-50 left-0 mt-1 w-80 min-w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
       @mousedown.prevent="focusInput"
     >
-      <div class="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700">
-        Filter by category
+      <div class="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+          Filter by category
+        </div>
+        <div
+          v-if="helpText"
+          class="mt-0.5 text-xs text-gray-400 dark:text-gray-500 italic"
+        >
+          {{ helpText }}
+        </div>
       </div>
       <div class="max-h-80 overflow-y-auto">
         <div
@@ -617,7 +663,7 @@ function handleTermMouseEnter(index: number) {
           v-if="termSuggestions.length === 0"
           class="px-4 py-3 text-sm text-gray-400 dark:text-gray-500"
         >
-          No matching terms found
+          {{ noTermMatchesMessage }}
         </div>
         <button
           v-for="(term, index) in termSuggestions"
@@ -636,7 +682,7 @@ function handleTermMouseEnter(index: number) {
 
     <!-- Free-text hint (shown when in free-text mode with text typed) -->
     <div
-      v-if="selectedCategoryKind === TEXT_QUERY_KIND && currentInput.trim()"
+      v-if="isFocused && selectedCategoryKind === TEXT_QUERY_KIND && currentInput.trim()"
       class="absolute z-50 left-0 mt-1 w-80 min-w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
       @mousedown.prevent="focusInput"
     >
