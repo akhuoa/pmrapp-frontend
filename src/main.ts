@@ -8,23 +8,19 @@ import router from './router'
 import { useAuthStore } from './stores/auth'
 
 const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID
-const isCypress = typeof window !== 'undefined' && 'Cypress' in window
+const gtag = createGtag({
+  tagId: GA_MEASUREMENT_ID,
+  pageTracker: {
+    router,
+  },
+})
 
 const app = createApp(App)
 const pinia = createPinia()
 
 app.use(pinia)
 app.use(router)
-
-if (GA_MEASUREMENT_ID && !isCypress) {
-  const gtag = createGtag({
-    tagId: GA_MEASUREMENT_ID,
-    pageTracker: {
-      router,
-    },
-  })
-  app.use(gtag)
-}
+app.use(gtag)
 
 // Initialise authentication state from local storage.
 const authStore = useAuthStore()
