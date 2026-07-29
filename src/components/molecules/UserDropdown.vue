@@ -103,7 +103,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div v-if="authStore.isAuthenticated" ref="dropdownRef" class="relative pl-4">
+  <div v-if="authStore.isAuthenticated" ref="dropdownRef" class="relative">
     <button
       @click="toggleDropdown"
       :class="accountButtonClasses"
@@ -181,7 +181,7 @@ onUnmounted(() => {
   <RouterLink
     v-else
     to="/login"
-    class="nav-link ml-4"
+    class="nav-link"
     :class="{ 'text-primary': isActive('/login') }"
     @click="handleLoginClick"
   >
