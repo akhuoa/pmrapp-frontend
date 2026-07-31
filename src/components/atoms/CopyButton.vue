@@ -50,6 +50,7 @@ const handleCopyText = async () => {
 
 // mainly used for citations with clickable URL
 const handleCopyHTML = async () => {
+  if (typeof document === 'undefined') return
   try {
     const htmlContent = props.text.replaceAll('\n', '<br>')
     const tempElement = document.createElement('div')

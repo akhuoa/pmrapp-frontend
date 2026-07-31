@@ -31,6 +31,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
 watch(
   () => props.show,
   (newVal) => {
+    if (typeof document === 'undefined') return
     if (newVal) {
       document.addEventListener('keydown', handleKeyDown)
     } else {
@@ -41,7 +42,9 @@ watch(
 )
 
 onUnmounted(() => {
-  document.removeEventListener('keydown', handleKeyDown)
+  if (typeof document !== 'undefined') {
+    document.removeEventListener('keydown', handleKeyDown)
+  }
 })
 </script>
 

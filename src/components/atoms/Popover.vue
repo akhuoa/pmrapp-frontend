@@ -36,8 +36,8 @@ const updatePosition = () => {
     return
   }
 
-  const viewportWidth = window.innerWidth
-  const viewportHeight = window.innerHeight
+  const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1024
+  const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 768
 
   // Default: position below the trigger, centered.
   let nextTop = triggerRect.bottom + props.offset
@@ -106,13 +106,17 @@ const handleViewportChange = () => {
 }
 
 onMounted(() => {
-  window.addEventListener('scroll', handleViewportChange, true)
-  window.addEventListener('resize', handleViewportChange)
+  if (typeof window !== 'undefined') {
+    window.addEventListener('scroll', handleViewportChange, true)
+    window.addEventListener('resize', handleViewportChange)
+  }
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('scroll', handleViewportChange, true)
-  window.removeEventListener('resize', handleViewportChange)
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('scroll', handleViewportChange, true)
+    window.removeEventListener('resize', handleViewportChange)
+  }
   if (hideTimer) clearTimeout(hideTimer)
 })
 </script>

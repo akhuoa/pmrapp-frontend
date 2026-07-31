@@ -5,11 +5,13 @@ import ArrowUpIcon from '@/components/icons/ArrowUpIcon.vue'
 const isVisible = ref(false)
 
 const checkScroll = () => {
+  if (typeof window === 'undefined') return
   // Show button if user has scrolled down more than 300px.
   isVisible.value = window.scrollY > 300
 }
 
 const scrollToTop = () => {
+  if (typeof window === 'undefined') return
   window.scrollTo({
     top: 0,
     behavior: 'smooth',
@@ -17,12 +19,16 @@ const scrollToTop = () => {
 }
 
 onMounted(() => {
-  checkScroll() // Check initial scroll position.
-  window.addEventListener('scroll', checkScroll)
+  if (typeof window !== 'undefined') {
+    checkScroll() // Check initial scroll position.
+    window.addEventListener('scroll', checkScroll)
+  }
 })
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', checkScroll)
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('scroll', checkScroll)
+  }
 })
 </script>
 

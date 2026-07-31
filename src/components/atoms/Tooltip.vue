@@ -25,8 +25,8 @@ const updatePosition = () => {
   const anchorRect = props.anchorEl.getBoundingClientRect()
   const tooltipRect = tooltipEl.value.getBoundingClientRect()
 
-  const viewportWidth = window.innerWidth
-  const viewportHeight = window.innerHeight
+  const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1024
+  const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 768
 
   // Default to centered above the anchor.
   let nextLeft = anchorRect.left + anchorRect.width / 2 - tooltipRect.width / 2
@@ -80,13 +80,17 @@ const handleViewportChange = () => {
 }
 
 onMounted(() => {
-  window.addEventListener('scroll', handleViewportChange, true)
-  window.addEventListener('resize', handleViewportChange)
+  if (typeof window !== 'undefined') {
+    window.addEventListener('scroll', handleViewportChange, true)
+    window.addEventListener('resize', handleViewportChange)
+  }
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('scroll', handleViewportChange, true)
-  window.removeEventListener('resize', handleViewportChange)
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('scroll', handleViewportChange, true)
+    window.removeEventListener('resize', handleViewportChange)
+  }
 })
 </script>
 

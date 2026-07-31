@@ -145,7 +145,8 @@ const fileBrowserPath = computed(() => {
 // It also maintains reactivity for navigations.
 const citationUrl = computed(() => {
   const resolved = router.resolve({ name: route.name, params: route.params })
-  const resolvedURL = new URL(resolved.href, window.location.origin)
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'
+  const resolvedURL = new URL(resolved.href, origin)
   const decodedHref = decodeURIComponent(resolved.href)
 
   return resolvedURL.origin + decodedHref
@@ -322,7 +323,7 @@ const buildOpenCORURL = (option?: string, targetFile?: string) => {
 }
 
 const convertFirstTextNodeToTitle = () => {
-  if (!htmlViewRef.value) return
+  if (!htmlViewRef.value || typeof document === 'undefined') return
 
   const firstChild = htmlViewRef.value.firstChild
   if (firstChild && firstChild.nodeType === 3) {

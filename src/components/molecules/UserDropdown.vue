@@ -92,7 +92,9 @@ const handleClickOutside = (event: MouseEvent) => {
 const isActive = (path: string) => route.path.startsWith(path)
 
 onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
+  if (typeof document !== 'undefined') {
+    document.addEventListener('click', handleClickOutside)
+  }
 })
 
 watch(
@@ -105,7 +107,9 @@ watch(
 )
 
 onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
+  if (typeof document !== 'undefined') {
+    document.removeEventListener('click', handleClickOutside)
+  }
 })
 </script>
 

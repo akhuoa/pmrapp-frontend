@@ -4,7 +4,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export const workspaceService = {
   async listAliasedWorkspaces(): Promise<Workspace[]> {
-    const response = await fetch(`${API_BASE_URL}/api/list_aliased_workspaces`, {
+    const response = await fetch('/api/workspaces/list', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -25,23 +25,12 @@ export const workspaceService = {
       throw new Error('Workspace alias is required to get workspace info.')
     }
 
-    const payloadObj = {}
-    Object.assign(payloadObj, { id: { Aliased: alias } })
-
-    if (commitId) {
-      Object.assign(payloadObj, { commit: commitId })
-    }
-
-    if (path) {
-      Object.assign(payloadObj, { path: path })
-    }
-
-    const response = await fetch(`${API_BASE_URL}/api/get_workspace_info`, {
+    const response = await fetch('/api/workspaces/info', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payloadObj),
+      body: JSON.stringify({ alias, commitId: commitId || '', path: path || '' }),
     })
 
     if (!response.ok) {

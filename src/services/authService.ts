@@ -63,7 +63,7 @@ const mapLoginErrorMessage = (errorText: string, status: number): string => {
 
 export const authService = {
   async login(credentials: LoginCredentials): Promise<string> {
-    const response = await fetch(`${API_BASE_URL}/api/bearer/from_login_password`, {
+    const response = await fetch('/api/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -72,17 +72,17 @@ export const authService = {
     })
 
     if (!response.ok) {
-      const errorText = await response.text()
-      const errorMessage = mapLoginErrorMessage(errorText, response.status)
+      const errorData = await response.json().catch(() => ({}))
+      const errorMessage = mapLoginErrorMessage(errorData.message || '', response.status)
       throw new Error(errorMessage)
     }
 
-    const token = await response.text()
-    return token
+    const data = await response.json()
+    return data.token
   },
 
   async loginWithGitHub(code: string): Promise<GitHubAuthData> {
-    const response = await fetch(`${GITHUB_AUTH_API}/api/auth`, {
+    const response = await fetch('/api/auth/github', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code }),
@@ -98,7 +98,7 @@ export const authService = {
   async logout(): Promise<void> {
     const token = localStorage.getItem('auth_token')
 
-    const response = await fetch(`${API_BASE_URL}/api/sign_out`, {
+    const response = await fetch('/api/auth/logout', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -114,7 +114,7 @@ export const authService = {
   async revokeGitHub(): Promise<void> {
     const token = localStorage.getItem('auth_token')
 
-    const response = await fetch(`${GITHUB_AUTH_API}/api/auth/revoke`, {
+    const response = await fetch('/api/auth/github-revoke', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

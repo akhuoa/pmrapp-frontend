@@ -52,6 +52,7 @@ const goBack = () => {
 
   // Check browser history to preserve query state (search filters).
   if (
+    typeof window !== 'undefined' &&
     window.history.state.back?.includes(basePath) &&
     !window.history.state.back?.includes(`${basePath}/`)
   ) {

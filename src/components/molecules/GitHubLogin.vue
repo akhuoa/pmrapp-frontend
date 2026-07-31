@@ -28,7 +28,8 @@ const emit = defineEmits<{
   busyChange: [isBusy: boolean]
 }>()
 
-const hasAuthorizationCode = new URLSearchParams(window.location.search).has('code')
+const hasAuthorizationCode =
+  typeof window !== 'undefined' ? new URLSearchParams(window.location.search).has('code') : false
 const isRedirectingToGitHub = ref(false)
 const isAuthenticating = ref(hasAuthorizationCode)
 const isBusy = computed(() => isRedirectingToGitHub.value || isAuthenticating.value)
@@ -42,6 +43,7 @@ watch(
 )
 
 const handleGitHubLoginClick = () => {
+  if (typeof window === 'undefined') return
   isRedirectingToGitHub.value = true
 
   const state = generateOAuthState()
@@ -56,6 +58,7 @@ const handleGitHubLoginClick = () => {
 }
 
 onMounted(async () => {
+  if (typeof window === 'undefined') return
   const urlParams = new URLSearchParams(window.location.search)
   const code = urlParams.get('code')
 

@@ -124,6 +124,7 @@ const refreshCodeBlock = async () => {
 }
 
 const loadPrismTheme = async (isDark: boolean) => {
+  if (typeof document === 'undefined') return
   // Remove existing Prism theme stylesheets.
   const existingThemes = document.querySelectorAll('link[data-prism-theme]')
   existingThemes.forEach((link) => {
@@ -158,13 +159,15 @@ onMounted(() => {
 
   void refreshCodeBlock()
 
-  darkThemeMediaQuery.value = window.matchMedia('(prefers-color-scheme: dark)')
+  if (typeof window !== 'undefined') {
+    darkThemeMediaQuery.value = window.matchMedia('(prefers-color-scheme: dark)')
 
-  // Load initial theme.
-  loadPrismTheme(darkThemeMediaQuery.value.matches)
+    // Load initial theme.
+    loadPrismTheme(darkThemeMediaQuery.value.matches)
 
-  // Listen for theme changes.
-  darkThemeMediaQuery.value.addEventListener('change', handleThemeChange)
+    // Listen for theme changes.
+    darkThemeMediaQuery.value.addEventListener('change', handleThemeChange)
+  }
 
   if (preBlock.value && typeof ResizeObserver === 'function') {
     observer = new ResizeObserver((entries) => {
