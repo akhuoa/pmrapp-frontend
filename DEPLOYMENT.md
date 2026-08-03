@@ -6,17 +6,26 @@ This document covers deployment to production environments other than GitHub Pag
 
 - This app is a static Vue/Vite build output (`dist/`).
 - Production target is a root domain with `VITE_BASE_PATH=/`.
-- GitHub Pages-specific fallback behaviour is optional and controlled by environment variable.
+- GitHub Pages-specific fallback behaviour is optional and controlled by the `VITE_ENABLE_GH_PAGES_SPA_REDIRECT` environment variable.
 
 ## Prerequisites
 
 - Node.js: `>=22.12.0` (see [package.json](package.json)).
 - [Bun](https://bun.sh/) `>=1.3.3` (used for install/build commands in this repository).
-- Environment variables configured for your production API/auth endpoints.
+- Environment variables configured for your production API/auth endpoints:
+  - `VITE_API_BASE_URL`
+  - `VITE_DOWNLOAD_API`
+  - `VITE_GITHUB_CLIENT_ID`
+  - `VITE_GITHUB_AUTH_API`
+  - `VITE_GA_MEASUREMENT_ID`
+  - `VITE_BASE_PATH`
+  - `VITE_ENABLE_GH_PAGES_SPA_REDIRECT`
 
 ## Build-Time Environment Variables
 
-Set these in your CI/CD configuration or shell before running `bun run build`. See [`.env.example`](.env.example) for the full local-development template and its placeholder values. Vite embeds these values in the generated client bundle, so do not use them for secrets.
+Set these environment variables in your CI/CD configuration or shell before running `bun run build`. See [`.env.example`](.env.example) for the full local-development template and its placeholder values. Vite embeds these values in the generated client bundle, so <u>**do not**</u> use them for secrets.
+
+> **Note:** `VITE_API_BASE_URL_PROXY` (shown in [`.env.example`](.env.example)) is a CI-only variable. The app never reads it — it is a GitHub repository variable used by the e2e workflow ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) to supply `VITE_API_BASE_URL` for tests. It does not need to be set for production deployments.
 
 ### Required for a Full Production Deployment
 
@@ -25,13 +34,13 @@ Set these in your CI/CD configuration or shell before running `bun run build`. S
 - `VITE_GITHUB_CLIENT_ID`: Public client ID of the GitHub OAuth application used for sign-in. Example: `Ov23liExampleClientId`.
 - `VITE_GITHUB_AUTH_API`: Base URL of the backend endpoint that completes GitHub OAuth authentication. _(This is used for GitHub login.)_ Example: `https://auth.[example-pmrapp-dev].com`.
 
-The API and download URLs are required for their respective application features. The GitHub OAuth values are required when GitHub sign-in is enabled; omit both only if the deployed application intentionally does not offer GitHub login.
+The API and download URLs are required for their respective features, and the GitHub OAuth values are required for GitHub login option. `vite build` fails if any required variable is missing or invalid.
 
 ### Optional or Deployment-Specific Variables
 
-- `VITE_GA_MEASUREMENT_ID`: Optional Google Analytics 4 measurement ID. Set it to a value such as `G-ABC123DEFG` to enable analytics; leave it unset to disable analytics.
+- `VITE_GA_MEASUREMENT_ID`: Google Analytics 4 measurement ID. Set it to a value such as `G-ABC123DEFG` to enable analytics; leave it unset to disable analytics.
 - `VITE_BASE_PATH`: Deployment path used for generated asset and router URLs. Use `/` for a root-domain deployment. It defaults to `/` when omitted. GitHub Pages project deployments instead use a repository path, such as `/pmrapp-frontend/`.
-- `VITE_ENABLE_GH_PAGES_SPA_REDIRECT`: Enables the GitHub Pages query-string redirect helper. It is optional and defaults to `false`. Set it to `true` only for GitHub Pages project deployments; use `false` for Nginx, S3/CloudFront, and other standard hosts with SPA rewrite rules.
+- `VITE_ENABLE_GH_PAGES_SPA_REDIRECT`: Enables the GitHub Pages query-string redirect helper. It defaults to `false`. Set it to `true` only for GitHub Pages project deployments; use `false` for Nginx, S3/CloudFront, and other standard hosts with SPA rewrite rules.
 
 For example, a standard root-domain production environment can use:
 
@@ -56,25 +65,17 @@ Build output is generated in `dist/`.
 
 ## Important Routing Behaviour (SPA)
 
-The app uses history mode routing (see [src/router/index.ts](src/router/index.ts)), so the hosting platform must return `index.html` for unknown routes.
+The app is a single-page application: the build output (`dist/`) only contains `index.html`, the compiled assets, and the files copied from `public/`. There are **no** physical files or folders on the server for application routes such as:
 
-Examples:
+- `/exposures` — the exposures listing page
+- `/exposures/4e4` — a specific exposure's detail page
+- `/workspaces/baylor_hollingworth_chandler_2002` — a specific workspace's detail page
 
-- `/exposures`
-- `/workspaces/some-alias`
+Once the browser has loaded `index.html`, the Vue Router (see [src/router/index.ts](src/router/index.ts)) decides which page to render. But if a user opens one of these URLs directly or refreshes the page, the server receives a request for a path that doesn't exist on disk and would normally respond with 404.
 
-If your server does not rewrite these requests to `index.html`, refreshing a deep link will return 404.
+**Therefore the hosting platform must return `index.html` for any request that doesn't match a real file** — commonly known as an "SPA fallback" (or "history-mode rewrite"). Worked examples for Nginx, CloudFront, and other hosts are given in the [Deployment Patterns](#deployment-patterns) section.
 
-## GitHub Pages Script Toggle
-
-The query-string redirect helper in [index.html](index.html) is now guarded by:
-
-- `VITE_ENABLE_GH_PAGES_SPA_REDIRECT=true` for GitHub Pages deployments.
-- `VITE_ENABLE_GH_PAGES_SPA_REDIRECT=false` for standard production hosting.
-
-For non-GitHub production deployments, the redirect script should stay disabled.
-
-The file [public/404.html](public/404.html) is only needed for the GitHub Pages fallback approach and is not required for standard production hosts with proper SPA rewrite rules.
+Without this fallback, refreshing a deep link such as `/exposures/4e4` returns 404.
 
 ## Deployment Patterns
 
@@ -98,23 +99,27 @@ sudo rsync -av --delete dist/ /var/www/pmrapp/
 
 ```nginx
 server {
-		listen 80;
-		server_name www.pmrapp.com pmrapp.com;
+  listen 80;
+  server_name www.pmrapp.com pmrapp.com;
 
-		root /var/www/pmrapp;
-		index index.html;
+  root /var/www/pmrapp;
+  index index.html;
 
-		location / {
-				try_files $uri $uri/ /index.html;
-		}
+  location / {
+    try_files $uri $uri/ /index.html;
+  }
 }
 ```
 
 4. Reload Nginx.
 
+```sh
+sudo systemctl reload nginx   # or: sudo nginx -s reload
+```
+
 ### Option 2: AWS S3 + CloudFront
 
-1. Build with production variables (`VITE_BASE_PATH=/`, redirect toggle `false`).
+1. Build with production variables (`VITE_BASE_PATH=/` and `VITE_ENABLE_GH_PAGES_SPA_REDIRECT=false`).
 2. Upload `dist/` contents to S3 bucket origin.
 3. Configure CloudFront custom error response to serve `/index.html` for 403/404 (SPA fallback).
 4. Attach your domain (for example `www.pmrapp.com`) and TLS certificate.
@@ -134,11 +139,11 @@ bun install --frozen-lockfile
 bun run build
 ```
 
-Then publish the `dist/` artifact using your platform-specific deploy mechanism.
+Then publish the `dist/` artefact using your platform's deployment mechanism.
 
 ## GitHub Actions Template for Production
 
-A non-GitHub Pages workflow template is available at [.github/workflows/deploy-production.yml](.github/workflows/deploy-production.yml).
+A non-GitHub Pages workflow template is available at [.github/workflows/deploy-production-template.yml](.github/workflows/deploy-production-template.yml).
 
 Behaviour:
 
@@ -147,8 +152,8 @@ Behaviour:
 
 Defaults in this template are aligned with standard production hosting:
 
-- `VITE_BASE_PATH='/'`
-- `VITE_ENABLE_GH_PAGES_SPA_REDIRECT='false'`
+- `VITE_BASE_PATH=/`
+- `VITE_ENABLE_GH_PAGES_SPA_REDIRECT=false`
 
 Before using it for live deployment, replace the placeholder step with your provider commands, for example:
 
@@ -157,16 +162,19 @@ Before using it for live deployment, replace the placeholder step with your prov
 
 ## Environment Profiles
 
-- GitHub Pages: `VITE_BASE_PATH=/pmrapp-frontend/` (or configured repository path).
-- GitHub Pages: `VITE_ENABLE_GH_PAGES_SPA_REDIRECT=true`.
-- Standard production: `VITE_BASE_PATH=/`.
-- Standard production: `VITE_ENABLE_GH_PAGES_SPA_REDIRECT=false`.
+- GitHub Pages:
+  - `VITE_BASE_PATH=/pmrapp-frontend/` (or another repository path)
+  - `VITE_ENABLE_GH_PAGES_SPA_REDIRECT=true`
+- Standard production:
+  - `VITE_BASE_PATH=/`
+  - `VITE_ENABLE_GH_PAGES_SPA_REDIRECT=false`
 
 ## Validation Checklist
 
 - Build succeeds with Bun.
-- `/` loads correctly on production domain.
-- Deep-link refresh works (for example `/workspaces/...` loads without 404).
+- `bun run build` fails with a clear message when a required variable is missing or invalid (verify by unsetting one and rebuilding).
+- `/` loads correctly on the production domain.
+- Deep-link refresh works (e.g., `/workspaces/...` doesn't return 404).
 - API requests resolve to production backend URLs.
 - OAuth callback and login flow work.
-- Optional analytics loads only when configured.
+- Optional analytics loads, when configured.
