@@ -13,17 +13,17 @@ This document covers deployment to production environments other than GitHub Pag
 - Node.js: `>=22.12.0` (see [package.json](package.json)).
 - [Bun](https://bun.sh/) `>=1.3.3` (used for install/build commands in this repository).
 - Environment variables configured for your production API/auth endpoints:
-  - `VITE_API_BASE_URL`
-  - `VITE_DOWNLOAD_API`
-  - `VITE_GITHUB_CLIENT_ID`
-  - `VITE_GITHUB_AUTH_API`
-  - `VITE_GA_MEASUREMENT_ID`
-  - `VITE_BASE_PATH`
-  - `VITE_ENABLE_GH_PAGES_SPA_REDIRECT`
+  - `VITE_API_BASE_URL`;
+  - `VITE_DOWNLOAD_API`;
+  - `VITE_GITHUB_CLIENT_ID`;
+  - `VITE_GITHUB_AUTH_API`;
+  - `VITE_GA_MEASUREMENT_ID`;
+  - `VITE_BASE_PATH`; and
+  - `VITE_ENABLE_GH_PAGES_SPA_REDIRECT`.
 
 ## Build-Time Environment Variables
 
-Set these environment variables in your CI/CD configuration or shell before running `bun run build`. See [`.env.example`](.env.example) for the full local-development template and its placeholder values. Vite embeds these values in the generated client bundle, so <u>**do not**</u> use them for secrets.
+Set these environment variables in your CI/CD configuration or shell before running `bun run build`. See [`.env.example`](.env.example) for the full local-development template and its placeholder values. Vite embeds these values in the generated client bundle, so <ins>**do not**</ins> use them for secrets.
 
 > **Note:** `VITE_API_BASE_URL_PROXY` (shown in [`.env.example`](.env.example)) is a CI-only variable. The app never reads it — it is a GitHub repository variable used by the e2e workflow ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) to supply `VITE_API_BASE_URL` for tests. It does not need to be set for production deployments.
 
