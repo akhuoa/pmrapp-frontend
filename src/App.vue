@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import BackToTop from '@/components/atoms/BackToTop.vue'
 import BetaRibbon from '@/components/atoms/BetaRibbon.vue'
+import FeedbackButton from '@/components/atoms/FeedbackButton.vue'
 import CookieBanner from '@/components/molecules/CookieBanner.vue'
 import PreviewBanner from '@/components/molecules/PreviewBanner.vue'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
@@ -13,6 +14,7 @@ import DefaultLayout from '@/layouts/DefaultLayout.vue'
       <RouterView />
     </DefaultLayout>
     <BackToTop />
+    <FeedbackButton />
   </div>
   <CookieBanner />
   <BetaRibbon />
