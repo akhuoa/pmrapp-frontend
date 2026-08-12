@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import CloseButton from '@/components/atoms/CloseButton.vue'
 import { COOKIE } from '@/constants/global'
 import { Cookie } from '@/utils/cookie'
@@ -47,6 +47,9 @@ onMounted(async () => {
   if (dismissed === 'true') {
     isVisible.value = false
   }
+})
+
+onMounted(() => {
   updateNotificationBarHeight()
   window.addEventListener('resize', handleResize)
   handleResize()
@@ -65,7 +68,7 @@ onBeforeUnmount(() => {
   >
     <div
       ref="notificationContainerEl"
-      class="container mx-auto px-4 py-2 flex items-center justify-center gap-2 text-sm">
+      class="container relative mx-auto px-4 py-2 flex items-center justify-center gap-2 text-sm">
       <slot />
     </div>
     <CloseButton
