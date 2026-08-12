@@ -10,7 +10,7 @@ import { PMR2_URL } from '@/constants/global'
     <ActionButton
       :href="PMR2_URL"
       variant="secondary"
-      class="lg:absolute lg:left-4"
+      class="absolute left-4"
       size="sm"
     >
       <span class="hidden md:block">Go back to production</span>
@@ -21,7 +21,7 @@ import { PMR2_URL } from '@/constants/global'
     </ActionButton>
     <div class="flex items-center gap-2 ml-auto lg:ml-0">
       <span class="hidden md:block">You are viewing a preview version.</span>
-      <span class="md:hidden">You're on preview.</span>
+      <span class="md:hidden">You are on preview.</span>
       <ActionButton
         to="/feature-comparison"
         variant="primary"
