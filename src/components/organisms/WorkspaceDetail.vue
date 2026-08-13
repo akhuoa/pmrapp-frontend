@@ -90,11 +90,11 @@ const workspaceIssueUrl = computed(() => {
     return `${GITHUB_ISSUES_URL}/new`
   }
 
-  const workspaceUrl = window.location.origin + `/workspace/${props.alias}`
+  const workspaceUrl = `${window.location.origin}/workspace/${props.alias}`
   const params = new URLSearchParams({
     labels: 'workspace, preview-feedback',
     template: 'workspace.yml',
-    title: `[Workspace]: ${pageTitle.value}`,
+    title: `[Workspace]: ${error?.value ? error.value.title : pageTitle.value}`,
     'workspace-url': workspaceUrl,
   })
 
@@ -159,6 +159,20 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
     :error="error.message"
   />
 
+  <div class="pt-6" v-if="error">
+    <ActionButton
+      variant="link"
+      size="sm"
+      :href="workspaceIssueUrl"
+      target="_blank"
+      rel="noopener noreferrer"
+      content-section="Workspace Detail"
+    >
+      <BugIcon class="w-4 h-4" />
+      <span>Report a problem with this workspace</span>
+    </ActionButton>
+  </div>
+
   <LoadingBox v-else-if="isLoading" message="Loading workspace..." />
 
   <div v-else-if="workspaceInfo">
@@ -210,10 +224,9 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
         </div>
       </div>
 
-      <div class="flex flex-col lg:flex-row items-start lg:items-center gap-2">
-        <span class="font-bold text-gray-600 dark:text-gray-400">Report issue:</span>
+      <div class="flex flex-row justify-end">
         <ActionButton
-          variant="secondary"
+          variant="link"
           size="sm"
           :href="workspaceIssueUrl"
           target="_blank"
@@ -221,7 +234,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
           content-section="Workspace Detail"
         >
           <BugIcon class="w-4 h-4" />
-          <span>Report issue</span>
+          <span>Report a problem with this workspace</span>
         </ActionButton>
       </div>
     </div>

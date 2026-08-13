@@ -9,6 +9,7 @@ import CopyButton from '@/components/atoms/CopyButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import WrapButton from '@/components/atoms/WrapButton.vue'
+import BugIcon from '@/components/icons/BugIcon.vue'
 import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
@@ -16,9 +17,10 @@ import LoadingIcon from '@/components/icons/LoadingIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import MathTransformOptions from '@/components/molecules/MathTransformOptions.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
+import WarningBlock from '@/components/molecules/WarningBlock.vue'
 import WorkspaceFileBrowser from '@/components/molecules/WorkspaceFileBrowser.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
-import { TITLE } from '@/constants/global'
+import { GITHUB_ISSUES_URL, TITLE } from '@/constants/global'
 import { downloadCOMBINEArchive, getWorkspaceArchiveUrl } from '@/services/downloadUrlService'
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
@@ -126,6 +128,7 @@ const availableViews = ref<ViewEntry[]>([])
 const isCitationDetailsOpen = ref(false)
 const hasOtherRelatedModels = ref(false)
 const isDownloadingCOMBINE = ref(false)
+const isFileNotFound = ref(false)
 const loadedFileTitle = ref('')
 const { goBack } = useBackNavigation('/exposures')
 
@@ -219,6 +222,27 @@ const pageTitle = computed(() => {
   }
 
   return exposureTitle.value
+})
+
+const exposureIssueUrl = computed(() => {
+  if (!props.alias) {
+    return `${GITHUB_ISSUES_URL}/new`
+  }
+
+  let exposureUrl = `${window.location.origin}/exposure/${props.alias}`
+
+  if (props.file) {
+    exposureUrl += `/${props.file}`
+  }
+
+  const params = new URLSearchParams({
+    labels: 'exposure, preview-feedback',
+    template: 'exposure.yml',
+    title: `[Exposure]: ${error?.value ? error.value.title : exposureTitle.value}`,
+    'exposure-url': exposureUrl,
+  })
+
+  return `${GITHUB_ISSUES_URL}/new?${params.toString()}`
 })
 
 const openCORFiles = computed(() => {
@@ -526,6 +550,7 @@ const resetState = () => {
   generatedCode.value = ''
   generatedCodeFilename.value = ''
   hasOtherRelatedModels.value = false
+  isFileNotFound.value = false
   licenseInfo.value = DEFAULT_LICENSE
   metadataJSON.value = {}
   rawMathsData.value = []
@@ -551,6 +576,12 @@ const loadInitialView = async () => {
   }
 
   if (!fileWithViews) {
+    // Flag the file as not found only when it is not part of the exposure at all,
+    // so that valid files without views keep the current silent behaviour.
+    const fileExists =
+      exposureInfo.value.files.some((entry) => entry[0] === props.file) ||
+      exposureFiles.some((file) => file.workspace_file_path === props.file)
+    isFileNotFound.value = Boolean(props.file) && !fileExists
     return
   }
 
@@ -678,6 +709,19 @@ onMounted(async () => {
     :error="error.message"
   />
 
+  <div class="pt-6" v-if="error">
+    <ActionButton
+      variant="link"
+      size="sm"
+      :href="exposureIssueUrl"
+      target="_blank"
+      content-section="Exposure Detail"
+    >
+      <BugIcon class="w-4 h-4" />
+      <span>Report a problem with this {{ props.file ? 'resource' : 'exposure'}}</span>
+    </ActionButton>
+  </div>
+
   <LoadingBox v-else-if="isLoading" message="Loading exposure..." />
 
   <div v-else-if="exposureInfo" class="flex flex-col lg:flex-row gap-8">
@@ -686,7 +730,40 @@ onMounted(async () => {
         :title="pageTitle"
       />
 
-      <div v-if="props.view === 'cellml_codegen'" class="relative">
+      <WarningBlock
+        v-if="isFileNotFound"
+        title="File not found"
+      >
+        <template #content>
+          <div class="text-sm">
+            <p>The file <strong>{{ props.file }}</strong> does not exist in this exposure.</p>
+            <p class="mt-1">The information shown on this page relates to the exposure itself, not to this file.</p>
+          </div>
+        </template>
+        <template #footer>
+          <ActionButton
+            variant="primary"
+            size="sm"
+            :to="`/exposures/${props.alias}`"
+            content-section="Exposure Detail"
+          >
+            Go to exposure
+          </ActionButton>
+          <ActionButton
+            variant="link"
+            size="sm"
+            :href="exposureIssueUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            content-section="Exposure Detail"
+          >
+            <BugIcon class="w-4 h-4" />
+            <span>Report a problem with this resource</span>
+          </ActionButton>
+        </template>
+      </WarningBlock>
+
+      <div v-else-if="props.view === 'cellml_codegen'" class="relative">
         <nav>
           <ul class="space-x-2 mb-4 inline-flex">
             <li
@@ -736,7 +813,7 @@ onMounted(async () => {
           :options="mathFormatOptions"
           @update:options="mathFormatOptions = $event"
         />
-        <div class="p-4">
+        <div class="p-4 pt-0">
           <p v-if="!mathsJSON.length" class="text-sm text-gray-500 dark:text-gray-400">No mathematics content available.</p>
           <template v-else>
             <div v-for="value in mathsJSON" :key="value[0]"
@@ -810,7 +887,7 @@ onMounted(async () => {
           </div>
         </dl>
       </section>
-      <section class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+      <section v-if="!isFileNotFound" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
         <div class="flex flex-row justify-between mb-3">
           <h4 class="text-lg font-semibold">Citation</h4>
           <CopyButton
@@ -1016,7 +1093,7 @@ onMounted(async () => {
           </dl>
         </div>
       </section>
-      <section v-if="licenseInfo" class="pt-6 border-t border-gray-200 dark:border-gray-700">
+      <section v-if="licenseInfo" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Licence</h4>
         <nav>
           <ul class="space-y-2">
@@ -1027,6 +1104,19 @@ onMounted(async () => {
             </li>
           </ul>
         </nav>
+      </section>
+      <section class="pt-6 border-t border-gray-200 dark:border-gray-700">
+        <ActionButton
+          variant="link"
+          size="sm"
+          :href="exposureIssueUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          content-section="Exposure Detail"
+        >
+          <BugIcon class="w-4 h-4" />
+          <span>Report a problem with this {{ props.file ? 'resource' : 'exposure'}}</span>
+        </ActionButton>
       </section>
     </aside>
   </div>
