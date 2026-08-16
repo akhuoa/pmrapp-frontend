@@ -198,6 +198,18 @@ const refreshLoadedFileTitle = async () => {
   }
 }
 
+const actionToolbarWidth = computed(() => {
+  if (error.value || isLoading.value) {
+    return 'w-full'
+  }
+
+  return [
+    'w-full ',
+    'lg:w-[calc(100%-theme(spacing.72)-theme(spacing.8))]',
+    'xl:w-[calc(100%-theme(spacing.80)-theme(spacing.8))]'
+  ]
+})
+
 const exposureTitle = computed(() => {
   if (loadedFileTitle.value) {
     return loadedFileTitle.value
@@ -229,17 +241,11 @@ const exposureIssueUrl = computed(() => {
     return `${GITHUB_ISSUES_URL}/new`
   }
 
-  let exposureUrl = `${window.location.origin}/exposure/${props.alias}`
-
-  if (props.file) {
-    exposureUrl += `/${props.file}`
-  }
-
   const params = new URLSearchParams({
-    labels: 'exposure, preview-feedback',
+    labels: 'exposure,preview-feedback',
     template: 'exposure.yml',
-    title: `[Exposure]: ${error?.value ? error.value.title : exposureTitle.value}`,
-    'exposure-url': exposureUrl,
+    title: `[Exposure]: ${error.value ? error.value.title : exposureTitle.value}`,
+    'exposure-url': citationUrl.value,
   })
 
   return `${GITHUB_ISSUES_URL}/new?${params.toString()}`
@@ -697,30 +703,30 @@ onMounted(async () => {
 </script>
 
 <template>
-  <BackButton
-    :label="backButtonLabel"
-    content-section="Exposure Detail"
-    :on-click="goBack"
-  />
-
-  <ErrorBlock
-    v-if="error"
-    :title="error.title"
-    :error="error.message"
-  />
-
-  <div class="pt-6" v-if="error">
+  <div class="flex flex-wrap gap-2 justify-between mb-6" :class="actionToolbarWidth">
+    <BackButton
+      :label="backButtonLabel"
+      content-section="Exposure Detail"
+      :on-click="goBack"
+    />
     <ActionButton
       variant="link"
-      size="sm"
+      size="md"
       :href="exposureIssueUrl"
       target="_blank"
+      rel="noopener noreferrer"
       content-section="Exposure Detail"
     >
       <BugIcon class="w-4 h-4" />
       <span>Report a problem with this {{ props.file ? 'resource' : 'exposure'}}</span>
     </ActionButton>
   </div>
+
+  <ErrorBlock
+    v-if="error"
+    :title="error.title"
+    :error="error.message"
+  />
 
   <LoadingBox v-else-if="isLoading" message="Loading exposure..." />
 
@@ -748,17 +754,6 @@ onMounted(async () => {
             content-section="Exposure Detail"
           >
             Go to exposure
-          </ActionButton>
-          <ActionButton
-            variant="link"
-            size="sm"
-            :href="exposureIssueUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            content-section="Exposure Detail"
-          >
-            <BugIcon class="w-4 h-4" />
-            <span>Report a problem with this resource</span>
           </ActionButton>
         </template>
       </WarningBlock>
@@ -840,7 +835,7 @@ onMounted(async () => {
         :on-path-change="handleFileBrowserPathChange"
       />
     </article>
-    <aside class="w-full lg:w-70 xl:w-80 lg:flex-shrink-0">
+    <aside class="w-full lg:w-72 xl:w-80 lg:flex-shrink-0">
       <section class="pb-6">
         <h4 class="text-lg font-semibold mb-3">Source</h4>
         <div class="text-sm leading-relaxed">
@@ -1093,7 +1088,7 @@ onMounted(async () => {
           </dl>
         </div>
       </section>
-      <section v-if="licenseInfo" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+      <section v-if="licenseInfo" class="pt-6 border-t border-gray-200 dark:border-gray-700">
         <h4 class="text-lg font-semibold mb-3">Licence</h4>
         <nav>
           <ul class="space-y-2">
@@ -1104,19 +1099,6 @@ onMounted(async () => {
             </li>
           </ul>
         </nav>
-      </section>
-      <section class="pt-6 border-t border-gray-200 dark:border-gray-700">
-        <ActionButton
-          variant="link"
-          size="sm"
-          :href="exposureIssueUrl"
-          target="_blank"
-          rel="noopener noreferrer"
-          content-section="Exposure Detail"
-        >
-          <BugIcon class="w-4 h-4" />
-          <span>Report a problem with this {{ props.file ? 'resource' : 'exposure'}}</span>
-        </ActionButton>
       </section>
     </aside>
   </div>

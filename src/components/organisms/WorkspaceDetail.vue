@@ -90,11 +90,20 @@ const workspaceIssueUrl = computed(() => {
     return `${GITHUB_ISSUES_URL}/new`
   }
 
-  const workspaceUrl = `${window.location.origin}/workspace/${props.alias}`
+  const resolved = router.resolve(
+    props.commitId && props.path
+      ? {
+        name: 'workspace-file-detail',
+        params: { alias: props.alias, commitId: props.commitId, path: props.path },
+      }
+      : { name: 'workspace-detail', params: { alias: props.alias } },
+   )
+  const decodedHref = decodeURIComponent(resolved.href)
+  const workspaceUrl = new URL(decodedHref, window.location.origin).toString()
   const params = new URLSearchParams({
-    labels: 'workspace, preview-feedback',
+    labels: 'workspace,preview-feedback',
     template: 'workspace.yml',
-    title: `[Workspace]: ${error?.value ? error.value.title : pageTitle.value}`,
+    title: `[Workspace]: ${error.value ? error.value.title : pageTitle.value}`,
     'workspace-url': workspaceUrl,
   })
 
@@ -147,22 +156,15 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
 </script>
 
 <template>
-  <BackButton
-    :label="backButtonText"
-    content-section="Workspace Detail"
-    :on-click="goBack"
-  />
-
-  <ErrorBlock
-    v-if="error"
-    :title="error.title"
-    :error="error.message"
-  />
-
-  <div class="pt-6" v-if="error">
+  <div class="flex flex-wrap gap-2 justify-between mb-6">
+    <BackButton
+      :label="backButtonText"
+      content-section="Workspace Detail"
+      :on-click="goBack"
+    />
     <ActionButton
       variant="link"
-      size="sm"
+      size="md"
       :href="workspaceIssueUrl"
       target="_blank"
       rel="noopener noreferrer"
@@ -172,6 +174,12 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
       <span>Report a problem with this workspace</span>
     </ActionButton>
   </div>
+
+  <ErrorBlock
+    v-if="error"
+    :title="error.title"
+    :error="error.message"
+  />
 
   <LoadingBox v-else-if="isLoading" message="Loading workspace..." />
 
@@ -222,20 +230,6 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
             <span>Complete archive (as a <code class="code-inline bg-gray-100 dark:bg-gray-700">.tgz</code> file)</span>
           </ActionButton>
         </div>
-      </div>
-
-      <div class="flex flex-row justify-end">
-        <ActionButton
-          variant="link"
-          size="sm"
-          :href="workspaceIssueUrl"
-          target="_blank"
-          rel="noopener noreferrer"
-          content-section="Workspace Detail"
-        >
-          <BugIcon class="w-4 h-4" />
-          <span>Report a problem with this workspace</span>
-        </ActionButton>
       </div>
     </div>
 
