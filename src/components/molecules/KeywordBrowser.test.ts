@@ -50,6 +50,11 @@ describe('KeywordBrowser', () => {
 
     // Initialise the search store.
     searchStore = useSearchStore()
+
+    // Stub fetchCategories
+    // so KeywordBrowser's onMounted hook never makes a real network call,
+    // which is flaky/unavailable in CI environments.
+    vi.spyOn(searchStore, 'fetchCategories').mockResolvedValue(undefined)
   })
 
   const createWrapper = (props = {}) => {
@@ -171,7 +176,6 @@ describe('KeywordBrowser', () => {
     ]
 
     wrapper = createWrapper()
-    // Set the filter to match no terms.
     const searchField = wrapper.findComponent({ name: 'SearchField' })
     await searchField.vm.$emit('update:modelValue', 'nonexistent')
     await wrapper.vm.$nextTick()
