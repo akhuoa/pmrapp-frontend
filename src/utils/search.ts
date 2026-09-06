@@ -1,6 +1,7 @@
 import type { LocationQuery, LocationQueryRaw } from 'vue-router'
 import type { SortableEntity } from '@/types/common'
-import type { QueryFilterOptions, SearchFilter, TextSegment } from '@/types/search'
+import type { QueryFilterOptions, SearchFilter, SearchResult, TextSegment } from '@/types/search'
+import { ensureTrailingSlash } from '@/utils/path'
 import { DEFAULT_SORT_OPTION, isValidSortOption } from '@/utils/sort'
 
 /**
@@ -40,6 +41,19 @@ export const buildSearchQuery = (
   currentQuery: LocationQuery,
 ): LocationQueryRaw => {
   return buildQuerySearchQuery('', [{ kind, term }], currentQuery)
+}
+
+export const getQueryTextFromRouteQuery = (query: LocationQuery): string => {
+  const value = query.query ?? query.SearchableText
+
+  if (Array.isArray(value)) {
+    const firstValue = value.find(
+      (item): item is string => typeof item === 'string' && item.trim().length > 0,
+    )
+    return firstValue?.trim() ?? ''
+  }
+
+  return typeof value === 'string' ? value.trim() : ''
 }
 
 export const buildQuerySearchQuery = (
@@ -178,4 +192,23 @@ export function filterItemsByQuery<T extends SortableEntity>(options: QueryFilte
     const matchesId = item.entity.id.toString().includes(trimmedQuery)
     return matchesSearchText || matchesId
   })
+}
+
+/**
+ * Resolves the destination link for a search result item.
+ * Ensures a single trailing slash is present without duplicate slashes.
+ * Falls back to exposure alias or empty string.
+ */
+export const getSearchResultLink = (item: SearchResult): string => {
+  const uri = item.data?.aliased_uri?.[0]?.trim()
+  if (uri) {
+    return ensureTrailingSlash(uri)
+  }
+
+  const alias = item.data?.exposure_alias?.[0]?.trim()
+  if (alias) {
+    return `/exposure/${alias}/`
+  }
+
+  return ''
 }

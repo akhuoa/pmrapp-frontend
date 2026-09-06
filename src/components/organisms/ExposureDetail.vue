@@ -9,6 +9,7 @@ import CopyButton from '@/components/atoms/CopyButton.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import TermButton from '@/components/atoms/TermButton.vue'
 import WrapButton from '@/components/atoms/WrapButton.vue'
+import BugIcon from '@/components/icons/BugIcon.vue'
 import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
@@ -16,10 +17,11 @@ import LoadingIcon from '@/components/icons/LoadingIcon.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import MathTransformOptions from '@/components/molecules/MathTransformOptions.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
+import WarningBlock from '@/components/molecules/WarningBlock.vue'
 import WorkspaceFileBrowser from '@/components/molecules/WorkspaceFileBrowser.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
-import { TITLE } from '@/constants/global'
-import { downloadCOMBINEArchive, downloadWorkspaceArchive } from '@/services/downloadUrlService'
+import { GITHUB_ISSUES_URL, TITLE } from '@/constants/global'
+import { downloadCOMBINEArchive, getWorkspaceArchiveUrl } from '@/services/downloadUrlService'
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
 import type { ErrorInfo } from '@/types/error'
@@ -125,15 +127,27 @@ const licenseInfo = ref<string>(DEFAULT_LICENSE)
 const availableViews = ref<ViewEntry[]>([])
 const isCitationDetailsOpen = ref(false)
 const hasOtherRelatedModels = ref(false)
-const isDownloadingWorkspaceZip = ref(false)
-const isDownloadingWorkspaceTgz = ref(false)
 const isDownloadingCOMBINE = ref(false)
+const isFileNotFound = ref(false)
 const loadedFileTitle = ref('')
 const { goBack } = useBackNavigation('/exposures')
 
 const router = useRouter()
 const route = useRoute()
 const searchStore = useSearchStore()
+
+const backButtonLabel = computed(() => {
+  // Need to access route.path for Vue reactivity.
+  void route.path
+  const backPath = router.options.history.state.back
+  const backPathname = typeof backPath === 'string' ? backPath.split(/[?#]/)[0] : ''
+
+  if (backPathname === '/exposures') {
+    return 'Back to exposures'
+  }
+
+  return backPath ? 'Back' : 'Back to exposures'
+})
 
 const fileBrowserPath = computed(() => {
   const p = route.query.path
@@ -143,10 +157,18 @@ const fileBrowserPath = computed(() => {
 // Generates a citation URL from the current route, excluding query parameters and the hash.
 // It resolves the application's base path from vite.config to construct the complete URL.
 // It also maintains reactivity for navigations.
+// Params are built from props rather than route.params because the :file(.+) route param
+// captures a trailing slash inconsistently depending on which route alias was matched.
 const citationUrl = computed(() => {
-  const resolved = router.resolve({ name: route.name, params: route.params })
-  const resolvedURL = new URL(resolved.href, window.location.origin)
-  const decodedHref = decodeURIComponent(resolved.href)
+  const params: Record<string, string> = { alias: props.alias }
+  if (props.file) params.file = props.file
+  if (props.view) params.view = props.view
+
+  const resolved = router.resolve({ name: route.name, params })
+  // File-only routes need a trailing slash so production's raw-file server serves the page instead of downloading the file.
+  const href = props.file && !props.view ? `${resolved.href}/` : resolved.href
+  const resolvedURL = new URL(href, window.location.origin)
+  const decodedHref = decodeURIComponent(href)
 
   return resolvedURL.origin + decodedHref
 })
@@ -184,6 +206,18 @@ const refreshLoadedFileTitle = async () => {
   }
 }
 
+const actionToolbarWidth = computed(() => {
+  if (error.value || isLoading.value) {
+    return 'w-full'
+  }
+
+  return [
+    'w-full ',
+    'lg:w-[calc(100%-theme(spacing.72)-theme(spacing.8))]',
+    'xl:w-[calc(100%-theme(spacing.80)-theme(spacing.8))]'
+  ]
+})
+
 const exposureTitle = computed(() => {
   if (loadedFileTitle.value) {
     return loadedFileTitle.value
@@ -210,6 +244,21 @@ const pageTitle = computed(() => {
   return exposureTitle.value
 })
 
+const exposureIssueUrl = computed(() => {
+  if (!props.alias) {
+    return `${GITHUB_ISSUES_URL}/new`
+  }
+
+  const params = new URLSearchParams({
+    labels: 'exposure,preview-feedback',
+    template: 'exposure.yml',
+    title: `[Exposure]: ${error.value ? error.value.title : exposureTitle.value}`,
+    'exposure-url': citationUrl.value,
+  })
+
+  return `${GITHUB_ISSUES_URL}/new?${params.toString()}`
+})
+
 const openCORFiles = computed(() => {
   if (!exposureInfo.value) return []
 
@@ -233,27 +282,20 @@ const createdYear = computed(() => {
   return formatYear(exposureInfo.value.exposure.created_ts)
 })
 
-const handleDownloadWorkspaceArchive = async (format: 'zip' | 'tgz') => {
-  if (!exposureInfo.value) return
+const workspaceArchiveFilename = computed(() => {
+  if (!exposureInfo.value) return ''
 
-  const fileName = exposureInfo.value.exposure.description || ''
-  const loadingRef = format === 'zip' ? isDownloadingWorkspaceZip : isDownloadingWorkspaceTgz
-  loadingRef.value = true
+  return exposureInfo.value.exposure.description || exposureInfo.value.workspace_alias
+})
 
-  try {
-    await downloadWorkspaceArchive(
-      exposureInfo.value.workspace.url,
-      exposureInfo.value.workspace_alias,
-      exposureInfo.value.exposure.commit_id,
-      format,
-      fileName,
-    )
-  } catch (err) {
-    console.error('Error downloading workspace archive:', err)
-  } finally {
-    loadingRef.value = false
-  }
-}
+const workspaceArchiveUrlBase = computed(() => {
+  if (!exposureInfo.value) return ''
+
+  return getWorkspaceArchiveUrl(
+    exposureInfo.value.workspace_alias,
+    exposureInfo.value.exposure.commit_id,
+  )
+})
 
 const handleDownloadCOMBINEArchive = async () => {
   const exposureAlias = props.alias
@@ -522,6 +564,7 @@ const resetState = () => {
   generatedCode.value = ''
   generatedCodeFilename.value = ''
   hasOtherRelatedModels.value = false
+  isFileNotFound.value = false
   licenseInfo.value = DEFAULT_LICENSE
   metadataJSON.value = {}
   rawMathsData.value = []
@@ -547,6 +590,12 @@ const loadInitialView = async () => {
   }
 
   if (!fileWithViews) {
+    // Flag the file as not found only when it is not part of the exposure at all,
+    // so that valid files without views keep the current silent behaviour.
+    const fileExists =
+      exposureInfo.value.files.some((entry) => entry[0] === props.file) ||
+      exposureFiles.some((file) => file.workspace_file_path === props.file)
+    isFileNotFound.value = Boolean(props.file) && !fileExists
     return
   }
 
@@ -662,11 +711,24 @@ onMounted(async () => {
 </script>
 
 <template>
-  <BackButton
-    label="Back to exposures"
-    content-section="Exposure Detail"
-    :on-click="goBack"
-  />
+  <div class="flex flex-wrap gap-2 justify-between mb-6" :class="actionToolbarWidth">
+    <BackButton
+      :label="backButtonLabel"
+      content-section="Exposure Detail"
+      :on-click="goBack"
+    />
+    <ActionButton
+      variant="link"
+      size="md"
+      :href="exposureIssueUrl"
+      target="_blank"
+      rel="noopener noreferrer"
+      content-section="Exposure Detail"
+    >
+      <BugIcon class="w-4 h-4" />
+      <span>Report a problem with this {{ props.file ? 'resource' : 'exposure'}}</span>
+    </ActionButton>
+  </div>
 
   <ErrorBlock
     v-if="error"
@@ -682,7 +744,29 @@ onMounted(async () => {
         :title="pageTitle"
       />
 
-      <div v-if="props.view === 'cellml_codegen'" class="relative">
+      <WarningBlock
+        v-if="isFileNotFound"
+        title="File not found"
+      >
+        <template #content>
+          <div class="text-sm">
+            <p>The file <strong>{{ props.file }}</strong> does not exist in this exposure.</p>
+            <p class="mt-1">The information shown on this page relates to the exposure itself, not to this file.</p>
+          </div>
+        </template>
+        <template #footer>
+          <ActionButton
+            variant="primary"
+            size="sm"
+            :to="`/exposures/${props.alias}`"
+            content-section="Exposure Detail"
+          >
+            Go to exposure
+          </ActionButton>
+        </template>
+      </WarningBlock>
+
+      <div v-else-if="props.view === 'cellml_codegen'" class="relative">
         <nav>
           <ul class="space-x-2 mb-4 inline-flex">
             <li
@@ -732,7 +816,7 @@ onMounted(async () => {
           :options="mathFormatOptions"
           @update:options="mathFormatOptions = $event"
         />
-        <div class="p-4">
+        <div class="p-4 pt-0">
           <p v-if="!mathsJSON.length" class="text-sm text-gray-500 dark:text-gray-400">No mathematics content available.</p>
           <template v-else>
             <div v-for="value in mathsJSON" :key="value[0]"
@@ -759,7 +843,7 @@ onMounted(async () => {
         :on-path-change="handleFileBrowserPathChange"
       />
     </article>
-    <aside class="w-full lg:w-70 xl:w-80 lg:flex-shrink-0">
+    <aside class="w-full lg:w-72 xl:w-80 lg:flex-shrink-0">
       <section class="pb-6">
         <h4 class="text-lg font-semibold mb-3">Source</h4>
         <div class="text-sm leading-relaxed">
@@ -806,7 +890,7 @@ onMounted(async () => {
           </div>
         </dl>
       </section>
-      <section class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
+      <section v-if="!isFileNotFound" class="pt-6 pb-6 border-t border-gray-200 dark:border-gray-700">
         <div class="flex flex-row justify-between mb-3">
           <h4 class="text-lg font-semibold">Citation</h4>
           <CopyButton
@@ -872,7 +956,7 @@ onMounted(async () => {
               class="text-sm"
             >
               <RouterLink
-                :to="`/exposures/${props.alias}/${entry[0]}`"
+                :to="`/exposures/${props.alias}/${entry[0]}/`"
                 class="inline-flex items-center gap-2 break-all transition-colors"
                 :class="
                   props.file === entry[0]
@@ -895,12 +979,11 @@ onMounted(async () => {
               <ActionButton
                 variant="secondary"
                 size="sm"
-                :disabled="isDownloadingWorkspaceZip"
-                @click="handleDownloadWorkspaceArchive('zip')"
+                :href="`${workspaceArchiveUrlBase}zip`"
+                :download="`${workspaceArchiveFilename}.zip`"
                 content-section="Exposure Detail"
               >
-                <LoadingIcon v-if="isDownloadingWorkspaceZip" class="w-4 h-4" />
-                <DownloadIcon v-else class="w-4 h-4" />
+                <DownloadIcon class="w-4 h-4" />
                 <span>Complete archive (as a <code class="code-inline bg-gray-100 dark:bg-gray-700">.zip</code> file)</span>
               </ActionButton>
             </li>
@@ -908,12 +991,11 @@ onMounted(async () => {
               <ActionButton
                 variant="secondary"
                 size="sm"
-                :disabled="isDownloadingWorkspaceTgz"
-                @click="handleDownloadWorkspaceArchive('tgz')"
+                :href="`${workspaceArchiveUrlBase}tgz`"
+                :download="`${workspaceArchiveFilename}.tgz`"
                 content-section="Exposure Detail"
               >
-                <LoadingIcon v-if="isDownloadingWorkspaceTgz" class="w-4 h-4" />
-                <DownloadIcon v-else class="w-4 h-4" />
+                <DownloadIcon class="w-4 h-4" />
                 <span>Complete archive (as a <code class="code-inline bg-gray-100 dark:bg-gray-700">.tgz</code> file)</span>
               </ActionButton>
             </li>

@@ -4,27 +4,39 @@ import { createGtag } from 'vue-gtag'
 import './assets/main.css'
 
 import App from './App.vue'
+import { LOGIN_DISABLED } from './constants/auth'
 import router from './router'
 import { useAuthStore } from './stores/auth'
 
 const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID
-const gtag = createGtag({
-  tagId: GA_MEASUREMENT_ID,
-  pageTracker: {
-    router,
-  },
-})
+const isCypress = typeof window !== 'undefined' && 'Cypress' in window
 
 const app = createApp(App)
 const pinia = createPinia()
 
 app.use(pinia)
 app.use(router)
-app.use(gtag)
+
+if (GA_MEASUREMENT_ID && !isCypress) {
+  const gtag = createGtag({
+    tagId: GA_MEASUREMENT_ID,
+    pageTracker: {
+      router,
+    },
+  })
+  app.use(gtag)
+}
 
 // Initialise authentication state from local storage.
 const authStore = useAuthStore()
-authStore.initAuth()
+
+// When login is disabled, any previously stored authentication data is stale
+// and should be removed so that it is not left behind in storage.
+if (LOGIN_DISABLED) {
+  authStore.clearAuth()
+} else {
+  authStore.initAuth()
+}
 
 // Synchronises authentication state across browser tabs.
 // When another tab logs in or out, localStorage updates and triggers the storage event in all other tabs.

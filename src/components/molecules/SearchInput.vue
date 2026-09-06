@@ -132,6 +132,10 @@ const toggleAdvancedSearch = () => {
   showAdvancedSearch.value = !showAdvancedSearch.value
 }
 
+const showBackdrop = computed(() => {
+  return showAdvancedSearch.value && !props.inOverlay
+})
+
 const handleBackdropClick = () => {
   searchInputRef.value?.inputRef?.blur()
   isSearchFocused.value = false
@@ -171,20 +175,23 @@ defineExpose({
 </script>
 
 <template>
-  <div :class="`relative ${isSearchFocused ? 'z-100' : ''}`">
+  <div class="relative">
     <!-- Backdrop overlay (only when not in SearchOverlay). -->
     <div
-      v-if="showAdvancedSearch && !props.inOverlay"
-      class="fixed inset-0 bg-gray-600/75 dark:bg-gray-900/75 backdrop-blur-sm z-100"
+      v-if="showBackdrop"
+      class="fixed inset-0 bg-gray-300/75 dark:bg-gray-700/75 md:bg-gray-600/75 md:dark:bg-gray-900/75 backdrop-blur-sm z-100"
       @click="handleBackdropClick"
     ></div>
-    <div class="flex items-center justify-between w-full transition-all relative z-200">
+    <div
+      class="flex flex-col md:flex-row items-center md:justify-between gap-2 w-full transition-all relative"
+      :class="{'z-200': showBackdrop}"
+    >
       <SearchField
         ref="searchInputRef"
         v-model="searchInput"
         placeholder="Start typing to search..."
         ariaLabel="Search term"
-        class="flex-1 bg-background border rounded-lg relative overflow-hidden"
+        class="flex-1 w-full bg-background border rounded-lg relative overflow-hidden"
         :class="isSearchFocused ? 'ring-1 ring-primary border-primary' : 'border-gray-200 dark:border-gray-700'"
         input-class="flex-1 min-w-0 outline-none focus:ring-0 px-4 py-2"
         :with-search-button="true"
@@ -198,7 +205,7 @@ defineExpose({
       <ActionButton
         variant="secondary"
         size="lg"
-        class="ml-2 focus-visible:ring-2 focus-visible:ring-primary focus:outline-none"
+        class="focus-visible:ring-2 focus-visible:ring-primary focus:outline-none relative"
         aria-label="Advanced Search"
         :aria-expanded="showAdvancedSearch"
         @click="toggleAdvancedSearch"

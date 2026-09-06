@@ -20,13 +20,21 @@ const handleClick = () => {
 </script>
 
 <template>
-  <div class="mb-4">
-    <ActionButton
-      variant="link"
-      :content-section="contentSection"
-      @click="handleClick"
-    >
-      &larr; {{ label }}
-    </ActionButton>
-  </div>
+  <ActionButton
+    variant="link"
+    :content-section="contentSection"
+    @click="handleClick"
+    class="back-button"
+  >
+    {{ label }}
+  </ActionButton>
 </template>
+
+<style scoped>
+  .back-button {
+    &::before {
+      content: '\2190';
+      display: inline-block;
+    }
+  }
+</style>
