@@ -1,13 +1,12 @@
-import { createRouter, createWebHistory, type RouteLocationNormalized } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
+import { LOGIN_DISABLED } from '@/constants/auth'
 import { TITLE } from '@/constants/global'
 import { useAuthStore } from '@/stores/auth'
-import { useExposureStore } from '@/stores/exposure'
-import { useSearchStore } from '@/stores/search'
-import { useWorkspaceStore } from '@/stores/workspace'
-import { generateExposureTitle, resolveExposureFileTitle } from '@/utils/exposure'
-import { generateWorkspaceTitle } from '@/utils/workspace'
+import { isJwtExpired } from '@/utils/auth'
+import { getQueryTextFromRouteQuery } from '@/utils/search'
 import ExposureDetailView from '@/views/ExposureDetailView.vue'
 import ExposureView from '@/views/ExposureView.vue'
+import FeatureComparisonView from '@/views/FeatureComparisonView.vue'
 import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
@@ -16,108 +15,18 @@ import SearchView from '@/views/SearchView.vue'
 import WorkspaceDetailView from '@/views/WorkspaceDetailView.vue'
 import WorkspaceView from '@/views/WorkspaceView.vue'
 
-const workspaceAliasBases = ['/workspace']
-const workspaceDetailRouteSuffixes = ['/:alias', '/:alias/file', '/:alias/@@file']
-const workspaceFileRouteSuffixes = [
-  '/:alias/file/:commitId/:path(.+)',
-  '/:alias/file/:commitId',
-  '/:alias/@@file/:commitId/:path(.+)',
-  '/:alias/@@file/:commitId',
-]
-const exposureAliasBases = ['/exposure', '/e']
-const exposureFileRouteSuffixes = [
-  '/:alias/:file',
-  '/:alias/experiments/cell/:file',
-  '/:alias/experiments/channel/:file',
-  '/:alias/models/channels/:file',
-  '/:alias/models/:file',
-]
-const exposureFileViewRouteSuffixes = [
-  '/:alias/:file/:view',
-  '/:alias/experiments/cell/:file/:view',
-  '/:alias/experiments/channel/:file/:view',
-  '/:alias/models/channels/:file/:view',
-  '/:alias/models/:file/:view',
-]
-
-const createAliases = (bases: string[], ...suffixes: string[]) =>
-  bases.flatMap((base) => suffixes.map((suffix) => `${base}${suffix}`))
-
-const createPluralRouteAliases = (pluralBase: string, aliasBases: string[], suffixes: string[]) => [
-  ...suffixes.slice(1).map((suffix) => `${pluralBase}${suffix}`),
-  ...createAliases(aliasBases, ...suffixes),
-]
-
-const resolveExposureTitle = async (to: RouteLocationNormalized) => {
-  const alias = to.params?.alias as string | undefined
-  if (!alias) {
-    return
-  }
-
-  const fileParam = to.params?.file
-  const file = typeof fileParam === 'string' ? fileParam : undefined
-  if (file) {
-    try {
-      const fileTitle = await resolveExposureFileTitle(alias, file, useSearchStore().searchQuery)
-      if (fileTitle) {
-        return fileTitle
-      }
-    } catch (error) {
-      console.error(`Error fetching exposure file title for alias ${alias}:`, error)
-    }
-  }
-
-  try {
-    const exposureInfo = await useExposureStore().getExposureInfo(alias)
-
-    return generateExposureTitle(
-      exposureInfo?.exposure?.description,
-      exposureInfo?.exposure?.id,
-      true,
-    )
-  } catch (error) {
-    console.error(`Error fetching exposure info for alias ${alias}:`, error)
-  }
-}
-
-const resolveWorkspaceTitle = async (to: RouteLocationNormalized) => {
-  const alias = to.params?.alias as string | undefined
-  if (!alias) {
-    return
-  }
-
-  try {
-    const commitIdParam = to.params?.commitId
-    const pathParam = to.params?.path
-    const commitId = typeof commitIdParam === 'string' ? commitIdParam : ''
-    const path = typeof pathParam === 'string' ? pathParam : ''
-    const workspaceInfo = await useWorkspaceStore().getWorkspaceInfo(alias, commitId, path)
-
-    return generateWorkspaceTitle(
-      workspaceInfo?.workspace?.description,
-      workspaceInfo?.workspace?.id,
-      commitId,
-      path,
-      true,
-    )
-  } catch (error) {
-    console.error(`Error fetching workspace info for alias ${alias}:`, error)
-  }
-}
-
-const resolveRouteTitle = async (to: RouteLocationNormalized) => {
-  const currentTitle = to.meta.title as string | undefined
-
-  if (to.name?.toString().startsWith('exposure')) {
-    return (await resolveExposureTitle(to)) || currentTitle
-  }
-
-  if (to.name?.toString().startsWith('workspace')) {
-    return (await resolveWorkspaceTitle(to)) || currentTitle
-  }
-
-  return currentTitle
-}
+import {
+  createAliases,
+  createPluralRouteAliases,
+  workspaceAliasBases,
+  workspaceDetailRouteSuffixes,
+  workspaceFileRouteSuffixes,
+  exposureAliasBases,
+  exposureFileRouteSuffixes,
+  exposureFileViewRouteSuffixes,
+  workspaceDetailCommitSuffixes
+} from '@/router/routeAliases'
+import { resolveRouteTitle } from '@/router/routeResolvers'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -152,6 +61,17 @@ const router = createRouter({
         '/workspaces',
         workspaceAliasBases,
         workspaceDetailRouteSuffixes,
+      ),
+      meta: { title: `Workspace Detail – ${TITLE}` },
+    },
+    {
+      path: '/workspaces/:alias/file/:commitId',
+      name: 'workspace-detail-alias-commit',
+      component: WorkspaceDetailView,
+      alias: createPluralRouteAliases(
+        '/workspaces',
+        workspaceAliasBases,
+        workspaceDetailCommitSuffixes,
       ),
       meta: { title: `Workspace Detail – ${TITLE}` },
     },
@@ -211,16 +131,24 @@ const router = createRouter({
       meta: { title: `Search Results – ${TITLE}` },
     },
     {
+      path: '/feature-comparison',
+      name: 'feature-comparison',
+      component: FeatureComparisonView,
+      meta: { title: `Feature Comparison – ${TITLE}` },
+    },
+    {
       path: '/login',
       name: 'login',
-      component: LoginView,
-      meta: { title: `Login – ${TITLE}` },
+      component: LOGIN_DISABLED ? NotFoundView : LoginView,
+      meta: LOGIN_DISABLED ? { title: `Page Not Found – ${TITLE}` } : { title: `Login – ${TITLE}` },
     },
     {
       path: '/profile',
       name: 'profile',
-      component: ProfileView,
-      meta: { title: `Profile – ${TITLE}`, requiresAuth: true },
+      component: LOGIN_DISABLED ? NotFoundView : ProfileView,
+      meta: LOGIN_DISABLED
+        ? { title: `Page Not Found – ${TITLE}` }
+        : { title: `Profile – ${TITLE}`, requiresAuth: true },
     },
     {
       path: '/:pathMatch(.*)*',
@@ -232,7 +160,28 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
+  if (to.path === '/search' && to.query.SearchableText !== undefined && to.query.query === undefined) {
+    const legacyQuery = getQueryTextFromRouteQuery(to.query)
+
+    if (legacyQuery) {
+      const nextQuery = { ...to.query }
+      delete nextQuery.SearchableText
+      nextQuery.query = legacyQuery
+      return { path: to.path, query: nextQuery, replace: true }
+    }
+  }
+
   const authStore = useAuthStore()
+  const storedToken = localStorage.getItem('auth_token')
+  const authMethod = localStorage.getItem('auth_method') as 'password' | 'github' | null
+  const looksLikeJwt = storedToken?.split('.').length === 3
+
+  // Only check JWT expiry for GitHub OAuth tokens, which use JWTs.
+  // Password-auth tokens may not be JWTs, so skip the expiry check.
+  if (storedToken && looksLikeJwt && authMethod === 'github' && isJwtExpired(storedToken)) {
+    authStore.clearAuth()
+    return { name: 'login' }
+  }
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     return { name: 'login' }
