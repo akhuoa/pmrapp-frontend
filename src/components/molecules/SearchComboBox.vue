@@ -114,22 +114,22 @@ const categoryPrefix = computed(() => {
 })
 
 const inputPlaceholder = computed(() => {
-  if (chips.value.length > 0) return 'Add another filter or press Enter to search…'
-  return 'Start typing to search, or select a filter category…'
+  if (selectedCategoryKind.value && selectedCategoryKind.value !== TEXT_QUERY_KIND) {
+    return 'Type to filter…'
+  }
+  if (chips.value.length > 0) return 'Type to search, or Tab to add a category filter…'
+  return 'Type to search and press Enter…'
 })
 
 const helpText = computed(() => {
   if (!isFocused.value) return ''
-  if (selectedCategoryKind.value === TEXT_QUERY_KIND) {
-    return 'Press Enter to confirm as keyword search'
-  }
-  if (selectedCategoryKind.value) {
+  if (selectedCategoryKind.value && selectedCategoryKind.value !== TEXT_QUERY_KIND) {
     return 'Select or type a term from the suggestions below'
   }
   if (chips.value.length > 0) {
-    return 'Add another filter below to narrow your search'
+    return 'Add another category filter below to narrow your search'
   }
-  return 'Select a filter category below, or just type to search freely'
+  return 'Select a category filter below, or just type and press Enter to search'
 })
 
 const categoryMenuItems = computed(() => {
@@ -140,12 +140,11 @@ const categoryMenuItems = computed(() => {
       (cat) => cat.label.toLowerCase().includes(input) || cat.value.toLowerCase().includes(input),
     )
   }
-  return [...filtered, { value: TEXT_QUERY_KIND, label: TEXT_QUERY_LABEL }]
+  // Don't include TEXT_QUERY_KIND — free text is now always the implicit default.
+  return filtered
 })
 
-const hasCategoryMatches = computed(() =>
-  categoryMenuItems.value.some((item) => item.value !== TEXT_QUERY_KIND),
-)
+const hasCategoryMatches = computed(() => categoryMenuItems.value.length > 0)
 
 const showDropdown = computed(() => showCategoryMenu.value || showTermSuggestions.value)
 
@@ -156,20 +155,29 @@ const noTermMatchesMessage = computed(() => {
   return `No ${label} available for "${input}". Try a different term or press Escape to pick another category.`
 })
 
+/**
+ * Show the free-text hint dropdown when the user has typed something and no
+ * category or other dropdown is active.
+ */
+const showFreeTextHint = computed(() => {
+  return (
+    isFocused.value &&
+    !selectedCategoryKind.value &&
+    currentInput.value.trim().length > 0 &&
+    !showDropdown.value
+  )
+})
+
 const categoryIcons: Record<string, Component> = {
   citation_author_family_name: UserIcon,
   model_author: UserIcon,
   cellml_keyword: CodeIcon,
   citation_id: FileIcon,
-  [TEXT_QUERY_KIND]: SearchIcon,
 }
 
 // ---- Per-item class helpers (methods, not computed, because they take loop arguments) ----
-function getCategoryItemClass(cat: { value: string }, index: number): string[] {
+function getCategoryItemClass(_cat: { value: string }, index: number): string[] {
   const baseClasses = ['w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors cursor-pointer focus:outline-none']
-  if (cat.value === TEXT_QUERY_KIND) {
-    baseClasses.push('border-t border-gray-100 dark:border-gray-700')
-  }
   if (categoryMenuActiveIndex.value === index) {
     baseClasses.push('bg-gray-100 dark:bg-gray-700')
   } else {
@@ -270,27 +278,7 @@ function filterTermSuggestions(inputText: string) {
 
 // ---- Category selection ----
 function selectCategory(category: { value: string; label: string }) {
-  if (category.value === TEXT_QUERY_KIND) {
-    selectedCategoryKind.value = TEXT_QUERY_KIND
-    showCategoryMenu.value = false
-
-    // If a Free-text chip already exists, remove it and pre-populate the input.
-    // Otherwise, keep whatever the user has already typed in currentInput.
-    const existing = chips.value.find((c) => c.kind === TEXT_QUERY_KIND)
-    if (existing) {
-      chips.value = chips.value.filter((c) => c.id !== existing.id)
-      currentInput.value = existing.term
-    }
-    // else: currentInput already holds the user's typed text — keep it.
-
-    showTermSuggestions.value = false
-    termSuggestions.value = []
-    activeSuggestionIndex.value = -1
-    focusInput()
-    return
-  }
-
-  // Real category – show term suggestions.
+  // All entries are real categories now — show term suggestions.
   selectedCategoryKind.value = category.value
   showCategoryMenu.value = false
   currentInput.value = ''
@@ -356,8 +344,8 @@ function editChip(chip: FilterChip) {
   chips.value = chips.value.filter((c) => c.id !== chip.id)
 
   if (chip.kind === TEXT_QUERY_KIND) {
-    // Free-text: put the term back in the input for editing.
-    selectedCategoryKind.value = TEXT_QUERY_KIND
+    // Free-text: put the term back in the input for editing (no category needed).
+    selectedCategoryKind.value = null
     currentInput.value = chip.term
     showTermSuggestions.value = false
   } else {
@@ -389,10 +377,11 @@ function clearAll() {
 
 // ---- Search ----
 function executeSearch() {
-  const textQueryChip = chips.value.find((c) => c.kind === TEXT_QUERY_KIND)
-  const queryText = selectedCategoryKind.value === TEXT_QUERY_KIND
-    ? currentInput.value.trim()
-    : (textQueryChip?.term || '')
+  // Priority: whatever the user has typed right now, then fall back to an existing free-text chip.
+  const inputText = currentInput.value.trim()
+  const existingTextChip = chips.value.find((c) => c.kind === TEXT_QUERY_KIND)
+  const queryText = inputText || existingTextChip?.term || ''
+
   const filters: SearchFilter[] = chips.value
     .filter((c) => c.kind !== TEXT_QUERY_KIND)
     .map((c) => ({ kind: c.kind, term: c.term }))
@@ -419,11 +408,6 @@ function executeSearch() {
 function handleFocus() {
   isFocused.value = true
 
-  if (selectedCategoryKind.value === TEXT_QUERY_KIND) {
-    // Free-text mode — the hint dropdown will show automatically via the template condition.
-    return
-  }
-
   if (selectedCategoryKind.value) {
     // Category selected — show term suggestions.
     filterTermSuggestions(currentInput.value)
@@ -431,9 +415,12 @@ function handleFocus() {
     return
   }
 
-  // No category selected — show the category menu.
-  showCategoryMenu.value = true
-  categoryMenuActiveIndex.value = -1
+  // No category selected — only show the category menu when the input is empty.
+  // If the user has already typed text, let them press Enter to search freely.
+  if (!currentInput.value.trim()) {
+    showCategoryMenu.value = true
+    categoryMenuActiveIndex.value = -1
+  }
 }
 
 function handleBlur(event: FocusEvent) {
@@ -453,9 +440,16 @@ function handleInput(_event: Event) {
 
   if (selectedCategoryKind.value) {
     filterTermSuggestions(input.value)
-  } else if (showCategoryMenu.value) {
-    // Reset the active index when category menu is filtered by input text.
-    categoryMenuActiveIndex.value = -1
+  } else {
+    // In free-text mode: hide the category menu while typing so the
+    // free-text hint can show instead.
+    if (input.value.trim()) {
+      showCategoryMenu.value = false
+    } else {
+      // Input cleared — show the category menu again.
+      showCategoryMenu.value = true
+      categoryMenuActiveIndex.value = -1
+    }
   }
 }
 
@@ -464,14 +458,6 @@ function handleKeydown(event: KeyboardEvent) {
 
   // ---- Escape ----
   if (event.key === 'Escape') {
-    if (selectedCategoryKind.value === TEXT_QUERY_KIND) {
-      // Cancel free-text mode, go back to category menu.
-      selectedCategoryKind.value = null
-      showCategoryMenu.value = true
-      categoryMenuActiveIndex.value = -1
-      event.preventDefault()
-      return
-    }
     if (showTermSuggestions.value && selectedCategoryKind.value) {
       // Go back to category menu.
       cancelCategorySelection()
@@ -490,6 +476,26 @@ function handleKeydown(event: KeyboardEvent) {
   }
 
   // ---- Tab ----
+  // If the user has typed free text (no category active), Tab commits it as a chip
+  // so they can continue adding category filters.
+  if (event.key === 'Tab' && !selectedCategoryKind.value && currentInput.value.trim()) {
+    const term = currentInput.value.trim()
+    chips.value = chips.value.filter((c) => c.kind !== TEXT_QUERY_KIND)
+    chips.value.push({
+      id: generateChipId(),
+      kind: TEXT_QUERY_KIND,
+      term,
+      displayLabel: getDisplayLabel(TEXT_QUERY_KIND, term),
+    })
+    currentInput.value = ''
+    showCategoryMenu.value = true
+    categoryMenuActiveIndex.value = -1
+    event.preventDefault()
+    focusInput()
+    return
+  }
+
+  // Close dropdowns on Tab (without consuming the event, so focus moves naturally).
   if (event.key === 'Tab' && showDropdown.value) {
     showCategoryMenu.value = false
     showTermSuggestions.value = false
@@ -523,62 +529,36 @@ function handleKeydown(event: KeyboardEvent) {
 
   // ---- Enter ----
   if (event.key === 'Enter') {
+    // Category menu open with an item highlighted — select that category.
     if (showCategoryMenu.value && categoryMenuActiveIndex.value >= 0) {
       event.preventDefault()
       selectCategory(categoryMenuItems.value[categoryMenuActiveIndex.value])
       return
     }
+
+    // Term suggestions open with an item highlighted — select that term.
     if (showTermSuggestions.value && activeSuggestionIndex.value >= 0) {
       event.preventDefault()
       selectTerm(termSuggestions.value[activeSuggestionIndex.value])
       return
     }
-    if (showCategoryMenu.value) {
-      showCategoryMenu.value = false
-      event.preventDefault()
-      return
-    }
+
+    // Category selected but no item highlighted — try exact match, else fall to free-text search.
     if (showTermSuggestions.value && selectedCategoryKind.value) {
       event.preventDefault()
       const term = currentInput.value.trim()
       if (term && termSuggestions.value.some((t) => t.toLowerCase() === term.toLowerCase())) {
-        // Exact match found in suggestions.
         selectTerm(term)
-      } else if (term) {
-        // No matching term — keep text as keyword query, cancel category.
-        cancelCategorySelection()
-        showCategoryMenu.value = true
-        categoryMenuActiveIndex.value = -1
       } else {
+        // Cancel category, use input as free-text query.
         cancelCategorySelection()
-        showCategoryMenu.value = true
-        categoryMenuActiveIndex.value = -1
-      }
-      return
-    }
-    // ---- Free-text mode ----
-    if (selectedCategoryKind.value === TEXT_QUERY_KIND) {
-      event.preventDefault()
-      const term = currentInput.value.trim()
-      if (term) {
-        // Remove any existing Free-text chip, then add new one.
-        chips.value = chips.value.filter((c) => c.kind !== TEXT_QUERY_KIND)
-        chips.value.push({
-          id: generateChipId(),
-          kind: TEXT_QUERY_KIND,
-          term,
-          displayLabel: getDisplayLabel(TEXT_QUERY_KIND, term),
-        })
-        selectedCategoryKind.value = null
-        currentInput.value = ''
-        showCategoryMenu.value = true
-        categoryMenuActiveIndex.value = -1
-        focusInput()
+        showCategoryMenu.value = false
+        executeSearch()
       }
       return
     }
 
-    // Perform search
+    // ---- Default: free-text search (primary user journey) ----
     event.preventDefault()
     executeSearch()
     return
@@ -676,7 +656,7 @@ function handleTermMouseEnter(index: number) {
       </button>
     </div>
 
-    <!-- Category menu dropdown (shown on focus) -->
+    <!-- Category menu dropdown (shown when input is empty on focus, or after Tab) -->
     <div
       v-if="showCategoryMenu && categoryMenuItems.length > 0"
       :class="categoryMenuClass"
@@ -695,11 +675,10 @@ function handleTermMouseEnter(index: number) {
       </div>
       <div class="max-h-80 overflow-y-auto">
         <div
-          v-if="!hasCategoryMatches && currentInput.trim()"
+          v-if="!hasCategoryMatches"
           class="px-4 py-3 text-sm text-gray-400 dark:text-gray-500"
         >
-          No matching category found. Try a different term or select
-          <strong>&ldquo;{{ TEXT_QUERY_LABEL }}&rdquo;</strong> below for a general keyword search.
+          No matching category found. Press <strong>Enter</strong> to search as free text.
         </div>
         <button
           v-for="(cat, index) in categoryMenuItems"
@@ -751,16 +730,18 @@ function handleTermMouseEnter(index: number) {
       </div>
     </div>
 
-    <!-- Free-text hint (shown when in free-text mode with text typed) -->
+    <!-- Free-text hint (shown when user has typed text and no category/dropdown is active) -->
     <div
-      v-if="isFocused && selectedCategoryKind === TEXT_QUERY_KIND && currentInput.trim()"
+      v-if="showFreeTextHint"
       :class="freeTextHintClass"
       @mousedown.prevent="focusInput"
     >
-      <div class="px-4 py-3 text-sm text-gray-400 dark:text-gray-500 flex items-center gap-2">
-        Press
+      <div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 flex items-center flex-wrap gap-x-1.5 gap-y-1">
+        <span>Press</span>
         <Keycap size="small">&crarr;</Keycap>
-        <span>to confirm as keyword search</span>
+        <span>to search for &ldquo;{{ currentInput }}&rdquo;, or press</span>
+        <Keycap size="small">Tab</Keycap>
+        <span>to save as keyword and add category filters</span>
       </div>
     </div>
   </div>
