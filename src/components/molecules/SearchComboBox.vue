@@ -164,6 +164,30 @@ const categoryIcons: Record<string, Component> = {
   [TEXT_QUERY_KIND]: SearchIcon,
 }
 
+// ---- Per-item class helpers (methods, not computed, because they take loop arguments) ----
+function getCategoryItemClass(cat: { value: string }, index: number): string[] {
+  const baseClasses = ['w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors cursor-pointer focus:outline-none']
+  if (cat.value === TEXT_QUERY_KIND) {
+    baseClasses.push('border-t border-gray-100 dark:border-gray-700')
+  }
+  if (categoryMenuActiveIndex.value === index) {
+    baseClasses.push('bg-gray-100 dark:bg-gray-700')
+  } else {
+    baseClasses.push('hover:bg-gray-50 dark:hover:bg-gray-750')
+  }
+  return baseClasses
+}
+
+function getTermItemClass(index: number): string[] {
+  const baseClasses = ['w-full text-left px-4 py-2 text-sm transition-colors cursor-pointer focus:outline-none flex items-center gap-2']
+  if (activeSuggestionIndex.value === index) {
+    baseClasses.push('bg-gray-100 dark:bg-gray-700')
+  } else {
+    baseClasses.push('hover:bg-gray-50 dark:hover:bg-gray-750')
+  }
+  return baseClasses
+}
+
 // ---- Helpers ----
 function getDisplayLabel(kind: string, term: string): string {
   if (kind === TEXT_QUERY_KIND) return term
@@ -681,11 +705,7 @@ function handleTermMouseEnter(index: number) {
           v-for="(cat, index) in categoryMenuItems"
           :key="cat.value"
           type="button"
-          class="w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors cursor-pointer focus:outline-none"
-          :class="[
-            cat.value === TEXT_QUERY_KIND ? 'border-t border-gray-100 dark:border-gray-700' : '',
-            categoryMenuActiveIndex === index ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-750',
-          ]"
+          :class="getCategoryItemClass(cat, index)"
           @click="handleCategoryClick(cat)"
           @mouseenter="handleCategoryMouseEnter(index)"
         >
@@ -721,8 +741,7 @@ function handleTermMouseEnter(index: number) {
           v-for="(term, index) in termSuggestions"
           :key="term"
           type="button"
-          class="w-full text-left px-4 py-2 text-sm transition-colors cursor-pointer focus:outline-none flex items-center gap-2"
-          :class="activeSuggestionIndex === index ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-750'"
+          :class="getTermItemClass(index)"
           @click="selectTerm(term)"
           @mouseenter="handleTermMouseEnter(index)"
         >
