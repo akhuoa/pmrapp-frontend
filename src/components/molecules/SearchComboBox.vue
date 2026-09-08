@@ -85,6 +85,24 @@ const freeTextHintClass = computed(() => [
   ...dropdownMenuClass
 ])
 
+const searchButtonClass = computed(() => {
+  const baseClasses = [
+    'flex items-center justify-center px-4 self-stretch shrink-0',
+    'border-l border-gray-200 dark:border-gray-700',
+    'bg-gray-200 dark:bg-gray-700',
+    'transition duration-200 ease-linear',
+    'focus-visible:ring-2 focus-visible:ring-primary focus:outline-none'
+  ]
+
+  if (hasValues.value) {
+    baseClasses.push('cursor-pointer')
+  } else {
+    baseClasses.push('opacity-50 cursor-default')
+  }
+
+  return baseClasses
+})
+
 const hasValues = computed(() => {
   return chips.value.length > 0 || currentInput.value.trim().length > 0
 })
@@ -625,8 +643,7 @@ function handleTermMouseEnter(index: number) {
       <!-- Search button -->
       <button
         type="button"
-        class="flex items-center justify-center px-4 self-stretch shrink-0 border-l border-gray-200 dark:border-gray-700 bg-gray-200 dark:bg-gray-700 cursor-pointer transition duration-200 ease-linear focus-visible:ring-2 focus-visible:ring-primary focus:outline-none"
-        :class="hasValues ? '' : 'opacity-50 cursor-default'"
+        :class="searchButtonClass"
         :disabled="!hasValues"
         aria-label="Search"
         @click.stop="executeSearch"
