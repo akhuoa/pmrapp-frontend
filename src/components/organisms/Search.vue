@@ -154,7 +154,7 @@ const handleRefresh = async () => {
 </script>
 
 <template>
-  <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+  <div class="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
     <!-- TODO: search-combobox testing -->
     <!-- <SearchInput
       class="w-full lg:flex-1 lg:w-auto"
@@ -166,13 +166,13 @@ const handleRefresh = async () => {
       @querySearch="handleQuerySearch"
     /> -->
     <SearchComboBox
-      class="flex-1 w-full sm:w-auto"
+      class="flex-1 w-full md:w-auto"
       :initial-query="searchQueryParam"
       :initial-filters="queryFilters"
       :in-overlay="true"
       @query-search="handleQuerySearch"
     />
-    <div class="flex w-full gap-4 lg:w-auto lg:flex-row lg:items-center justify-end">
+    <div class="flex w-full gap-4 md:w-auto md:flex-row md:items-center justify-end">
       <SortDropdown
         :disabled="!(hasResults || isLoading)"
         :model-value="sortBy"
