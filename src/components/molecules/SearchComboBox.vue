@@ -54,6 +54,37 @@ const categoryMenuActiveIndex = ref(-1)
 const isFocused = ref(false)
 
 // ---- Computed ----
+const mainSearchBarClass = computed(() => {
+  const baseClasses = [
+    'flex items-center w-full border rounded-lg overflow-hidden transition-all bg-background'
+  ]
+
+  if (isFocused.value) {
+    baseClasses.push('ring-1 ring-primary border-primary')
+  } else {
+    baseClasses.push('border-gray-200 dark:border-gray-700')
+  }
+
+  return baseClasses
+})
+
+const dropdownMenuClass = [
+  'absolute z-50 left-0 mt-1 w-80 min-w-full bg-white dark:bg-gray-800',
+  'rounded-lg shadow-lg border border-gray-200 dark:border-gray-700'
+]
+
+const categoryMenuClass = computed(() => [
+  ...dropdownMenuClass
+])
+
+const termSuggestionsClass = computed(() => [
+  ...dropdownMenuClass
+])
+
+const freeTextHintClass = computed(() => [
+  ...dropdownMenuClass
+])
+
 const hasValues = computed(() => {
   return chips.value.length > 0 || currentInput.value.trim().length > 0
 })
@@ -544,8 +575,7 @@ function handleTermMouseEnter(index: number) {
       Main search bar: chips + active category prefix + text input + clear button + search button
     -->
     <div
-      class="flex items-center w-full border rounded-lg overflow-hidden transition-all bg-background"
-      :class="isFocused ? 'ring-1 ring-primary border-primary' : 'border-gray-200 dark:border-gray-700'"
+      :class="mainSearchBarClass"
       @click="focusInput"
     >
       <!-- Chips + input area -->
@@ -608,7 +638,7 @@ function handleTermMouseEnter(index: number) {
     <!-- Category menu dropdown (shown on focus) -->
     <div
       v-if="showCategoryMenu && categoryMenuItems.length > 0"
-      class="absolute z-50 left-0 mt-1 w-80 min-w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
+      :class="categoryMenuClass"
       @mousedown.prevent="focusInput"
     >
       <div class="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
@@ -652,7 +682,7 @@ function handleTermMouseEnter(index: number) {
     <!-- Term suggestions dropdown (shown when typing a filter value) -->
     <div
       v-if="showTermSuggestions"
-      class="absolute z-50 left-0 mt-1 w-80 min-w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
+      :class="termSuggestionsClass"
       @mousedown.prevent="focusInput"
     >
       <div class="max-h-80 overflow-y-auto">
@@ -688,7 +718,7 @@ function handleTermMouseEnter(index: number) {
     <!-- Free-text hint (shown when in free-text mode with text typed) -->
     <div
       v-if="isFocused && selectedCategoryKind === TEXT_QUERY_KIND && currentInput.trim()"
-      class="absolute z-50 left-0 mt-1 w-80 min-w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
+      :class="freeTextHintClass"
       @mousedown.prevent="focusInput"
     >
       <div class="px-4 py-3 text-sm text-gray-400 dark:text-gray-500 flex items-center gap-2">
