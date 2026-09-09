@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { nextTick, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Keycap from '@/components/atoms/Keycap.vue'
 import Dialog from '@/components/molecules/Dialog.vue'
-import SearchInput from '@/components/molecules/SearchInput.vue'
 import { SEARCH_KIND_NAMES } from '@/constants/search'
 import { buildQuerySearchQuery, buildSearchQuery, parseQueryFiltersFromQuery } from '@/utils/search'
+import SearchComboBox from '../molecules/SearchComboBox.vue'
 
 const props = defineProps<{
   show: boolean
@@ -15,23 +15,8 @@ const emit = defineEmits<(e: 'close') => void>()
 
 const router = useRouter()
 const route = useRoute()
-const searchInputRef = ref<InstanceType<typeof SearchInput> | null>(null)
 
-watch(
-  () => props.show,
-  (newVal) => {
-    if (newVal) {
-      // Double nextTick to ensure focus happens
-      // after Dialog's own nextTick callback
-      // that focuses dialogRef (which steals focus).
-      nextTick(() => {
-        nextTick(() => {
-          searchInputRef.value?.searchInputRef?.focus()
-        })
-      })
-    }
-  },
-)
+const dropdownSpacerHeight = ref(0)
 
 watch(
   () => route.fullPath,
@@ -74,13 +59,14 @@ const getInitialTerm = (): string => {
     :show="show"
     title="Search"
     position="top"
+    :overflow-content="false"
     @close="emit('close')"
   >
     <div class="mb-4 text-sm text-gray-500 dark:text-gray-400">
       Type a term and press <Keycap>Enter</Keycap> to search the repository,
       or use the more options to filter by category (author, keyword, publication references), or combine both.
     </div>
-    <SearchInput
+    <!-- <SearchInput
       ref="searchInputRef"
       :inOverlay="true"
       :initial-kind="''"
@@ -89,6 +75,16 @@ const getInitialTerm = (): string => {
       @search="handleSearch"
       @querySearch="handleQuerySearch"
       @close="emit('close')"
+    /> -->
+    <SearchComboBox
+      class="flex-1 w-full md:w-auto"
+      :initial-query="getInitialTerm()"
+      :initial-filters="parseQueryFiltersFromQuery(route.query, SEARCH_KIND_NAMES)"
+      :in-overlay="true"
+      @query-search="handleQuerySearch"
+      @dropdown-height-change="(h) => (dropdownSpacerHeight = h)"
     />
+    <!-- Spacer that grows the dialog to accommodate the absolute-positioned dropdown -->
+    <div :style="{ height: dropdownSpacerHeight > 0 ? `${dropdownSpacerHeight}px` : '0' }" aria-hidden="true" />
   </Dialog>
 </template>

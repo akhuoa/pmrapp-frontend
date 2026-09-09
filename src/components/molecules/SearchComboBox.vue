@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, type Component } from 'vue'
+import { computed, nextTick, onMounted, ref, watch, type Component } from 'vue'
 import Chip from '@/components/atoms/Chip.vue'
 import CloseButton from '@/components/atoms/CloseButton.vue'
 import SearchIcon from '@/components/icons/SearchIcon.vue'
@@ -33,6 +33,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   (e: 'querySearch', request: SearchQueryRequest): void
   (e: 'close'): void
+  (e: 'dropdownHeightChange', height: number): void
 }>()
 
 const searchStore = useSearchStore()
@@ -43,6 +44,9 @@ const TEXT_QUERY_LABEL = 'Free text'
 // ---- Refs ----
 const inputRef = ref<HTMLInputElement | null>(null)
 const wrapperRef = ref<HTMLDivElement | null>(null)
+const categoryMenuRef = ref<HTMLDivElement | null>(null)
+const termSuggestionsRef = ref<HTMLDivElement | null>(null)
+const freeTextHintRef = ref<HTMLDivElement | null>(null)
 const chips = ref<FilterChip[]>([])
 const currentInput = ref('')
 const showCategoryMenu = ref(false)
@@ -52,6 +56,14 @@ const termSuggestions = ref<string[]>([])
 const activeSuggestionIndex = ref(-1)
 const categoryMenuActiveIndex = ref(-1)
 const isFocused = ref(false)
+
+// Emits the current dropdown height whenever it changes (used by SearchOverlay to grow the dialog).
+function emitDropdownHeight() {
+  nextTick(() => {
+    const el = categoryMenuRef.value ?? termSuggestionsRef.value ?? freeTextHintRef.value
+    emit('dropdownHeightChange', el ? el.offsetHeight : 0)
+  })
+}
 
 // ---- Computed ----
 const mainSearchBarClass = computed(() => {
@@ -175,6 +187,10 @@ const showFreeTextHint = computed(() => {
     !showDropdown.value
   )
 })
+
+// Watch all dropdown visibility states; emit the active dropdown's height so
+// SearchOverlay can grow the dialog to fit it.
+watch([showCategoryMenu, showTermSuggestions, showFreeTextHint], emitDropdownHeight)
 
 const categoryIcons: Record<string, Component> = {
   citation_author_family_name: UserIcon,
@@ -667,6 +683,7 @@ function handleTermMouseEnter(index: number) {
     <!-- Category menu dropdown (shown when input is empty on focus, or after Tab) -->
     <div
       v-if="showCategoryMenu && categoryMenuItems.length > 0"
+      ref="categoryMenuRef"
       :class="categoryMenuClass"
       @mousedown.prevent="focusInput"
     >
@@ -706,6 +723,7 @@ function handleTermMouseEnter(index: number) {
     <!-- Term suggestions dropdown (shown when typing a filter value) -->
     <div
       v-if="showTermSuggestions"
+      ref="termSuggestionsRef"
       :class="termSuggestionsClass"
       @mousedown.prevent="focusInput"
     >
@@ -741,6 +759,7 @@ function handleTermMouseEnter(index: number) {
     <!-- Free-text hint (shown when user has typed text and no category/dropdown is active) -->
     <div
       v-if="showFreeTextHint"
+      ref="freeTextHintRef"
       :class="freeTextHintClass"
       @mousedown.prevent="focusInput"
     >
