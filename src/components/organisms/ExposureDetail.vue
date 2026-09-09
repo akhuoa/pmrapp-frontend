@@ -298,6 +298,12 @@ const workspaceArchiveUrlBase = computed(() => {
   )
 })
 
+// Use the middle part from path.
+// E.g., 'C_IDA' from 'code.C_IDA.c'.
+const extractLangPath = (path: string) => {
+  return path.split('.')[1]
+}
+
 const handleDownloadCOMBINEArchive = async () => {
   const exposureAlias = props.alias
   const fileName = exposureInfo.value
@@ -466,9 +472,10 @@ const loadDefaultView = async () => {
 const loadCodegenView = async () => {
   if (!exposureInfo.value) return
 
-  // Resolve the active language: prefer the lang route param, fall back to the first entry.
+  // Resolve the active language: prefer the lang route param (matched against the path segment,
+  // e.g. 'C_IDA' from 'code.C_IDA.c'), fall back to the first entry.
   const activeLang =
-    CODEGEN_LANGUAGES.find((l) => l.name === props.lang) ?? CODEGEN_LANGUAGES[0]
+    CODEGEN_LANGUAGES.find((l) => extractLangPath(l.path) === props.lang) ?? CODEGEN_LANGUAGES[0]
 
   if (!activeLang) return
 
@@ -482,7 +489,7 @@ const loadCodegenView = async () => {
         alias: props.alias,
         file: props.file,
         view: 'cellml_codegen',
-        lang: activeLang.name,
+        lang: extractLangPath(activeLang.path),
       },
       query: route.query,
     })
@@ -496,7 +503,7 @@ const navigateToLang = (lang: (typeof CODEGEN_LANGUAGES)[number]) => {
       alias: props.alias,
       file: props.file,
       view: 'cellml_codegen',
-      lang: lang.name,
+      lang: extractLangPath(lang.path)
     },
     query: route.query,
   })
@@ -719,7 +726,8 @@ watch(
   async (newLang, oldLang) => {
     // Only react when we're on the codegen view and the lang segment actually changed.
     if (props.view !== 'cellml_codegen' || newLang === oldLang) return
-    const activeLang = CODEGEN_LANGUAGES.find((l) => l.name === newLang) ?? CODEGEN_LANGUAGES[0]
+    const activeLang =
+      CODEGEN_LANGUAGES.find((l) => extractLangPath(l.path) === newLang) ?? CODEGEN_LANGUAGES[0]
     if (activeLang) {
       await generateCode(activeLang.path, activeLang.fileName)
     }
