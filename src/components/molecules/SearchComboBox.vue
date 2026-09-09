@@ -739,9 +739,13 @@ function handleTermMouseEnter(index: number) {
       <div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 flex items-center flex-wrap gap-x-1.5 gap-y-1">
         <span>Press</span>
         <Keycap size="small">&crarr;</Keycap>
-        <span>to search for &ldquo;{{ currentInput }}&rdquo;, or press</span>
+        <span>
+          to search for
+          <strong class="text-gray-700 dark:text-gray-200">{{ currentInput }}</strong>,
+          or press
+        </span>
         <Keycap size="small">Tab</Keycap>
-        <span>to save as keyword and add category filters</span>
+        <span>to add category filters</span>
       </div>
     </div>
   </div>
