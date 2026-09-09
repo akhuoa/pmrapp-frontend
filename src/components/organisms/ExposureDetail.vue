@@ -509,6 +509,28 @@ const navigateToLang = (lang: (typeof CODEGEN_LANGUAGES)[number]) => {
   })
 }
 
+// Returns the route target for a view button in the sidebar.
+// For the codegen view, always include the active lang segment so that clicking
+// "Generate code" while already on the codegen view still produces a URL change
+// (and triggers loadCodegenView via the props.view or props.lang watch).
+const viewButtonTarget = (viewKey: string) => {
+  if (viewKey === 'cellml_codegen') {
+    const activeLangPath =
+      props.lang ||
+      extractLangPath(CODEGEN_LANGUAGES[0]?.path ?? 'code.C.c')
+    return {
+      name: 'exposure-file-detail-view-lang' as const,
+      params: {
+        alias: props.alias,
+        file: exposureFilePath.value,
+        view: 'cellml_codegen',
+        lang: activeLangPath,
+      },
+    }
+  }
+  return `/exposures/${props.alias}/${exposureFilePath.value}/${viewKey}`
+}
+
 const isAboutSectionAvailable = computed(() => {
   return (
     metadataJSON.value.model_title ||
@@ -988,7 +1010,7 @@ onMounted(async () => {
               <ActionButton
                 variant="secondary"
                 size="sm"
-                :to="`/exposures/${props.alias}/${exposureFilePath}/${view.view_key}`"
+                :to="viewButtonTarget(view.view_key)"
                 content-section="Exposure Detail"
               >
                 {{ view.name }}
