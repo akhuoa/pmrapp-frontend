@@ -46,6 +46,7 @@ const props = defineProps<{
   alias: string
   file: string
   view: string
+  lang: string
 }>()
 
 const DEFAULT_LICENSE = 'https://creativecommons.org/licenses/by/3.0/'
@@ -464,11 +465,41 @@ const loadDefaultView = async () => {
 
 const loadCodegenView = async () => {
   if (!exposureInfo.value) return
-  // Load code generation view with the first language as default.
-  await generateCode(
-    CODEGEN_LANGUAGES[0]?.path || 'code.C.c',
-    CODEGEN_LANGUAGES[0]?.fileName || 'code.c',
-  )
+
+  // Resolve the active language: prefer the lang route param, fall back to the first entry.
+  const activeLang =
+    CODEGEN_LANGUAGES.find((l) => l.name === props.lang) ?? CODEGEN_LANGUAGES[0]
+
+  if (!activeLang) return
+
+  await generateCode(activeLang.path, activeLang.fileName)
+
+  // Reflect the active language in the URL (replace so it doesn't pollute browser history).
+  if (props.view === 'cellml_codegen') {
+    router.replace({
+      name: 'exposure-file-detail-view-lang',
+      params: {
+        alias: props.alias,
+        file: props.file,
+        view: 'cellml_codegen',
+        lang: activeLang.name,
+      },
+      query: route.query,
+    })
+  }
+}
+
+const navigateToLang = (lang: (typeof CODEGEN_LANGUAGES)[number]) => {
+  router.push({
+    name: 'exposure-file-detail-view-lang',
+    params: {
+      alias: props.alias,
+      file: props.file,
+      view: 'cellml_codegen',
+      lang: lang.name,
+    },
+    query: route.query,
+  })
 }
 
 const isAboutSectionAvailable = computed(() => {
@@ -683,6 +714,18 @@ watch(
   },
 )
 
+watch(
+  () => props.lang,
+  async (newLang, oldLang) => {
+    // Only react when we're on the codegen view and the lang segment actually changed.
+    if (props.view !== 'cellml_codegen' || newLang === oldLang) return
+    const activeLang = CODEGEN_LANGUAGES.find((l) => l.name === newLang) ?? CODEGEN_LANGUAGES[0]
+    if (activeLang) {
+      await generateCode(activeLang.path, activeLang.fileName)
+    }
+  },
+)
+
 onMounted(async () => {
   error.value = null
 
@@ -776,7 +819,7 @@ onMounted(async () => {
               <ActionButton
                 :variant="generatedCodeFilename === lang.fileName ? 'primary' : 'secondary'"
                 size="sm"
-                @click="generateCode(lang.path, lang.fileName)"
+                @click="navigateToLang(lang)"
               >
                 {{ lang.name }}
               </ActionButton>
