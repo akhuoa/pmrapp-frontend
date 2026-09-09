@@ -115,10 +115,18 @@ const categoryPrefix = computed(() => {
 
 const inputPlaceholder = computed(() => {
   if (selectedCategoryKind.value && selectedCategoryKind.value !== TEXT_QUERY_KIND) {
-    return 'Type to filter…'
+    return 'Type to filter...'
   }
-  if (chips.value.length > 0) return 'Type to search, or Tab to add a category filter…'
-  return 'Type to search and press Enter…'
+
+  if (chips.value?.find(({kind}) => (kind === TEXT_QUERY_KIND))) {
+    return 'Type to replace search query or add a category below…'
+  }
+
+  if (showCategoryMenu.value) {
+    return 'Type to search or add a category below...'
+  }
+
+  return 'Type to search...'
 })
 
 const helpText = computed(() => {
@@ -662,7 +670,7 @@ function handleTermMouseEnter(index: number) {
       :class="categoryMenuClass"
       @mousedown.prevent="focusInput"
     >
-      <div class="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+      <!-- <div class="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
         <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
           Filter by category
         </div>
@@ -672,7 +680,7 @@ function handleTermMouseEnter(index: number) {
         >
           {{ helpText }}
         </div>
-      </div>
+      </div> -->
       <div class="max-h-80 overflow-y-auto">
         <div
           v-if="!hasCategoryMatches"
@@ -702,14 +710,14 @@ function handleTermMouseEnter(index: number) {
       @mousedown.prevent="focusInput"
     >
       <div class="max-h-80 overflow-y-auto">
-        <div class="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+        <!-- <div class="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
           <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
             {{ categoryPrefix }} suggestions
           </div>
           <div v-if="termSuggestions.length > 0" class="mt-0.5 text-xs text-gray-400 dark:text-gray-500 italic">
             Select one from the list
           </div>
-        </div>
+        </div> -->
         <div
           v-if="termSuggestions.length === 0"
           class="px-4 py-3 text-sm text-gray-400 dark:text-gray-500"
