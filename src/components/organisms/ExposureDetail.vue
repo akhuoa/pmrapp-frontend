@@ -42,12 +42,17 @@ import { buildSearchQuery, isValidTerm } from '@/utils/search'
 
 type ExposureFileEntry = ExposureInfo['files'][number]
 
-const props = defineProps<{
-  alias: string
-  file: string
-  view: string
-  lang: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    alias: string
+    file: string
+    view: string
+    lang?: string
+  }>(),
+  {
+    lang: '',
+  },
+)
 
 const DEFAULT_LICENSE = 'https://creativecommons.org/licenses/by/3.0/'
 const AVAILABLE_VIEWS = [
