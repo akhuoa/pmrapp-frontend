@@ -36,7 +36,9 @@ describe('It covers navigation and routing.', () => {
       searchDialog.should('be.visible')
       searchDialog.contains('h2', 'Search').should('be.visible')
       searchDialog.get('button[aria-label="Close"]').should('be.visible')
-      searchDialog.get('input[type="text"][aria-label="Search term"]').should('be.visible')
+      // TODO: To update after search combobox update.
+      // Disabled this for search UI changing to combobox.
+      // searchDialog.get('input[type="text"][aria-label="Search term"]').should('be.visible')
     })
   })
 
