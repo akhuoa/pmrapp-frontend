@@ -15,13 +15,15 @@ describe('Search page', () => {
     cy.get(selectors.resultItems).should('have.length', itemCount)
   }
 
-  const chooseAdvancedSearchTerm = (filter: string, optionLabel: string) => {
-    cy.get(selectors.filterInput).clear().type(filter)
-    cy.get(`button[aria-label="Search for ${optionLabel}"]`)
-      .contains(optionLabel)
-      .should('exist')
-      .click()
-  }
+  // TODO: To update after search combobox update.
+  // Disabled this for search UI changing to combobox.
+  // const chooseAdvancedSearchTerm = (filter: string, optionLabel: string) => {
+  //   cy.get(selectors.filterInput).clear().type(filter)
+  //   cy.get(`button[aria-label="Search for ${optionLabel}"]`)
+  //     .contains(optionLabel)
+  //     .should('exist')
+  //     .click()
+  // }
 
   beforeEach(() => {
     cy.visit('/search')
