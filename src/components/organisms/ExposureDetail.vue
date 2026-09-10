@@ -261,8 +261,8 @@ const workspaceArchiveUrlBase = computed(() => {
   )
 })
 
-// Use the middle part from path.
-// E.g., 'C_IDA' from 'code.C_IDA.c'.
+// Extracts the language segment from a codegen path for use in the URL route.
+// The paths come from the CODEGEN_LANGUAGES constant in '@/constants/exposure'.
 const extractLangPath = (path: string) => {
   return path.split('.')[1]
 }
