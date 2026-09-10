@@ -42,11 +42,17 @@ import { buildSearchQuery, isValidTerm } from '@/utils/search'
 
 type ExposureFileEntry = ExposureInfo['files'][number]
 
-const props = defineProps<{
-  alias: string
-  file: string
-  view: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    alias: string
+    file: string
+    view: string
+    lang?: string
+  }>(),
+  {
+    lang: '',
+  },
+)
 
 const DEFAULT_LICENSE = 'https://creativecommons.org/licenses/by/3.0/'
 const AVAILABLE_VIEWS = [
@@ -297,6 +303,12 @@ const workspaceArchiveUrlBase = computed(() => {
   )
 })
 
+// Use the middle part from path.
+// E.g., 'C_IDA' from 'code.C_IDA.c'.
+const extractLangPath = (path: string) => {
+  return path.split('.')[1]
+}
+
 const handleDownloadCOMBINEArchive = async () => {
   const exposureAlias = props.alias
   const fileName = exposureInfo.value
@@ -464,11 +476,64 @@ const loadDefaultView = async () => {
 
 const loadCodegenView = async () => {
   if (!exposureInfo.value) return
-  // Load code generation view with the first language as default.
-  await generateCode(
-    CODEGEN_LANGUAGES[0]?.path || 'code.C.c',
-    CODEGEN_LANGUAGES[0]?.fileName || 'code.c',
-  )
+
+  // Resolve the active language: prefer the lang route param (matched against the path segment,
+  // e.g. 'C_IDA' from 'code.C_IDA.c'), fall back to the first entry.
+  const activeLang =
+    CODEGEN_LANGUAGES.find((l) => extractLangPath(l.path) === props.lang) ?? CODEGEN_LANGUAGES[0]
+
+  if (!activeLang) return
+
+  await generateCode(activeLang.path, activeLang.fileName)
+
+  // Reflect the active language in the URL (replace so it doesn't pollute browser history).
+  if (props.view === 'cellml_codegen') {
+    router.replace({
+      name: 'exposure-file-detail-view-lang',
+      params: {
+        alias: props.alias,
+        file: props.file,
+        view: 'cellml_codegen',
+        lang: extractLangPath(activeLang.path),
+      },
+      query: route.query,
+    })
+  }
+}
+
+const navigateToLang = (lang: (typeof CODEGEN_LANGUAGES)[number]) => {
+  router.push({
+    name: 'exposure-file-detail-view-lang',
+    params: {
+      alias: props.alias,
+      file: props.file,
+      view: 'cellml_codegen',
+      lang: extractLangPath(lang.path)
+    },
+    query: route.query,
+  })
+}
+
+// Returns the route target for a view button in the sidebar.
+// For the codegen view, always include the active lang segment so that clicking
+// "Generate code" while already on the codegen view still produces a URL change
+// (and triggers loadCodegenView via the props.view or props.lang watch).
+const viewButtonTarget = (viewKey: string) => {
+  if (viewKey === 'cellml_codegen') {
+    const activeLangPath =
+      props.lang ||
+      extractLangPath(CODEGEN_LANGUAGES[0]?.path ?? 'code.C.c')
+    return {
+      name: 'exposure-file-detail-view-lang' as const,
+      params: {
+        alias: props.alias,
+        file: exposureFilePath.value,
+        view: 'cellml_codegen',
+        lang: activeLangPath,
+      },
+    }
+  }
+  return `/exposures/${props.alias}/${exposureFilePath.value}/${viewKey}`
 }
 
 const isAboutSectionAvailable = computed(() => {
@@ -683,6 +748,19 @@ watch(
   },
 )
 
+watch(
+  () => props.lang,
+  async (newLang, oldLang) => {
+    // Only react when we're on the codegen view and the lang segment actually changed.
+    if (props.view !== 'cellml_codegen' || newLang === oldLang) return
+    const activeLang =
+      CODEGEN_LANGUAGES.find((l) => extractLangPath(l.path) === newLang) ?? CODEGEN_LANGUAGES[0]
+    if (activeLang && generatedCodeFilename.value !== activeLang.fileName) {
+      await generateCode(activeLang.path, activeLang.fileName)
+    }
+  },
+)
+
 onMounted(async () => {
   error.value = null
 
@@ -776,7 +854,7 @@ onMounted(async () => {
               <ActionButton
                 :variant="generatedCodeFilename === lang.fileName ? 'primary' : 'secondary'"
                 size="sm"
-                @click="generateCode(lang.path, lang.fileName)"
+                @click="navigateToLang(lang)"
               >
                 {{ lang.name }}
               </ActionButton>
@@ -937,7 +1015,7 @@ onMounted(async () => {
               <ActionButton
                 variant="secondary"
                 size="sm"
-                :to="`/exposures/${props.alias}/${exposureFilePath}/${view.view_key}`"
+                :to="viewButtonTarget(view.view_key)"
                 content-section="Exposure Detail"
               >
                 {{ view.name }}
