@@ -20,7 +20,9 @@ import PageHeader from '@/components/molecules/PageHeader.vue'
 import WarningBlock from '@/components/molecules/WarningBlock.vue'
 import WorkspaceFileBrowser from '@/components/molecules/WorkspaceFileBrowser.vue'
 import { useBackNavigation } from '@/composables/useBackNavigation'
+import { AVAILABLE_VIEWS, CODEGEN_LANGUAGES, DEFAULT_LICENSE } from '@/constants/exposure'
 import { GITHUB_ISSUES_URL, TITLE } from '@/constants/global'
+import { DEFAULT_MATH_FORMAT_OPTIONS } from '@/constants/mathml'
 import { downloadCOMBINEArchive, getWorkspaceArchiveUrl } from '@/services/downloadUrlService'
 import { useExposureStore } from '@/stores/exposure'
 import { useSearchStore } from '@/stores/search'
@@ -53,50 +55,6 @@ const props = withDefaults(
     lang: '',
   },
 )
-
-const DEFAULT_LICENSE = 'https://creativecommons.org/licenses/by/3.0/'
-const AVAILABLE_VIEWS = [
-  {
-    name: 'Generate code',
-    view_key: 'cellml_codegen',
-  },
-  {
-    name: 'Mathematics',
-    view_key: 'cellml_math',
-  },
-]
-const CODEGEN_LANGUAGES = [
-  {
-    name: 'C',
-    path: 'code.C.c',
-    fileName: 'code.c',
-  },
-  {
-    name: 'C (IDA solver)',
-    path: 'code.C_IDA.c',
-    fileName: 'code.ida.c',
-  },
-  {
-    name: 'FORTRAN 77',
-    path: 'code.F77.f77',
-    fileName: 'code.f77',
-  },
-  {
-    name: 'MATLAB',
-    path: 'code.MATLAB.m',
-    fileName: 'code.m',
-  },
-  {
-    name: 'Python',
-    path: 'code.Python.py',
-    fileName: 'code.py',
-  },
-]
-const DEFAULT_MATH_FORMAT_OPTIONS: Required<MathMLFormatOptions> = {
-  digitGrouping: false,
-  greekSymbols: false,
-  subscripts: false,
-}
 
 const exposureStore = useExposureStore()
 const exposureInfo = ref<ExposureInfo | null>(null)
