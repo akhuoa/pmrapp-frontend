@@ -750,7 +750,7 @@ watch(
     if (props.view !== 'cellml_codegen' || newLang === oldLang) return
     const activeLang =
       CODEGEN_LANGUAGES.find((l) => extractLangPath(l.path) === newLang) ?? CODEGEN_LANGUAGES[0]
-    if (activeLang) {
+    if (activeLang && generatedCodeFilename.value !== activeLang.fileName) {
       await generateCode(activeLang.path, activeLang.fileName)
     }
   },
