@@ -649,6 +649,7 @@ function handleTermMouseEnter(index: number) {
           ref="inputRef"
           :value="currentInput"
           type="text"
+          aria-label="Search term"
           class="flex-1 min-w-[120px] outline-none border-none bg-transparent px-1 py-1 text-sm"
           :class="{ 'pl-0': selectedCategoryKind !== null || chips.length > 0 }"
           :placeholder="inputPlaceholder"
