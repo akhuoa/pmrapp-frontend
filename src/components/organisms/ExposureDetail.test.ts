@@ -430,7 +430,7 @@ describe('ExposureDetail', () => {
       .find((button) => button.text().trim() === 'Python')
     expect(pythonButton).toBeDefined()
 
-    await pythonButton!.trigger('click')
+    await pythonButton?.trigger('click')
 
     expect(mockRouterPush).toHaveBeenCalledWith({
       name: 'exposure-file-detail-view-lang',
@@ -457,7 +457,7 @@ describe('ExposureDetail', () => {
 
     const codeBlock = wrapper.findComponent({ name: 'CodeBlock' })
     expect(codeBlock.props('filename')).toBe('code.py')
-    expect(pythonButton!.props('variant')).toBe('primary')
+    expect(pythonButton?.props('variant')).toBe('primary')
   })
 
   it('toggles wrap active state when clicking the wrap button in codegen view', async () => {
