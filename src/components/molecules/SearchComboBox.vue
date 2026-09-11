@@ -142,7 +142,7 @@ const inputPlaceholder = computed(() => {
 })
 
 const helpText = computed(() => {
-  if (!isFocused.value) return ''
+  if (!isFocused.value && !props.inOverlay) return ''
   if (selectedCategoryKind.value && selectedCategoryKind.value !== TEXT_QUERY_KIND) {
     return 'Select or type a term from the suggestions below'
   }
@@ -181,7 +181,7 @@ const noTermMatchesMessage = computed(() => {
  */
 const showFreeTextHint = computed(() => {
   return (
-    isFocused.value &&
+    (props.inOverlay || isFocused.value) &&
     !selectedCategoryKind.value &&
     currentInput.value.trim().length > 0 &&
     !showDropdown.value
@@ -263,6 +263,12 @@ onMounted(async () => {
   initialiseFromProps()
 
   if (props.inOverlay) {
+    if (selectedCategoryKind.value) {
+      filterTermSuggestions(currentInput.value)
+    } else if (!currentInput.value.trim()) {
+      showCategoryMenu.value = true
+      categoryMenuActiveIndex.value = -1
+    }
     focusInput()
   }
 
@@ -458,8 +464,10 @@ function handleBlur(event: FocusEvent) {
     return
   }
   isFocused.value = false
-  showCategoryMenu.value = false
-  showTermSuggestions.value = false
+  if (!props.inOverlay) {
+    showCategoryMenu.value = false
+    showTermSuggestions.value = false
+  }
 }
 
 function handleInput(_event: Event) {

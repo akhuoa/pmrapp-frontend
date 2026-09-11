@@ -169,7 +169,6 @@ const handleRefresh = async () => {
       class="flex-1 w-full md:w-auto"
       :initial-query="searchQueryParam"
       :initial-filters="queryFilters"
-      :in-overlay="true"
       @query-search="handleQuerySearch"
     />
     <div class="flex w-full gap-4 md:w-auto md:flex-row md:items-center justify-end">
