@@ -62,10 +62,10 @@ const getInitialTerm = (): string => {
     :overflow-content="false"
     @close="emit('close')"
   >
-    <div class="mb-4 text-sm text-gray-500 dark:text-gray-400">
+    <!-- <div class="mb-4 text-sm text-gray-500 dark:text-gray-400">
       Type a term and press <Keycap>Enter</Keycap> to search the repository,
       or use the more options to filter by category (author, keyword, publication references), or combine both.
-    </div>
+    </div> -->
     <!-- <SearchInput
       ref="searchInputRef"
       :inOverlay="true"
