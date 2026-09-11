@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Keycap from '@/components/atoms/Keycap.vue'
 import Dialog from '@/components/molecules/Dialog.vue'
@@ -16,7 +16,20 @@ const emit = defineEmits<(e: 'close') => void>()
 const router = useRouter()
 const route = useRoute()
 
+const searchComboBoxRef = ref<InstanceType<typeof SearchComboBox> | null>(null)
 const dropdownSpacerHeight = ref(0)
+
+watch(
+  () => props.show,
+  (show) => {
+    if (show) {
+      nextTick(() => {
+        searchComboBoxRef.value?.focusInput()
+      })
+    }
+  },
+  { immediate: true },
+)
 
 watch(
   () => route.fullPath,
@@ -62,10 +75,10 @@ const getInitialTerm = (): string => {
     :overflow-content="false"
     @close="emit('close')"
   >
-    <div class="mb-4 text-sm text-gray-500 dark:text-gray-400">
+    <!-- <div class="mb-4 text-sm text-gray-500 dark:text-gray-400">
       Type a term and press <Keycap>Enter</Keycap> to search the repository,
       or use the more options to filter by category (author, keyword, publication references), or combine both.
-    </div>
+    </div> -->
     <!-- <SearchInput
       ref="searchInputRef"
       :inOverlay="true"
@@ -77,6 +90,7 @@ const getInitialTerm = (): string => {
       @close="emit('close')"
     /> -->
     <SearchComboBox
+      ref="searchComboBoxRef"
       class="flex-1 w-full md:w-auto"
       :initial-query="getInitialTerm()"
       :initial-filters="parseQueryFiltersFromQuery(route.query, SEARCH_KIND_NAMES)"

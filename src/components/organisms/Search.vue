@@ -37,7 +37,7 @@ const searchQueryParam = computed(() => getQueryTextFromRouteQuery(route.query))
 const searchResults = ref<SearchResult[]>([])
 const isLoading = ref(false)
 const resultsError = ref<string | null>(null)
-const searchInputRef = ref<InstanceType<typeof SearchInput> | null>(null)
+const searchComboBoxRef = ref<InstanceType<typeof SearchComboBox> | null>(null)
 
 const sortQuery = route.query.sort
 const initialSort: SortOption =
@@ -48,7 +48,7 @@ watch(
   () => globalState.isSearchFocusRequested,
   (isRequested) => {
     if (isRequested) {
-      searchInputRef.value?.searchInputRef?.focus()
+      searchComboBoxRef.value?.focusInput()
       globalState.consumeSearchFocus()
     }
   },
@@ -166,10 +166,10 @@ const handleRefresh = async () => {
       @querySearch="handleQuerySearch"
     /> -->
     <SearchComboBox
+      ref="searchComboBoxRef"
       class="flex-1 w-full md:w-auto"
       :initial-query="searchQueryParam"
       :initial-filters="queryFilters"
-      :in-overlay="true"
       @query-search="handleQuerySearch"
     />
     <div class="flex w-full gap-4 md:w-auto md:flex-row md:items-center justify-end">
