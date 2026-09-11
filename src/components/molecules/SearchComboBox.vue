@@ -262,6 +262,10 @@ function initialiseFromProps() {
 onMounted(async () => {
   initialiseFromProps()
 
+  if (props.inOverlay) {
+    focusInput()
+  }
+
   // Pre-fetch categories for term suggestions
   try {
     const validKinds = SEARCH_CATEGORIES.map((c) => c.value)
@@ -613,6 +617,11 @@ function handleCategoryMouseEnter(index: number) {
 function handleTermMouseEnter(index: number) {
   activeSuggestionIndex.value = index
 }
+
+defineExpose({
+  inputRef,
+  focusInput,
+})
 </script>
 
 <template>
