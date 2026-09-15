@@ -21,6 +21,8 @@ const emit = defineEmits<{
   (e: 'searchTermClick', filters: SearchFilter[]): void
   (e: 'focusSearchInput'): void
   (e: 'escape'): void
+  (e: 'search'): void
+  (e: 'cancel'): void
 }>()
 
 const searchStore = useSearchStore()
@@ -33,8 +35,32 @@ const chipRefs = ref<InstanceType<typeof Chip>[]>([])
 const termButtonRefs = ref<InstanceType<typeof TermButton>[]>([])
 const toggleButtonRefs = ref<(HTMLButtonElement | null)[]>([])
 const clearAllButtonRef = ref<HTMLButtonElement | null>(null)
+const searchButtonRef = ref<HTMLButtonElement | null>(null)
+const cancelButtonRef = ref<HTMLButtonElement | null>(null)
 const MAX_TERMS_PER_CATEGORY = 10
 const selectedFilters = ref<SearchFilter[]>(props.initialFilters ? [...props.initialFilters] : [])
+
+const resultGroupClass = computed(() => [
+  'border-b last:border-0 border-gray-200 dark:border-gray-700',
+  'transition-all group-hover/results:opacity-75 hover:!opacity-100'
+])
+
+const resultGroupHeaderClass = computed(() => [
+  'sticky-container',
+  'sticky top-0 z-1',
+])
+
+const resultGroupHeaderInnerClass = computed(() => [
+  'sticky-container-inner',
+  'p-4 gap-3',
+  'flex items-start justify-between',
+  'bg-background transition-shadow',
+])
+
+const resultGroupBodyClass = computed(() => [
+  'p-4 pt-0 gap-2',
+  'flex flex-row items-start justify-start flex-wrap',
+])
 
 watch(
   () => props.initialFilters,
@@ -198,6 +224,11 @@ const allSuggestionButtons = computed<HTMLElement[]>(() => {
       buttons.push(toggleEl)
     }
   })
+
+  if (selectedFilters.value.length > 0) {
+    if (cancelButtonRef.value) buttons.push(cancelButtonRef.value)
+    if (searchButtonRef.value) buttons.push(searchButtonRef.value)
+  }
 
   return buttons
 })
@@ -397,25 +428,27 @@ const handleClearAllFilters = (): void => {
           <div
             v-for="(categoryGroup, groupIndex) in filteredSearchTermsByCategory"
             :key="categoryGroup.kind"
-            class="result-group"
+            :class="resultGroupClass"
           >
-            <div class="mb-3 flex items-start justify-between gap-3">
-              <h4 class="font-semibold text-gray-700 dark:text-gray-300">
-                {{ categoryGroup.label }}
-              </h4>
-              <button
-                v-if="categoryGroup.totalCount > MAX_TERMS_PER_CATEGORY"
-                type="button"
-                :ref="(el) => setToggleButtonRef(el, groupIndex)"
-                class="px-3 py-1 text-sm rounded-md transition-colors relative focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-gray-900 cursor-pointer text-primary hover:text-primary-hover bg-transparent"
-                :aria-expanded="categoryGroup.isExpanded"
-                @click="handleToggleTerms(categoryGroup.kind)"
-                @keydown="handleToggleButtonKeyDown($event, categoryGroup.kind, groupIndex)"
-              >
-                {{ categoryGroup.isExpanded ? 'Show less' : '... more' }}
-              </button>
+            <div :class="resultGroupHeaderClass">
+              <div :class="resultGroupHeaderInnerClass">
+                <h4 class="font-semibold text-gray-700 dark:text-gray-300">
+                  {{ categoryGroup.label }}
+                </h4>
+                <button
+                  v-if="categoryGroup.totalCount > MAX_TERMS_PER_CATEGORY"
+                  type="button"
+                  :ref="(el) => setToggleButtonRef(el, groupIndex)"
+                  class="px-3 py-1 text-sm rounded-md transition-colors relative focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-gray-900 cursor-pointer text-primary hover:text-primary-hover bg-transparent"
+                  :aria-expanded="categoryGroup.isExpanded"
+                  @click="handleToggleTerms(categoryGroup.kind)"
+                  @keydown="handleToggleButtonKeyDown($event, categoryGroup.kind, groupIndex)"
+                >
+                  {{ categoryGroup.isExpanded ? 'Show less' : '... more' }}
+                </button>
+              </div>
             </div>
-            <div class="flex flex-row items-start justify-start flex-wrap gap-2">
+            <div :class="resultGroupBodyClass">
               <TermButton
                 v-for="(term, termIndex) in categoryGroup.terms"
                 :key="term"
@@ -430,16 +463,46 @@ const handleClearAllFilters = (): void => {
           </div>
         </div>
       </div>
+      <div
+        v-if="selectedFilters.length > 0"
+        class="p-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-end gap-2"
+      >
+        <button
+          ref="cancelButtonRef"
+          type="button"
+          class="px-4 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-gray-900 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+          @click="emit('cancel')"
+          @keydown="handleSuggestionButtonKeyDown($event)"
+        >
+          Cancel
+        </button>
+        <button
+          ref="searchButtonRef"
+          type="button"
+          class="px-4 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-gray-900 cursor-pointer bg-primary text-white hover:bg-primary-hover"
+          @click="emit('search')"
+          @keydown="handleSuggestionButtonKeyDown($event)"
+        >
+          Search
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+@reference "tailwindcss";
 @import '@/assets/box.css';
 @import '@/assets/error-box.css';
 @import '@/assets/input.css';
 
-.result-group {
-  @apply hover:bg-gray-50 dark:hover:bg-gray-900 border-b last:border-0 border-gray-200 dark:border-gray-700 p-4 transition-all group-hover/results:opacity-75 hover:!opacity-100;
+.sticky-container {
+  container-type: scroll-state;
+}
+
+@container scroll-state(stuck: top) {
+  .sticky-container-inner {
+    @apply shadow-sm dark:shadow-gray-900;
+  }
 }
 </style>
