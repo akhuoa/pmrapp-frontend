@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch, type Component } from 'vue'
+import { computed, nextTick, onMounted, ref, useId, watch, type Component } from 'vue'
 import Chip from '@/components/atoms/Chip.vue'
 import CloseButton from '@/components/atoms/CloseButton.vue'
 import SearchIcon from '@/components/icons/SearchIcon.vue'
@@ -9,13 +9,13 @@ import FileIcon from '@/components/icons/FileIcon.vue'
 import { SEARCH_CATEGORIES, SEARCH_KIND_LABEL_SINGULAR_MAP } from '@/constants/search'
 import { useSearchStore } from '@/stores/search'
 import type { SearchFilter, SearchQueryRequest } from '@/types/search'
+import { isValidTerm } from '@/utils/search'
 import Keycap from '@/components/atoms/Keycap.vue'
 
 interface FilterChip {
   id: string
   kind: string
   term: string
-  displayLabel: string
 }
 
 const props = withDefaults(
@@ -57,6 +57,21 @@ const activeSuggestionIndex = ref(-1)
 const categoryMenuActiveIndex = ref(-1)
 const isFocused = ref(false)
 
+// ---- Accessibility IDs ----
+const baseId = useId()
+const categoryListboxId = `${baseId}-categories`
+const termListboxId = `${baseId}-terms`
+const freeTextHintId = `${baseId}-hint`
+const statusId = `${baseId}-status`
+
+function getCategoryOptionId(index: number): string {
+  return `${categoryListboxId}-${index}`
+}
+
+function getTermOptionId(index: number): string {
+  return `${termListboxId}-${index}`
+}
+
 // Emits the current dropdown height whenever it changes (used by SearchOverlay to grow the dialog).
 function emitDropdownHeight() {
   nextTick(() => {
@@ -68,7 +83,7 @@ function emitDropdownHeight() {
 // ---- Computed ----
 const mainSearchBarClass = computed(() => {
   const baseClasses = [
-    'flex items-center w-full border rounded-lg overflow-hidden transition-all bg-background'
+    'flex items-center w-full border rounded-lg overflow-hidden transition-all bg-background',
   ]
 
   if (isFocused.value) {
@@ -82,20 +97,14 @@ const mainSearchBarClass = computed(() => {
 
 const dropdownMenuClass = [
   'absolute z-50 left-0 mt-1 w-80 min-w-full bg-white dark:bg-gray-800',
-  'rounded-lg shadow-lg border border-gray-200 dark:border-gray-700'
+  'rounded-lg shadow-lg border border-gray-200 dark:border-gray-700',
 ]
 
-const categoryMenuClass = computed(() => [
-  ...dropdownMenuClass
-])
+const categoryMenuClass = computed(() => [...dropdownMenuClass])
 
-const termSuggestionsClass = computed(() => [
-  ...dropdownMenuClass
-])
+const termSuggestionsClass = computed(() => [...dropdownMenuClass])
 
-const freeTextHintClass = computed(() => [
-  ...dropdownMenuClass
-])
+const freeTextHintClass = computed(() => [...dropdownMenuClass])
 
 const searchButtonClass = computed(() => {
   const baseClasses = [
@@ -103,7 +112,7 @@ const searchButtonClass = computed(() => {
     'border-l border-gray-200 dark:border-gray-700',
     'bg-gray-200 dark:bg-gray-700',
     'transition duration-200 ease-linear',
-    'focus-visible:ring-2 focus-visible:ring-primary focus:outline-none'
+    'focus-visible:ring-2 focus-visible:ring-primary focus:outline-none',
   ]
 
   if (hasValues.value) {
@@ -130,7 +139,7 @@ const inputPlaceholder = computed(() => {
     return 'Type to filter...'
   }
 
-  if (chips.value?.find(({kind}) => (kind === TEXT_QUERY_KIND))) {
+  if (chips.value?.find(({ kind }) => kind === TEXT_QUERY_KIND)) {
     return 'Type to replace search query or add a category below…'
   }
 
@@ -164,13 +173,32 @@ const categoryMenuItems = computed(() => {
   return filtered
 })
 
-const hasCategoryMatches = computed(() => categoryMenuItems.value.length > 0)
-
 const showDropdown = computed(() => showCategoryMenu.value || showTermSuggestions.value)
+
+const selectedCategoryData = computed(() =>
+  searchStore.categories.find((c) => c.kind === selectedCategoryKind.value),
+)
+
+// Categories are fetched on mount, so a category can be selected before its terms have loaded.
+const isSelectedCategoryLoading = computed(() => {
+  if (!selectedCategoryKind.value || selectedCategoryKind.value === TEXT_QUERY_KIND) return false
+  return searchStore.isLoading || !!selectedCategoryData.value?.loading
+})
+
+// Refresh the open suggestions once the selected category's terms arrive.
+watch(
+  () => selectedCategoryData.value?.kindInfo,
+  () => {
+    if (!showTermSuggestions.value) return
+    filterTermSuggestions(currentInput.value)
+    emitDropdownHeight()
+  },
+)
 
 const noTermMatchesMessage = computed(() => {
   const input = currentInput.value.trim()
   const label = categoryPrefix.value || 'this category'
+  if (isSelectedCategoryLoading.value) return `Loading ${label} suggestions...`
   if (!input) return `No ${label} suggestions available`
   return `No ${label} available for "${input}". Try a different term or press Escape to pick another category.`
 })
@@ -188,6 +216,51 @@ const showFreeTextHint = computed(() => {
   )
 })
 
+// ---- Combobox ARIA state ----
+const isCategoryListboxVisible = computed(
+  () => showCategoryMenu.value && categoryMenuItems.value.length > 0,
+)
+
+const comboboxExpanded = computed(() => isCategoryListboxVisible.value || showTermSuggestions.value)
+
+const comboboxControls = computed(() => {
+  if (isCategoryListboxVisible.value) return categoryListboxId
+  if (showTermSuggestions.value) return termListboxId
+  return undefined
+})
+
+const comboboxActiveDescendant = computed(() => {
+  if (isCategoryListboxVisible.value && categoryMenuActiveIndex.value >= 0) {
+    return getCategoryOptionId(categoryMenuActiveIndex.value)
+  }
+  if (showTermSuggestions.value && activeSuggestionIndex.value >= 0) {
+    return getTermOptionId(activeSuggestionIndex.value)
+  }
+  return undefined
+})
+
+// Announced politely so screen-reader users know when suggestions appear or change.
+const statusMessage = computed(() => {
+  if (isCategoryListboxVisible.value) {
+    const count = categoryMenuItems.value.length
+    return `${count} ${count === 1 ? 'category' : 'categories'} available. Use up and down arrows to navigate.`
+  }
+  if (showTermSuggestions.value) {
+    const count = termSuggestions.value.length
+    if (count === 0) return noTermMatchesMessage.value
+    return `${count} ${categoryPrefix.value} ${count === 1 ? 'suggestion' : 'suggestions'} available. Use up and down arrows to navigate.`
+  }
+  return ''
+})
+
+// Keep the active option visible when arrow-navigating a scrollable list.
+watch(comboboxActiveDescendant, (id) => {
+  if (!id) return
+  nextTick(() => {
+    document.getElementById(id)?.scrollIntoView?.({ block: 'nearest' })
+  })
+})
+
 // Watch all dropdown visibility states; emit the active dropdown's height so
 // SearchOverlay can grow the dialog to fit it.
 watch([showCategoryMenu, showTermSuggestions, showFreeTextHint], emitDropdownHeight)
@@ -201,7 +274,9 @@ const categoryIcons: Record<string, Component> = {
 
 // ---- Per-item class helpers (methods, not computed, because they take loop arguments) ----
 function getCategoryItemClass(_cat: { value: string }, index: number): string[] {
-  const baseClasses = ['w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors cursor-pointer focus:outline-none']
+  const baseClasses = [
+    'w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors cursor-pointer focus:outline-none',
+  ]
   if (categoryMenuActiveIndex.value === index) {
     baseClasses.push('bg-gray-100 dark:bg-gray-700')
   } else {
@@ -211,7 +286,9 @@ function getCategoryItemClass(_cat: { value: string }, index: number): string[] 
 }
 
 function getTermItemClass(index: number): string[] {
-  const baseClasses = ['w-full text-left px-4 py-2 text-sm transition-colors cursor-pointer focus:outline-none flex items-center gap-2']
+  const baseClasses = [
+    'w-full text-left px-4 py-2 text-sm transition-colors cursor-pointer focus:outline-none flex items-center gap-2',
+  ]
   if (activeSuggestionIndex.value === index) {
     baseClasses.push('bg-gray-100 dark:bg-gray-700')
   } else {
@@ -221,10 +298,9 @@ function getTermItemClass(index: number): string[] {
 }
 
 // ---- Helpers ----
-function getDisplayLabel(kind: string, term: string): string {
-  if (kind === TEXT_QUERY_KIND) return term
-  const singularLabel = SEARCH_KIND_LABEL_SINGULAR_MAP[kind] || kind
-  return `${singularLabel}: ${term}`
+function getCategoryLabel(kind: string): string | undefined {
+  if (kind === TEXT_QUERY_KIND) return undefined
+  return SEARCH_KIND_LABEL_SINGULAR_MAP[kind] || kind
 }
 
 function generateChipId(): string {
@@ -237,27 +313,51 @@ function focusInput() {
   })
 }
 
+// Invariant: an empty, focused input with no active category always shows the category menu.
+// Set explicitly rather than relying on the focus event, which doesn't fire
+// if the input is already focused (e.g. when clicking the clear button doesn't move focus).
+function showCategoryMenuIfEmpty() {
+  if (selectedCategoryKind.value || currentInput.value.trim()) return
+  showCategoryMenu.value = true
+  categoryMenuActiveIndex.value = -1
+}
+
 // ---- Initialisation ----
 function initialiseFromProps() {
-  if (props.initialFilters.length > 0) {
-    chips.value = props.initialFilters
-      .filter((f) => f.kind && f.term)
-      .map((f) => ({
-        id: generateChipId(),
-        kind: f.kind,
-        term: f.term,
-        displayLabel: getDisplayLabel(f.kind, f.term),
-      }))
-  }
+  chips.value = props.initialFilters
+    .filter((f) => f.kind && f.term)
+    .map((f) => ({
+      id: generateChipId(),
+      kind: f.kind,
+      term: f.term,
+    }))
   if (props.initialQuery) {
     chips.value.push({
       id: generateChipId(),
       kind: TEXT_QUERY_KIND,
       term: props.initialQuery,
-      displayLabel: getDisplayLabel(TEXT_QUERY_KIND, props.initialQuery),
     })
   }
 }
+
+// Rebuild chips when the parent's search params actually change
+// (e.g. after a search or back/forward navigation).
+// Compared by value so unrelated route changes (e.g. sort)
+// that produce new-but-equal props don't wipe the user's in-progress edits.
+const initialSearchKey = computed(() =>
+  JSON.stringify({
+    query: props.initialQuery,
+    filters: props.initialFilters.map((f) => [f.kind, f.term]),
+  }),
+)
+
+watch(initialSearchKey, () => {
+  initialiseFromProps()
+  currentInput.value = ''
+  selectedCategoryKind.value = null
+  showTermSuggestions.value = false
+  termSuggestions.value = []
+})
 
 onMounted(async () => {
   initialiseFromProps()
@@ -291,21 +391,17 @@ function filterTermSuggestions(inputText: string) {
 
   const category = searchStore.categories.find((c) => c.kind === selectedCategoryKind.value)
   const terms = (category?.kindInfo?.terms || [])
-    .filter((t) => t.trim().length > 0)
-    .filter((t) => !chips.value.some((chip) => chip.kind === selectedCategoryKind.value && chip.term.toLowerCase() === t.toLowerCase()))
+    .filter(isValidTerm)
+    .filter(
+      (t) =>
+        !chips.value.some(
+          (chip) =>
+            chip.kind === selectedCategoryKind.value && chip.term.toLowerCase() === t.toLowerCase(),
+        ),
+    )
 
-  if (!inputText.trim()) {
-    termSuggestions.value = terms.slice(0, 50)
-    showTermSuggestions.value = true
-    activeSuggestionIndex.value = -1
-    return
-  }
-
-  const filtered = terms
-    .filter((t) => t.toLowerCase().includes(inputText.toLowerCase()))
-    .slice(0, 50)
-
-  termSuggestions.value = filtered
+  const query = inputText.trim().toLowerCase()
+  termSuggestions.value = query ? terms.filter((t) => t.toLowerCase().includes(query)) : terms
   showTermSuggestions.value = true
   activeSuggestionIndex.value = -1
 }
@@ -335,6 +431,7 @@ function cancelCategorySelection() {
   showTermSuggestions.value = false
   termSuggestions.value = []
   activeSuggestionIndex.value = -1
+  showCategoryMenuIfEmpty()
   focusInput()
 }
 
@@ -344,7 +441,8 @@ function selectTerm(term: string) {
 
   // Prevent adding a duplicate term within the same category.
   const alreadySelected = chips.value.some(
-    (chip) => chip.kind === selectedCategoryKind.value && chip.term.toLowerCase() === term.toLowerCase(),
+    (chip) =>
+      chip.kind === selectedCategoryKind.value && chip.term.toLowerCase() === term.toLowerCase(),
   )
   if (alreadySelected) return
 
@@ -352,7 +450,6 @@ function selectTerm(term: string) {
     id: generateChipId(),
     kind: selectedCategoryKind.value,
     term,
-    displayLabel: getDisplayLabel(selectedCategoryKind.value, term),
   })
 
   selectedCategoryKind.value = null
@@ -372,40 +469,14 @@ function removeChip(id: string) {
   focusInput()
 }
 
-// ---- Edit chip ----
-function editChip(chip: FilterChip) {
-  // Remove the chip from the list.
-  chips.value = chips.value.filter((c) => c.id !== chip.id)
-
-  if (chip.kind === TEXT_QUERY_KIND) {
-    // Free-text: put the term back in the input for editing (no category needed).
-    selectedCategoryKind.value = null
-    currentInput.value = chip.term
-    showTermSuggestions.value = false
-  } else {
-    // Real category: set the category and show term suggestions,
-    // pre-populated with the existing term so the user can edit it.
-    selectedCategoryKind.value = chip.kind
-    currentInput.value = chip.term
-    showTermSuggestions.value = false
-    // Re-open term suggestions for this category.
-    filterTermSuggestions(chip.term)
-    showTermSuggestions.value = termSuggestions.value.length > 0
-  }
-
-  showCategoryMenu.value = false
-  activeSuggestionIndex.value = -1
-  focusInput()
-}
-
 // ---- Clear ----
 function clearAll() {
   chips.value = []
   currentInput.value = ''
   selectedCategoryKind.value = null
-  showCategoryMenu.value = false
   showTermSuggestions.value = false
   termSuggestions.value = []
+  showCategoryMenuIfEmpty()
   focusInput()
 }
 
@@ -421,8 +492,21 @@ function executeSearch() {
     .map((c) => ({ kind: c.kind, term: c.term }))
 
   if (!queryText && filters.length === 0) {
+    showCategoryMenuIfEmpty()
     focusInput()
     return
+  }
+
+  // Commit typed text as the free-text chip so the bar reflects the submitted search,
+  // even when the URL doesn't change (e.g. re-submitting the same query).
+  if (inputText) {
+    chips.value = chips.value.filter((c) => c.kind !== TEXT_QUERY_KIND)
+    chips.value.push({
+      id: generateChipId(),
+      kind: TEXT_QUERY_KIND,
+      term: inputText,
+    })
+    currentInput.value = ''
   }
 
   inputRef.value?.blur()
@@ -451,10 +535,7 @@ function handleFocus() {
 
   // No category selected — only show the category menu when the input is empty.
   // If the user has already typed text, let them press Enter to search freely.
-  if (!currentInput.value.trim()) {
-    showCategoryMenu.value = true
-    categoryMenuActiveIndex.value = -1
-  }
+  showCategoryMenuIfEmpty()
 }
 
 function handleBlur(event: FocusEvent) {
@@ -483,8 +564,7 @@ function handleInput(_event: Event) {
       showCategoryMenu.value = false
     } else {
       // Input cleared — show the category menu again.
-      showCategoryMenu.value = true
-      categoryMenuActiveIndex.value = -1
+      showCategoryMenuIfEmpty()
     }
   }
 }
@@ -495,10 +575,9 @@ function handleKeydown(event: KeyboardEvent) {
   // ---- Escape ----
   if (event.key === 'Escape') {
     if (showTermSuggestions.value && selectedCategoryKind.value) {
-      // Go back to category menu.
+      // Go back to the full category menu, discarding the partial term.
+      currentInput.value = ''
       cancelCategorySelection()
-      showCategoryMenu.value = true
-      categoryMenuActiveIndex.value = -1
       event.preventDefault()
       return
     }
@@ -521,7 +600,6 @@ function handleKeydown(event: KeyboardEvent) {
       id: generateChipId(),
       kind: TEXT_QUERY_KIND,
       term,
-      displayLabel: getDisplayLabel(TEXT_QUERY_KIND, term),
     })
     currentInput.value = ''
     showCategoryMenu.value = true
@@ -549,7 +627,8 @@ function handleKeydown(event: KeyboardEvent) {
       const items = categoryMenuItems.value
       const maxIndex = items.length - 1
       const nextIndex = categoryMenuActiveIndex.value + delta
-      categoryMenuActiveIndex.value = nextIndex < 0 ? maxIndex : nextIndex > maxIndex ? 0 : nextIndex
+      categoryMenuActiveIndex.value =
+        nextIndex < 0 ? maxIndex : nextIndex > maxIndex ? 0 : nextIndex
       return
     }
     if (showTermSuggestions.value && termSuggestions.value.length > 0) {
@@ -614,8 +693,17 @@ function handleKeydown(event: KeyboardEvent) {
     }
     return
   }
+}
 
-
+// The whole search bar acts as the input: pressing on empty space or a chip label must not
+// blur the input (which would hide the dropdown until mouseup refocuses it). Interactive
+// children (chip remove, clear, search buttons) keep their default behaviour.
+function handleSearchBarMouseDown(event: MouseEvent) {
+  const target = event.target as HTMLElement | null
+  if (!target || target === inputRef.value) return
+  if (target.closest('button, a, input, [role="button"]')) return
+  event.preventDefault()
+  focusInput()
 }
 
 function handleCategoryMouseEnter(index: number) {
@@ -639,6 +727,7 @@ defineExpose({
     -->
     <div
       :class="mainSearchBarClass"
+      @mousedown="handleSearchBarMouseDown"
       @click="focusInput"
     >
       <!-- Chips + input area -->
@@ -647,10 +736,10 @@ defineExpose({
         <Chip
           v-for="chip in chips"
           :key="chip.id"
-          :label="chip.displayLabel"
+          :category="getCategoryLabel(chip.kind)"
+          :label="chip.term"
           :removable="true"
           :on-remove="() => removeChip(chip.id)"
-          :on-click="() => editChip(chip)"
         />
 
         <!-- Active category prefix label (non-editable) -->
@@ -666,7 +755,14 @@ defineExpose({
           ref="inputRef"
           :value="currentInput"
           type="text"
+          role="combobox"
           aria-label="Search term"
+          aria-autocomplete="list"
+          aria-haspopup="listbox"
+          :aria-expanded="comboboxExpanded"
+          :aria-controls="comboboxControls"
+          :aria-activedescendant="comboboxActiveDescendant"
+          :aria-describedby="showFreeTextHint ? freeTextHintId : undefined"
           class="flex-1 min-w-[120px] outline-none border-none bg-transparent px-1 py-1 text-sm"
           :class="{ 'pl-0': selectedCategoryKind !== null || chips.length > 0 }"
           :placeholder="inputPlaceholder"
@@ -700,40 +796,32 @@ defineExpose({
 
     <!-- Category menu dropdown (shown when input is empty on focus, or after Tab) -->
     <div
-      v-if="showCategoryMenu && categoryMenuItems.length > 0"
+      v-if="isCategoryListboxVisible"
       ref="categoryMenuRef"
       :class="categoryMenuClass"
       @mousedown.prevent="focusInput"
     >
-      <!-- <div class="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
-        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-          Filter by category
-        </div>
-        <div
-          v-if="helpText"
-          class="mt-0.5 text-xs text-gray-400 dark:text-gray-500 italic"
-        >
-          {{ helpText }}
-        </div>
-      </div> -->
-      <div class="max-h-80 overflow-y-auto">
-        <div
-          v-if="!hasCategoryMatches"
-          class="px-4 py-3 text-sm text-gray-400 dark:text-gray-500"
-        >
-          No matching category found. Press <strong>Enter</strong> to search as free text.
-        </div>
+      <div
+        :id="categoryListboxId"
+        role="listbox"
+        aria-label="Search categories"
+        class="max-h-80 overflow-y-auto"
+      >
         <button
           v-for="(cat, index) in categoryMenuItems"
+          :id="getCategoryOptionId(index)"
           :key="cat.value"
           type="button"
+          role="option"
+          tabindex="-1"
+          :aria-selected="categoryMenuActiveIndex === index"
           :class="getCategoryItemClass(cat, index)"
           @click="handleCategoryClick(cat)"
           @mouseenter="handleCategoryMouseEnter(index)"
         >
-          <component :is="categoryIcons[cat.value]" class="w-4 h-4 shrink-0 text-gray-500 dark:text-gray-400" />
+          <component :is="categoryIcons[cat.value]" aria-hidden="true" class="w-4 h-4 shrink-0 text-gray-500 dark:text-gray-400" />
           <span class="font-medium text-gray-800 dark:text-gray-200 flex-1">{{ cat.label }}</span>
-          <Keycap v-if="categoryMenuActiveIndex === index" size="small">&crarr;</Keycap>
+          <Keycap v-if="categoryMenuActiveIndex === index" aria-hidden="true" size="small">&crarr;</Keycap>
         </button>
       </div>
     </div>
@@ -745,31 +833,46 @@ defineExpose({
       :class="termSuggestionsClass"
       @mousedown.prevent="focusInput"
     >
-      <div class="max-h-80 overflow-y-auto">
-        <!-- <div class="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
-          <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-            {{ categoryPrefix }} suggestions
-          </div>
-          <div v-if="termSuggestions.length > 0" class="mt-0.5 text-xs text-gray-400 dark:text-gray-500 italic">
-            Select one from the list
-          </div>
-        </div> -->
-        <div
-          v-if="termSuggestions.length === 0"
-          class="px-4 py-3 text-sm text-gray-400 dark:text-gray-500"
-        >
-          {{ noTermMatchesMessage }}
-        </div>
+      <div
+        v-if="termSuggestions.length === 0"
+        class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 flex items-center flex-wrap gap-x-1.5 gap-y-1"
+      >
+        <template v-if="isSelectedCategoryLoading">
+          <span>Loading {{ categoryPrefix || 'this category' }} suggestions...</span>
+        </template>
+        <template v-else-if="!currentInput.trim()">
+          <span>No {{ categoryPrefix || 'this category' }} suggestions available</span>
+        </template>
+        <template v-else>
+          <span>
+            No {{ categoryPrefix || 'this category' }} available for
+            <strong class="text-gray-700 dark:text-gray-200">{{ currentInput.trim() }}</strong>.
+            Try a different term or press
+          </span>
+          <Keycap size="small">Esc</Keycap>
+          <span>to pick another category</span>
+        </template>
+      </div>
+      <div
+        :id="termListboxId"
+        role="listbox"
+        :aria-label="`${categoryPrefix} suggestions`"
+        class="max-h-80 overflow-y-auto"
+      >
         <button
           v-for="(term, index) in termSuggestions"
+          :id="getTermOptionId(index)"
           :key="term"
           type="button"
+          role="option"
+          tabindex="-1"
+          :aria-selected="activeSuggestionIndex === index"
           :class="getTermItemClass(index)"
           @click="selectTerm(term)"
           @mouseenter="handleTermMouseEnter(index)"
         >
           <span class="truncate flex-1">{{ term }}</span>
-          <Keycap v-if="activeSuggestionIndex === index" size="small">&crarr;</Keycap>
+          <Keycap v-if="activeSuggestionIndex === index" aria-hidden="true" size="small">&crarr;</Keycap>
         </button>
       </div>
     </div>
@@ -777,6 +880,7 @@ defineExpose({
     <!-- Free-text hint (shown when user has typed text and no category/dropdown is active) -->
     <div
       v-if="showFreeTextHint"
+      :id="freeTextHintId"
       ref="freeTextHintRef"
       :class="freeTextHintClass"
       @mousedown.prevent="focusInput"
@@ -792,6 +896,11 @@ defineExpose({
         <Keycap size="small">Tab</Keycap>
         <span>to add category filters</span>
       </div>
+    </div>
+
+    <!-- Screen-reader announcements for suggestion availability -->
+    <div :id="statusId" role="status" aria-live="polite" class="sr-only">
+      {{ statusMessage }}
     </div>
   </div>
 </template>
