@@ -63,11 +63,11 @@ const backPath = computed(() => {
   const lastSlash = props.path.lastIndexOf('/')
   if (lastSlash === -1) {
     // File in root - go to root workspace.
-    return `/workspaces/${props.alias}`
+    return `/workspace/${props.alias}`
   }
   // Go to parent folder.
   const parentPath = props.path.substring(0, lastSlash)
-  return `/workspaces/${props.alias}/file/${props.commitId}/${parentPath}`
+  return `/workspace/${props.alias}/file/${props.commitId}/${parentPath}`
 })
 
 const { goBack } = useBackNavigation(backPath.value)
@@ -238,7 +238,7 @@ const switchCodeView = async (event: Event, showCodeView: boolean) => {
   trackButtonClick({
     button_name: buttonText,
     content_section: pageTitle.value,
-    link_category: `/workspaces/${props.alias}/file/${props.commitId}/${props.path}`,
+    link_category: `/workspace/${props.alias}/file/${props.commitId}/${props.path}`,
   })
 }
 </script>
@@ -339,7 +339,9 @@ const switchCodeView = async (event: Event, showCodeView: boolean) => {
       </div>
 
       <!-- SVG Rendered View -->
-      <div :id="previewPanelId" role="tabpanel" v-if="isSvg && shouldShowPreview" class="flex justify-center p-4 bg-gray-50 dark:bg-gray-900 rounded">
+      <div :id="previewPanelId" role="tabpanel" v-if="isSvg && shouldShowPreview"
+        class="flex justify-center p-4 bg-gray-50 dark:bg-white rounded-b"
+      >
         <img :src="fileBlobUrl" :alt="path" class="max-w-full h-auto" />
       </div>
 
@@ -349,7 +351,7 @@ const switchCodeView = async (event: Event, showCodeView: boolean) => {
       </div>
 
       <!-- Image View -->
-      <div v-else-if="isImage && imageDataUrl" class="flex justify-center p-4 bg-gray-50 dark:bg-gray-900 rounded">
+      <div v-else-if="isImage && imageDataUrl" class="flex justify-center p-4 bg-gray-50 dark:bg-white rounded-b">
         <img :src="imageDataUrl" :alt="path" class="max-w-full h-auto" />
       </div>
 

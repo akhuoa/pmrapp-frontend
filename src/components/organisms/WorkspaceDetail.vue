@@ -33,21 +33,21 @@ const requestCounter = ref(0)
 const backPath = computed(() => {
   if (!props.path) {
     // Root workspace - go to workspaces listing.
-    return '/workspaces'
+    return '/workspace'
   }
   // Extract parent folder path.
   const lastSlash = props.path.lastIndexOf('/')
   if (lastSlash === -1) {
     // File/folder in root - go to root workspace
-    return `/workspaces/${props.alias}`
+    return `/workspace/${props.alias}`
   }
   // Go to parent folder.
   const parentPath = props.path.substring(0, lastSlash)
-  return `/workspaces/${props.alias}/file/${props.commitId}/${parentPath}`
+  return `/workspace/${props.alias}/file/${props.commitId}/${parentPath}`
 })
 
 const goBack = () => {
-  const basePath = !props.path ? '/workspaces' : `/workspaces/${props.alias}`
+  const basePath = !props.path ? '/workspace' : `/workspace/${props.alias}`
 
   // Check browser history to preserve query state (search filters).
   if (
@@ -93,11 +93,11 @@ const workspaceIssueUrl = computed(() => {
   const resolved = router.resolve(
     props.commitId && props.path
       ? {
-        name: 'workspace-file-detail',
-        params: { alias: props.alias, commitId: props.commitId, path: props.path },
-      }
+          name: 'workspace-file-detail',
+          params: { alias: props.alias, commitId: props.commitId, path: props.path },
+        }
       : { name: 'workspace-detail', params: { alias: props.alias } },
-   )
+  )
   const decodedHref = decodeURIComponent(resolved.href)
   const workspaceUrl = new URL(decodedHref, window.location.origin).toString()
   const params = new URLSearchParams({
