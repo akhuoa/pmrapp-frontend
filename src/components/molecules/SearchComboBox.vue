@@ -147,6 +147,57 @@ const isFilteringCategory = computed(
 
 const hasTextChips = computed(() => chips.value.some(({ kind }) => kind === TEXT_QUERY_KIND))
 
+const pluralise = (count: number, word: string) => `${count} ${count === 1 ? word : `${word}s`}`
+
+// Enter searches with the existing chips too, so the free-text hint mentions them.
+// Text chips are keywords in the query; the rest are sent as filters.
+const otherChipsText = computed(() => {
+  const keywordCount = chips.value.filter(({ kind }) => kind === TEXT_QUERY_KIND).length
+  const filterCount = chips.value.length - keywordCount
+  const parts = []
+  if (keywordCount > 0) parts.push(pluralise(keywordCount, 'other keyword'))
+  if (filterCount > 0) parts.push(pluralise(filterCount, 'filter'))
+  return parts.length > 0 ? ` with ${parts.join(' and ')}` : ''
+})
+
+// The typed text as it will be searched: one keyword per word or quoted phrase.
+const typedTokens = computed(() => parseQueryTokens(currentInput.value))
+
+// Tab adds one keyword chip per token.
+const tabKeywordLabel = computed(() => (typedTokens.value.length > 1 ? 'keywords' : 'keyword'))
+
+// Separator shown before each typed token, e.g. "a, b and c".
+const tokenSeparator = (index: number) => {
+  if (index === 0) return ''
+  return index === typedTokens.value.length - 1 ? ' and ' : ', '
+}
+
+// The Enter hint sentence as text and emphasised token segments,
+// so that spacing is defined here instead of relying on template whitespace.
+const freeTextHintParts = computed(() => {
+  const parts = [{ key: 'prefix', text: 'to search for ', emphasised: false }]
+  typedTokens.value.forEach((token, index) => {
+    const separator = tokenSeparator(index)
+    if (separator) parts.push({ key: `separator-${index}`, text: separator, emphasised: false })
+    parts.push({ key: `token-${index}`, text: token, emphasised: true })
+  })
+  parts.push({ key: 'suffix', text: `${otherChipsText.value}, or press`, emphasised: false })
+  return parts
+})
+
+// Typing several words without quotes searches them separately, so suggest quotes for an exact phrase.
+const showExactPhraseTip = computed(
+  () => typedTokens.value.length > 1 && !typedTokens.value.some((token) => token.startsWith('"')),
+)
+
+// The typed words wrapped in double quotes, offered as a one-click replacement for the typed text.
+const exactPhraseSuggestion = computed(() => `"${typedTokens.value.join(' ')}"`)
+
+function applyExactPhrase() {
+  currentInput.value = exactPhraseSuggestion.value
+  focusInput()
+}
+
 const inputPlaceholder = computed(() => {
   if (isFilteringCategory.value) {
     return PLACEHOLDER_FILTER
@@ -881,7 +932,7 @@ defineExpose({
     >
       <div
         v-if="termSuggestions.length === 0"
-        class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 flex items-center flex-wrap gap-x-1.5 gap-y-1"
+        class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 leading-6"
       >
         <template v-if="isSelectedCategoryLoading">
           <span>Loading {{ categoryPrefix ? `${categoryPrefix} ` : '' }}suggestions...</span>
@@ -898,9 +949,9 @@ defineExpose({
             <strong class="text-gray-700 dark:text-gray-200">{{ currentInput.trim() }}</strong>.
             Press
           </span>
-          <Keycap size="small">&crarr;</Keycap>
+          <Keycap size="small" class="mx-1 align-middle">&crarr;</Keycap>
           <span>to search it as free text, or</span>
-          <Keycap size="small">Esc</Keycap>
+          <Keycap size="small" class="mx-1 align-middle">Esc</Keycap>
           <span>to pick another category</span>
         </template>
       </div>
@@ -936,17 +987,27 @@ defineExpose({
       :class="freeTextHintClass"
       @mousedown.prevent="focusInput"
     >
-      <div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 flex items-center flex-wrap gap-x-1.5 gap-y-1">
+      <div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 leading-6">
         <span>Press</span>
-        <Keycap size="small">&crarr;</Keycap>
+        <Keycap size="small" class="mx-1 align-middle">&crarr;</Keycap>
         <span>
-          to search for
-          <strong class="text-gray-700 dark:text-gray-200">{{ currentInput }}</strong>,
-          or press
+          <template v-for="part in freeTextHintParts" :key="part.key">
+            <strong v-if="part.emphasised" class="text-gray-700 dark:text-gray-200">{{ part.text }}</strong>
+            <template v-else>{{ part.text }}</template>
+          </template>
         </span>
-        <Keycap size="small">Tab</Keycap>
+        <Keycap size="small" class="mx-1 align-middle">Tab</Keycap>
         <span>
-          to add as keywords.
+          to add as {{ tabKeywordLabel }}.
+          <template v-if="showExactPhraseTip">
+            To search for an exact phrase instead,
+            <button
+              type="button"
+              tabindex="-1"
+              class="font-medium text-left break-words text-gray-700 dark:text-gray-200 underline decoration-dotted hover:text-gray-900 dark:hover:text-white cursor-pointer"
+              @click="applyExactPhrase"
+            >replace with {{ exactPhraseSuggestion }}</button>.
+          </template>
         </span>
       </div>
     </div>
