@@ -8,6 +8,11 @@ import FileIcon from '@/components/icons/FileIcon.vue'
 import SearchIcon from '@/components/icons/SearchIcon.vue'
 import UserIcon from '@/components/icons/UserIcon.vue'
 import {
+  PLACEHOLDER_ADD_KEYWORD,
+  PLACEHOLDER_ADD_KEYWORD_OR_CATEGORY,
+  PLACEHOLDER_FILTER,
+  PLACEHOLDER_SEARCH,
+  PLACEHOLDER_SEARCH_OR_CATEGORY,
   SEARCH_CATEGORIES,
   SEARCH_KIND_LABEL_SINGULAR_MAP,
   TEXT_QUERY_KIND,
@@ -15,7 +20,7 @@ import {
 } from '@/constants/search'
 import { useSearchStore } from '@/stores/search'
 import type { SearchFilter, SearchQueryRequest } from '@/types/search'
-import { isValidTerm } from '@/utils/search'
+import { buildQueryFromTokens, isValidTerm, parseQueryTokens } from '@/utils/search'
 
 interface FilterChip {
   id: string
@@ -136,21 +141,38 @@ const categoryPrefix = computed(() => {
   return SEARCH_KIND_LABEL_SINGULAR_MAP[selectedCategoryKind.value] || selectedCategoryKind.value
 })
 
+const isFilteringCategory = computed(
+  () => !!selectedCategoryKind.value && selectedCategoryKind.value !== TEXT_QUERY_KIND,
+)
+
+const hasTextChips = computed(() => chips.value.some(({ kind }) => kind === TEXT_QUERY_KIND))
+
 const inputPlaceholder = computed(() => {
-  if (selectedCategoryKind.value && selectedCategoryKind.value !== TEXT_QUERY_KIND) {
-    return 'Type to filter...'
+  if (isFilteringCategory.value) {
+    return PLACEHOLDER_FILTER
   }
 
-  if (chips.value?.find(({ kind }) => kind === TEXT_QUERY_KIND)) {
-    return 'Type to replace search query or add a category below…'
+  if (hasTextChips.value) {
+    return showCategoryMenu.value ? PLACEHOLDER_ADD_KEYWORD_OR_CATEGORY : PLACEHOLDER_ADD_KEYWORD
   }
 
-  if (showCategoryMenu.value) {
-    return 'Type to search or add a category below...'
-  }
-
-  return 'Type to search...'
+  return showCategoryMenu.value ? PLACEHOLDER_SEARCH_OR_CATEGORY : PLACEHOLDER_SEARCH
 })
+
+// Longest placeholder for the current state (the one shown while the dropdown is open).
+// The input's min-width is based on it, so it doesn't move when the dropdown opens.
+const longestPlaceholder = computed(() => {
+  if (isFilteringCategory.value) {
+    return PLACEHOLDER_FILTER
+  }
+  return hasTextChips.value ? PLACEHOLDER_ADD_KEYWORD_OR_CATEGORY : PLACEHOLDER_SEARCH_OR_CATEGORY
+})
+
+// Keep the input wide enough for the whole placeholder;
+// flex-wrap moves it to the next line when the chips leave too little room.
+const inputMinWidth = computed(() =>
+  currentInput.value ? '120px' : `min(100%, ${longestPlaceholder.value.length + 2}ch)`,
+)
 
 const helpText = computed(() => {
   if (!isFocused.value && !props.inOverlay) return ''
@@ -160,7 +182,7 @@ const helpText = computed(() => {
   if (chips.value.length > 0) {
     return 'Add another category filter below to narrow your search'
   }
-  return 'Select a category filter below, or just type and press Enter to search'
+  return 'Select a category filter below, or just type and press Enter to search. Wrap words in quotes for an exact phrase'
 })
 
 const categoryMenuItems = computed(() => {
@@ -202,7 +224,7 @@ const noTermMatchesMessage = computed(() => {
   const label = categoryPrefix.value || 'this category'
   if (isSelectedCategoryLoading.value) return `Loading ${label} suggestions...`
   if (!input) return `No ${label} suggestions available`
-  return `No ${label} available for "${input}". Try a different term or press Escape to pick another category.`
+  return `No ${label} available for "${input}". Press Enter to search it as free text, or Escape to pick another category.`
 })
 
 /**
@@ -245,12 +267,12 @@ const comboboxActiveDescendant = computed(() => {
 const statusMessage = computed(() => {
   if (isCategoryListboxVisible.value) {
     const count = categoryMenuItems.value.length
-    return `${count} ${count === 1 ? 'category' : 'categories'} available. Use up and down arrows or Tab to navigate.`
+    return `${count} ${count === 1 ? 'category' : 'categories'} available. Use up and down arrows or Tab to navigate, Enter to select, Escape to close.`
   }
   if (showTermSuggestions.value) {
     const count = termSuggestions.value.length
     if (count === 0) return noTermMatchesMessage.value
-    return `${count} ${categoryPrefix.value} ${count === 1 ? 'suggestion' : 'suggestions'} available. Use up and down arrows or Tab to navigate.`
+    return `${count} ${categoryPrefix.value} ${count === 1 ? 'suggestion' : 'suggestions'} available. Use up and down arrows or Tab to navigate, Enter to select, Escape to close.`
   }
   return ''
 })
@@ -325,21 +347,23 @@ function showCategoryMenuIfEmpty() {
 }
 
 // ---- Initialisation ----
+// Order-independent key for comparing two sets of chips.
+function chipSetKey(items: SearchFilter[]): string {
+  return JSON.stringify(items.map(({ kind, term }) => `${kind}|${term}`).sort())
+}
+
 function initialiseFromProps() {
-  chips.value = props.initialFilters
-    .filter((f) => f.kind && f.term)
-    .map((f) => ({
-      id: generateChipId(),
-      kind: f.kind,
-      term: f.term,
-    }))
-  if (props.initialQuery) {
-    chips.value.push({
-      id: generateChipId(),
-      kind: TEXT_QUERY_KIND,
-      term: props.initialQuery,
-    })
-  }
+  // Default order: free text first, then filters.
+  const items: SearchFilter[] = [
+    ...parseQueryTokens(props.initialQuery).map((term) => ({ kind: TEXT_QUERY_KIND, term })),
+    ...props.initialFilters.filter((f) => f.kind && f.term),
+  ]
+  // The URL can't hold the order the chips were added in,
+  // so reuse the order from the last search when it has the same chips
+  // (e.g. after searching or opening /search).
+  const ordered =
+    chipSetKey(items) === chipSetKey(searchStore.lastChipOrder) ? searchStore.lastChipOrder : items
+  chips.value = ordered.map(({ kind, term }) => ({ id: generateChipId(), kind, term }))
 }
 
 // Rebuild chips when the parent's search params actually change
@@ -405,7 +429,11 @@ function filterTermSuggestions(inputText: string) {
   const query = inputText.trim().toLowerCase()
   termSuggestions.value = query ? terms.filter((t) => t.toLowerCase().includes(query)) : terms
   showTermSuggestions.value = true
-  activeSuggestionIndex.value = -1
+  // Highlight an exact match (or else the first match) while typing so Enter/Tab picks it;
+  // nothing is pre-selected when the category is first opened.
+  const exactIndex = termSuggestions.value.findIndex((t) => t.toLowerCase() === query)
+  activeSuggestionIndex.value =
+    !query || termSuggestions.value.length === 0 ? -1 : Math.max(exactIndex, 0)
 }
 
 // ---- Category selection ----
@@ -482,12 +510,28 @@ function clearAll() {
   focusInput()
 }
 
+// ---- Free text ----
+// Splits the typed text into keyword/phrase chips and appends them, skipping duplicates.
+function commitInputAsTextChips() {
+  const tokens = parseQueryTokens(currentInput.value)
+  currentInput.value = ''
+
+  const existing = new Set(
+    chips.value.filter((c) => c.kind === TEXT_QUERY_KIND).map((c) => c.term.toLowerCase()),
+  )
+  const newChips = tokens
+    .filter((term) => !existing.has(term.toLowerCase()))
+    .map((term) => ({ id: generateChipId(), kind: TEXT_QUERY_KIND, term }))
+  chips.value.push(...newChips)
+}
+
 // ---- Search ----
 function executeSearch() {
-  // Priority: whatever the user has typed right now, then fall back to an existing free-text chip.
-  const inputText = currentInput.value.trim()
-  const existingTextChip = chips.value.find((c) => c.kind === TEXT_QUERY_KIND)
-  const queryText = inputText || existingTextChip?.term || ''
+  // Typed text is added to the existing free-text chips; all of them make up the query.
+  commitInputAsTextChips()
+  const queryText = buildQueryFromTokens(
+    chips.value.filter((c) => c.kind === TEXT_QUERY_KIND).map((c) => c.term),
+  )
 
   const filters: SearchFilter[] = chips.value
     .filter((c) => c.kind !== TEXT_QUERY_KIND)
@@ -499,22 +543,12 @@ function executeSearch() {
     return
   }
 
-  // Commit typed text as the free-text chip so the bar reflects the submitted search,
-  // even when the URL doesn't change (e.g. re-submitting the same query).
-  if (inputText) {
-    chips.value = chips.value.filter((c) => c.kind !== TEXT_QUERY_KIND)
-    chips.value.push({
-      id: generateChipId(),
-      kind: TEXT_QUERY_KIND,
-      term: inputText,
-    })
-    currentInput.value = ''
-  }
-
   inputRef.value?.blur()
   showCategoryMenu.value = false
   showTermSuggestions.value = false
   selectedCategoryKind.value = null
+
+  searchStore.lastChipOrder = chips.value.map(({ kind, term }) => ({ kind, term }))
 
   const request: SearchQueryRequest = {
     query: queryText || undefined,
@@ -571,6 +605,13 @@ function handleInput(_event: Event) {
   }
 }
 
+// Moves an active index through a list of `count` items, wrapping at both ends.
+// From no highlight (-1), down goes to the first item and up to the last.
+function wrapIndex(index: number, delta: number, count: number): number {
+  if (index < 0) return delta > 0 ? 0 : count - 1
+  return (index + delta + count) % count
+}
+
 function handleKeydown(event: KeyboardEvent) {
   const input = event.target as HTMLInputElement
 
@@ -593,17 +634,14 @@ function handleKeydown(event: KeyboardEvent) {
   }
 
   // ---- Tab ----
-  // If the user has typed free text (no category active), Tab commits it as a chip
-  // so they can continue adding category filters.
-  if (event.key === 'Tab' && !selectedCategoryKind.value && currentInput.value.trim()) {
-    const term = currentInput.value.trim()
-    chips.value = chips.value.filter((c) => c.kind !== TEXT_QUERY_KIND)
-    chips.value.push({
-      id: generateChipId(),
-      kind: TEXT_QUERY_KIND,
-      term,
-    })
-    currentInput.value = ''
+  // Free text typed (no category active): Tab commits it as keyword chips.
+  if (
+    event.key === 'Tab' &&
+    !event.shiftKey &&
+    !selectedCategoryKind.value &&
+    currentInput.value.trim()
+  ) {
+    commitInputAsTextChips()
     showCategoryMenu.value = true
     categoryMenuActiveIndex.value = -1
     event.preventDefault()
@@ -611,57 +649,45 @@ function handleKeydown(event: KeyboardEvent) {
     return
   }
 
-  // Tab / Shift+Tab cycle through the open list like the arrow keys, but include the
-  // input itself (index -1) in the loop. Escape closes the list so Tab can leave the bar.
-  if (event.key === 'Tab') {
-    const delta = event.shiftKey ? -1 : 1
-    const cycle = (index: number, count: number) =>
-      ((index + 1 + delta + count + 1) % (count + 1)) - 1
-
+  // ---- Arrow / Tab navigation ----
+  // Tab / Shift+Tab move through an open list like the arrow keys
+  // (Escape closes the list so Tab can leave the bar).
+  const isTab = event.key === 'Tab'
+  if (isTab || event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+    const delta = event.key === 'ArrowUp' || (isTab && event.shiftKey) ? -1 : 1
     if (isCategoryListboxVisible.value) {
       event.preventDefault()
-      categoryMenuActiveIndex.value = cycle(
+      categoryMenuActiveIndex.value = wrapIndex(
         categoryMenuActiveIndex.value,
+        delta,
         categoryMenuItems.value.length,
       )
       return
     }
     if (showTermSuggestions.value && termSuggestions.value.length > 0) {
       event.preventDefault()
-      activeSuggestionIndex.value = cycle(activeSuggestionIndex.value, termSuggestions.value.length)
+      activeSuggestionIndex.value = wrapIndex(
+        activeSuggestionIndex.value,
+        delta,
+        termSuggestions.value.length,
+      )
       return
     }
-  }
-
-  // Close dropdowns on Tab (without consuming the event, so focus moves naturally).
-  if (event.key === 'Tab' && showDropdown.value) {
-    showCategoryMenu.value = false
-    showTermSuggestions.value = false
-    if (selectedCategoryKind.value) {
-      selectedCategoryKind.value = null
+    // Nothing to navigate (e.g. no matching terms): close the dropdowns and let Tab
+    // move focus naturally.
+    if (isTab) {
+      if (showDropdown.value) {
+        showCategoryMenu.value = false
+        showTermSuggestions.value = false
+        selectedCategoryKind.value = null
+      }
+      return
     }
-    return
-  }
-
-  // ---- Arrow navigation ----
-  if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-    if (showCategoryMenu.value) {
+    // Menu closed (e.g. after Escape) with an empty input: ArrowDown reopens it.
+    if (event.key === 'ArrowDown' && !selectedCategoryKind.value && !currentInput.value.trim()) {
       event.preventDefault()
-      const delta = event.key === 'ArrowDown' ? 1 : -1
-      const items = categoryMenuItems.value
-      const maxIndex = items.length - 1
-      const nextIndex = categoryMenuActiveIndex.value + delta
-      categoryMenuActiveIndex.value =
-        nextIndex < 0 ? maxIndex : nextIndex > maxIndex ? 0 : nextIndex
-      return
-    }
-    if (showTermSuggestions.value && termSuggestions.value.length > 0) {
-      event.preventDefault()
-      const delta = event.key === 'ArrowDown' ? 1 : -1
-      const maxIndex = termSuggestions.value.length - 1
-      const nextIndex = activeSuggestionIndex.value + delta
-      activeSuggestionIndex.value = nextIndex < 0 ? maxIndex : nextIndex > maxIndex ? 0 : nextIndex
-      return
+      showCategoryMenuIfEmpty()
+      categoryMenuActiveIndex.value = 0
     }
     return
   }
@@ -682,18 +708,13 @@ function handleKeydown(event: KeyboardEvent) {
       return
     }
 
-    // Category selected but no item highlighted — try exact match, else fall to free-text search.
+    // Category selected but nothing highlighted (no matching terms, or empty input) —
+    // cancel the category and search the typed text as free text.
     if (showTermSuggestions.value && selectedCategoryKind.value) {
       event.preventDefault()
-      const term = currentInput.value.trim()
-      if (term && termSuggestions.value.some((t) => t.toLowerCase() === term.toLowerCase())) {
-        selectTerm(term)
-      } else {
-        // Cancel category, use input as free-text query.
-        cancelCategorySelection()
-        showCategoryMenu.value = false
-        executeSearch()
-      }
+      cancelCategorySelection()
+      showCategoryMenu.value = false
+      executeSearch()
       return
     }
 
@@ -787,8 +808,9 @@ defineExpose({
           :aria-controls="comboboxControls"
           :aria-activedescendant="comboboxActiveDescendant"
           :aria-describedby="showFreeTextHint ? freeTextHintId : undefined"
-          class="flex-1 min-w-[120px] outline-none border-none bg-transparent px-1 py-1 text-sm"
+          class="flex-1 outline-none border-none bg-transparent px-1 py-1 text-sm"
           :class="{ 'pl-0': selectedCategoryKind !== null || chips.length > 0 }"
+          :style="{ minWidth: inputMinWidth }"
           :placeholder="inputPlaceholder"
           @input="handleInput"
           @keydown="handleKeydown"
@@ -871,8 +893,10 @@ defineExpose({
           <span>
             No {{ categoryPrefix || 'this category' }} available for
             <strong class="text-gray-700 dark:text-gray-200">{{ currentInput.trim() }}</strong>.
-            Try a different term or press
+            Press
           </span>
+          <Keycap size="small">&crarr;</Keycap>
+          <span>to search it as free text, or</span>
           <Keycap size="small">Esc</Keycap>
           <span>to pick another category</span>
         </template>
@@ -918,7 +942,10 @@ defineExpose({
           or press
         </span>
         <Keycap size="small">Tab</Keycap>
-        <span>to add category filters</span>
+        <span>
+          to add as keywords. Results must contain <strong class="text-gray-700 dark:text-gray-200">all</strong> keywords;
+          wrap in "quotes" for an exact phrase.
+        </span>
       </div>
     </div>
 

@@ -10,6 +10,7 @@ import type { SearchFilter } from '@/types/search'
 const { mockSearchStore } = vi.hoisted(() => ({
   mockSearchStore: {
     categories: [] as CategoryData[],
+    lastChipOrder: [] as SearchFilter[],
     isLoading: false,
     fetchCategories: vi.fn<(kinds?: string[]) => Promise<void>>(),
   },
@@ -61,6 +62,7 @@ describe('SearchComboBox', () => {
   beforeEach(() => {
     mockSearchStore.categories = structuredClone(searchCategories)
     mockSearchStore.isLoading = false
+    mockSearchStore.lastChipOrder = []
     mockSearchStore.fetchCategories.mockReset()
     mockSearchStore.fetchCategories.mockResolvedValue(undefined)
   })
@@ -89,7 +91,33 @@ describe('SearchComboBox', () => {
         ],
       })
 
-      expect(chipLabels(w)).toEqual(['Model author: Noble', 'sodium channel'])
+      expect(chipLabels(w)).toEqual(['sodium', 'channel', 'Model author: Noble'])
+    })
+
+    it('rebuilds chips in the order of the last search when they match', async () => {
+      mockSearchStore.lastChipOrder = [
+        { kind: 'model_author', term: 'Noble' },
+        { kind: '_text_query', term: 'cardiac' },
+      ]
+      const w = await mountComboBox({
+        initialQuery: 'cardiac',
+        initialFilters: [{ kind: 'model_author', term: 'Noble' }],
+      })
+
+      expect(chipLabels(w)).toEqual(['Model author: Noble', 'cardiac'])
+    })
+
+    it('falls back to text-first order when the last search has different chips', async () => {
+      mockSearchStore.lastChipOrder = [
+        { kind: 'model_author', term: 'Noble' },
+        { kind: '_text_query', term: 'other' },
+      ]
+      const w = await mountComboBox({
+        initialQuery: 'cardiac',
+        initialFilters: [{ kind: 'model_author', term: 'Noble' }],
+      })
+
+      expect(chipLabels(w)).toEqual(['cardiac', 'Model author: Noble'])
     })
 
     it('rebuilds chips when the initial search params change', async () => {
@@ -122,7 +150,7 @@ describe('SearchComboBox', () => {
       )
       expect(input.attributes('placeholder')).toBe('Type to search or add a category below...')
       expect(statusText(w)).toBe(
-        '4 categories available. Use up and down arrows or Tab to navigate.',
+        '4 categories available. Use up and down arrows or Tab to navigate, Enter to select, Escape to close.',
       )
     })
 
@@ -161,36 +189,41 @@ describe('SearchComboBox', () => {
       expect(input.attributes('aria-activedescendant')).toBe(options[0]?.attributes('id'))
     })
 
-    it('cycles through categories with Tab, looping back to the input', async () => {
+    it('cycles through categories with Tab, wrapping from last to first', async () => {
       const w = await mountComboBox()
       const input = getInput(w)
       const activeIndex = () =>
         categoryOptions(w).findIndex((o) => o.attributes('aria-selected') === 'true')
 
-      for (const expected of [0, 1, 2, 3]) {
+      for (const expected of [0, 1, 2, 3, 0]) {
         await press(w, 'Tab')
         expect(activeIndex()).toBe(expected)
         expect(input.attributes('aria-activedescendant')).toBe(
           categoryOptions(w)[expected]?.attributes('id'),
         )
       }
-
-      await press(w, 'Tab')
-      expect(activeIndex()).toBe(-1)
-      expect(input.attributes('aria-activedescendant')).toBeUndefined()
-      expect(categoryOptions(w)).toHaveLength(4)
     })
 
-    it('cycles backwards with Shift+Tab', async () => {
+    it('cycles backwards with Shift+Tab, starting from the last category', async () => {
       const w = await mountComboBox()
       const activeIndex = () =>
         categoryOptions(w).findIndex((o) => o.attributes('aria-selected') === 'true')
 
-      await getInput(w).trigger('keydown', { key: 'Tab', shiftKey: true })
-      expect(activeIndex()).toBe(3)
+      for (const expected of [3, 2]) {
+        await getInput(w).trigger('keydown', { key: 'Tab', shiftKey: true })
+        expect(activeIndex()).toBe(expected)
+      }
+    })
 
-      await press(w, 'Tab')
-      expect(activeIndex()).toBe(-1)
+    it('reopens the category menu with ArrowDown after Escape', async () => {
+      const w = await mountComboBox()
+
+      await press(w, 'Escape')
+      expect(categoryOptions(w)).toHaveLength(0)
+
+      await press(w, 'ArrowDown')
+      expect(categoryOptions(w)).toHaveLength(4)
+      expect(categoryOptions(w)[0]?.attributes('aria-selected')).toBe('true')
     })
 
     it('does not trap Tab once the category menu is closed with Escape', async () => {
@@ -246,9 +279,9 @@ describe('SearchComboBox', () => {
       await selectCategory(w, 'Model authors')
       await getInput(w).setValue('NOBLE')
 
-      expect(termOptions(w).map((o) => o.text())).toEqual(['Noble', 'Penny Noble'])
+      expect(termOptions(w).map((o) => o.get('span').text())).toEqual(['Noble', 'Penny Noble'])
       expect(statusText(w)).toBe(
-        '2 Model author suggestions available. Use up and down arrows or Tab to navigate.',
+        '2 Model author suggestions available. Use up and down arrows or Tab to navigate, Enter to select, Escape to close.',
       )
     })
 
@@ -271,14 +304,46 @@ describe('SearchComboBox', () => {
         termOptions(w).findIndex((o) => o.attributes('aria-selected') === 'true')
 
       await selectCategory(w, 'Publication authors')
-      for (const expected of [0, 1, 2, -1]) {
+      for (const expected of [0, 1, 2, 0]) {
         await press(w, 'Tab')
         expect(activeIndex()).toBe(expected)
       }
 
-      await getInput(w).trigger('keydown', { key: 'Tab', shiftKey: true })
-      expect(activeIndex()).toBe(2)
       expect(w.text()).toContain('Publication author:')
+      expect(chipLabels(w)).toEqual([])
+    })
+
+    it('lets Tab leave the bar when the term list has no matches', async () => {
+      const w = await mountComboBox()
+
+      await selectCategory(w, 'Model authors')
+      await getInput(w).setValue('xyz')
+      const event = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true })
+      getInput(w).element.dispatchEvent(event)
+      await nextTick()
+
+      expect(event.defaultPrevented).toBe(false)
+      expect(w.text()).not.toContain('No Model author available')
+    })
+
+    it('does not highlight a term when a category is first opened', async () => {
+      const w = await mountComboBox()
+
+      await selectCategory(w, 'Publication authors')
+
+      expect(termOptions(w).some((o) => o.attributes('aria-selected') === 'true')).toBe(false)
+    })
+
+    it('highlights the first match while typing so Enter selects it', async () => {
+      const w = await mountComboBox()
+
+      await selectCategory(w, 'Model authors')
+      await getInput(w).setValue('lloy')
+      expect(termOptions(w)[0]?.attributes('aria-selected')).toBe('true')
+
+      await press(w, 'Enter')
+      expect(chipLabels(w)).toEqual(['Model author: Catherine Lloyd'])
+      expect(w.emitted('querySearch')).toBeUndefined()
     })
 
     it('selects the highlighted term on Enter', async () => {
@@ -291,14 +356,14 @@ describe('SearchComboBox', () => {
       expect(chipLabels(w)).toEqual(['CellML keyword: calcium'])
     })
 
-    it('selects an exact typed match on Enter without highlighting', async () => {
+    it('prefers an exact typed match over the first match on Enter', async () => {
       const w = await mountComboBox()
 
       await selectCategory(w, 'Model authors')
       await getInput(w).setValue('noble')
       await press(w, 'Enter')
 
-      expect(chipLabels(w)).toEqual(['Model author: noble'])
+      expect(chipLabels(w)).toEqual(['Model author: Noble'])
       expect(w.emitted('querySearch')).toBeUndefined()
     })
 
@@ -324,7 +389,7 @@ describe('SearchComboBox', () => {
       expect(chipLabels(w)).toEqual(['xyz'])
     })
 
-    it('shows a no-match message with an Esc hint', async () => {
+    it('shows a no-match message with Enter and Esc hints', async () => {
       const w = await mountComboBox()
 
       await selectCategory(w, 'Model authors')
@@ -332,9 +397,10 @@ describe('SearchComboBox', () => {
 
       expect(termOptions(w)).toHaveLength(0)
       expect(w.text()).toContain('No Model author available for xyz')
+      expect(w.text()).toContain('to search it as free text')
       expect(w.findAll('kbd').some((k) => k.text() === 'Esc')).toBe(true)
       expect(statusText(w)).toBe(
-        'No Model author available for "xyz". Try a different term or press Escape to pick another category.',
+        'No Model author available for "xyz". Press Enter to search it as free text, or Escape to pick another category.',
       )
     })
 
@@ -422,20 +488,20 @@ describe('SearchComboBox', () => {
       expect((getInput(w).element as HTMLInputElement).value).toBe('')
     })
 
-    it('emits filters with the typed text replacing an existing free-text chip', async () => {
+    it('emits filters with the typed text added to existing free-text chips', async () => {
       const w = await mountComboBox({
         inOverlay: true,
-        initialQuery: 'old query',
+        initialQuery: 'cardiac',
         initialFilters: [{ kind: 'model_author', term: 'Noble' }],
       })
 
-      await getInput(w).setValue('new query')
+      await getInput(w).setValue('myocyte')
       await press(w, 'Enter')
 
       expect(w.emitted('querySearch')?.[0]).toEqual([
-        { query: 'new query', filters: [{ kind: 'model_author', term: 'Noble' }] },
+        { query: 'cardiac myocyte', filters: [{ kind: 'model_author', term: 'Noble' }] },
       ])
-      expect(chipLabels(w)).toEqual(['Model author: Noble', 'new query'])
+      expect(chipLabels(w)).toEqual(['cardiac', 'Model author: Noble', 'myocyte'])
     })
 
     it('emits the existing free-text chip when nothing is typed', async () => {
@@ -465,8 +531,88 @@ describe('SearchComboBox', () => {
       expect((getInput(w).element as HTMLInputElement).value).toBe('')
       expect(categoryOptions(w)).toHaveLength(4)
       expect(getInput(w).attributes('placeholder')).toBe(
-        'Type to replace search query or add a category below…',
+        'Type to add another keyword or a category below...',
       )
+    })
+
+    it('adds keywords from successive Tabs instead of replacing them', async () => {
+      const w = await mountComboBox()
+
+      await getInput(w).setValue('cardiac')
+      await press(w, 'Tab')
+      await getInput(w).setValue('myocyte')
+      await press(w, 'Tab')
+
+      expect(chipLabels(w)).toEqual(['cardiac', 'myocyte'])
+      await w.get('button[aria-label="Search"]').trigger('click')
+      expect(w.emitted('querySearch')?.[0]).toEqual([
+        { query: 'cardiac myocyte', filters: undefined },
+      ])
+    })
+
+    it('splits space-separated text into separate keyword chips', async () => {
+      const w = await mountComboBox()
+
+      await getInput(w).setValue('cardiac myocyte cardiac')
+      await press(w, 'Tab')
+
+      expect(chipLabels(w)).toEqual(['cardiac', 'myocyte'])
+    })
+
+    it('keeps quoted text as a single exact phrase chip', async () => {
+      const w = await mountComboBox()
+
+      await getInput(w).setValue('"cardiac myocyte"')
+      await press(w, 'Tab')
+
+      expect(chipLabels(w)).toEqual(['"cardiac myocyte"'])
+      await press(w, 'Enter')
+      expect(w.emitted('querySearch')?.[0]).toEqual([
+        { query: '"cardiac myocyte"', filters: undefined },
+      ])
+    })
+
+    it('rebuilds keyword and phrase chips from the initial query', async () => {
+      const w = await mountComboBox({ inOverlay: true, initialQuery: 'calcium "cardiac myocyte"' })
+
+      expect(chipLabels(w)).toEqual(['calcium', '"cardiac myocyte"'])
+    })
+
+    it('appends new chips at the end in the order they are added', async () => {
+      const w = await mountComboBox()
+
+      await getInput(w).setValue('cardiac')
+      await press(w, 'Tab')
+      await selectCategory(w, 'Model author')
+
+      const author = termOptions(w)[0]?.text() as string
+      await termOptions(w)[0]?.trigger('click')
+      await nextTick()
+      await getInput(w).setValue('myocyte')
+      await press(w, 'Tab')
+
+      expect(chipLabels(w)).toEqual(['cardiac', `Model author: ${author}`, 'myocyte'])
+    })
+
+    it('keeps the chip order after searching and receiving the new search params', async () => {
+      const w = await mountComboBox()
+
+      await selectCategory(w, 'Model author')
+
+      const author = termOptions(w)[0]?.text() as string
+      await termOptions(w)[0]?.trigger('click')
+      await nextTick()
+      await getInput(w).setValue('cardiac')
+      await press(w, 'Enter')
+      expect(chipLabels(w)).toEqual([`Model author: ${author}`, 'cardiac'])
+
+      // The parent passes the searched params back down (as it would after navigating).
+      await w.setProps({
+        initialQuery: 'cardiac',
+        initialFilters: [{ kind: 'model_author', term: author }],
+      })
+
+      expect(chipLabels(w)).toEqual([`Model author: ${author}`, 'cardiac'])
     })
 
     it('emits a search when the search button is clicked', async () => {
