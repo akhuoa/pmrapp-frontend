@@ -20,7 +20,12 @@ import {
 } from '@/constants/search'
 import { useSearchStore } from '@/stores/search'
 import type { SearchFilter, SearchQueryRequest } from '@/types/search'
-import { buildQueryFromTokens, isValidTerm, parseQueryTokens } from '@/utils/search'
+import {
+  buildQueryFromTokens,
+  isValidTerm,
+  parseQueryTokens,
+  stripSurroundingQuotes,
+} from '@/utils/search'
 
 interface FilterChip {
   id: string
@@ -352,10 +357,9 @@ function getCategoryItemClass(_cat: { value: string }, index: number): string[] 
   const baseClasses = [
     'w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors cursor-pointer focus:outline-none',
   ]
+  // Mouse hover sets the active index, so no separate :hover style is needed (it would double-highlight).
   if (categoryMenuActiveIndex.value === index) {
     baseClasses.push('bg-gray-100 dark:bg-gray-700')
-  } else {
-    baseClasses.push('hover:bg-gray-50 dark:hover:bg-gray-750')
   }
   return baseClasses
 }
@@ -366,8 +370,6 @@ function getTermItemClass(index: number): string[] {
   ]
   if (activeSuggestionIndex.value === index) {
     baseClasses.push('bg-gray-100 dark:bg-gray-700')
-  } else {
-    baseClasses.push('hover:bg-gray-50 dark:hover:bg-gray-750')
   }
   return baseClasses
 }
@@ -833,7 +835,7 @@ defineExpose({
           v-for="chip in chips"
           :key="chip.id"
           :category="getCategoryLabel(chip.kind)"
-          :label="chip.term"
+          :label="stripSurroundingQuotes(chip.term)"
           :removable="true"
           :on-remove="() => removeChip(chip.id)"
         />
