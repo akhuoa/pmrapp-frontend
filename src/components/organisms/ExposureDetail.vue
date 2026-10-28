@@ -16,7 +16,7 @@ import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
 import LoadingIcon from '@/components/icons/LoadingIcon.vue'
 import WarningIcon from '@/components/icons/WarningIcon.vue'
-import Breadcrumbs from '@/components/molecules/Breadcrumbs.vue'
+import BreadcrumbsBar from '@/components/molecules/BreadcrumbsBar.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import MathTransformOptions from '@/components/molecules/MathTransformOptions.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
@@ -32,7 +32,6 @@ import { GITHUB_ISSUES_URL, TITLE } from '@/constants/global'
 import { DEFAULT_MATH_FORMAT_OPTIONS } from '@/constants/mathml'
 import { downloadCOMBINEArchive, getWorkspaceArchiveUrl } from '@/services/downloadUrlService'
 import { useExposureStore } from '@/stores/exposure'
-import { useNavigationStore } from '@/stores/navigation'
 import { useSearchStore } from '@/stores/search'
 import type { BreadcrumbItem } from '@/types/breadcrumb'
 import type { ErrorInfo } from '@/types/error'
@@ -50,6 +49,7 @@ import { formatYear } from '@/utils/format'
 import { markHtmlImagesLoaded, prepareHtmlImages } from '@/utils/html'
 import { formatLicenceUrl } from '@/utils/licence'
 import { formatMathMLTable, initMathPolyfills, transformMathString } from '@/utils/mathTransformer'
+import { encodePathSegments } from '@/utils/path'
 import { buildSearchQuery, isValidTerm } from '@/utils/search'
 
 type ExposureFileEntry = ExposureInfo['files'][number]
@@ -126,8 +126,6 @@ const router = useRouter()
 const route = useRoute()
 const searchStore = useSearchStore()
 
-const navigationStore = useNavigationStore()
-
 const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
   const exposureLabel = exposureInfo.value
     ? generateExposureTitle(
@@ -142,12 +140,9 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
 
   const items: BreadcrumbItem[] = [
     {
-      label: 'Exposures',
-      to: { name: 'exposures', query: navigationStore.listingQuery.exposures },
-    },
-    {
       label: exposureLabel,
       to: props.file ? { name: 'exposure-detail', params: { alias: props.alias } } : undefined,
+      loading: !exposureInfo.value && isLoading.value,
     },
   ]
 
@@ -155,7 +150,7 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     items.push({
       label: props.file,
       // Trailing slash matches the file links in the navigation sidebar.
-      to: hasViewCrumb ? `/exposures/${props.alias}/${props.file}/` : undefined,
+      to: hasViewCrumb ? `/exposure/${props.alias}/${encodePathSegments(props.file)}/` : undefined,
     })
   }
 
@@ -947,7 +942,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <Breadcrumbs :items="breadcrumbItems" class="mb-6" />
+  <BreadcrumbsBar :items="breadcrumbItems" />
 
   <div class="flex flex-wrap gap-2 justify-end mb-6" :class="actionToolbarWidth">
     <ActionButton

@@ -10,14 +10,12 @@ import CodeIcon from '@/components/icons/CodeIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
 import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
 import PreviewIcon from '@/components/icons/PreviewIcon.vue'
-import Breadcrumbs from '@/components/molecules/Breadcrumbs.vue'
+import BreadcrumbsBar from '@/components/molecules/BreadcrumbsBar.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import { getWorkspaceService } from '@/services'
 import { getWorkspaceFileUrl } from '@/services/downloadUrlService'
-import { useNavigationStore } from '@/stores/navigation'
 import { useWorkspaceStore } from '@/stores/workspace'
-import type { BreadcrumbItem } from '@/types/breadcrumb'
 import type { WorkspaceInfo } from '@/types/workspace'
 import { trackButtonClick } from '@/utils/analytics'
 import { downloadWorkspaceFile } from '@/utils/download'
@@ -30,7 +28,7 @@ import {
   isSvgFile,
 } from '@/utils/file'
 import { renderMarkdown } from '@/utils/markdown'
-import { generateWorkspaceTitle } from '@/utils/workspace'
+import { generateWorkspaceBreadcrumbs, generateWorkspaceTitle } from '@/utils/workspace'
 
 // Files with size above this threshold are not rendered in the preview to prevent browser freeze.
 const MAX_PREVIEW_FILE_SIZE_BYTES = 500 * 1024 // ~500 KB
@@ -163,26 +161,15 @@ const loadWorkspaceInfo = async () => {
   }
 }
 
-const navigationStore = useNavigationStore()
-
-const breadcrumbItems = computed<BreadcrumbItem[]>(() => [
-  {
-    label: 'Workspaces',
-    to: { name: 'workspaces', query: navigationStore.listingQuery.workspaces },
-  },
-  {
-    label: workspaceInfo.value
-      ? generateWorkspaceTitle(
-          workspaceInfo.value.workspace.description,
-          workspaceInfo.value.workspace.id,
-        )
-      : props.alias,
-    to: {
-      name: 'workspace-detail-alias-commit',
-      params: { alias: props.alias, commitId: props.commitId },
-    },
-  },
-])
+const breadcrumbItems = computed(() =>
+  generateWorkspaceBreadcrumbs(
+    workspaceInfo.value,
+    props.alias,
+    props.commitId,
+    props.path,
+    workspaceInfoLoading.value,
+  ),
+)
 
 const pageTitle = computed(() => {
   const title = generateWorkspaceTitle(
@@ -255,7 +242,7 @@ const switchCodeView = async (event: Event, showCodeView: boolean) => {
 </script>
 
 <template>
-  <Breadcrumbs :items="breadcrumbItems" class="mb-6" />
+  <BreadcrumbsBar :items="breadcrumbItems" />
 
   <PageHeader v-if="!workspaceInfoLoading" :title="pageTitle" titleSize="small" />
 

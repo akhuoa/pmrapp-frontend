@@ -2,7 +2,7 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
-import Breadcrumbs from '@/components/molecules/Breadcrumbs.vue'
+import BreadcrumbsBar from '@/components/molecules/BreadcrumbsBar.vue'
 import WorkspaceDetail from '@/components/organisms/WorkspaceDetail.vue'
 import { GITHUB_ISSUES_URL } from '@/constants/global'
 import { mockWorkspaceInfo } from '@/mocks/workspaceInfo'
@@ -20,7 +20,7 @@ vi.mock('@/utils/analytics', () => ({
 }))
 
 const stubs = {
-  Breadcrumbs: true,
+  BreadcrumbsBar: true,
   ActionButton: {
     props: ['href', 'target', 'rel', 'contentSection', 'variant', 'size'],
     template: '<a :href="href" :target="target" :rel="rel"><slot /></a>',
@@ -79,13 +79,12 @@ describe('WorkspaceDetail', () => {
 
     await flushPromises()
 
-    expect(wrapper.findComponent(Breadcrumbs).props('items')).toEqual([
-      { label: 'Workspaces', to: { name: 'workspaces', query: {} } },
-      { label: mockWorkspaceInfo.workspace.description, to: undefined },
+    expect(wrapper.findComponent(BreadcrumbsBar).props('items')).toEqual([
+      { label: mockWorkspaceInfo.workspace.description, to: undefined, loading: false },
     ])
   })
 
-  it('links the workspace crumb to the root at the same commit inside a folder', async () => {
+  it('links the workspace crumb to the root at the same commit and adds each folder inside a folder', async () => {
     const workspaceStore = useWorkspaceStore()
     vi.spyOn(workspaceStore, 'getWorkspaceInfo').mockResolvedValue(mockWorkspaceInfo)
 
@@ -96,16 +95,21 @@ describe('WorkspaceDetail', () => {
 
     await flushPromises()
 
-    expect(wrapper.findComponent(Breadcrumbs).props('items')[1]).toEqual({
-      label: mockWorkspaceInfo.workspace.description,
-      to: {
-        name: 'workspace-detail-alias-commit',
-        params: { alias: 'test-alias', commitId: 'abc123' },
+    expect(wrapper.findComponent(BreadcrumbsBar).props('items')).toEqual([
+      {
+        label: mockWorkspaceInfo.workspace.description,
+        to: {
+          name: 'workspace-detail-alias-commit',
+          params: { alias: 'test-alias', commitId: 'abc123' },
+        },
+        loading: false,
       },
-    })
+      { label: 'src', to: '/workspace/test-alias/file/abc123/src' },
+      { label: 'models' },
+    ])
   })
 
-  it('uses the alias as the workspace crumb while loading', () => {
+  it('shows a loading crumb until the workspace loads', () => {
     const workspaceStore = useWorkspaceStore()
     vi.spyOn(workspaceStore, 'getWorkspaceInfo').mockReturnValue(new Promise(() => {}))
 
@@ -114,6 +118,6 @@ describe('WorkspaceDetail', () => {
       global: { stubs },
     })
 
-    expect(wrapper.findComponent(Breadcrumbs).props('items')[1].label).toBe('test-alias')
+    expect(wrapper.findComponent(BreadcrumbsBar).props('items')[0]).toMatchObject({ loading: true })
   })
 })

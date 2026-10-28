@@ -6,18 +6,16 @@ import FormattedEmailText from '@/components/atoms/FormattedEmailText.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
 import BugIcon from '@/components/icons/BugIcon.vue'
 import DownloadIcon from '@/components/icons/DownloadIcon.vue'
-import Breadcrumbs from '@/components/molecules/Breadcrumbs.vue'
+import BreadcrumbsBar from '@/components/molecules/BreadcrumbsBar.vue'
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue'
 import PageHeader from '@/components/molecules/PageHeader.vue'
 import WorkspaceFileBrowser from '@/components/molecules/WorkspaceFileBrowser.vue'
 import { GITHUB_ISSUES_URL } from '@/constants/global'
 import { getWorkspaceArchiveUrl } from '@/services/downloadUrlService'
-import { useNavigationStore } from '@/stores/navigation'
 import { useWorkspaceStore } from '@/stores/workspace'
-import type { BreadcrumbItem } from '@/types/breadcrumb'
 import type { ErrorInfo } from '@/types/error'
 import type { WorkspaceInfo } from '@/types/workspace'
-import { generateWorkspaceTitle } from '@/utils/workspace'
+import { generateWorkspaceBreadcrumbs, generateWorkspaceTitle } from '@/utils/workspace'
 
 const props = defineProps<{
   alias: string
@@ -32,32 +30,15 @@ const error = ref<ErrorInfo | null>(null)
 const isLoading = ref(true)
 const requestCounter = ref(0)
 
-const navigationStore = useNavigationStore()
-
-const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
-  const workspaceLabel = workspaceInfo.value
-    ? generateWorkspaceTitle(
-        workspaceInfo.value.workspace.description,
-        workspaceInfo.value.workspace.id,
-      )
-    : props.alias
-
-  // Inside a folder, link back to the workspace root at the same commit.
-  const workspaceRoot = props.commitId
-    ? {
-        name: 'workspace-detail-alias-commit',
-        params: { alias: props.alias, commitId: props.commitId },
-      }
-    : { name: 'workspace-detail', params: { alias: props.alias } }
-
-  return [
-    {
-      label: 'Workspaces',
-      to: { name: 'workspaces', query: navigationStore.listingQuery.workspaces },
-    },
-    { label: workspaceLabel, to: props.path ? workspaceRoot : undefined },
-  ]
-})
+const breadcrumbItems = computed(() =>
+  generateWorkspaceBreadcrumbs(
+    workspaceInfo.value,
+    props.alias,
+    props.commitId ?? '',
+    props.path ?? '',
+    !workspaceInfo.value && isLoading.value,
+  ),
+)
 
 const workspaceArchiveFilename = computed(() => {
   if (!workspaceInfo.value) return ''
@@ -149,7 +130,7 @@ watch(() => [props.alias, props.commitId, props.path], loadWorkspaceInfo)
 </script>
 
 <template>
-  <Breadcrumbs :items="breadcrumbItems" class="mb-6" />
+  <BreadcrumbsBar :items="breadcrumbItems" />
 
   <div class="flex flex-wrap gap-2 justify-end mb-6">
     <ActionButton
