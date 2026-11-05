@@ -124,6 +124,23 @@ bun run build
 bun run test:e2e
 ```
 
+### Performance Tests
+
+Performance checks live in `cypress/perf/` and are kept out of the regular e2e suite. They run against the production build and print their measurements to the terminal, prefixed with `PERF>`:
+
+```sh
+bun run build
+bun run test:perf
+```
+
+For example, `large-file.cy.ts` serves a generated ~10 MB CellML file and measures how long the code view takes to show highlighted code, scroll to the end of the file and find a search match. It also reports any long tasks that block the main thread. Change `LINE_PAIRS` in the spec to test other file sizes.
+
+To watch a check run and record a profile in Chrome DevTools, use `cypress open` instead:
+
+```sh
+bunx start-server-and-test preview http://localhost:4173 'cypress open --e2e --config-file cypress.perf.config.ts'
+```
+
 ## Code Quality
 
 Format code:
