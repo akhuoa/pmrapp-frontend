@@ -1,18 +1,10 @@
 <script setup lang="ts">
-import Prism from 'prismjs'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import 'prismjs/components/prism-markup'
-import 'prismjs/components/prism-css'
-import 'prismjs/components/prism-c'
-import 'prismjs/components/prism-cpp'
-import 'prismjs/components/prism-fortran'
-import 'prismjs/components/prism-javascript'
-import 'prismjs/components/prism-json'
-import 'prismjs/components/prism-python'
-import 'prismjs/components/prism-markdown'
-import 'prismjs/components/prism-matlab'
-import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
-import 'prismjs/plugins/line-numbers/prism-line-numbers'
+import { syntaxHighlighting } from '@codemirror/language'
+import { highlightSelectionMatches, search, searchKeymap } from '@codemirror/search'
+import { Compartment, EditorState, type Extension } from '@codemirror/state'
+import { drawSelection, EditorView, keymap, lineNumbers } from '@codemirror/view'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { codeHighlighter, detectCodeLanguage, loadCodeLanguage } from '@/utils/codeLanguage'
 
 const props = defineProps<{
   code: string
@@ -20,227 +12,297 @@ const props = defineProps<{
   startWrapped?: boolean
 }>()
 
-const codeBlock = ref<HTMLElement | null>(null)
-const preBlock = ref<HTMLElement | null>(null)
-const darkThemeMediaQuery = ref<MediaQueryList | null>(null)
-const isWrapped = ref(false)
-let observer: ResizeObserver | null = null
+const host = ref<HTMLElement | null>(null)
+const detectedLanguage = computed(() => detectCodeLanguage(props.filename))
 
-const preformatClass = computed(() =>
-  [
-    'line-numbers',
-    'bg-gray-50',
-    'dark:bg-gray-900',
-    'rounded',
-    'overflow-x-auto',
-    'text-sm!',
-    'm-0!',
-  ].join(' '),
-)
+// CodeMirror only renders the lines in the viewport and parses the document incrementally,
+// so large files can be highlighted without building a DOM node for every token.
+let view: EditorView | null = null
+const languageCompartment = new Compartment()
+const wrapCompartment = new Compartment()
+const attributesCompartment = new Compartment()
 
-const detectedLanguage = computed(() => {
-  const ext = props.filename.split('.').pop()?.toLowerCase()
+// Incremented on every language load so that stale asynchronous loads are ignored.
+let languageRequestId = 0
 
-  // Map file extensions to Prism language names.
-  const languageMap: Record<string, string> = {
-    c: 'c',
-    cellml: 'markup',
-    conf: 'json',
-    cpp: 'cpp',
-    css: 'css',
-    f77: 'fortran',
-    fortran: 'fortran',
-    h: 'cpp',
-    htm: 'markup',
-    html: 'markup',
-    js: 'javascript',
-    json: 'json',
-    jsx: 'javascript',
-    m: 'matlab',
-    markdown: 'markdown',
-    matlab: 'matlab',
-    md: 'markdown',
-    neon: 'json',
-    py: 'python',
-    python: 'python',
-    rdf: 'markup',
-    sass: 'css',
-    scss: 'css',
-    sedml: 'markup',
-    svg: 'markup',
-    ts: 'javascript',
-    tsx: 'javascript',
-    xml: 'markup',
-    xul: 'markup',
-  }
+const wrapExtension = (isWrapped: boolean): Extension => (isWrapped ? EditorView.lineWrapping : [])
 
-  return ext ? languageMap[ext] || 'plaintext' : 'none'
-})
+const attributesExtension = (filename: string): Extension =>
+  EditorView.contentAttributes.of({ 'aria-label': `Code view of ${filename || 'file'}` })
 
-const highlightCode = async () => {
-  await nextTick()
-  if (codeBlock.value && props.code) {
-    try {
-      // Clear previous highlighting.
-      codeBlock.value.removeAttribute('data-highlighted')
+const applyLanguage = async () => {
+  const requestId = ++languageRequestId
+  const language = detectedLanguage.value
 
-      if (detectedLanguage.value !== 'none') {
-        Prism.highlightElement(codeBlock.value)
-      }
-    } catch (err) {
-      console.error('Error highlighting code:', err)
+  // Show plain text straight away; highlighting is added once the language pack is loaded.
+  view?.dispatch({ effects: languageCompartment.reconfigure([]) })
+
+  if (!language) return
+
+  try {
+    const support = await loadCodeLanguage(language)
+    if (view && requestId === languageRequestId) {
+      view.dispatch({ effects: languageCompartment.reconfigure(support) })
     }
+  } catch (err) {
+    console.error('Error loading syntax highlighting:', err)
   }
-}
-
-const syncWrapAndLineNumbers = async () => {
-  if (!preBlock.value || !codeBlock.value) return
-
-  // Keep wrap classes in sync after Prism mutates highlighted markup.
-  preBlock.value.classList.toggle('!whitespace-pre-wrap', isWrapped.value)
-  codeBlock.value.classList.toggle('!whitespace-pre-wrap', isWrapped.value)
-
-  await nextTick()
-
-  // Re-check refs after await in case the component was unmounted.
-  if (!preBlock.value) return
-
-  if (!isWrapped.value) {
-    const lineSpans = preBlock.value.querySelectorAll('.line-numbers-rows > span')
-    lineSpans.forEach((span) => {
-      const lineSpan = span as HTMLElement
-      lineSpan.style.height = ''
-    })
-  }
-
-  if (Prism.plugins.lineNumbers?.resize) {
-    Prism.plugins.lineNumbers.resize(preBlock.value)
-  }
-}
-
-const refreshCodeBlock = async () => {
-  await highlightCode()
-  await syncWrapAndLineNumbers()
-}
-
-const loadPrismTheme = async (isDark: boolean) => {
-  // Remove existing Prism theme stylesheets.
-  const existingThemes = document.querySelectorAll('link[data-prism-theme]')
-  existingThemes.forEach((link) => {
-    link.remove()
-  })
-
-  // Create and add new theme stylesheet.
-  const link = document.createElement('link')
-  link.rel = 'stylesheet'
-  link.setAttribute('data-prism-theme', 'true')
-
-  // Import from local node_modules.
-  if (isDark) {
-    const theme = await import('prismjs/themes/prism-okaidia.css?url')
-    link.href = theme.default
-  } else {
-    const theme = await import('prismjs/themes/prism.css?url')
-    link.href = theme.default
-  }
-
-  document.head.appendChild(link)
-}
-
-const handleThemeChange = (e: MediaQueryListEvent) => {
-  loadPrismTheme(e.matches)
 }
 
 onMounted(() => {
-  if (props.startWrapped) {
-    isWrapped.value = true
-  }
+  if (!host.value) return
 
-  void refreshCodeBlock()
+  view = new EditorView({
+    parent: host.value,
+    state: EditorState.create({
+      doc: props.code,
+      extensions: [
+        EditorState.readOnly.of(true),
+        lineNumbers(),
+        drawSelection(),
+        highlightSelectionMatches(),
+        // The browser's find-in-page only sees the rendered lines, so use the built-in search.
+        search({ top: true }),
+        keymap.of(searchKeymap),
+        syntaxHighlighting(codeHighlighter),
+        languageCompartment.of([]),
+        wrapCompartment.of(wrapExtension(Boolean(props.startWrapped))),
+        attributesCompartment.of(attributesExtension(props.filename)),
+      ],
+    }),
+  })
 
-  darkThemeMediaQuery.value = window.matchMedia('(prefers-color-scheme: dark)')
-
-  // Load initial theme.
-  loadPrismTheme(darkThemeMediaQuery.value.matches)
-
-  // Listen for theme changes.
-  darkThemeMediaQuery.value.addEventListener('change', handleThemeChange)
-
-  if (preBlock.value && typeof ResizeObserver === 'function') {
-    observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        if (Prism.plugins.lineNumbers?.resize) {
-          Prism.plugins.lineNumbers.resize(entry.target as HTMLElement)
-        }
-      }
-    })
-
-    observer.observe(preBlock.value)
-  }
+  void applyLanguage()
 })
 
 onBeforeUnmount(() => {
-  if (darkThemeMediaQuery.value) {
-    darkThemeMediaQuery.value.removeEventListener('change', handleThemeChange)
-  }
-
-  if (observer) {
-    observer.disconnect()
-  }
+  // Invalidate any pending language load.
+  languageRequestId++
+  view?.destroy()
+  view = null
 })
 
 watch(
   () => props.code,
-  () => {
-    void refreshCodeBlock()
+  (code) => {
+    if (!view || view.state.doc.toString() === code) return
+
+    view.dispatch({
+      changes: { from: 0, to: view.state.doc.length, insert: code },
+      selection: { anchor: 0 },
+    })
+  },
+)
+
+watch(
+  () => props.filename,
+  (filename) => {
+    view?.dispatch({ effects: attributesCompartment.reconfigure(attributesExtension(filename)) })
+    void applyLanguage()
   },
 )
 
 watch(
   () => props.startWrapped,
-  (newVal) => {
-    if (!preBlock.value || !codeBlock.value) return
-
-    if (newVal !== undefined) {
-      isWrapped.value = newVal
-      void syncWrapAndLineNumbers()
-    }
+  (isWrapped) => {
+    view?.dispatch({ effects: wrapCompartment.reconfigure(wrapExtension(Boolean(isWrapped))) })
   },
 )
 </script>
 
 <template>
-  <pre
-    ref="preBlock"
-    :class="preformatClass"
-  ><code
-    ref="codeBlock"
-    :class="`language-${detectedLanguage}`"
-  >{{ code }}</code></pre>
+  <div
+    ref="host"
+    class="code-block"
+    :data-language="detectedLanguage ?? 'plaintext'"
+  />
 </template>
 
-<style scoped>
-pre {
-  margin: 0;
-  padding: 1em;
-  padding-left: 3.8em;
+<style>
+/* Editor layout. These styles are global because CodeMirror creates its DOM outside Vue. */
+.code-block {
+  --code-background: var(--color-gray-50, #f9fafb);
+  --code-foreground: #1f2328;
+  --code-gutter-foreground: #8c959f;
+  --code-gutter-border: var(--color-gray-200, #e5e7eb);
+  --code-selection: #b6d6fd;
+  --code-search-match: #fde68a;
+
+  --tok-comment: #6a737d;
+  --tok-keyword: #0550ae;
+  --tok-string: #0a7a2f;
+  --tok-string2: #b45309;
+  --tok-number: #953800;
+  --tok-tag: #a1145a;
+  --tok-attribute: #6639ba;
+  --tok-type: #8a4b08;
+  --tok-property: #0b6584;
+  --tok-function: #a01b3e;
+  --tok-operator: #8a5a28;
+  --tok-punctuation: #6e7781;
+  --tok-meta: #6e7781;
+  --tok-heading: #0550ae;
+  --tok-invalid: #cf222e;
+}
+
+@media (prefers-color-scheme: dark) {
+  .code-block {
+    --code-background: var(--color-gray-900, #111827);
+    --code-foreground: #f8f8f2;
+    --code-gutter-foreground: #6b7280;
+    --code-gutter-border: var(--color-gray-700, #374151);
+    --code-selection: #3e4451;
+    --code-search-match: #6b5b16;
+
+    --tok-comment: #8292a2;
+    --tok-keyword: #66d9ef;
+    --tok-string: #a6e22e;
+    --tok-string2: #fd971f;
+    --tok-number: #ae81ff;
+    --tok-tag: #f92672;
+    --tok-attribute: #a6e22e;
+    --tok-type: #66d9ef;
+    --tok-property: #fd971f;
+    --tok-function: #e6db74;
+    --tok-operator: #f8f8f2;
+    --tok-punctuation: #c0c0bc;
+    --tok-meta: #8292a2;
+    --tok-heading: #66d9ef;
+    --tok-invalid: #f92672;
+  }
+}
+
+.code-block .cm-editor {
+  background-color: var(--code-background);
+  color: var(--code-foreground);
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.code-block .cm-editor.cm-focused {
+  outline: 1px solid var(--code-gutter-border);
+}
+
+.code-block .cm-scroller {
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
   line-height: 1.5;
 }
 
-code {
-  font-family: inherit;
+.code-block .cm-content {
+  padding: 1em 0;
+  caret-color: var(--code-foreground);
 }
-</style>
 
-<style>
-@media (prefers-color-scheme: light) {
-  .token.operator,
-  .token.entity,
-  .token.url,
-  .language-css .token.string,
-  .style .token.string {
-    background: transparent !important;
-  }
+.code-block .cm-line {
+  padding: 0 1em 0 0.75em;
+}
+
+.code-block .cm-gutters {
+  background-color: var(--code-background);
+  color: var(--code-gutter-foreground);
+  border-right: 1px solid var(--code-gutter-border);
+}
+
+.code-block .cm-lineNumbers .cm-gutterElement {
+  padding: 0 0.75em 0 1em;
+}
+
+.code-block .cm-cursor {
+  border-left-color: var(--code-foreground);
+}
+
+.code-block .cm-selectionBackground,
+.code-block .cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground {
+  background-color: var(--code-selection);
+}
+
+.code-block .cm-searchMatch,
+.code-block .cm-selectionMatch {
+  background-color: var(--code-search-match);
+}
+
+.code-block .cm-panels {
+  background-color: var(--code-background);
+  color: var(--code-foreground);
+}
+
+.code-block .cm-panels-top {
+  border-bottom: 1px solid var(--code-gutter-border);
+}
+
+/* Syntax token colours (light theme based on GitHub, dark theme based on Okaidia). */
+.code-block .tok-comment {
+  color: var(--tok-comment);
+  font-style: italic;
+}
+
+.code-block .tok-keyword {
+  color: var(--tok-keyword);
+}
+
+.code-block .tok-string {
+  color: var(--tok-string);
+}
+
+.code-block .tok-string2 {
+  color: var(--tok-string2);
+}
+
+.code-block .tok-number {
+  color: var(--tok-number);
+}
+
+.code-block .tok-tagName {
+  color: var(--tok-tag);
+}
+
+.code-block .tok-attributeName {
+  color: var(--tok-attribute);
+}
+
+.code-block .tok-typeName {
+  color: var(--tok-type);
+}
+
+.code-block .tok-propertyName {
+  color: var(--tok-property);
+}
+
+.code-block .tok-function,
+.code-block .tok-definition {
+  color: var(--tok-function);
+}
+
+.code-block .tok-operator {
+  color: var(--tok-operator);
+}
+
+.code-block .tok-punctuation {
+  color: var(--tok-punctuation);
+}
+
+.code-block .tok-meta {
+  color: var(--tok-meta);
+}
+
+.code-block .tok-heading {
+  color: var(--tok-heading);
+  font-weight: bold;
+}
+
+.code-block .tok-emphasis {
+  font-style: italic;
+}
+
+.code-block .tok-strong {
+  font-weight: bold;
+}
+
+.code-block .tok-link {
+  text-decoration: underline;
+}
+
+.code-block .tok-invalid {
+  color: var(--tok-invalid);
 }
 </style>

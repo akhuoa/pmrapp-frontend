@@ -1,7 +1,14 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId } from 'vue'
+import {
+  computed,
+  defineAsyncComponent,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  useId,
+} from 'vue'
 import ActionButton from '@/components/atoms/ActionButton.vue'
-import CodeBlock from '@/components/atoms/CodeBlock.vue'
 import CopyButton from '@/components/atoms/CopyButton.vue'
 import FilePanel from '@/components/atoms/FilePanel.vue'
 import LoadingBox from '@/components/atoms/LoadingBox.vue'
@@ -30,8 +37,12 @@ import {
 import { renderMarkdown } from '@/utils/markdown'
 import { generateWorkspaceBreadcrumbs, generateWorkspaceTitle } from '@/utils/workspace'
 
-// Files with size above this threshold are not rendered in the preview to prevent browser freeze.
-const MAX_PREVIEW_FILE_SIZE_BYTES = 500 * 1024 // ~500 KB
+// The code viewer is loaded on demand so that CodeMirror is not part of the main bundle.
+const CodeBlock = defineAsyncComponent(() => import('@/components/atoms/CodeBlock.vue'))
+
+// Files with size above this threshold are not rendered in the preview to limit memory and network use.
+// The code viewer only renders visible lines, so files below this size remain responsive.
+const MAX_PREVIEW_FILE_SIZE_BYTES = 20 * 1024 * 1024 // 20 MB
 
 const props = defineProps<{
   alias: string
