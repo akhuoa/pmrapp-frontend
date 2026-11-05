@@ -1,8 +1,38 @@
 // Performance check for the code viewer with a large generated CellML file.
-// It is not part of the regular e2e suite; run it with cypress.perf.config.ts.
+// It is not part of the regular e2e suite; run it with `bun run test:perf`.
+// Measurements are printed with a "PERF>" prefix and written to cypress/perf-results/, which CI
+// uses to post a report on the pull request (see scripts/perfReport.ts).
 
 const WORKSPACE_FILE_URL = '/workspace/6b0/file/a8a92308e217ac5626809237dd90a31240b22834'
 const LINE_PAIRS = 80000 // About 10 MB. Increase to test larger files (the preview limit is 20 MB).
+const RESULTS_FILE = 'cypress/perf-results/large-file.json'
+
+// Generous limits that only catch severe regressions. Typical local values are noted alongside;
+// CI runners are slower and the page also waits for the remote demo API.
+const LIMITS = {
+  firstScreenMs: 10000, // Typically about 1.3 s.
+  domLines: 500, // Typically 36; a large value means only visible lines are no longer rendered.
+  endOfFileMs: 3000, // Typically about 30 ms.
+  searchMs: 5000, // Typically about 0.6 s.
+  longestBlockBeforeSearchMs: 1000, // Typically about 100 ms.
+  longestBlockOverallMs: 3000, // Typically about 0.5 s (the search itself).
+}
+
+type MetricId = keyof typeof LIMITS
+
+interface Metric {
+  id: MetricId
+  value: number
+  limit: number
+}
+
+interface PerfResults {
+  spec: string
+  fileSizeMB: number
+  lines: number
+  complete: boolean
+  metrics: Metric[]
+}
 
 const buildLargeCellML = (): string => {
   const lines = [
@@ -25,13 +55,29 @@ type PerfWindow = Window & { __longTasks: number[]; __searchStart: number }
 // The application window is extended with fields that collect measurements during the test.
 const asPerfWindow = (win: Window): PerfWindow => win as unknown as PerfWindow
 
+const longestTask = (win: Window): number => Math.max(0, ...asPerfWindow(win).__longTasks)
+
 describe('Large file code view', () => {
   it('renders, scrolls and searches a large CellML file without freezing', () => {
     const body = buildLargeCellML()
-    cy.task(
-      'log',
-      `file size: ${(body.length / 1024 / 1024).toFixed(2)} MB, lines: ${LINE_PAIRS * 2 + 3}`,
-    )
+    const results: PerfResults = {
+      spec: 'large-file',
+      fileSizeMB: Number((body.length / 1024 / 1024).toFixed(2)),
+      lines: LINE_PAIRS * 2 + 4,
+      complete: false,
+      metrics: [],
+    }
+
+    // Results are written after every measurement, so a failure part-way through still leaves
+    // the measurements taken so far.
+    const record = (id: MetricId, value: number) => {
+      results.metrics.push({ id, value: Math.round(value), limit: LIMITS[id] })
+      cy.task('log', `${id}: ${Math.round(value)} (limit ${LIMITS[id]})`)
+      cy.writeFile(RESULTS_FILE, results)
+    }
+
+    cy.task('log', `file size: ${results.fileSizeMB} MB, lines: ${results.lines}`)
+    cy.writeFile(RESULTS_FILE, results)
 
     // Serve the generated file in place of README.md, and rename README.md to big.cellml in the
     // workspace info so the page treats it as an existing CellML file.
@@ -66,11 +112,8 @@ describe('Large file code view', () => {
     // 1. First highlighted screen.
     cy.get('.code-block .tok-tagName', { timeout: 60000 }).should('exist')
     cy.window().then((win) => {
-      cy.task(
-        'log',
-        `time to highlighted first screen: ${Math.round(win.performance.now() - start)} ms`,
-      )
-      cy.task('log', `lines in the DOM: ${win.document.querySelectorAll('.cm-line').length}`)
+      record('firstScreenMs', win.performance.now() - start)
+      record('domLines', win.document.querySelectorAll('.cm-line').length)
     })
 
     // 2. Jump to the end of the file.
@@ -81,10 +124,7 @@ describe('Large file code view', () => {
         .contains('needle_at_the_end')
         .should('exist')
         .then(() => {
-          cy.task(
-            'log',
-            `time to render end of file: ${Math.round(win.performance.now() - scrollStart)} ms`,
-          )
+          record('endOfFileMs', win.performance.now() - scrollStart)
         })
     })
     cy.get('.cm-line')
@@ -97,29 +137,28 @@ describe('Large file code view', () => {
     cy.scrollTo('top')
     cy.get('.cm-line').first().click()
     cy.window().then((win) => {
-      const perfWin = asPerfWindow(win)
-      const tasks = [...perfWin.__longTasks].sort((a, b) => b - a)
-      cy.task(
-        'log',
-        `long tasks before search: count=${tasks.length}, longest=${tasks.slice(0, 5).join(', ')} ms`,
-      )
-      perfWin.__searchStart = win.performance.now()
+      record('longestBlockBeforeSearchMs', longestTask(win))
+      asPerfWindow(win).__searchStart = win.performance.now()
     })
     const searchShortcut = Cypress.platform === 'darwin' ? '{meta}f' : '{ctrl}f'
     cy.get('.cm-content').type(searchShortcut, { force: true })
     cy.get('.cm-search input[name="search"]').type('needle_at_the_end{enter}')
     cy.get('.cm-line', { timeout: 30000 }).contains('needle_at_the_end').should('be.visible')
     cy.window().then((win) => {
-      const perfWin = asPerfWindow(win)
-      cy.task(
-        'log',
-        `time from search to match: ${Math.round(win.performance.now() - perfWin.__searchStart)} ms`,
+      record('searchMs', win.performance.now() - asPerfWindow(win).__searchStart)
+      record('longestBlockOverallMs', longestTask(win))
+    })
+
+    // 4. Check the limits after all measurements have been recorded.
+    cy.then(() => {
+      results.complete = true
+      cy.writeFile(RESULTS_FILE, results)
+
+      const exceeded = results.metrics.filter((metric) => metric.value > metric.limit)
+      const details = exceeded.map(
+        (metric) => `${metric.id} = ${metric.value} (limit ${metric.limit})`,
       )
-      const tasks = [...perfWin.__longTasks].sort((a, b) => b - a)
-      cy.task(
-        'log',
-        `long tasks overall: count=${tasks.length}, longest=${tasks.slice(0, 5).join(', ')} ms`,
-      )
+      expect(details, 'performance limits exceeded').to.be.empty
     })
   })
 })
