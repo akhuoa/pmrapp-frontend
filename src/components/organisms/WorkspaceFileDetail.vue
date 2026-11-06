@@ -38,11 +38,11 @@ import { renderMarkdown } from '@/utils/markdown';
 import { generateWorkspaceBreadcrumbs, generateWorkspaceTitle } from '@/utils/workspace';
 
 // The code viewer is loaded on demand so that CodeMirror is not part of the main bundle.
-const CodeBlock = defineAsyncComponent(() => import('@/components/atoms/CodeBlock.vue'))
+const CodeBlock = defineAsyncComponent(() => import('@/components/atoms/CodeBlock.vue'));
 
 // Files with size above this threshold are not rendered in the preview to limit memory and network use.
 // The code viewer only renders visible lines, so files below this size remain responsive.
-const MAX_PREVIEW_FILE_SIZE_BYTES = 20 * 1024 * 1024 // 20 MB
+const MAX_PREVIEW_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
 
 const props = defineProps<{
   alias: string;

@@ -1,6 +1,6 @@
-import { StreamLanguage } from '@codemirror/language'
-import type { Extension } from '@codemirror/state'
-import { tagHighlighter, tags } from '@lezer/highlight'
+import { StreamLanguage } from '@codemirror/language';
+import type { Extension } from '@codemirror/state';
+import { tagHighlighter, tags } from '@lezer/highlight';
 
 /**
  * Highlighter that assigns stable `tok-*` CSS classes to syntax tokens.
@@ -33,7 +33,7 @@ export const codeHighlighter = tagHighlighter([
   { tag: tags.strong, class: 'tok-strong' },
   { tag: [tags.link, tags.url], class: 'tok-link' },
   { tag: tags.invalid, class: 'tok-invalid' },
-])
+]);
 
 /**
  * Languages supported by the code viewer for syntax highlighting.
@@ -48,7 +48,7 @@ export type CodeLanguageId =
   | 'markdown'
   | 'matlab'
   | 'python'
-  | 'xml'
+  | 'xml';
 
 /**
  * Map of file extensions to code viewer languages.
@@ -83,7 +83,7 @@ const EXTENSION_LANGUAGE_MAP: Record<string, CodeLanguageId> = {
   tsx: 'javascript',
   xml: 'xml',
   xul: 'xml',
-}
+};
 
 /**
  * Detect the code viewer language from a filename.
@@ -91,14 +91,14 @@ const EXTENSION_LANGUAGE_MAP: Record<string, CodeLanguageId> = {
  * @returns The detected language, or null when the file should be shown as plain text.
  */
 export const detectCodeLanguage = (filename: string): CodeLanguageId | null => {
-  const basename = filename.split('/').pop() ?? ''
-  const dotIndex = basename.lastIndexOf('.')
+  const basename = filename.split('/').pop() ?? '';
+  const dotIndex = basename.lastIndexOf('.');
 
-  if (dotIndex < 0) return null
+  if (dotIndex < 0) return null;
 
-  const extension = basename.slice(dotIndex + 1).toLowerCase()
-  return EXTENSION_LANGUAGE_MAP[extension] ?? null
-}
+  const extension = basename.slice(dotIndex + 1).toLowerCase();
+  return EXTENSION_LANGUAGE_MAP[extension] ?? null;
+};
 
 /**
  * Load the CodeMirror language support for a language.
@@ -109,27 +109,27 @@ export const detectCodeLanguage = (filename: string): CodeLanguageId | null => {
 export const loadCodeLanguage = async (id: CodeLanguageId): Promise<Extension> => {
   switch (id) {
     case 'cpp':
-      return (await import('@codemirror/lang-cpp')).cpp()
+      return (await import('@codemirror/lang-cpp')).cpp();
     case 'css':
-      return (await import('@codemirror/lang-css')).css()
+      return (await import('@codemirror/lang-css')).css();
     case 'fortran':
-      return StreamLanguage.define((await import('@codemirror/legacy-modes/mode/fortran')).fortran)
+      return StreamLanguage.define((await import('@codemirror/legacy-modes/mode/fortran')).fortran);
     case 'html':
-      return (await import('@codemirror/lang-html')).html()
+      return (await import('@codemirror/lang-html')).html();
     case 'javascript':
       return (await import('@codemirror/lang-javascript')).javascript({
         jsx: true,
         typescript: true,
-      })
+      });
     case 'json':
-      return (await import('@codemirror/lang-json')).json()
+      return (await import('@codemirror/lang-json')).json();
     case 'markdown':
-      return (await import('@codemirror/lang-markdown')).markdown()
+      return (await import('@codemirror/lang-markdown')).markdown();
     case 'matlab':
-      return StreamLanguage.define((await import('@codemirror/legacy-modes/mode/octave')).octave)
+      return StreamLanguage.define((await import('@codemirror/legacy-modes/mode/octave')).octave);
     case 'python':
-      return (await import('@codemirror/lang-python')).python()
+      return (await import('@codemirror/lang-python')).python();
     case 'xml':
-      return (await import('@codemirror/lang-xml')).xml()
+      return (await import('@codemirror/lang-xml')).xml();
   }
-}
+};

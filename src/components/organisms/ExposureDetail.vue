@@ -52,9 +52,9 @@ import { encodePathSegments } from '@/utils/path';
 import { buildSearchQuery, isValidTerm } from '@/utils/search';
 
 // The code viewer is loaded on demand so that CodeMirror is not part of the main bundle.
-const CodeBlock = defineAsyncComponent(() => import('@/components/atoms/CodeBlock.vue'))
+const CodeBlock = defineAsyncComponent(() => import('@/components/atoms/CodeBlock.vue'));
 
-type ExposureFileEntry = ExposureInfo['files'][number]
+type ExposureFileEntry = ExposureInfo['files'][number];
 
 const props = withDefaults(
   defineProps<{

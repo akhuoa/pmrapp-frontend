@@ -1,7 +1,7 @@
-import { defineConfig } from 'cypress'
-import { loadEnv } from 'vite'
+import { defineConfig } from 'cypress';
+import { loadEnv } from 'vite';
 
-const basePath = loadEnv('', process.cwd(), 'VITE_').VITE_BASE_PATH || '/'
+const basePath = loadEnv('', process.cwd(), 'VITE_').VITE_BASE_PATH || '/';
 
 // Configuration for the performance checks in cypress/perf. These are kept out of the regular
 // e2e suite and print their measurements to the terminal with a "PERF>" prefix.
@@ -16,10 +16,10 @@ export default defineConfig({
     setupNodeEvents(on) {
       on('task', {
         log(message: string) {
-          console.log(`PERF> ${message}`)
-          return null
+          console.log(`PERF> ${message}`);
+          return null;
         },
-      })
+      });
     },
   },
-})
+});

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { syntaxHighlighting } from '@codemirror/language'
-import { highlightSelectionMatches, search, searchKeymap } from '@codemirror/search'
-import { Compartment, EditorState, type Extension } from '@codemirror/state'
-import { drawSelection, EditorView, keymap, lineNumbers } from '@codemirror/view'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { codeHighlighter, detectCodeLanguage, loadCodeLanguage } from '@/utils/codeLanguage'
+import { syntaxHighlighting } from '@codemirror/language';
+import { highlightSelectionMatches, search, searchKeymap } from '@codemirror/search';
+import { Compartment, EditorState, type Extension } from '@codemirror/state';
+import { drawSelection, EditorView, keymap, lineNumbers } from '@codemirror/view';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { codeHighlighter, detectCodeLanguage, loadCodeLanguage } from '@/utils/codeLanguage';
 
 const props = defineProps<{
   code: string;
@@ -12,45 +12,45 @@ const props = defineProps<{
   startWrapped?: boolean;
 }>();
 
-const host = ref<HTMLElement | null>(null)
-const detectedLanguage = computed(() => detectCodeLanguage(props.filename))
+const host = ref<HTMLElement | null>(null);
+const detectedLanguage = computed(() => detectCodeLanguage(props.filename));
 
 // CodeMirror only renders the lines in the viewport and parses the document incrementally,
 // so large files can be highlighted without building a DOM node for every token.
-let view: EditorView | null = null
-const languageCompartment = new Compartment()
-const wrapCompartment = new Compartment()
-const attributesCompartment = new Compartment()
+let view: EditorView | null = null;
+const languageCompartment = new Compartment();
+const wrapCompartment = new Compartment();
+const attributesCompartment = new Compartment();
 
 // Incremented on every language load so that stale asynchronous loads are ignored.
-let languageRequestId = 0
+let languageRequestId = 0;
 
-const wrapExtension = (isWrapped: boolean): Extension => (isWrapped ? EditorView.lineWrapping : [])
+const wrapExtension = (isWrapped: boolean): Extension => (isWrapped ? EditorView.lineWrapping : []);
 
 const attributesExtension = (filename: string): Extension =>
-  EditorView.contentAttributes.of({ 'aria-label': `Code view of ${filename || 'file'}` })
+  EditorView.contentAttributes.of({ 'aria-label': `Code view of ${filename || 'file'}` });
 
 const applyLanguage = async () => {
-  const requestId = ++languageRequestId
-  const language = detectedLanguage.value
+  const requestId = ++languageRequestId;
+  const language = detectedLanguage.value;
 
   // Show plain text straight away; highlighting is added once the language pack is loaded.
-  view?.dispatch({ effects: languageCompartment.reconfigure([]) })
+  view?.dispatch({ effects: languageCompartment.reconfigure([]) });
 
-  if (!language) return
+  if (!language) return;
 
   try {
-    const support = await loadCodeLanguage(language)
+    const support = await loadCodeLanguage(language);
     if (view && requestId === languageRequestId) {
-      view.dispatch({ effects: languageCompartment.reconfigure(support) })
+      view.dispatch({ effects: languageCompartment.reconfigure(support) });
     }
   } catch (err) {
-    console.error('Error loading syntax highlighting:', err)
+    console.error('Error loading syntax highlighting:', err);
   }
 };
 
 onMounted(() => {
-  if (!host.value) return
+  if (!host.value) return;
 
   view = new EditorView({
     parent: host.value,
@@ -70,56 +70,54 @@ onMounted(() => {
         attributesCompartment.of(attributesExtension(props.filename)),
       ],
     }),
-  })
+  });
 
-  void applyLanguage()
-})
+  void applyLanguage();
+});
 
 onBeforeUnmount(() => {
   // Invalidate any pending language load.
-  languageRequestId++
-  view?.destroy()
-  view = null
-})
+  languageRequestId++;
+  view?.destroy();
+  view = null;
+});
 
 watch(
   () => props.code,
   (code) => {
-    if (!view || view.state.doc.toString() === code) return
+    if (!view || view.state.doc.toString() === code) return;
 
     view.dispatch({
       changes: { from: 0, to: view.state.doc.length, insert: code },
       selection: { anchor: 0 },
-    })
+    });
   },
-)
+);
 
 watch(
   () => props.filename,
   (filename) => {
-    view?.dispatch({ effects: attributesCompartment.reconfigure(attributesExtension(filename)) })
-    void applyLanguage()
+    view?.dispatch({ effects: attributesCompartment.reconfigure(attributesExtension(filename)) });
+    void applyLanguage();
   },
 );
 
 watch(
   () => props.startWrapped,
   (isWrapped) => {
-    view?.dispatch({ effects: wrapCompartment.reconfigure(wrapExtension(Boolean(isWrapped))) })
+    view?.dispatch({ effects: wrapCompartment.reconfigure(wrapExtension(Boolean(isWrapped))) });
   },
 );
 </script>
 
 <template>
-  <div
-    ref="host"
-    class="code-block"
-    :data-language="detectedLanguage ?? 'plaintext'"
-  />
+  <div ref="host" class="code-block" :data-language="detectedLanguage ?? 'plaintext'" />
 </template>
 
+<!--
+  biome-ignore lint/suspicious/useScopedStyles: Editor layout. These styles are global because CodeMirror creates its DOM outside Vue.
+-->
 <style>
-/* Editor layout. These styles are global because CodeMirror creates its DOM outside Vue. */
 .code-block {
   --code-background: var(--color-gray-50, #f9fafb);
   --code-foreground: #1f2328;
@@ -184,7 +182,7 @@ watch(
 }
 
 .code-block .cm-scroller {
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
   line-height: 1.5;
 }
 
