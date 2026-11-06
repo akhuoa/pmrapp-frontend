@@ -34,6 +34,21 @@ describe('Workspace detail page', () => {
     cy.get('button[aria-label="Wrap words"]').should('not.be.disabled');
   });
 
+  it('renders the code view with line numbers, syntax highlighting and line wrapping', () => {
+    cy.visit('/workspace/6b0/file/a8a92308e217ac5626809237dd90a31240b22834/README.md');
+
+    cy.get('button').contains('Code').click();
+
+    cy.get('.code-block[data-language="markdown"]').should('exist');
+    cy.get('.code-block .cm-editor').should('exist');
+    cy.get('.code-block .cm-lineNumbers').should('exist');
+    cy.get('.code-block [class*="tok-"]').should('exist');
+
+    cy.get('.code-block .cm-content').should('not.have.class', 'cm-lineWrapping');
+    cy.get('button[aria-label="Wrap words"]').click();
+    cy.get('.code-block .cm-content').should('have.class', 'cm-lineWrapping');
+  });
+
   it('renders the page breadcrumb', () => {
     cy.visit('/workspace/6b0/file/a8a92308e217ac5626809237dd90a31240b22834/README.md');
 
