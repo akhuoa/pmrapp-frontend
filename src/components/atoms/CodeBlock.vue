@@ -7,10 +7,10 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { codeHighlighter, detectCodeLanguage, loadCodeLanguage } from '@/utils/codeLanguage'
 
 const props = defineProps<{
-  code: string
-  filename: string
-  startWrapped?: boolean
-}>()
+  code: string;
+  filename: string;
+  startWrapped?: boolean;
+}>();
 
 const host = ref<HTMLElement | null>(null)
 const detectedLanguage = computed(() => detectCodeLanguage(props.filename))
@@ -47,7 +47,7 @@ const applyLanguage = async () => {
   } catch (err) {
     console.error('Error loading syntax highlighting:', err)
   }
-}
+};
 
 onMounted(() => {
   if (!host.value) return
@@ -100,14 +100,14 @@ watch(
     view?.dispatch({ effects: attributesCompartment.reconfigure(attributesExtension(filename)) })
     void applyLanguage()
   },
-)
+);
 
 watch(
   () => props.startWrapped,
   (isWrapped) => {
     view?.dispatch({ effects: wrapCompartment.reconfigure(wrapExtension(Boolean(isWrapped))) })
   },
-)
+);
 </script>
 
 <template>

@@ -11,7 +11,7 @@ beforeAll(() => {
   Range.prototype.getClientRects = emptyRectList
 })
 
-const smallCode = 'const x = 1'
+const smallCode = 'const x = 1';
 
 const getEditorView = (wrapper: VueWrapper): EditorView => {
   const editor = wrapper.find('.cm-editor').element as HTMLElement
