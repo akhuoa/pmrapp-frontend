@@ -4,7 +4,12 @@ import { highlightSelectionMatches, search, searchKeymap } from '@codemirror/sea
 import { Compartment, EditorState, type Extension } from '@codemirror/state';
 import { drawSelection, EditorView, keymap, lineNumbers } from '@codemirror/view';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { codeHighlighter, detectCodeLanguage, loadCodeLanguage } from '@/utils/codeLanguage';
+import {
+  codeHighlighter,
+  detectCodeLanguage,
+  loadCodeLanguage,
+  viewportParsing,
+} from '@/utils/codeLanguage';
 
 const props = defineProps<{
   code: string;
@@ -65,6 +70,7 @@ onMounted(() => {
         search({ top: true }),
         keymap.of(searchKeymap),
         syntaxHighlighting(codeHighlighter),
+        viewportParsing,
         languageCompartment.of([]),
         wrapCompartment.of(wrapExtension(Boolean(props.startWrapped))),
         attributesCompartment.of(attributesExtension(props.filename)),
