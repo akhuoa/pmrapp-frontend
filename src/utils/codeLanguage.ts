@@ -1,6 +1,12 @@
 import { forceParsing, language, StreamLanguage, syntaxTreeAvailable } from '@codemirror/language';
 import type { Extension } from '@codemirror/state';
 import { type EditorView, ViewPlugin } from '@codemirror/view';
+import {
+  EXTENSION_LANGUAGE_MAP,
+  VIEWPORT_PARSE_PAUSE_MS,
+  VIEWPORT_PARSE_SLICE_MS,
+} from '@/constants/codeLanguage';
+import type { CodeLanguageId } from '@/types/codeLanguage';
 import { tagHighlighter, tags } from '@lezer/highlight';
 
 /**
@@ -35,56 +41,6 @@ export const codeHighlighter = tagHighlighter([
   { tag: [tags.link, tags.url], class: 'tok-link' },
   { tag: tags.invalid, class: 'tok-invalid' },
 ]);
-
-/**
- * Languages supported by the code viewer for syntax highlighting.
- */
-export type CodeLanguageId =
-  | 'cpp'
-  | 'css'
-  | 'fortran'
-  | 'html'
-  | 'javascript'
-  | 'json'
-  | 'markdown'
-  | 'matlab'
-  | 'python'
-  | 'xml';
-
-/**
- * Map of file extensions to code viewer languages.
- */
-const EXTENSION_LANGUAGE_MAP: Record<string, CodeLanguageId> = {
-  c: 'cpp',
-  cellml: 'xml',
-  conf: 'json',
-  cpp: 'cpp',
-  css: 'css',
-  f77: 'fortran',
-  fortran: 'fortran',
-  h: 'cpp',
-  htm: 'html',
-  html: 'html',
-  js: 'javascript',
-  json: 'json',
-  jsx: 'javascript',
-  m: 'matlab',
-  markdown: 'markdown',
-  matlab: 'matlab',
-  md: 'markdown',
-  neon: 'json',
-  py: 'python',
-  python: 'python',
-  rdf: 'xml',
-  sass: 'css',
-  scss: 'css',
-  sedml: 'xml',
-  svg: 'xml',
-  ts: 'javascript',
-  tsx: 'javascript',
-  xml: 'xml',
-  xul: 'xml',
-};
 
 /**
  * Detect the code viewer language from a filename.
@@ -134,12 +90,6 @@ export const loadCodeLanguage = async (id: CodeLanguageId): Promise<Extension> =
       return (await import('@codemirror/lang-xml')).xml();
   }
 };
-
-/** Longest time, in milliseconds, spent parsing in one go before giving the browser a turn. */
-const VIEWPORT_PARSE_SLICE_MS = 50;
-
-/** Pause, in milliseconds, between parse slices so that scrolling and input stay responsive. */
-const VIEWPORT_PARSE_PAUSE_MS = 50;
 
 /**
  * Keep parsing until the visible lines can be highlighted, even when the editor is not focused.

@@ -20,6 +20,7 @@ import PreviewIcon from '@/components/icons/PreviewIcon.vue';
 import BreadcrumbsBar from '@/components/molecules/BreadcrumbsBar.vue';
 import ErrorBlock from '@/components/molecules/ErrorBlock.vue';
 import PageHeader from '@/components/molecules/PageHeader.vue';
+import { MAX_PREVIEW_FILE_SIZE_BYTES } from '@/constants/workspace';
 import { getWorkspaceService } from '@/services';
 import { getWorkspaceFileUrl } from '@/services/downloadUrlService';
 import { useWorkspaceStore } from '@/stores/workspace';
@@ -39,10 +40,6 @@ import { generateWorkspaceBreadcrumbs, generateWorkspaceTitle } from '@/utils/wo
 
 // The code viewer is loaded on demand so that CodeMirror is not part of the main bundle.
 const CodeBlock = defineAsyncComponent(() => import('@/components/atoms/CodeBlock.vue'));
-
-// Files with size above this threshold are not rendered in the preview to limit memory and network use.
-// The code viewer only renders visible lines, so files below this size remain responsive.
-const MAX_PREVIEW_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
 
 const props = defineProps<{
   alias: string;
