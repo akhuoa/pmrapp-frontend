@@ -1,13 +1,13 @@
 import { forceParsing, language, StreamLanguage, syntaxTreeAvailable } from '@codemirror/language';
 import type { Extension } from '@codemirror/state';
 import { type EditorView, ViewPlugin } from '@codemirror/view';
+import { tagHighlighter, tags } from '@lezer/highlight';
 import {
   EXTENSION_LANGUAGE_MAP,
   VIEWPORT_PARSE_PAUSE_MS,
   VIEWPORT_PARSE_SLICE_MS,
 } from '@/constants/codeLanguage';
 import type { CodeLanguageId } from '@/types/codeLanguage';
-import { tagHighlighter, tags } from '@lezer/highlight';
 
 /**
  * Highlighter that assigns stable `tok-*` CSS classes to syntax tokens.
