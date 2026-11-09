@@ -1,308 +1,202 @@
 <script setup lang="ts">
-import { syntaxHighlighting } from '@codemirror/language'
-import { highlightSelectionMatches, search, searchKeymap } from '@codemirror/search'
-import { Compartment, EditorState, type Extension } from '@codemirror/state'
-import { drawSelection, EditorView, keymap, lineNumbers } from '@codemirror/view'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { codeHighlighter, detectCodeLanguage, loadCodeLanguage } from '@/utils/codeLanguage'
+import type { editor as MonacoEditor } from 'monaco-editor/editor/editor.api';
+import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { CODE_VIEW_MAX_HEIGHT, CODE_VIEW_THEMES } from '@/constants/codeLanguage';
+import { FILE_PANEL_SCROLL_SYNC } from '@/constants/filePanel';
+import { detectCodeLanguage, toMonacoLanguage } from '@/utils/codeLanguage';
+import { loadMonaco, type Monaco } from '@/utils/monaco';
 
 const props = defineProps<{
-  code: string
-  filename: string
-  startWrapped?: boolean
-}>()
+  code: string;
+  filename: string;
+  startWrapped?: boolean;
+}>();
 
-const host = ref<HTMLElement | null>(null)
-const detectedLanguage = computed(() => detectCodeLanguage(props.filename))
+const host = ref<HTMLElement | null>(null);
+const contentHeight = ref<number | null>(null);
+const loadFailed = ref(false);
+const detectedLanguage = computed(() => detectCodeLanguage(props.filename));
 
-// CodeMirror only renders the lines in the viewport and parses the document incrementally,
-// so large files can be highlighted without building a DOM node for every token.
-let view: EditorView | null = null
-const languageCompartment = new Compartment()
-const wrapCompartment = new Compartment()
-const attributesCompartment = new Compartment()
+// Inside a sticky file panel, the editor scrolls with the page and uses the browser's scrollbar.
+const scrollSync = inject(FILE_PANEL_SCROLL_SYNC, null);
 
-// Incremented on every language load so that stale asynchronous loads are ignored.
-let languageRequestId = 0
+// Short files fit their content. Long files are capped so that a sticky file panel fits below the
+// header, and the editor only renders the visible lines.
+const hostStyle = computed(() =>
+  contentHeight.value === null
+    ? undefined
+    : { height: `min(${contentHeight.value}px, ${CODE_VIEW_MAX_HEIGHT})` },
+);
 
-const wrapExtension = (isWrapped: boolean): Extension => (isWrapped ? EditorView.lineWrapping : [])
+let monaco: Monaco | null = null;
+let editor: MonacoEditor.IStandaloneCodeEditor | null = null;
+let model: MonacoEditor.ITextModel | null = null;
+let colourSchemeQuery: MediaQueryList | null = null;
+let isUnmounted = false;
+// Set while the editor follows the page, so that the editor does not scroll the page back.
+let isFollowingPage = false;
 
-const attributesExtension = (filename: string): Extension =>
-  EditorView.contentAttributes.of({ 'aria-label': `Code view of ${filename || 'file'}` })
+const ariaLabel = (filename: string) => `Code view of ${filename || 'file'}`;
 
-const applyLanguage = async () => {
-  const requestId = ++languageRequestId
-  const language = detectedLanguage.value
+const themeName = (isDark: boolean) => (isDark ? CODE_VIEW_THEMES.dark : CODE_VIEW_THEMES.light);
 
-  // Show plain text straight away; highlighting is added once the language pack is loaded.
-  view?.dispatch({ effects: languageCompartment.reconfigure([]) })
-
-  if (!language) return
-
-  try {
-    const support = await loadCodeLanguage(language)
-    if (view && requestId === languageRequestId) {
-      view.dispatch({ effects: languageCompartment.reconfigure(support) })
-    }
-  } catch (err) {
-    console.error('Error loading syntax highlighting:', err)
+/**
+ * Send vertical mouse-wheel scrolling to the page instead of the editor, when the editor follows
+ * the page scroll. Horizontal scrolling (including Shift + wheel) still scrolls long lines.
+ */
+const handleWheel = (event: WheelEvent) => {
+  if (!event.shiftKey && Math.abs(event.deltaY) >= Math.abs(event.deltaX)) {
+    event.stopPropagation();
   }
-}
+};
 
-onMounted(() => {
-  if (!host.value) return
+const handleColourSchemeChange = (event: MediaQueryListEvent) => {
+  monaco?.editor.setTheme(themeName(event.matches));
+};
 
-  view = new EditorView({
-    parent: host.value,
-    state: EditorState.create({
-      doc: props.code,
-      extensions: [
-        EditorState.readOnly.of(true),
-        lineNumbers(),
-        drawSelection(),
-        highlightSelectionMatches(),
-        // The browser's find-in-page only sees the rendered lines, so use the built-in search.
-        search({ top: true }),
-        keymap.of(searchKeymap),
-        syntaxHighlighting(codeHighlighter),
-        languageCompartment.of([]),
-        wrapCompartment.of(wrapExtension(Boolean(props.startWrapped))),
-        attributesCompartment.of(attributesExtension(props.filename)),
-      ],
-    }),
-  })
+onMounted(async () => {
+  try {
+    monaco = await loadMonaco();
+  } catch (err) {
+    console.error('Error loading the code viewer:', err);
+    loadFailed.value = true;
+    return;
+  }
 
-  void applyLanguage()
-})
+  // The component may have been unmounted while Monaco was loading.
+  if (isUnmounted || !host.value) return;
+
+  colourSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  colourSchemeQuery.addEventListener('change', handleColourSchemeChange);
+
+  model = monaco.editor.createModel(props.code, toMonacoLanguage(detectedLanguage.value));
+  editor = monaco.editor.create(host.value, {
+    model,
+    theme: themeName(colourSchemeQuery.matches),
+    ariaLabel: ariaLabel(props.filename),
+    readOnly: true,
+    domReadOnly: true,
+    automaticLayout: true,
+    // Keep highlighting files up to the 20 MB preview limit; Monaco otherwise turns it off for
+    // files of 20 MB or 300,000 lines.
+    largeFileOptimizations: false,
+    minimap: { enabled: false },
+    scrollBeyondLastLine: false,
+    wordWrap: props.startWrapped ? 'on' : 'off',
+    lineNumbers: 'on',
+    folding: true,
+    contextmenu: false,
+    renderLineHighlight: 'none',
+    occurrencesHighlight: 'off',
+    selectionHighlight: false,
+    fontFamily: "Consolas, Monaco, 'Courier New', monospace",
+    fontSize: 14,
+    lineHeight: 21,
+    padding: { top: 16, bottom: 16 },
+    // In a sticky file panel the page scrollbar is used, so the editor's own is hidden.
+    scrollbar: scrollSync
+      ? { vertical: 'hidden', verticalScrollbarSize: 0, alwaysConsumeMouseWheel: false }
+      : { alwaysConsumeMouseWheel: false },
+  });
+
+  editor.onDidContentSizeChange((event) => {
+    contentHeight.value = event.contentHeight;
+    scrollSync?.setContentHeight(event.contentHeight);
+  });
+  contentHeight.value = editor.getContentHeight();
+
+  if (scrollSync) {
+    scrollSync.setContentHeight(contentHeight.value);
+    // Scrolling the page scrolls the editor; when the editor scrolls itself, for example to a
+    // search match or with the keyboard, the page scrolls to match.
+    scrollSync.onPageScroll((offset) => {
+      isFollowingPage = true;
+      editor?.setScrollTop(offset);
+      isFollowingPage = false;
+    });
+    editor.onDidScrollChange((event) => {
+      if (event.scrollTopChanged && !isFollowingPage) scrollSync.scrollPageTo(event.scrollTop);
+    });
+    // Capture the wheel before it reaches the editor's own handler.
+    host.value.addEventListener('wheel', handleWheel, { capture: true, passive: true });
+  }
+});
 
 onBeforeUnmount(() => {
-  // Invalidate any pending language load.
-  languageRequestId++
-  view?.destroy()
-  view = null
-})
+  isUnmounted = true;
+  colourSchemeQuery?.removeEventListener('change', handleColourSchemeChange);
+  host.value?.removeEventListener('wheel', handleWheel, { capture: true });
+  scrollSync?.onPageScroll(null);
+  scrollSync?.setContentHeight(null);
+  editor?.dispose();
+  model?.dispose();
+  editor = null;
+  model = null;
+});
 
 watch(
   () => props.code,
   (code) => {
-    if (!view || view.state.doc.toString() === code) return
-
-    view.dispatch({
-      changes: { from: 0, to: view.state.doc.length, insert: code },
-      selection: { anchor: 0 },
-    })
+    if (model && model.getValue() !== code) model.setValue(code);
   },
-)
+);
 
 watch(
   () => props.filename,
   (filename) => {
-    view?.dispatch({ effects: attributesCompartment.reconfigure(attributesExtension(filename)) })
-    void applyLanguage()
+    if (model && monaco) {
+      monaco.editor.setModelLanguage(model, toMonacoLanguage(detectedLanguage.value));
+    }
+    editor?.updateOptions({ ariaLabel: ariaLabel(filename) });
   },
-)
+);
 
 watch(
   () => props.startWrapped,
   (isWrapped) => {
-    view?.dispatch({ effects: wrapCompartment.reconfigure(wrapExtension(Boolean(isWrapped))) })
+    editor?.updateOptions({ wordWrap: isWrapped ? 'on' : 'off' });
   },
-)
+);
 </script>
 
 <template>
   <div
-    ref="host"
     class="code-block"
     :data-language="detectedLanguage ?? 'plaintext'"
-  />
+    :data-wrapped="startWrapped ? 'true' : 'false'"
+  >
+    <pre
+      v-if="loadFailed"
+      class="code-block-fallback"
+      :style="{ maxHeight: CODE_VIEW_MAX_HEIGHT }"
+    >{{ code }}</pre>
+    <div v-else ref="host" class="code-block-editor" :style="hostStyle" />
+  </div>
 </template>
 
-<style>
-/* Editor layout. These styles are global because CodeMirror creates its DOM outside Vue. */
+<style scoped>
 .code-block {
-  --code-background: var(--color-gray-50, #f9fafb);
-  --code-foreground: #1f2328;
-  --code-gutter-foreground: #8c959f;
-  --code-gutter-border: var(--color-gray-200, #e5e7eb);
-  --code-selection: #b6d6fd;
-  --code-search-match: #fde68a;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  outline: 1px solid var(--color-gray-200, #e5e7eb);
+}
 
-  --tok-comment: #6a737d;
-  --tok-keyword: #0550ae;
-  --tok-string: #0a7a2f;
-  --tok-string2: #b45309;
-  --tok-number: #953800;
-  --tok-tag: #a1145a;
-  --tok-attribute: #6639ba;
-  --tok-type: #8a4b08;
-  --tok-property: #0b6584;
-  --tok-function: #a01b3e;
-  --tok-operator: #8a5a28;
-  --tok-punctuation: #6e7781;
-  --tok-meta: #6e7781;
-  --tok-heading: #0550ae;
-  --tok-invalid: #cf222e;
+.code-block-editor {
+  min-height: 3rem;
+}
+
+.code-block-fallback {
+  margin: 0;
+  padding: 1em;
+  overflow: auto;
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 @media (prefers-color-scheme: dark) {
   .code-block {
-    --code-background: var(--color-gray-900, #111827);
-    --code-foreground: #f8f8f2;
-    --code-gutter-foreground: #6b7280;
-    --code-gutter-border: var(--color-gray-700, #374151);
-    --code-selection: #3e4451;
-    --code-search-match: #6b5b16;
-
-    --tok-comment: #8292a2;
-    --tok-keyword: #66d9ef;
-    --tok-string: #a6e22e;
-    --tok-string2: #fd971f;
-    --tok-number: #ae81ff;
-    --tok-tag: #f92672;
-    --tok-attribute: #a6e22e;
-    --tok-type: #66d9ef;
-    --tok-property: #fd971f;
-    --tok-function: #e6db74;
-    --tok-operator: #f8f8f2;
-    --tok-punctuation: #c0c0bc;
-    --tok-meta: #8292a2;
-    --tok-heading: #66d9ef;
-    --tok-invalid: #f92672;
+    outline-color: var(--color-gray-700, #374151);
   }
-}
-
-.code-block .cm-editor {
-  background-color: var(--code-background);
-  color: var(--code-foreground);
-  border-radius: 0.25rem;
-  font-size: 0.875rem;
-}
-
-.code-block .cm-editor.cm-focused {
-  outline: 1px solid var(--code-gutter-border);
-}
-
-.code-block .cm-scroller {
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  line-height: 1.5;
-}
-
-.code-block .cm-content {
-  padding: 1em 0;
-  caret-color: var(--code-foreground);
-}
-
-.code-block .cm-line {
-  padding: 0 1em 0 0.75em;
-}
-
-.code-block .cm-gutters {
-  background-color: var(--code-background);
-  color: var(--code-gutter-foreground);
-  border-right: 1px solid var(--code-gutter-border);
-}
-
-.code-block .cm-lineNumbers .cm-gutterElement {
-  padding: 0 0.75em 0 1em;
-}
-
-.code-block .cm-cursor {
-  border-left-color: var(--code-foreground);
-}
-
-.code-block .cm-selectionBackground,
-.code-block .cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground {
-  background-color: var(--code-selection);
-}
-
-.code-block .cm-searchMatch,
-.code-block .cm-selectionMatch {
-  background-color: var(--code-search-match);
-}
-
-.code-block .cm-panels {
-  background-color: var(--code-background);
-  color: var(--code-foreground);
-}
-
-.code-block .cm-panels-top {
-  border-bottom: 1px solid var(--code-gutter-border);
-}
-
-/* Syntax token colours (light theme based on GitHub, dark theme based on Okaidia). */
-.code-block .tok-comment {
-  color: var(--tok-comment);
-  font-style: italic;
-}
-
-.code-block .tok-keyword {
-  color: var(--tok-keyword);
-}
-
-.code-block .tok-string {
-  color: var(--tok-string);
-}
-
-.code-block .tok-string2 {
-  color: var(--tok-string2);
-}
-
-.code-block .tok-number {
-  color: var(--tok-number);
-}
-
-.code-block .tok-tagName {
-  color: var(--tok-tag);
-}
-
-.code-block .tok-attributeName {
-  color: var(--tok-attribute);
-}
-
-.code-block .tok-typeName {
-  color: var(--tok-type);
-}
-
-.code-block .tok-propertyName {
-  color: var(--tok-property);
-}
-
-.code-block .tok-function,
-.code-block .tok-definition {
-  color: var(--tok-function);
-}
-
-.code-block .tok-operator {
-  color: var(--tok-operator);
-}
-
-.code-block .tok-punctuation {
-  color: var(--tok-punctuation);
-}
-
-.code-block .tok-meta {
-  color: var(--tok-meta);
-}
-
-.code-block .tok-heading {
-  color: var(--tok-heading);
-  font-weight: bold;
-}
-
-.code-block .tok-emphasis {
-  font-style: italic;
-}
-
-.code-block .tok-strong {
-  font-weight: bold;
-}
-
-.code-block .tok-link {
-  text-decoration: underline;
-}
-
-.code-block .tok-invalid {
-  color: var(--tok-invalid);
 }
 </style>

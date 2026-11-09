@@ -1,142 +1,284 @@
-import { EditorView } from '@codemirror/view'
-import { mount, type VueWrapper } from '@vue/test-utils'
-import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
-import CodeBlock from '@/components/atoms/CodeBlock.vue'
+import { flushPromises, mount, type VueWrapper } from '@vue/test-utils';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import CodeBlock from '@/components/atoms/CodeBlock.vue';
+import { FILE_PANEL_SCROLL_SYNC } from '@/constants/filePanel';
+import type { FilePanelScrollSync } from '@/types/filePanel';
 
-// jsdom does not implement layout, which CodeMirror measures; provide empty rectangles.
-beforeAll(() => {
-  const emptyRect = () => new DOMRect(0, 0, 0, 0)
-  const emptyRectList = () => [] as unknown as DOMRectList
-  Range.prototype.getBoundingClientRect = emptyRect
-  Range.prototype.getClientRects = emptyRectList
-})
+// Monaco does not run in jsdom, so the editor is replaced with a fake that records its calls.
+// Real rendering is covered by the Cypress tests.
+const monacoMock = vi.hoisted(() => {
+  const model = {
+    value: '',
+    getValue: vi.fn(() => model.value),
+    setValue: vi.fn((value: string) => {
+      model.value = value;
+    }),
+    dispose: vi.fn(),
+  };
+  const editor = {
+    onDidContentSizeChange: vi.fn(),
+    onDidScrollChange: vi.fn(),
+    setScrollTop: vi.fn(),
+    getContentHeight: vi.fn(() => 120),
+    updateOptions: vi.fn(),
+    dispose: vi.fn(),
+  };
+  const monaco = {
+    editor: {
+      createModel: vi.fn((value: string, _language: string) => {
+        model.value = value;
+        return model;
+      }),
+      create: vi.fn((_host: HTMLElement, _options: Record<string, unknown>) => editor),
+      setModelLanguage: vi.fn(),
+      setTheme: vi.fn(),
+    },
+  };
+  return { model, editor, monaco, loadMonaco: vi.fn(() => Promise.resolve(monaco)) };
+});
 
-const smallCode = 'const x = 1'
+vi.mock('@/utils/monaco', () => ({ loadMonaco: monacoMock.loadMonaco }));
 
-const getEditorView = (wrapper: VueWrapper): EditorView => {
-  const editor = wrapper.find('.cm-editor').element as HTMLElement
-  const view = EditorView.findFromDOM(editor)
-  if (!view) throw new Error('CodeMirror view not found')
-  return view
-}
+const { model, editor, monaco, loadMonaco } = monacoMock;
+
+const createOptions = () => monaco.editor.create.mock.calls[0]?.[1] ?? {};
 
 describe('CodeBlock', () => {
-  let wrapper: VueWrapper | null = null
+  let wrapper: VueWrapper | null = null;
+  let colourSchemeListeners: ((event: MediaQueryListEvent) => void)[] = [];
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    loadMonaco.mockImplementation(() => Promise.resolve(monaco));
+    colourSchemeListeners = [];
+    window.matchMedia = vi.fn(
+      (media: string) =>
+        ({
+          matches: false,
+          media,
+          addEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => {
+            colourSchemeListeners.push(listener);
+          },
+          removeEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => {
+            colourSchemeListeners = colourSchemeListeners.filter((item) => item !== listener);
+          },
+        }) as unknown as MediaQueryList,
+    );
+  });
 
   afterEach(() => {
-    wrapper?.unmount()
-    wrapper = null
-  })
+    wrapper?.unmount();
+    wrapper = null;
+  });
 
-  it('renders code content in a CodeMirror editor', () => {
+  const mountCodeBlock = async (
+    props: Record<string, unknown>,
+    scrollSync: FilePanelScrollSync | null = null,
+  ) => {
     wrapper = mount(CodeBlock, {
-      props: { code: smallCode, filename: 'example.js' },
+      props: { code: 'const x = 1', filename: 'example.js', ...props },
       attachTo: document.body,
-    })
+      global: scrollSync ? { provide: { [FILE_PANEL_SCROLL_SYNC]: scrollSync } } : {},
+    });
+    await flushPromises();
+    return wrapper;
+  };
 
-    expect(wrapper.find('.cm-editor').exists()).toBe(true)
-    expect(getEditorView(wrapper).state.doc.toString()).toBe(smallCode)
-  })
+  it('creates a read-only editor without a minimap', async () => {
+    await mountCodeBlock({});
 
-  it('shows line numbers', () => {
-    wrapper = mount(CodeBlock, {
-      props: { code: 'line 1\nline 2', filename: 'example.py' },
-      attachTo: document.body,
-    })
-
-    expect(wrapper.find('.cm-lineNumbers').exists()).toBe(true)
-  })
-
-  it('is read-only', () => {
-    wrapper = mount(CodeBlock, {
-      props: { code: smallCode, filename: 'example.py' },
-      attachTo: document.body,
-    })
-
-    expect(getEditorView(wrapper).state.readOnly).toBe(true)
-  })
-
-  it('updates code when props change', async () => {
-    wrapper = mount(CodeBlock, {
-      props: { code: smallCode, filename: 'model.cellml' },
-      attachTo: document.body,
-    })
-
-    await wrapper.setProps({ code: 'new code' })
-
-    expect(getEditorView(wrapper).state.doc.toString()).toBe('new code')
-  })
+    expect(monaco.editor.create).toHaveBeenCalledOnce();
+    expect(createOptions()).toMatchObject({
+      readOnly: true,
+      domReadOnly: true,
+      minimap: { enabled: false },
+      largeFileOptimizations: false,
+      model,
+    });
+  });
 
   it.each([
-    ['model.cellml', 'xml'],
-    ['generated.neon', 'json'],
-    ['model.xul', 'xml'],
-    ['data.xyz', 'plaintext'],
-  ])('sets the detected language for %s to %s', (filename, expected) => {
-    wrapper = mount(CodeBlock, {
-      props: { code: smallCode, filename },
-      attachTo: document.body,
-    })
+    ['model.cellml', 'xml', 'xml'],
+    ['script.js', 'javascript', 'typescript'],
+    ['model.f77', 'fortran', 'fortran'],
+    ['model.m', 'matlab', 'matlab'],
+    ['data.xyz', 'plaintext', 'plaintext'],
+  ])('uses the language detected for %s', async (filename, dataLanguage, monacoLanguage) => {
+    await mountCodeBlock({ code: 'x', filename });
 
-    expect(wrapper.attributes('data-language')).toBe(expected)
-  })
+    expect(monaco.editor.createModel).toHaveBeenCalledWith('x', monacoLanguage);
+    expect(wrapper?.attributes('data-language')).toBe(dataLanguage);
+  });
 
-  it('applies syntax highlighting once the language is loaded', async () => {
-    wrapper = mount(CodeBlock, {
-      props: { code: '<model name="test"/>', filename: 'model.cellml' },
-      attachTo: document.body,
-    })
+  it('labels the editor with the filename', async () => {
+    await mountCodeBlock({ filename: 'model.cellml' });
 
-    // The language pack is imported asynchronously and the parse is time-sliced.
-    await vi.waitFor(() => {
-      expect(wrapper?.find('.tok-tagName').exists()).toBe(true)
-      expect(wrapper?.find('.tok-attributeName').exists()).toBe(true)
-    })
-  })
+    expect(createOptions()).toMatchObject({ ariaLabel: 'Code view of model.cellml' });
+  });
 
-  it('starts wrapped when startWrapped is true', () => {
-    wrapper = mount(CodeBlock, {
-      props: { code: smallCode, filename: 'example.js', startWrapped: true },
-      attachTo: document.body,
-    })
+  it('updates the code when the prop changes', async () => {
+    await mountCodeBlock({});
 
-    expect(wrapper.find('.cm-content').classes()).toContain('cm-lineWrapping')
-  })
+    await wrapper?.setProps({ code: 'new code' });
 
-  it('toggles line wrapping when startWrapped changes', async () => {
-    wrapper = mount(CodeBlock, {
-      props: { code: smallCode, filename: 'example.js' },
-      attachTo: document.body,
-    })
+    expect(model.setValue).toHaveBeenCalledWith('new code');
+  });
 
-    expect(wrapper.find('.cm-content').classes()).not.toContain('cm-lineWrapping')
+  it('updates the language and label when the filename changes', async () => {
+    await mountCodeBlock({ filename: 'example.js' });
 
-    await wrapper.setProps({ startWrapped: true })
-    expect(wrapper.find('.cm-content').classes()).toContain('cm-lineWrapping')
+    await wrapper?.setProps({ filename: 'model.py' });
 
-    await wrapper.setProps({ startWrapped: false })
-    expect(wrapper.find('.cm-content').classes()).not.toContain('cm-lineWrapping')
-  })
+    expect(monaco.editor.setModelLanguage).toHaveBeenCalledWith(model, 'python');
+    expect(editor.updateOptions).toHaveBeenCalledWith({ ariaLabel: 'Code view of model.py' });
+  });
 
-  it('labels the code content with the filename', () => {
-    wrapper = mount(CodeBlock, {
-      props: { code: smallCode, filename: 'model.cellml' },
-      attachTo: document.body,
-    })
+  it('starts wrapped when startWrapped is true', async () => {
+    await mountCodeBlock({ startWrapped: true });
 
-    expect(wrapper.find('.cm-content').attributes('aria-label')).toBe('Code view of model.cellml')
-  })
+    expect(createOptions()).toMatchObject({ wordWrap: 'on' });
+    expect(wrapper?.attributes('data-wrapped')).toBe('true');
+  });
 
-  it('destroys the editor on unmount', () => {
-    wrapper = mount(CodeBlock, {
-      props: { code: smallCode, filename: 'example.js' },
-      attachTo: document.body,
-    })
+  it('toggles word wrap when startWrapped changes', async () => {
+    await mountCodeBlock({});
+    expect(createOptions()).toMatchObject({ wordWrap: 'off' });
 
-    const view = getEditorView(wrapper)
-    wrapper.unmount()
-    wrapper = null
+    await wrapper?.setProps({ startWrapped: true });
+    expect(editor.updateOptions).toHaveBeenLastCalledWith({ wordWrap: 'on' });
+    expect(wrapper?.attributes('data-wrapped')).toBe('true');
 
-    expect(view.dom.isConnected).toBe(false)
-  })
-})
+    await wrapper?.setProps({ startWrapped: false });
+    expect(editor.updateOptions).toHaveBeenLastCalledWith({ wordWrap: 'off' });
+  });
+
+  it('fits short content and caps the height of long content', async () => {
+    await mountCodeBlock({});
+
+    const host = wrapper?.find('.code-block-editor').element as HTMLElement;
+    expect(host.style.height).toContain('120px');
+    expect(host.style.height).toContain('min(');
+  });
+
+  it('follows the system colour scheme', async () => {
+    await mountCodeBlock({});
+    expect(createOptions()).toMatchObject({ theme: 'pmr-light' });
+
+    for (const listener of colourSchemeListeners) {
+      listener({ matches: true } as MediaQueryListEvent);
+    }
+
+    expect(monaco.editor.setTheme).toHaveBeenCalledWith('pmr-dark');
+  });
+
+  it('disposes the editor and model on unmount', async () => {
+    await mountCodeBlock({});
+
+    wrapper?.unmount();
+    wrapper = null;
+
+    expect(editor.dispose).toHaveBeenCalledOnce();
+    expect(model.dispose).toHaveBeenCalledOnce();
+    expect(colourSchemeListeners).toHaveLength(0);
+  });
+
+  it('does not create an editor when unmounted before Monaco has loaded', async () => {
+    let resolveMonaco: (value: typeof monaco) => void = () => {};
+    loadMonaco.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveMonaco = resolve;
+        }),
+    );
+    wrapper = mount(CodeBlock, { props: { code: 'x', filename: 'example.js' } });
+
+    wrapper.unmount();
+    wrapper = null;
+    resolveMonaco(monaco);
+    await flushPromises();
+
+    expect(monaco.editor.create).not.toHaveBeenCalled();
+  });
+
+  it('shows the code as plain text when Monaco fails to load', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    loadMonaco.mockImplementation(() => Promise.reject(new Error('network error')));
+
+    await mountCodeBlock({ code: '<model/>' });
+
+    expect(wrapper?.find('pre').text()).toBe('<model/>');
+    expect(consoleError).toHaveBeenCalled();
+    consoleError.mockRestore();
+  });
+
+  describe('inside a sticky file panel', () => {
+    const createScrollSync = () => ({
+      setContentHeight: vi.fn(),
+      onPageScroll: vi.fn(),
+      scrollPageTo: vi.fn(),
+    });
+
+    it('hides the vertical scrollbar and reports the content height', async () => {
+      const scrollSync = createScrollSync();
+      await mountCodeBlock({}, scrollSync);
+
+      expect(createOptions()).toMatchObject({ scrollbar: { vertical: 'hidden' } });
+      expect(scrollSync.setContentHeight).toHaveBeenCalledWith(120);
+    });
+
+    it('scrolls the editor when the page scrolls', async () => {
+      const scrollSync = createScrollSync();
+      await mountCodeBlock({}, scrollSync);
+
+      const followPage = scrollSync.onPageScroll.mock.calls[0]?.[0];
+      followPage(840);
+
+      expect(editor.setScrollTop).toHaveBeenCalledWith(840);
+    });
+
+    it('scrolls the page when the editor scrolls itself, but not when it follows the page', async () => {
+      const scrollSync = createScrollSync();
+      editor.setScrollTop.mockImplementation((scrollTop: number) => {
+        for (const [listener] of editor.onDidScrollChange.mock.calls) {
+          listener({ scrollTop, scrollTopChanged: true });
+        }
+      });
+      await mountCodeBlock({}, scrollSync);
+
+      scrollSync.onPageScroll.mock.calls[0]?.[0](300);
+      expect(scrollSync.scrollPageTo).not.toHaveBeenCalled();
+
+      // For example, a search match further down the file.
+      const [onScroll] = editor.onDidScrollChange.mock.calls[0] ?? [];
+      onScroll({ scrollTop: 4200, scrollTopChanged: true });
+      expect(scrollSync.scrollPageTo).toHaveBeenCalledWith(4200);
+      editor.setScrollTop.mockReset();
+    });
+
+    it('sends vertical wheel scrolling to the page and keeps horizontal scrolling', async () => {
+      await mountCodeBlock({}, createScrollSync());
+      const host = wrapper?.find('.code-block-editor').element as HTMLElement;
+      const child = document.createElement('div');
+      host.appendChild(child);
+      const reachedEditor = vi.fn();
+      child.addEventListener('wheel', reachedEditor);
+
+      child.dispatchEvent(new WheelEvent('wheel', { deltaY: 100, bubbles: true }));
+      expect(reachedEditor).not.toHaveBeenCalled();
+
+      child.dispatchEvent(new WheelEvent('wheel', { deltaX: 100, bubbles: true }));
+      expect(reachedEditor).toHaveBeenCalledOnce();
+    });
+
+    it('stops following the page on unmount', async () => {
+      const scrollSync = createScrollSync();
+      await mountCodeBlock({}, scrollSync);
+
+      wrapper?.unmount();
+      wrapper = null;
+
+      expect(scrollSync.onPageScroll).toHaveBeenLastCalledWith(null);
+      expect(scrollSync.setContentHeight).toHaveBeenLastCalledWith(null);
+    });
+  });
+});
